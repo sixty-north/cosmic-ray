@@ -11,6 +11,9 @@ class PrintVisitor(ast.NodeVisitor):
         super().generic_visit(node)
         self.indent = self.indent[:-4]
 
+    def visit_Num(self, node):
+        import pdb; pdb.set_trace()
+        print('a number:', node)
 
 def dump_mod():
     import mod
