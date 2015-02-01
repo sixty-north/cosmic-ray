@@ -25,7 +25,6 @@ def find_modules(name):
     module_names = [name]
     while module_names:
         module_name = module_names.pop()
-        print('importing', module_name)
         module = importlib.import_module(module_name)
 
         yield module.__file__
