@@ -13,6 +13,6 @@ import ast
 from .find_modules import find_modules
 
 
-def mutato(module_name):
+def main(module_name):
     asts = {path: ast.parse(path)
             for path in find_modules(module_name)}

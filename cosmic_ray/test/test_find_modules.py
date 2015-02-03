@@ -5,7 +5,7 @@ import tempfile
 
 import with_fixture
 
-from mutato.find_modules import find_modules
+from cosmic_ray.find_modules import find_modules
 
 @contextlib.contextmanager
 def excursion(directory):
