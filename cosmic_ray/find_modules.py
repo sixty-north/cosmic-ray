@@ -3,7 +3,7 @@ import pkgutil
 
 
 def find_modules(name):
-    """Generate the paths to all submodules of the module named NAME.
+    """Generate sequence of all submodules of NAME, including NAME itself.
 
     Given a directory structure like this:
 
@@ -17,17 +17,17 @@ def find_modules(name):
     you get this:
 
         >>> list(find_modules('a'))
-        ['/a/__init__.py',
-         '/a/b.py',
-         '/a/c/__init__.py',
-         '/a/c/d.py']
+        [<module 'a' from 'a/__init__.py'>,
+         <module 'a.b' from 'a/b.py'>,
+         <module 'a.c' from 'a/c/__init__.py'>,
+         <module 'a.c.d' from 'a/c/d.py'>]
     """
     module_names = [name]
     while module_names:
         module_name = module_names.pop()
         module = importlib.import_module(module_name)
 
-        yield module.__file__
+        yield module
 
         if hasattr(module, '__path__'):
             for loader, name, ispkg in pkgutil.iter_modules(module.__path__):

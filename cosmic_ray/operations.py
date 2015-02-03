@@ -1,6 +1,7 @@
 import ast
 import copy
 import itertools
+import logging
 import tempfile
 
 
@@ -21,19 +22,15 @@ class NumberReplacer(ast.NodeTransformer):
     def visit_Num(self, node):
         if self._count == self._target:
             self._activated = True
+            logging.info('NumberReplacer: line number {}'.format(node.lineno))
             node = ast.Num(n=node.n + 1)
 
         self._count += 1
         return node
 
-
-def test():
-    code = '''
-x = 0
-    '''
-    node = ast.parse(code)
-
-    replace_constants(node)
+    def __repr__(self):
+        return 'NumberReplacer(target={})'.format(
+            self._target)
 
 
 def replace_constants(node):
@@ -43,11 +40,7 @@ def replace_constants(node):
     for target in itertools.count():
         replacer = NumberReplacer(target)
         clone = replacer.visit(copy.deepcopy(node))
-        if not replace.activated:
+        if not replacer.activated:
             break
 
         yield clone
-
-
-def replace_constant(node):
-    pass
