@@ -44,4 +44,4 @@ class FindModulesTest(with_fixture.TestCase):
         results = find_modules('a')
         self.assertListEqual(
             sorted(paths),
-            sorted(map(os.path.abspath, results)))
+            sorted(map(lambda m: m.__file__, results)))
