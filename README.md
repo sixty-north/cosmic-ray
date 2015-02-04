@@ -73,7 +73,7 @@ to discover your tests and run them against the mutant code.
 
 In effect, the mutation testing algorithm is something like this:
 
-```
+```python
 for mod in modules_under_test:
     for op in mutation_operators:
         for site in mutation_sites(op, mod):
