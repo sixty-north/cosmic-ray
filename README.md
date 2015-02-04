@@ -52,7 +52,10 @@ a) you need more or better tests or b) you've got code which you don't
 need.
 
 You can read more about mutation testing at
-[the repository of all human knowledge](http://en.wikipedia.org/wiki/Mutation_testing).
+[the repository of all human knowledge](http://en.wikipedia.org/wiki/Mutation_testing). Lionel
+Brian has a
+[nice set of slides](http://www.uio.no/studier/emner/matnat/ifi/INF4290/v10/undervisningsmateriale/INF4290-Mutest.pdf)
+introducing mutation testing as well.
 
 ## Implementation
 
