@@ -33,7 +33,7 @@ which were killed, and – most frighteningly – which survived.
 ## Theory
 
 Mutation testing is conceptually simple and elegant. You make certain
-kinds of controlled changes (mutations) to your codebase, and then you
+kinds of controlled changes (mutations) to your code, and then you
 run your test suite over this mutated code. If your test suite fails,
 then we say that your tests "killed" (i.e. detected) the mutant. If
 the changes cause your code to simply crash, then we say the mutant is
