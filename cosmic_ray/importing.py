@@ -14,7 +14,7 @@ class ASTLoader:
         self._name = name
 
     def exec_module(self, mod):
-        exec(compile(self._ast, self.name, 'exec'),
+        exec(compile(self._ast, self._name, 'exec'),
              mod.__dict__)
 
 
