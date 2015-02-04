@@ -15,7 +15,7 @@ import unittest
 
 from .find_modules import find_modules
 from .importing import Finder
-from .operations import replace_constants
+from .operations import delete_arithmetic_operators, replace_constants
 
 log = logging.getLogger()
 
@@ -42,7 +42,7 @@ def mutation_testing(module_name, test_dir):
 
     sys.meta_path = [finder] + sys.meta_path
 
-    operations = (replace_constants,)
+    operations = (replace_constants, delete_arithmetic_operators)
     for module_name, ast_node in finder.items():
         log.info('Mutating module {}'.format(module_name))
 
