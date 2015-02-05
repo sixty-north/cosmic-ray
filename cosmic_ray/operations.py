@@ -34,8 +34,6 @@ class ArithmeticOperatorDeletion(ast.NodeTransformer):
     def _visit_arithmetic_op(self, node):
         if self._count == self._target:
             self._activated = True
-            log.info('ArithmeticOperatorDeletion: line number {}'.format(
-                node.lineno))
             node = None
 
         self._count += 1
