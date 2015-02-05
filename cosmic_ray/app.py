@@ -13,6 +13,8 @@ import logging
 import sys
 import unittest
 
+import decorator
+
 from .find_modules import find_modules
 from .importing import Finder
 from .operations import delete_arithmetic_operators, replace_constants
@@ -20,6 +22,26 @@ from .operations import delete_arithmetic_operators, replace_constants
 log = logging.getLogger()
 
 
+@decorator.decorator
+def isolate_import_environment(f, *args, **kwargs):
+    """A decorator which ensures that `sys.meta_path` and `sys.modules`
+    are restored to their initial state after the call.
+
+    This helps ensure a stable environment for performing operations
+    that might add finders and/or import modules that we want to
+    reimport.
+    """
+    meta_path = sys.meta_path[:]
+    modules = dict(sys.modules)
+
+    try:
+        return f(*args, **kwargs)
+    finally:
+        sys.meta_path = meta_path
+        sys.modules = modules
+
+
+@isolate_import_environment
 def create_finder(module_name):
     finder = Finder()
 
@@ -35,6 +57,20 @@ def create_finder(module_name):
             source, module.__file__, 'exec')
 
     return finder
+
+
+@isolate_import_environment
+def run_tests(test_dir):
+    try:
+        suite = unittest.TestLoader().discover(test_dir)
+        result = unittest.TestResult()
+        suite.run(result)
+        if result.wasSuccessful:
+            log.info('survived: mutant')
+        else:
+            log.info('killer: mutant')
+    except Exception:
+        log.info('incompetent: mutant')
 
 
 def mutation_testing(module_name, test_dir):
@@ -56,16 +92,7 @@ def mutation_testing(module_name, test_dir):
 
                 sys.modules.pop(module_name, None)
 
-                try:
-                    suite = unittest.TestLoader().discover(test_dir)
-                    result = unittest.TestResult()
-                    suite.run(result)
-                    if result.wasSuccessful:
-                        log.info('survived: mutant {}'.format(idx))
-                    else:
-                        log.info('killer: mutant {}'.format(idx))
-                except Exception:
-                    log.info('incompetent: mutant {}'.format(idx))
+                run_tests(test_dir)
 
         finder[module_name] = pristine_ast
 
