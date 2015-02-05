@@ -26,5 +26,8 @@ setup(
     #     ],
     platforms='any',
     include_package_data=True,
-    install_requires=['with_fixture']
+    install_requires=[
+        'decorator',
+        'with_fixture',
+    ]
 )
