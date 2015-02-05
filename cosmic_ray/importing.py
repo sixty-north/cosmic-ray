@@ -29,3 +29,6 @@ class Finder(MetaPathFinder, dict):
                               ASTLoader(self[fullname], fullname))
         except KeyError:
             pass
+
+    def __repr__(self):
+        return '{}'.format(self.__class__)
