@@ -17,7 +17,8 @@ import decorator
 
 from .find_modules import find_modules
 from .importing import Finder
-from .operations import delete_arithmetic_operators, replace_constants
+from .operators.number_replacer import replace_constants
+from .operators.arithmetic_operator_deletion import delete_arithmetic_operators
 
 log = logging.getLogger()
 

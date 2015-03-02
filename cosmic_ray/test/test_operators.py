@@ -1,9 +1,8 @@
 import ast
 import copy
-from itertools import islice
 import unittest
 
-from cosmic_ray.operations import NumberReplacer
+from cosmic_ray.operators.number_replacer import NumberReplacer
 
 
 class Linearizer(ast.NodeVisitor):
