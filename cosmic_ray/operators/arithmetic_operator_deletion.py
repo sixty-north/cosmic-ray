@@ -5,11 +5,6 @@ class ArithmeticOperatorDeletion(Operator):
     """A NodeTransformer that deletes the n-th arithmetic operator.
     """
 
-    @property
-    def activated(self):
-        "Whether this replace has performed any replacements."
-        return self._activated
-
     def visit_Add(self, node):
         return self._visit_arithmetic_op(node)
 
