@@ -17,9 +17,7 @@ import decorator
 
 from .find_modules import find_modules
 from .importing import Finder
-from .operators.arithmetic_operator_deletion import ArithmeticOperatorDeletion
-from .operators.number_replacer import NumberReplacer
-from .operators.relational_operator_replacement import ReplaceEq
+from .operators import all_operators
 
 log = logging.getLogger()
 
@@ -80,17 +78,12 @@ def mutation_testing(module_name, test_dir):
 
     sys.meta_path = [finder] + sys.meta_path
 
-    operators = [
-        #NumberReplacer,
-        #ArithmeticOperatorDeletion,
-        ReplaceEq
-    ]
     for module_name, ast_node in finder.items():
         log.info('Mutating module {}'.format(module_name))
 
         pristine_ast = ast_node
 
-        for operator in operators:
+        for operator in all_operators():
             log.info('Operation: {}'.format(operator))
 
             for idx, mutant in enumerate(operator.bombard(pristine_ast)):

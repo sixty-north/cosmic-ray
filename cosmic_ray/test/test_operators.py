@@ -2,6 +2,8 @@ import ast
 import copy
 import unittest
 
+from cosmic_ray.operators.relational_operator_replacement import (ReplaceEq,
+                                                                  ReplaceNotEq)
 from cosmic_ray.operators.number_replacer import NumberReplacer
 
 
@@ -53,3 +55,29 @@ class TestNumberReplacer(unittest.TestCase):
         self.assertEqual(
             ast.dump(node),
             ast.dump(NumberReplacer(1).visit(copy.deepcopy(node))))
+
+
+class test_ReplaceEq(unittest.TestCase):
+    def test_ast_node_is_modified_correctly(self):
+        node = ast.parse('if x == 1: pass')
+        self.assertIsInstance(
+            node.body[0].test.ops[0],
+            ast.Eq)
+
+        node = ReplaceEq(0).visit(node)
+        self.assertIsInstance(
+            node.body[0].test.ops[0],
+            ast.NotEq)
+
+
+class test_ReplaceNotEq(unittest.TestCase):
+    def test_ast_node_is_modified_correctly(self):
+        node = ast.parse('if x != 1: pass')
+        self.assertIsInstance(
+            node.body[0].test.ops[0],
+            ast.NotEq)
+
+        node = ReplaceNotEq(0).visit(node)
+        self.assertIsInstance(
+            node.body[0].test.ops[0],
+            ast.Eq)

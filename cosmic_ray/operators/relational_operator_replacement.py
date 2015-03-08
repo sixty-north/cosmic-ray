@@ -7,7 +7,15 @@ from .operator import Operator
 
 class ReplaceEq(Operator):
     def visit_Eq(self, node):
-        self.visit_mutation_site(node)
+        return self.visit_mutation_site(node)
 
     def mutate(self, node):
         return ast.NotEq()
+
+
+class ReplaceNotEq(Operator):
+    def visit_NotEq(self, node):
+        return self.visit_mutation_site(node)
+
+    def mutate(self, node):
+        return ast.Eq()
