@@ -26,7 +26,7 @@ class TestNumberReplacer(unittest.TestCase):
         node = ast.parse('x = 1')
         replacer = NumberReplacer(0)
         replacer.visit(node)
-        self.assertTrue(replacer.activated)
+        self.assertTrue(replacer.activation_record)
 
     def test_remove_first(self):
         node = ast.parse('x = 1')
@@ -46,7 +46,7 @@ class TestNumberReplacer(unittest.TestCase):
         node = ast.parse('x = 1')
         replacer = NumberReplacer(1)
         replacer.visit(node)
-        self.assertFalse(replacer.activated)
+        self.assertFalse(replacer.activation_record)
 
     def test_replacer_ignore_non_nth_sites(self):
         node = ast.parse('x = 1')

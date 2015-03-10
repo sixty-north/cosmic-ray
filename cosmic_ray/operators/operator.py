@@ -16,11 +16,11 @@ class Operator(ast.NodeTransformer):
     def __init__(self, target):
         self._target = target
         self._count = 0
-        self._activated = False
+        self._activation_record = None
 
     @property
-    def activated(self):
-        return self._activated
+    def activation_record(self):
+        return self._activation_record
 
     def visit_mutation_site(self, node):
         """Potentially mutate `node`, returning the mutated version.
@@ -31,10 +31,9 @@ class Operator(ast.NodeTransformer):
         mutation.
         """
         if self._count == self._target:
-            self._activated = True
+            self._activation_record = {'type': self.__class__}
             if hasattr(node, 'lineno'):
-                log.info('{}: mutating line number {}'.format(
-                    self.__class__, node.lineno))
+                self._activation_record['lineno'] = node.lineno
             node = self.mutate(node)
 
         self._count += 1
@@ -62,8 +61,8 @@ class Operator(ast.NodeTransformer):
         """
         for target in itertools.count():
             operator = cls(target)
-            clone = operator.visit(copy.deepcopy(node))
-            if not operator.activated:
+            mutant = operator.visit(copy.deepcopy(node))
+            if not operator.activation_record:
                 break
 
-            yield clone
+            yield operator.activation_record, mutant

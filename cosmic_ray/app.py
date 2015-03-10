@@ -86,7 +86,8 @@ def mutation_testing(module_name, test_dir):
         for operator in all_operators():
             log.info('Operation: {}'.format(operator))
 
-            for idx, mutant in enumerate(operator.bombard(pristine_ast)):
+            for idx, (record, mutant) in enumerate(
+                    operator.bombard(pristine_ast)):
                 finder[module_name] = mutant
 
                 sys.modules.pop(module_name, None)
