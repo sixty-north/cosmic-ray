@@ -24,4 +24,6 @@ for from_op in RELATIONAL_OPERATORS:
                  (Operator,),
                  {'mutate': lambda self, node: to_op(),
                   visit_func_name: visit_func,
-                  'from_op': from_op}))
+                  'from_op': from_op,
+                  '__repr__': lambda self: 'replace {} with {}'.format(
+                      from_op.__name__, to_op.__name__)}))

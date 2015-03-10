@@ -3,6 +3,8 @@ import copy
 import itertools
 import logging
 
+from ..util import get_line_number
+
 log = logging.getLogger()
 
 
@@ -31,9 +33,11 @@ class Operator(ast.NodeTransformer):
         mutation.
         """
         if self._count == self._target:
-            self._activation_record = {'type': self.__class__}
-            if hasattr(node, 'lineno'):
-                self._activation_record['lineno'] = node.lineno
+            self._activation_record = {
+                'type': self.__class__,
+                'description': str(self),
+                'lineno': get_line_number(node)
+            }
             node = self.mutate(node)
 
         self._count += 1

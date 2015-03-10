@@ -45,7 +45,7 @@ def mutation_testing(finder, test_dir):
         sys.modules.pop(module_name, None)
         return run_tests(test_dir)
 
-    return [test(module_name, mutant)
+    return [(record, test(module_name, mutant))
             for module_name, ast_node in finder.items()
             for operator in all_operators()
             for record, mutant in operator.bombard(ast_node)]
@@ -54,4 +54,6 @@ def mutation_testing(finder, test_dir):
 if __name__ == '__main__':
     with install_finder(sys.argv[1]) as finder:
         results = mutation_testing(finder, sys.argv[2])
-    print(results)
+
+    import pprint
+    pprint.pprint(results)
