@@ -2,8 +2,7 @@ import ast
 import copy
 import unittest
 
-from cosmic_ray.operators.relational_operator_replacement import (ReplaceEq,
-                                                                  ReplaceNotEq)
+import cosmic_ray.operators.relational_operator_replacement as ROR
 from cosmic_ray.operators.number_replacer import NumberReplacer
 
 
@@ -56,28 +55,31 @@ class TestNumberReplacer(unittest.TestCase):
             ast.dump(node),
             ast.dump(NumberReplacer(1).visit(copy.deepcopy(node))))
 
+RELATIONAL_OP_MAP = {op: 'if x {} 1: pass'.format(token)
+                     for op, token in {
+                         ast.Eq: '==',
+                         ast.NotEq: '!=',
+                         ast.Lt: '<',
+                         ast.LtE: '<=',
+                         ast.Gt: '>',
+                         ast.GtE: '>=',
+                         ast.Is: 'is',
+                         ast.IsNot: 'is not',
+                         ast.In: 'in',
+                         ast.NotIn: 'not in'
+                         }.items()}
 
-class test_ReplaceEq(unittest.TestCase):
-    def test_ast_node_is_modified_correctly(self):
-        node = ast.parse('if x == 1: pass')
-        self.assertIsInstance(
+
+class test_ReplaceRelationalOp(unittest.TestCase):
+    def test_ast_node_is_modified(self):
+        for replacer in ROR.operators:
+            code = RELATIONAL_OP_MAP[replacer.from_op]
+            node = ast.parse(code)
+            self.assertIsInstance(
+                node.body[0].test.ops[0],
+                replacer.from_op)
+
+        node = replacer(0).visit(node)
+        self.assertNotIsInstance(
             node.body[0].test.ops[0],
-            ast.Eq)
-
-        node = ReplaceEq(0).visit(node)
-        self.assertIsInstance(
-            node.body[0].test.ops[0],
-            ast.NotEq)
-
-
-class test_ReplaceNotEq(unittest.TestCase):
-    def test_ast_node_is_modified_correctly(self):
-        node = ast.parse('if x != 1: pass')
-        self.assertIsInstance(
-            node.body[0].test.ops[0],
-            ast.NotEq)
-
-        node = ReplaceNotEq(0).visit(node)
-        self.assertIsInstance(
-            node.body[0].test.ops[0],
-            ast.Eq)
+            replacer.from_op)
