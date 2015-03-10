@@ -20,3 +20,10 @@ def isolate_import_environment(f, *args, **kwargs):
     finally:
         sys.meta_path = meta_path
         sys.modules = modules
+
+
+def get_line_number(node):
+    if hasattr(node, 'lineno'):
+        return node.lineno
+    else:
+        return '<UNKNOWN>'
