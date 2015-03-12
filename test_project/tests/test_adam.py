@@ -1,6 +1,5 @@
 import unittest
 import adam
-print('adam-id:', id(adam))
 
 
 class Tests(unittest.TestCase):

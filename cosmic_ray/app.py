@@ -37,24 +37,28 @@ def run_with_mutants(module, operator, func, q):
     pristine_ast = ast.parse(source, module.__file__, 'exec')
 
     for record, mutant in operator.bombard(pristine_ast):
-        #print(record)
-        #print(ast.dump(mutant))
-        #print(module.__name__)
-
         new_mod = types.ModuleType(module.__name__)
         code = compile(mutant, module.__file__, 'exec')
         sys.modules[module.__name__] = new_mod
         exec(code,  new_mod.__dict__)
 
-        func(module)
-        # print(dir(sys.modules[module.__name__]))
+        try:
+            result, data = func(module)
+        except Exception as e:
+            result = INCOMPETENT
+            data = e
+
+        q.put((record, result))
 
 
 def run_test(test_dir, module):
     suite = unittest.TestLoader().discover(test_dir)
     result = unittest.TestResult()
     suite.run(result)
-    print(result)
+    if result.wasSuccessful():
+        return (SURVIVED, result)
+    else:
+        return (KILLED, result)
 
 
 def main(top_module, test_dir):
@@ -77,8 +81,8 @@ def main(top_module, test_dir):
             p.start()
             p.join()
 
-    #for elem in q:A
-    #    print(q)
+    while not q.empty():
+        print(q.get())
 
 
 if __name__ == '__main__':

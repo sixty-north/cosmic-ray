@@ -7,5 +7,4 @@ from .operator import Operator
 
 
 def all_operators():
-    # return Operator.__subclasses__()
-    return [cosmic_ray.operators.number_replacer.NumberReplacer]
+    return Operator.__subclasses__()
