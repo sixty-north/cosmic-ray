@@ -8,13 +8,16 @@
 #            run all tests
 #            If not failures, mutant survived!
 
+import ast
+from functools import partial
 import logging
+import multiprocessing
 import sys
+import types
 import unittest
 
-from .importing import install_finder
-from .operators import all_operators
-from .util import isolate_import_environment
+from cosmic_ray.find_modules import find_modules
+from cosmic_ray.operators import all_operators
 
 log = logging.getLogger()
 
@@ -23,37 +26,60 @@ KILLED = 'killed'
 INCOMPETENT = 'incompetent'
 
 
-@isolate_import_environment
-def run_tests(test_dir):
-    """Discover and run all tests in `test_dir`.
-    """
-    try:
-        suite = unittest.TestLoader().discover(test_dir)
-        result = unittest.TestResult()
-        suite.run(result)
-        if result.wasSuccessful:
-            return SURVIVED
-        else:
-            return KILLED
-    except Exception:
-        return INCOMPETENT
+def run_with_mutants(module, operator, func, q):
+    with open(module.__file__, 'rt') as f:
+        log.info('reading module {} from {}'.format(
+            module.__name__, module.__file__))
+        source = f.read()
+
+    log.info('parsing module {}'.format(module.__name__))
+
+    pristine_ast = ast.parse(source, module.__file__, 'exec')
+
+    for record, mutant in operator.bombard(pristine_ast):
+        #print(record)
+        #print(ast.dump(mutant))
+        #print(module.__name__)
+
+        new_mod = types.ModuleType(module.__name__)
+        code = compile(mutant, module.__file__, 'exec')
+        sys.modules[module.__name__] = new_mod
+        exec(code,  new_mod.__dict__)
+
+        func(module)
+        # print(dir(sys.modules[module.__name__]))
 
 
-def mutation_testing(finder, test_dir):
-    def test(module_name, mutant):
-        finder[module_name] = mutant
-        sys.modules.pop(module_name, None)
-        return run_tests(test_dir)
+def run_test(test_dir, module):
+    suite = unittest.TestLoader().discover(test_dir)
+    result = unittest.TestResult()
+    suite.run(result)
+    print(result)
 
-    return [(record, test(module_name, mutant))
-            for module_name, ast_node in finder.items()
-            for operator in all_operators()
-            for record, mutant in operator.bombard(ast_node)]
+
+def main(top_module, test_dir):
+    # 1. Find all modules to be mutated
+    modules = list(find_modules(top_module))
+
+    # Remove those names from sys.modules. Tests will import them on
+    # their own after mutation.
+    for m in modules:
+        del sys.modules[m.__name__]
+
+    # 2. For each module, for each operator
+    q = multiprocessing.Queue()
+
+    for m in modules:
+        for operator in all_operators():
+            p = multiprocessing.Process(
+                target=run_with_mutants,
+                args=(m, operator, partial(run_test, test_dir), q))
+            p.start()
+            p.join()
+
+    #for elem in q:A
+    #    print(q)
 
 
 if __name__ == '__main__':
-    with install_finder(sys.argv[1]) as finder:
-        results = mutation_testing(finder, sys.argv[2])
-
-    import pprint
-    pprint.pprint(results)
+    main(sys.argv[1], sys.argv[2])

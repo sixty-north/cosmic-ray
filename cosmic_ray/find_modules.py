@@ -1,5 +1,8 @@
 import importlib
+import logging
 import pkgutil
+
+log = logging.getLogger()
 
 
 def find_modules(name):
@@ -25,7 +28,11 @@ def find_modules(name):
     module_names = [name]
     while module_names:
         module_name = module_names.pop()
-        module = importlib.import_module(module_name)
+        try:
+            module = importlib.import_module(module_name)
+        except Exception:
+            log.exception(
+                'Unable to import {}'.format(module_name))
 
         yield module
 
