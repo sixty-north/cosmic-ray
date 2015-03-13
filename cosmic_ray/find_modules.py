@@ -30,14 +30,14 @@ def find_modules(name):
         module_name = module_names.pop()
         try:
             module = importlib.import_module(module_name)
+
+            yield module
+
+            if hasattr(module, '__path__'):
+                for loader, name, ispkg in pkgutil.iter_modules(module.__path__):
+                    module_names.append(
+                        '{}.{}'.format(
+                            module_name, name))
         except Exception:
             log.exception(
                 'Unable to import {}'.format(module_name))
-
-        yield module
-
-        if hasattr(module, '__path__'):
-            for loader, name, ispkg in pkgutil.iter_modules(module.__path__):
-                module_names.append(
-                    '{}.{}'.format(
-                        module_name, name))
