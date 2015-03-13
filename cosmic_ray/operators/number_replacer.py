@@ -12,9 +12,8 @@ class NumberReplacer(Operator):
         return self.visit_mutation_site(node)
 
     def mutate(self, node):
-        return ast.Num(n=node.n + 1,
-                       lineno=node.lineno,
-                       col_offset=node.col_offset)
+        new_node = ast.Num(n=node.n + 1)
+        return new_node
 
     def __repr__(self):
         return 'NumberReplacer(target={})'.format(

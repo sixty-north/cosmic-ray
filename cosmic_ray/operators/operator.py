@@ -38,7 +38,9 @@ class Operator(ast.NodeTransformer):
                 'description': str(self),
                 'lineno': get_line_number(node)
             }
-            node = self.mutate(node)
+            old_node = node
+            node = self.mutate(old_node)
+            ast.copy_location(node, old_node)
 
         self._count += 1
         return node
