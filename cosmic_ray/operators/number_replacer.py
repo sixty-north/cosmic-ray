@@ -4,8 +4,8 @@ from .operator import Operator
 
 
 class NumberReplacer(Operator):
-    """A NodeTransformer that replaces the n-th occurrence of a `Num` node
-    with another `Num` node with a different numeric value.
+    """A NodeTransformer that replaces a `Num` node with another `Num`
+    node holding a different numeric value.
     """
 
     def visit_Num(self, node):

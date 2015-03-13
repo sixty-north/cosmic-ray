@@ -1,3 +1,18 @@
+"""This module contains mutation operators which replace one
+relational operator with another.
+
+For each relational operator we generate a series of classes, one for
+each *other* operator. These generated classes mutate nodes by
+replaces the first operator with the second.
+
+The generated classes are named `Replace<from-op>With<to-op>` where
+`from-op` is the relational operator being replaced and `to-op` is the
+replacement operator.
+
+The global list `operators` also contains a all of the generated
+classes. This list is primarily used for testing.
+"""
+
 import ast
 
 from .operator import Operator

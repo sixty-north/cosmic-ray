@@ -1,13 +1,3 @@
-# Find all of the modules that need to be mutated
-# Create ASTs for all of the modules
-# Foreach AST:
-#    foreach operation:
-#        foreach location in AST where op applies:
-#            apply op to location
-#            Make that AST active/replace old module with new
-#            run all tests
-#            If not failures, mutant survived!
-
 import ast
 from functools import partial
 import logging
@@ -27,6 +17,19 @@ INCOMPETENT = 'incompetent'
 
 
 def run_with_mutants(module_file, module_name, operator, func, q):
+    """Run a function for each mutatation of a module.
+
+    Mutate the module specified by `module_file` and `module_name`
+    using `operator`. For each mutation, install that mutant into the
+    module registry and then run `func`, putting `func`'s return value
+    into the queue `q`.
+
+    If `func` raises an exception, then a tuple (INCOMPETENT,
+    exception-info) is placed into `q`.
+
+    This is designed to be run in its own process, specifically via
+    the `multiprocessing` module.
+    """
     with open(module_file, 'rt') as f:
         log.info('reading module {} from {}'.format(
             module_name, module_file))
@@ -50,6 +53,11 @@ def run_with_mutants(module_file, module_name, operator, func, q):
 
 
 def run_test(test_dir):
+    """Discover and run tests in `test_dir`.
+
+    If the tests pass, this returns `(SURVIVED, result)`, otherwise it
+    returns `(KILLED, result)`.
+    """
     suite = unittest.TestLoader().discover(test_dir)
     result = unittest.TestResult()
     suite.run(result)
@@ -60,11 +68,20 @@ def run_test(test_dir):
 
 
 def main(top_module, test_dir):
-    # 1. Find all modules to be mutated
+    """Runs the tests in `test_dir` against mutated version of
+    `top_module`.
+
+    This finds all of the modules in and including `top_module`. For
+    each of these modules, it mutates them using all of the available
+    mutation operators. For each mutant, the tests in `test_dir` are
+    executed. The result of a bunch of records telling us whether the
+    mutant survived, was killed, or was incompetent.
+    """
     modules = list(find_modules(top_module))
 
     # Remove those names from sys.modules. Tests will import them on
     # their own after mutation.
+    # TODO: This doesn't seem necessary now.
     for m in modules:
         del sys.modules[m.__name__]
 

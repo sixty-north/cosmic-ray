@@ -2,7 +2,7 @@ from .operator import Operator
 
 
 class ArithmeticOperatorDeletion(Operator):
-    """A NodeTransformer that deletes the n-th arithmetic operator.
+    """A NodeTransformer that deletes arithmetic operators.
     """
 
     def visit_Add(self, node):
