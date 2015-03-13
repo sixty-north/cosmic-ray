@@ -73,22 +73,12 @@ def main(top_module, test_dir):
     mp_mgr = multiprocessing.Manager()
     response_queue = mp_mgr.Queue()
 
-    with multiprocessing.Pool(4) as p:
-        # results = p.starmap(
-        #     run_with_mutants,
-        #     [[m, op, test_runner]
-        #      for m in modules
-        #      for op in all_operators()])
-        for m in modules:
-            for op in all_operators():
-                log.info('applying operator {}'.format(op))
-                p.apply(
-                    run_with_mutants,
-                    (m.__file__,
-                     m.__name__,
-                     op,
-                     test_runner,
-                     response_queue))
+    with multiprocessing.Pool() as p:
+        p.starmap(
+            run_with_mutants,
+            [(m.__file__, m.__name__, op, test_runner, response_queue)
+             for m in modules
+             for op in all_operators()])
 
     while not response_queue.empty():
         print(response_queue.get())
