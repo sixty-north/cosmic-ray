@@ -28,7 +28,7 @@ class Operator(ast.NodeTransformer):
         """Potentially mutate `node`, returning the mutated version.
 
         Subclasses should call this when their AST iteration reaches a
-        potential mutation site. If that site is schedule for
+        potential mutation site. If that site is scheduled for
         mutation, the subclass instance will be asked to perform the
         mutation.
         """
