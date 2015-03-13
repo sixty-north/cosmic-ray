@@ -37,12 +37,11 @@ def run_with_mutants(module, operator, func, q):
     pristine_ast = ast.parse(source, module.__file__, 'exec')
 
     for record, mutant in operator.bombard(pristine_ast):
-        new_mod = types.ModuleType(module.__name__)
-        code = compile(mutant, module.__file__, 'exec')
-        sys.modules[module.__name__] = new_mod
-        exec(code,  new_mod.__dict__)
-
         try:
+            new_mod = types.ModuleType(module.__name__)
+            code = compile(mutant, module.__file__, 'exec')
+            sys.modules[module.__name__] = new_mod
+            exec(code,  new_mod.__dict__)
             result, data = func(module)
         except Exception as e:
             result = INCOMPETENT
@@ -75,6 +74,7 @@ def main(top_module, test_dir):
 
     for m in modules:
         for operator in all_operators():
+            log.info('applying operator {}'.format(operator))
             p = multiprocessing.Process(
                 target=run_with_mutants,
                 args=(m, operator, partial(run_test, test_dir), q))
@@ -86,4 +86,5 @@ def main(top_module, test_dir):
 
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO)
     main(sys.argv[1], sys.argv[2])
