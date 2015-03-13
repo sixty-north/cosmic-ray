@@ -27,7 +27,7 @@ setup(
     platforms='any',
     include_package_data=True,
     install_requires=[
-        'decorator',
+        'docopt',
         'with_fixture',
     ]
 )

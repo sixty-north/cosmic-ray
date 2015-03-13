@@ -1,3 +1,13 @@
+"""cosmic-ray
+
+Usage:
+  cosmic-ray [options] <module> <test-dir>
+
+Options:
+  -h --help     Show this screen.
+  --verbose     Produce verbose output
+"""
+
 import ast
 from functools import partial
 import logging
@@ -5,6 +15,8 @@ import multiprocessing
 import sys
 import types
 import unittest
+
+import docopt
 
 from cosmic_ray.find_modules import find_modules
 from cosmic_ray.operators import all_operators
@@ -101,5 +113,9 @@ def main(top_module, test_dir):
         print(response_queue.get())
 
 if __name__ == '__main__':
-    # logging.basicConfig(level=logging.INFO)
-    main(sys.argv[1], sys.argv[2])
+    arguments = docopt.docopt(__doc__, version='cosmic-ray v.1')
+    if arguments['--verbose']:
+        logging.basicConfig(level=logging.INFO)
+
+    main(arguments['<module>'],
+         arguments['<test-dir>'])
