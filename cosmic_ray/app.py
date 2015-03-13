@@ -26,38 +26,37 @@ KILLED = 'killed'
 INCOMPETENT = 'incompetent'
 
 
-def run_with_mutants(module, operator, func, q):
-    with open(module.__file__, 'rt') as f:
+def run_with_mutants(module_file, module_name, operator, func, q):
+    with open(module_file, 'rt') as f:
         log.info('reading module {} from {}'.format(
-            module.__name__, module.__file__))
+            module_name, module_file))
         source = f.read()
 
-    log.info('parsing module {}'.format(module.__name__))
+    log.info('parsing module {}'.format(module_name))
 
-    pristine_ast = ast.parse(source, module.__file__, 'exec')
+    pristine_ast = ast.parse(source, module_file, 'exec')
+
+    log.info('{} successfully parsed'.format(module_name))
 
     for record, mutant in operator.bombard(pristine_ast):
         try:
-            new_mod = types.ModuleType(module.__name__)
-            code = compile(mutant, module.__file__, 'exec')
-            sys.modules[module.__name__] = new_mod
+            new_mod = types.ModuleType(module_name)
+            code = compile(mutant, module_file, 'exec')
+            sys.modules[module_name] = new_mod
             exec(code,  new_mod.__dict__)
-            result, data = func(module)
+            q.put(func())
         except Exception as e:
-            result = INCOMPETENT
-            data = e
-
-        q.put((record, result))
+            q.put((INCOMPETENT, str(e)))
 
 
-def run_test(test_dir, module):
+def run_test(test_dir):
     suite = unittest.TestLoader().discover(test_dir)
     result = unittest.TestResult()
     suite.run(result)
     if result.wasSuccessful():
-        return (SURVIVED, result)
+        return SURVIVED, str(result)
     else:
-        return (KILLED, result)
+        return KILLED, str(result)
 
 
 def main(top_module, test_dir):
@@ -69,22 +68,31 @@ def main(top_module, test_dir):
     for m in modules:
         del sys.modules[m.__name__]
 
-    # 2. For each module, for each operator
-    q = multiprocessing.Queue()
+    test_runner = partial(run_test, test_dir)
 
-    for m in modules:
-        for operator in all_operators():
-            log.info('applying operator {}'.format(operator))
-            p = multiprocessing.Process(
-                target=run_with_mutants,
-                args=(m, operator, partial(run_test, test_dir), q))
-            p.start()
-            p.join()
+    mp_mgr = multiprocessing.Manager()
+    response_queue = mp_mgr.Queue()
 
-    while not q.empty():
-        print(q.get())
+    with multiprocessing.Pool(4) as p:
+        # results = p.starmap(
+        #     run_with_mutants,
+        #     [[m, op, test_runner]
+        #      for m in modules
+        #      for op in all_operators()])
+        for m in modules:
+            for op in all_operators():
+                log.info('applying operator {}'.format(op))
+                p.apply(
+                    run_with_mutants,
+                    (m.__file__,
+                     m.__name__,
+                     op,
+                     test_runner,
+                     response_queue))
 
+    while not response_queue.empty():
+        print(response_queue.get())
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
+    # logging.basicConfig(level=logging.INFO)
     main(sys.argv[1], sys.argv[2])
