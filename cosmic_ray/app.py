@@ -4,8 +4,9 @@ Usage:
   cosmic-ray [options] <module> <test-dir>
 
 Options:
-  -h --help     Show this screen.
-  --verbose     Produce verbose output
+  -h --help          Show this screen.
+  --verbose          Produce verbose output
+  --no-local-import  Allow importing module from the current directory
 """
 import logging
 import multiprocessing
@@ -22,7 +23,7 @@ from cosmic_ray.testing import run_tests
 log = logging.getLogger()
 
 
-def main(top_module, test_dir):
+def full_module_test(top_module, test_dir):
     """Runs the tests in `test_dir` against mutated version of
     `top_module`.
 
@@ -55,10 +56,18 @@ def main(top_module, test_dir):
     while not response_queue.empty():
         print(response_queue.get())
 
-if __name__ == '__main__':
+
+def main():
     arguments = docopt.docopt(__doc__, version='cosmic-ray v.1')
     if arguments['--verbose']:
         logging.basicConfig(level=logging.INFO)
 
-    main(arguments['<module>'],
-         arguments['<test-dir>'])
+    if not arguments['--no-local-import']:
+        sys.path.insert(0, '')
+
+    full_module_test(
+        arguments['<module>'],
+        arguments['<test-dir>'])
+
+if __name__ == '__main__':
+    main()

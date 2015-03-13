@@ -29,5 +29,10 @@ setup(
     install_requires=[
         'docopt',
         'with_fixture',
-    ]
+    ],
+    entry_points = {
+        'console_scripts': [
+            'cosmic-ray = cosmic_ray.app:main',
+        ],
+    },
 )
