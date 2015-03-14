@@ -8,10 +8,11 @@ Options:
   --verbose          Produce verbose output
   --no-local-import  Allow importing module from the current directory
 """
+from functools import partial
+import json
 import logging
 import multiprocessing
 import sys
-from functools import partial
 
 import docopt
 
@@ -54,7 +55,7 @@ def full_module_test(top_module, test_dir):
              for op in all_operators()])
 
     while not response_queue.empty():
-        print(response_queue.get())
+        print(json.dumps(response_queue.get()))
 
 
 def main():
