@@ -9,9 +9,8 @@ from ..util import get_line_number
 log = logging.getLogger()
 
 
-ActivationRecord = namedtuple(
-    'ActivationRecord',
-    ['operator', 'description', 'line_number'])
+def _full_module_name(obj):
+    return obj.__class__.__module__ + obj.__class__.__name__
 
 
 class Operator(ast.NodeTransformer):
@@ -39,10 +38,11 @@ class Operator(ast.NodeTransformer):
         mutation.
         """
         if self._count == self._target:
-            self._activation_record = ActivationRecord(
-                self.__class__,
-                str(self),
-                get_line_number(node))
+            self._activation_record = {
+                'operator': _full_module_name(self),
+                'description': str(self),
+                'line_number': get_line_number(node)
+            }
 
             old_node = node
             node = self.mutate(old_node)
