@@ -1,4 +1,5 @@
 import ast
+from collections import namedtuple
 import copy
 import itertools
 import logging
@@ -6,6 +7,11 @@ import logging
 from ..util import get_line_number
 
 log = logging.getLogger()
+
+
+ActivationRecord = namedtuple(
+    'ActivationRecord',
+    ['operator', 'description', 'line_number'])
 
 
 class Operator(ast.NodeTransformer):
@@ -33,11 +39,11 @@ class Operator(ast.NodeTransformer):
         mutation.
         """
         if self._count == self._target:
-            self._activation_record = {
-                'type': self.__class__,
-                'description': str(self),
-                'lineno': get_line_number(node)
-            }
+            self._activation_record = ActivationRecord(
+                self.__class__,
+                str(self),
+                get_line_number(node))
+
             old_node = node
             node = self.mutate(old_node)
             ast.copy_location(node, old_node)
