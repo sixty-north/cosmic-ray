@@ -15,14 +15,24 @@ def run_with_mutants(module_file, module_name, operator, func, q):
 
     Mutate the module specified by `module_file` and `module_name`
     using `operator`. For each mutation, install that mutant into the
-    module registry and then run `func`, putting `func`'s return value
-    into the queue `q`.
+    module registry and then run `func`.
 
-    If `func` raises an exception, then a tuple (INCOMPETENT,
-    exception-info) is placed into `q`.
+    Each run of `func` will insert a new element into `q` of the form:
 
-    This is designed to be run in its own process, specifically via
-    the `multiprocessing` module.
+        (activation-record, outcome, data)
+
+    `activation-record` is a
+    `cosmic_ray.operators.operator.ActivationRecord` describing the
+    location and nature of the mutation.
+
+    `outcome` is one of `SURVIVED`, `KILLED`, or `INCOMPETENT`
+    depending on the fate of the mutant.
+
+    `data` is any data describing the test run.
+
+    This function is designed to be run in its own process,
+    specifically via the `multiprocessing` module.
+
     """
     with open(module_file, 'rt') as f:
         log.info('reading module {} from {}'.format(
@@ -42,7 +52,10 @@ def run_with_mutants(module_file, module_name, operator, func, q):
             sys.modules[module_name] = new_mod
             exec(code,  new_mod.__dict__)
             passed, result = func()
-            q.put((SURVIVED if passed else KILLED,
+            q.put((record,
+                   SURVIVED if passed else KILLED,
                    result))
         except Exception as e:
-            q.put((INCOMPETENT, str(e)))
+            q.put((record,
+                   INCOMPETENT,
+                   str(e)))
