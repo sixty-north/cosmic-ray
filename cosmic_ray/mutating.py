@@ -46,6 +46,7 @@ def run_with_mutants(module_file, module_name, operator, func, q):
     log.info('{} successfully parsed'.format(module_name))
 
     for record, mutant in operator.bombard(pristine_ast):
+        record['filename'] = module_file
         try:
             new_mod = types.ModuleType(module_name)
             code = compile(mutant, module_file, 'exec')
