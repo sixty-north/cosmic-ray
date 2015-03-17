@@ -10,7 +10,9 @@ log = logging.getLogger()
 
 
 def _full_module_name(obj):
-    return obj.__class__.__module__ + obj.__class__.__name__
+    return '{}.{}'.format(
+        obj.__class__.__module__,
+        obj.__class__.__name__)
 
 
 class Operator(ast.NodeTransformer):
