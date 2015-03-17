@@ -27,11 +27,12 @@ log = logging.getLogger()
 def format_response(response):
     rec = response[0]
 
-    return '{outcome} -> {desc} @ {filename}:{lineno}'.format(
+    return '{outcome} -> {desc} @ {filename}:{lineno}\n{reason}'.format(
         outcome=response[1],
         desc=rec['description'],
         filename=rec['filename'],
-        lineno=rec['line_number'])
+        lineno=rec['line_number'],
+        reason=response[2])
 
 
 def full_module_test(top_module, test_dir):
