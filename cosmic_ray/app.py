@@ -58,27 +58,12 @@ def full_module_test(top_module, test_dir):
     mp_mgr = multiprocessing.Manager()
     response_queue = mp_mgr.Queue()
 
-    for m in modules:
-        for op in all_operators():
-            p = multiprocessing.Process(
-                target=run_with_mutants,
-                args=(m.__file__,
-                      m.__name__,
-                      op,
-                      test_runner,
-                      response_queue))
-            p.start()
-            p.join()
-
-    # TODO: This is what we want to do, but apparently test discovery is not
-    # reloading modules as we expect. Sort this out.
-    #
-    # with multiprocessing.Pool() as p:
-    #     p.starmap(
-    #         run_with_mutants,
-    #         [(m.__file__, m.__name__, op, test_runner, response_queue)
-    #          for m in modules
-    #          for op in all_operators()])
+    with multiprocessing.Pool() as p:
+        p.starmap(
+            run_with_mutants,
+            [(m.__file__, m.__name__, op, test_runner, response_queue)
+             for m in modules
+             for op in all_operators()])
 
     while not response_queue.empty():
         print(format_response(response_queue.get()))
