@@ -8,13 +8,16 @@ import decorator
 @decorator.decorator
 def isolate_imports(f, *args, **kwargs):
     modules = dict(sys.modules)
-    try:
-        return f(*args, **kwargs)
-    finally:
-        sys.modules = modules
+    result = f(*args, **kwargs)
+
+    dels = [m for m in sys.modules if m not in modules]
+    for m in dels:
+        del sys.modules[m]
+
+    return result
 
 
-# @isolate_imports
+@isolate_imports
 def run_tests(test_dir):
     """Discover and run tests in `test_dir`.
 
