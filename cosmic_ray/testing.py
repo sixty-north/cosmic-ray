@@ -1,7 +1,20 @@
 from itertools import chain
+import sys
 import unittest
 
+import decorator
 
+
+@decorator.decorator
+def isolate_imports(f, *args, **kwargs):
+    modules = dict(sys.modules)
+    try:
+        return f(*args, **kwargs)
+    finally:
+        sys.modules = modules
+
+
+# @isolate_imports
 def run_tests(test_dir):
     """Discover and run tests in `test_dir`.
 
