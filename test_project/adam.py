@@ -1,4 +1,6 @@
-def add_numbers():
-    """Fodder for the number-replacer and arithmetic operator replacement.
-    """
-    return 1 + 1
+def get_negative_one():
+    return -1
+
+
+def get_positive_one():
+    return +1

@@ -3,7 +3,12 @@ import adam
 
 
 class Tests(unittest.TestCase):
-    def test_add_numbers(self):
+    def test_get_negative_one(self):
         self.assertEqual(
-            adam.add_numbers(),
-            2)
+            adam.get_negative_one(),
+            -1)
+
+    def test_get_positive_one(self):
+        self.assertEqual(
+            adam.get_positive_one(),
+            +1)
