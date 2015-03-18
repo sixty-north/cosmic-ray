@@ -30,6 +30,27 @@ This will print out a bunch of information about what Cosmic Ray is
 doing, including stuff about what kinds of mutants are being created,
 which were killed, and – most frighteningly – which survived.
 
+## Tests
+
+Cosmic Ray has a number of test suites to help ensure that it works. The
+first suite is a standard `unittest` test suite that validates some if
+its internals. You can run that like this:
+
+```
+python -m unittest discover cosmic_ray/tests
+```
+
+There is also a set of tests which verify the various mutation
+operators. These tests comprise a specially prepared body of code,
+`adam.py`, and a full-coverage test-suite. The idea here is that
+Cosmic Ray should be 100% lethal against the mutants of `adam.py` or
+there's a problem. Run these tests like this:
+
+```
+cd test_project
+cosmic-ray adam tests
+```
+
 ## Theory
 
 Mutation testing is conceptually simple and elegant. You make certain
