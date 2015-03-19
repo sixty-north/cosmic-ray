@@ -3,6 +3,7 @@
 # kill every mutant when that suite is run; if it doesn't, then we've
 # got a problem.
 
+
 def unary_sub():
     return -1
 
