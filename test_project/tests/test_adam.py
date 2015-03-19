@@ -12,3 +12,6 @@ class Tests(unittest.TestCase):
         self.assertEqual(
             adam.unary_add(),
             +1)
+
+    def test_equals(self):
+        self.assertTrue(adam.equals())

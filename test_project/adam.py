@@ -9,3 +9,14 @@ def unary_sub():
 
 def unary_add():
     return +1
+
+
+def equals():
+    def constraint(x, y):
+        (x == y) ^ (x != y)
+
+    vals = [1, 2, 3]
+
+    return all([constraint(x, y)
+                for x in vals
+                for y in vals])
