@@ -4,6 +4,10 @@
 # got a problem.
 
 
+def constant_number():
+    return 42
+
+
 def unary_sub():
     return -1
 
