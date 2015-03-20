@@ -1,3 +1,43 @@
+## 2015-03-20
+
+We're really in need of reliable module replacement technology. We
+don't seem to be able to ensure that mutant modules are properly
+installed and subsequently used by test suites. We see, for example,
+that certain mutations get killed by tests that don't have anything to
+do with those mutations. It appears that previous mutations are
+hanging around which cause the tests to fail and, thus, the mutant to
+erroneously die.
+
+What could be going on? There's some indication that `multiprocessing`
+plays a role. For example, if I import a module in the parent process
+in a bit of code that only the parent process executes, that module is
+still reported as imported in the child process. I think this makes
+sense since `multiprocessing` is supposed to emulate multithreading,
+but it also means that some crafty things are going on under the hood.
+
+Another possibility is that some loader in `sys.meta_path` is keeping
+track of modules and somehow bypassing our module replacement. This
+seems unlikely since we're directly updating `sys.modules` with
+mutants, so loaders should not be consulted.
+
+Yet another possibility is that the unit test discovery is not keeping
+old modules alive and active. That is, when a unit test is first
+discovered it will import some modules. We rely on the next round of
+discovery to "re-discover" the imported modules, and if that's not
+happening then we're in a spot of trouble. My guess is that this is at
+least part of what's going on right now.
+
+How can we deal with this? One possibility is that we create a new
+process for each individual mutation. This would completely insulate
+the test environments from one another and the control process. This
+would also probably be slow...though I guess the impact of process
+startup time might be so small compared to test times that it's not an
+issue. And to be honest, directly managing subprocesses like this will
+probably mean that we can distribute testing to multiple machines more
+easily. Give it some tought...
+
+## Original
+
 We need to figure out how to run tests against modified ASTs. That is,
 given an AST with mutated nodes, how do we run a suite of tests
 against it.
