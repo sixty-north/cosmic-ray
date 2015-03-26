@@ -1,13 +1,16 @@
 import ast
+from enum import Enum
 import logging
 import sys
 import types
 
 log = logging.getLogger()
 
-SURVIVED = 'survived'
-KILLED = 'killed'
-INCOMPETENT = 'incompetent'
+
+class Outcome(Enum):
+    SURVIVED = 'survived'
+    KILLED = 'killed'
+    INCOMPETENT = 'incompetent'
 
 
 def run_with_mutants(module_file, module_name, operator, func, q):
@@ -54,9 +57,9 @@ def run_with_mutants(module_file, module_name, operator, func, q):
             exec(code,  new_mod.__dict__)
             passed, result = func()
             q.put((record,
-                   SURVIVED if passed else KILLED,
+                   Outcome.SURVIVED if passed else Outcome.KILLED,
                    result))
         except Exception as e:
             q.put((record,
-                   INCOMPETENT,
+                   Outcome.INCOMPETENT,
                    str(e)))

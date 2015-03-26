@@ -17,7 +17,7 @@ import sys
 import docopt
 
 from cosmic_ray.find_modules import find_modules
-from cosmic_ray.mutating import run_with_mutants, SURVIVED, KILLED, INCOMPETENT
+from cosmic_ray.mutating import Outcome, run_with_mutants
 from cosmic_ray.operators import all_operators
 from cosmic_ray.testing import run_tests
 
@@ -66,11 +66,7 @@ def full_module_test(top_module, test_dir):
              for m in modules
              for op in all_operators()])
 
-    stats = {
-        SURVIVED: 0,
-        KILLED: 0,
-        INCOMPETENT: 0
-    }
+    stats = {outcome: 0 for outcome in Outcome}
 
     while not response_queue.empty():
         activation_record, outcome, reason = response_queue.get()
@@ -78,7 +74,8 @@ def full_module_test(top_module, test_dir):
         stats[outcome] += 1
 
     print('Survival rate: {0:.2f}%'.format(
-        100 * stats[SURVIVED] / sum(stats.values())))
+        100 * stats[Outcome.SURVIVED] / sum(stats.values())))
+
 
 def main():
     arguments = docopt.docopt(__doc__, version='cosmic-ray v.1')
