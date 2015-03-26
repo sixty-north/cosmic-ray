@@ -18,7 +18,7 @@ def unary_add():
 
 def equals():
     def constraint(x, y):
-        (x == y) ^ (x != y)
+        return (x == y) ^ (x != y)
 
     vals = [1, 2, 3]
 
