@@ -24,15 +24,16 @@ from cosmic_ray.testing import run_tests
 log = logging.getLogger()
 
 
-def format_response(response):
-    rec = response[0]
-
+def format_response(outcome, activation_record, reason):
+    """Returns a reasonably formatted string with test outcome,
+    activation-record information, and reason.
+    """
     return '{outcome} -> {desc} @ {filename}:{lineno}\n{reason}'.format(
-        outcome=response[1],
-        desc=rec['description'],
-        filename=rec['filename'],
-        lineno=rec['line_number'],
-        reason=response[2])
+        outcome=outcome,
+        desc=activation_record['description'],
+        filename=activation_record['filename'],
+        lineno=activation_record['line_number'],
+        reason=reason)
 
 
 def full_module_test(top_module, test_dir):
@@ -66,7 +67,8 @@ def full_module_test(top_module, test_dir):
              for op in all_operators()])
 
     while not response_queue.empty():
-        print(format_response(response_queue.get()))
+        activation_record, outcome, reason = response_queue.get()
+        print(format_response(outcome, activation_record, reason))
 
 
 def main():
