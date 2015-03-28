@@ -1,4 +1,7 @@
+import copy
+import uuid
 import unittest
+
 import adam
 
 
@@ -23,4 +26,8 @@ class Tests(unittest.TestCase):
             +1)
 
     def test_equals(self):
-        self.assertTrue(adam.equals())
+        vals = [uuid.uuid1(),
+                uuid.uuid1()]
+        vals.append(copy.copy(vals[0]))
+        self.assertTrue(
+            adam.equals(vals))

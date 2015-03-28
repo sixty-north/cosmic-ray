@@ -16,11 +16,9 @@ def unary_add():
     return +1
 
 
-def equals():
+def equals(vals):
     def constraint(x, y):
         return (x == y) ^ (x != y)
-
-    vals = [1, 2, 3]
 
     return all([constraint(x, y)
                 for x in vals
