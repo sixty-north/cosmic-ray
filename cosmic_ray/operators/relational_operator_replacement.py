@@ -21,6 +21,12 @@ from .operator import Operator
 RELATIONAL_OPERATORS = {ast.Eq, ast.NotEq, ast.Lt, ast.LtE, ast.Gt, ast.GtE,
                         ast.Is, ast.IsNot, ast.In, ast.NotIn}
 
+# There are a number of potential replacements which we avoid because
+# they almost always produce equivalent mutants. This is a set of
+# (FROM-OP, TO-OP) tuples which we don't want to generate.
+SKIP = {
+    (ast.NotEq, ast.IsNot),
+}
 
 def create_operator(from_op, to_op):
     """Create an operator which replaces `from_op` with `to_op`.
@@ -53,4 +59,5 @@ def create_operator(from_op, to_op):
 # relational operator B which replaces A with B in an AST.
 operators = [create_operator(from_op, to_op)
              for from_op in RELATIONAL_OPERATORS
-             for to_op in RELATIONAL_OPERATORS.difference({from_op})]
+             for to_op in RELATIONAL_OPERATORS.difference({from_op})
+             if (from_op, to_op) not in SKIP]
