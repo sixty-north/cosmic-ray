@@ -24,16 +24,18 @@ from cosmic_ray.testing import Outcome, run_tests
 log = logging.getLogger()
 
 
-# def format_test_result(r):
-#     """Returns a reasonably formatted string with test outcome,
-#     activation-record information, and reason.
-#     """
-#     return '{outcome} -> {desc} @ {filename}:{lineno}\n{reason}'.format(
-#         outcome=outcome,
-#         desc=activation_record['description'],
-#         filename=activation_record['filename'],
-#         lineno=activation_record['line_number'],
-#         reason=reason)
+def format_test_result(mutation_record, test_result):
+    """Returns a reasonably formatted string with test outcome,
+    activation-record information, and reason.
+    """
+    arec = mutation_record.activation_record
+
+    return '{outcome} -> {desc} @ {filename}:{lineno}\n{reason}'.format(
+        outcome=test_result.outcome,
+        desc=arec['description'],
+        filename=mutation_record.module_file,
+        lineno=arec['line_number'],
+        reason=test_result.results)
 
 
 def _test_func(test_func, mutation_record):
@@ -77,8 +79,7 @@ def main():
 
     for mutation_record, test_result in results:
         outcomes[test_result.outcome] += 1
-        print(test_result)
-        print(mutation_record)
+        print(format_test_result(mutation_record, test_result))
 
     total_count = sum(outcomes.values())
     print('Survival rate: {:0.2f}%'.format(
