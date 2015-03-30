@@ -28,7 +28,7 @@ mutants, here's what you do:
 
 This will print out a bunch of information about what Cosmic Ray is
 doing, including stuff about what kinds of mutants are being created,
-which were killed, and – most frighteningly – which survived.
+which were killed, and – chillingly – which survived.
 
 ## Tests
 
