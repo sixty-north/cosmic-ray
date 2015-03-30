@@ -18,32 +18,39 @@ import docopt
 import cosmic_ray.find_modules
 from cosmic_ray.mutating import create_mutants, run_with_mutant
 import cosmic_ray.operators
-import cosmic_ray.testing
+from cosmic_ray.testing import Outcome, run_tests
 
 
 log = logging.getLogger()
 
 
-def format_response(outcome, activation_record, reason):
-    """Returns a reasonably formatted string with test outcome,
-    activation-record information, and reason.
-    """
-    return '{outcome} -> {desc} @ {filename}:{lineno}\n{reason}'.format(
-        outcome=outcome,
-        desc=activation_record['description'],
-        filename=activation_record['filename'],
-        lineno=activation_record['line_number'],
-        reason=reason)
+# def format_test_result(r):
+#     """Returns a reasonably formatted string with test outcome,
+#     activation-record information, and reason.
+#     """
+#     return '{outcome} -> {desc} @ {filename}:{lineno}\n{reason}'.format(
+#         outcome=outcome,
+#         desc=activation_record['description'],
+#         filename=activation_record['filename'],
+#         lineno=activation_record['line_number'],
+#         reason=reason)
+
+
+def _test_func(test_func, mutation_record):
+    return (mutation_record,
+            run_with_mutant(test_func,
+                            mutation_record))
 
 
 def hunt(mutation_records, test_function):
     """Call `test_function` for each mutant in `mutation_records`.
 
-    Returns a sequence of the values returned by `test_function`.
+    Returns a sequence of (MutationRecord, TestResult) tuples.
     """
+
     with multiprocessing.Pool() as p:
         yield from p.map(
-            functools.partial(run_with_mutant, test_function),
+            functools.partial(_test_func, test_function),
             mutation_records)
 
 
@@ -59,15 +66,23 @@ def main():
 
     operators = cosmic_ray.operators.all_operators()
 
-    test_function = functools.partial(cosmic_ray.testing.run_tests,
+    test_function = functools.partial(run_tests,
                                       arguments['<test-dir>'])
 
     results = hunt(
         create_mutants(modules, operators),
         test_function)
 
-    for r in results:
-        print(r)
+    outcomes = {o: 0 for o in Outcome}
+
+    for mutation_record, test_result in results:
+        outcomes[test_result.outcome] += 1
+        print(test_result)
+        print(mutation_record)
+
+    total_count = sum(outcomes.values())
+    print('Survival rate: {:0.2f}%'.format(
+        100 * outcomes[Outcome.SURVIVED] / total_count))
 
 if __name__ == '__main__':
     main()
