@@ -87,11 +87,8 @@ then uses
 [the `ast.NodeTransformer` class](https://docs.python.org/3/library/ast.html#ast.NodeTransformer)
 to make systematic mutations to the ASTs.
 
-For each individual mutation, Cosmic Ray uses Python's low-level
-[finder](https://docs.python.org/3/reference/import.html#finders-and-loaders)
-and [loader](https://docs.python.org/3/reference/import.html#loaders)
-system to dynamically replace the MUTs with the mutated versions. It
-then uses
+For each individual mutation, Cosmic Ray modifies the Python runtime
+environment to replace the MUT with the mutated version. It then uses
 [`unittest`'s "discovery" functionality](https://docs.python.org/3/library/unittest.html#test-discovery)
 to discover your tests and run them against the mutant code.
 
@@ -115,3 +112,10 @@ for mod in modules_under_test:
 				
 Obviously this can result in a lot of tests, and it can take some time
 if your test suite is large and/or slow.
+
+Cosmic Ray uses the
+[subprocess module](https://docs.python.org/3/library/subprocess.html)
+to run the tests in parallel and also to implement mutant
+sandboxing. This provides a nice speed-up in many cases, though if your
+tests are IO bound or use other common resources then this could
+actually slow things down.
