@@ -114,7 +114,7 @@ Obviously this can result in a lot of tests, and it can take some time
 if your test suite is large and/or slow.
 
 Cosmic Ray uses the
-[subprocess module](https://docs.python.org/3/library/subprocess.html)
+[multiprocessing module](https://docs.python.org/3/library/multiprocessing.html)
 to run the tests in parallel and also to implement mutant
 sandboxing. This provides a nice speed-up in many cases, though if your
 tests are IO bound or use other common resources then this could
