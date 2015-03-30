@@ -1,8 +1,21 @@
+from collections import namedtuple
+from enum import Enum
 from itertools import chain
 import sys
 import unittest
 
 import decorator
+
+
+class Outcome(Enum):
+    SURVIVED = 'survived'
+    KILLED = 'killed'
+    INCOMPETENT = 'incompetent'
+
+
+TestResult = namedtuple('TestResult',
+                        ['outcome',
+                         'results'])
 
 
 @decorator.decorator
@@ -24,10 +37,15 @@ def run_tests(test_dir):
     If the tests pass, this returns `(True, result)`, otherwise it
     returns `(False, result)`.
     """
-    suite = unittest.TestLoader().discover(test_dir)
-    result = unittest.TestResult()
-    suite.run(result)
-    return (result.wasSuccessful(),
+    try:
+        suite = unittest.TestLoader().discover(test_dir)
+        result = unittest.TestResult()
+        suite.run(result)
+
+        return TestResult(
+            Outcome.SURVIVED if result.wasSuccessful() else Outcome.KILLED,
             [(str(r[0]), r[1])
              for r in chain(result.errors,
                             result.failures)])
+    except Exception as e:
+        return TestResult(Outcome.INCOMPETENT, str(e))

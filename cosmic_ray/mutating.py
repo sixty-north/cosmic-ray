@@ -1,9 +1,9 @@
 import ast
-from collections import namedtuple
-from enum import Enum
 import logging
 import sys
 import types
+from collections import namedtuple
+
 
 log = logging.getLogger()
 
@@ -18,7 +18,9 @@ MutationRecord = namedtuple('MutationRecord', ['module_name',
 def create_mutants(modules, operators):
     """Mutate `modules` with `operators`.
 
-    Returns an iterable of `MutationRecord`s.
+    Returns an iterable of `MutationRecord`s, one for each application
+    of an operator to a location in a module.
+
     """
     for module in modules:
         with open(module.__file__, 'rt', encoding='utf-8') as f:
@@ -46,9 +48,3 @@ def run_with_mutant(func, mutation_record):
     sys.modules[module_name] = new_mod
     exec(code,  new_mod.__dict__)
     return func()
-
-
-class Outcome(Enum):
-    SURVIVED = 'survived'
-    KILLED = 'killed'
-    INCOMPETENT = 'incompetent'
