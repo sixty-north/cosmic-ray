@@ -39,6 +39,14 @@ def create_mutants(modules, operators):
                                      mutant=mutant)
 
 
+class TimeoutException(Exception):
+    pass
+
+
+def raise_timeout_exception():
+    raise TimeoutException()
+
+
 def run_with_mutant(func, mutation_record):
     """Install the mutation record and run func, returning its result.
     """

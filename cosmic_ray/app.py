@@ -8,6 +8,7 @@ Options:
   --verbose          Produce verbose output
   --no-local-import  Allow importing module from the current directory
 """
+from concurrent.futures import ThreadPoolExecutor
 import functools
 import logging
 import multiprocessing
@@ -18,7 +19,7 @@ import docopt
 import cosmic_ray.find_modules
 from cosmic_ray.mutating import create_mutants, run_with_mutant
 import cosmic_ray.operators
-from cosmic_ray.testing import Outcome, run_tests
+from cosmic_ray.testing import Outcome, run_tests, TestResult
 
 
 log = logging.getLogger()
@@ -39,9 +40,20 @@ def format_test_result(mutation_record, test_result):
 
 
 def _test_func(test_func, mutation_record):
-    return (mutation_record,
-            run_with_mutant(test_func,
-                            mutation_record))
+    p = multiprocessing.Process(
+        target=run_with_mutant,
+        args=(test_func, mutation_record))
+    p.start()
+    p.join(5)
+
+    if p.is_alive():
+        p.terminate()
+        p.join()
+        return (mutation_record,
+                TestResult(Outcome.INCOMPETENT, "killed after 5 seconds"))
+    else:
+        return (mutation_record,
+                # Proper test result)
 
 
 def hunt(mutation_records, test_function):
@@ -50,8 +62,8 @@ def hunt(mutation_records, test_function):
     Returns a sequence of (MutationRecord, TestResult) tuples.
     """
 
-    with multiprocessing.Pool() as p:
-        yield from p.map(
+    with ThreadPoolExecutor() as e:
+        yield from e.map(
             functools.partial(_test_func, test_function),
             mutation_records)
 
