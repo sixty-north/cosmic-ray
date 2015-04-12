@@ -8,8 +8,7 @@ Options:
   --verbose          Produce verbose output
   --no-local-import  Allow importing module from the current directory
 """
-from concurrent.futures import ThreadPoolExecutor
-import functools
+
 import logging
 import multiprocessing
 import sys
@@ -19,7 +18,7 @@ import docopt
 import cosmic_ray.find_modules
 from cosmic_ray.mutating import create_mutants, run_with_mutant
 import cosmic_ray.operators
-from cosmic_ray.testing import Outcome, run_tests, TestResult
+from cosmic_ray.testing import TestResult, Outcome, UnittestRunner
 
 
 log = logging.getLogger()
@@ -39,33 +38,33 @@ def format_test_result(mutation_record, test_result):
         reason=test_result.results)
 
 
-def _test_func(test_func, mutation_record):
-    p = multiprocessing.Process(
-        target=run_with_mutant,
-        args=(test_func, mutation_record))
-    p.start()
-    p.join(5)
+def hunt(mutation_records, test_runner):
+    """Call `test_runner` for each mutant in `mutation_records`.
 
-    if p.is_alive():
-        p.terminate()
-        p.join()
-        return (mutation_record,
-                TestResult(Outcome.INCOMPETENT, "killed after 5 seconds"))
-    else:
-        return (mutation_record,
-                # Proper test result)
+    `test_runner` should be a `TestRunner` instance.
 
-
-def hunt(mutation_records, test_function):
-    """Call `test_function` for each mutant in `mutation_records`.
-
-    Returns a sequence of (MutationRecord, TestResult) tuples.
+    Returns a sequence of `(MutationRecord, TestResult)` tuples.
     """
 
-    with ThreadPoolExecutor() as e:
-        yield from e.map(
-            functools.partial(_test_func, test_function),
-            mutation_records)
+    with multiprocessing.Pool(maxtasksperchild=1) as pool:
+        test_results = ((rec,
+                         pool.apply_async(run_with_mutant,
+                                          args=(test_runner, rec)))
+                        for rec in mutation_records)
+
+        logging.info('all tests initiated')
+
+        for rec, async_result in test_results:
+            try:
+                # TODO: This timeout needs to be configurable.
+                result = async_result.get(timeout=5)
+            except multiprocessing.TimeoutError:
+                result = TestResult(Outcome.INCOMPETENT, 'timeout')
+
+            logging.info('mutation record: {}'.format(rec))
+            logging.info('result: {}'.format(result))
+
+            yield (rec, result)
 
 
 def main():
@@ -80,12 +79,11 @@ def main():
 
     operators = cosmic_ray.operators.all_operators()
 
-    test_function = functools.partial(run_tests,
-                                      arguments['<test-dir>'])
+    test_runner = UnittestRunner(arguments['<test-dir>'])
 
     results = hunt(
         create_mutants(modules, operators),
-        test_function)
+        test_runner)
 
     outcomes = {o: 0 for o in Outcome}
 
