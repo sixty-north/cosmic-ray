@@ -33,6 +33,7 @@ class TestRunner(metaclass=abc.ABCMeta):
         """
         return self._test_dir
 
+    @abc.abstractmethod
     def _run(self):
         """Run all of the tests and return the results.
 
