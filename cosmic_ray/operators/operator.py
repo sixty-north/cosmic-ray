@@ -1,5 +1,4 @@
 import ast
-from collections import namedtuple
 import copy
 import itertools
 import logging
