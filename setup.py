@@ -1,16 +1,16 @@
 from setuptools import setup, find_packages
 
 setup(
-    name = 'cosmic_ray',
-    version = '0.0.0',
-    packages = find_packages(),
+    name='cosmic_ray',
+    version='0.0.0',
+    packages=find_packages(),
 
     # metadata for upload to PyPI
-    author = 'Austin Bingham',
-    author_email = 'austin.bingham@gmail.com',
-    description = 'Mutation testing',
-    license = 'MIT',
-    keywords = 'testing',
+    author='Austin Bingham',
+    author_email='austin.bingham@gmail.com',
+    description='Mutation testing',
+    license='MIT',
+    keywords='testing',
     # url =
     # downloadurl =
     # long_description
