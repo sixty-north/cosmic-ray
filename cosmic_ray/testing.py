@@ -1,3 +1,4 @@
+import abc
 from collections import namedtuple
 from enum import Enum
 from itertools import chain
@@ -15,13 +16,20 @@ TestResult = namedtuple('TestResult',
                          'results'])
 
 
-class TestRunner:
+class TestRunner(metaclass=abc.ABCMeta):
     """Specifies the interface for test runners in the system.
 
     There are many ways to run unit tests in Python, and each method
     supported by Cosmic Ray should be provided by a TestRunner
     implementation.
     """
+    def __init__(self, test_dir):
+        self._test_dir = test_dir
+
+    @property
+    def test_dir(self):
+        return self._test_dir
+
     def _run(self):
         """Run all of the tests and return the results.
 
@@ -66,11 +74,9 @@ class UnittestRunner(TestRunner):
     Any exceptions thrown out of the test run are simply propagated
     out of this function.
     """
-    def __init__(self, test_dir):
-        self._test_dir = test_dir
 
     def _run(self):
-        suite = unittest.TestLoader().discover(self._test_dir)
+        suite = unittest.TestLoader().discover(self.test_dir)
         result = unittest.TestResult()
         suite.run(result)
 

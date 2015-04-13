@@ -5,9 +5,10 @@ Usage:
 
 Options:
   -h --help         Show this screen.
-  --timeout=<t>     Maximum time (seconds) a mutant may run [default: 5]
+  --timeout=T       Maximum time (seconds) a mutant may run [default: 5]
   --verbose         Produce verbose output
   --no-local-import Allow importing module from the current directory
+  --test-runner=R   Test-runner plugin to use [default: unittest]
 """
 
 import logging
@@ -15,11 +16,12 @@ import multiprocessing
 import sys
 
 import docopt
+from stevedore import driver
 
 import cosmic_ray.find_modules
 from cosmic_ray.mutating import create_mutants, run_with_mutant
 import cosmic_ray.operators
-from cosmic_ray.testing import TestResult, Outcome, UnittestRunner
+from cosmic_ray.testing import TestResult, Outcome
 
 
 log = logging.getLogger()
@@ -71,6 +73,8 @@ def hunt(mutation_records, test_runner, timeout):
 def main():
     arguments = docopt.docopt(__doc__, version='cosmic-ray v.2')
 
+    print(arguments)
+
     if arguments['--verbose']:
         logging.basicConfig(level=logging.INFO)
 
@@ -83,7 +87,12 @@ def main():
 
     operators = cosmic_ray.operators.all_operators()
 
-    test_runner = UnittestRunner(arguments['<test-dir>'])
+    test_runner = driver.DriverManager(
+        namespace='cosmic_ray.test_runners',
+        name=arguments['--test-runner'],
+        invoke_on_load=True,
+        invoke_args=(arguments['<test-dir>'],),
+    ).driver
 
     results = hunt(
         mutation_records=create_mutants(modules, operators),

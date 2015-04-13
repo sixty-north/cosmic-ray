@@ -29,11 +29,15 @@ setup(
     install_requires=[
         'decorator',
         'docopt',
+        'stevedore',
         'with_fixture',
     ],
-    entry_points = {
+    entry_points={
         'console_scripts': [
             'cosmic-ray = cosmic_ray.app:main',
+        ],
+        'cosmic_ray.test_runners': [
+            'unittest = cosmic_ray.testing:UnittestRunner',
         ],
     },
 )
