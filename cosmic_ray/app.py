@@ -21,7 +21,7 @@ from stevedore import driver
 import cosmic_ray.find_modules
 from cosmic_ray.mutating import create_mutants, run_with_mutant
 import cosmic_ray.operators
-from cosmic_ray.testing import TestResult, Outcome
+from cosmic_ray.testing.test_runner import TestResult, Outcome
 
 
 log = logging.getLogger()

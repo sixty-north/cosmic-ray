@@ -1,16 +1,17 @@
 import abc
 from collections import namedtuple
 from enum import Enum
-from itertools import chain
-import unittest
 
 
 class Outcome(Enum):
+    """A enum of the possible outcomes for any mutant test run.
+    """
     SURVIVED = 'survived'
     KILLED = 'killed'
     INCOMPETENT = 'incompetent'
 
 
+# The type returned by TestRunner runs.
 TestResult = namedtuple('TestResult',
                         ['outcome',
                          'results'])
@@ -28,6 +29,8 @@ class TestRunner(metaclass=abc.ABCMeta):
 
     @property
     def test_dir(self):
+        """The directory containing the tests to be run.
+        """
         return self._test_dir
 
     def _run(self):
@@ -63,25 +66,3 @@ class TestRunner(metaclass=abc.ABCMeta):
         except Exception as e:
             return TestResult(Outcome.INCOMPETENT,
                               str(e))
-
-
-class UnittestRunner(TestRunner):
-    """Discover and run tests in `test_dir`.
-
-    If the tests pass, this returns `(True, result)`, otherwise it
-    returns `(False, result)`.
-
-    Any exceptions thrown out of the test run are simply propagated
-    out of this function.
-    """
-
-    def _run(self):
-        suite = unittest.TestLoader().discover(self.test_dir)
-        result = unittest.TestResult()
-        suite.run(result)
-
-        return (
-            result.wasSuccessful(),
-            [(str(r[0]), r[1])
-             for r in chain(result.errors,
-                            result.failures)])

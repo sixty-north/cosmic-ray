@@ -37,7 +37,7 @@ setup(
             'cosmic-ray = cosmic_ray.app:main',
         ],
         'cosmic_ray.test_runners': [
-            'unittest = cosmic_ray.testing:UnittestRunner',
+            'unittest = cosmic_ray.testing.unittest_runner:UnittestRunner',
         ],
     },
 )
