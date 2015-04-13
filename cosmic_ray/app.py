@@ -73,8 +73,6 @@ def hunt(mutation_records, test_runner, timeout):
 def main():
     arguments = docopt.docopt(__doc__, version='cosmic-ray v.2')
 
-    print(arguments)
-
     if arguments['--verbose']:
         logging.basicConfig(level=logging.INFO)
 
