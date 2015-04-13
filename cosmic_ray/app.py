@@ -4,9 +4,10 @@ Usage:
   cosmic-ray [options] <module> <test-dir>
 
 Options:
-  -h --help          Show this screen.
-  --verbose          Produce verbose output
-  --no-local-import  Allow importing module from the current directory
+  -h --help         Show this screen.
+  --timeout=<t>     Maximum time (seconds) a mutant may run [default: 5]
+  --verbose         Produce verbose output
+  --no-local-import Allow importing module from the current directory
 """
 
 import logging
@@ -38,7 +39,7 @@ def format_test_result(mutation_record, test_result):
         reason=test_result.results)
 
 
-def hunt(mutation_records, test_runner):
+def hunt(mutation_records, test_runner, timeout):
     """Call `test_runner` for each mutant in `mutation_records`.
 
     `test_runner` should be a `TestRunner` instance.
@@ -57,7 +58,7 @@ def hunt(mutation_records, test_runner):
         for rec, async_result in test_results:
             try:
                 # TODO: This timeout needs to be configurable.
-                result = async_result.get(timeout=5)
+                result = async_result.get(timeout=timeout)
             except multiprocessing.TimeoutError:
                 result = TestResult(Outcome.INCOMPETENT, 'timeout')
 
@@ -69,8 +70,11 @@ def hunt(mutation_records, test_runner):
 
 def main():
     arguments = docopt.docopt(__doc__, version='cosmic-ray v.2')
+
     if arguments['--verbose']:
         logging.basicConfig(level=logging.INFO)
+
+    timeout = float(arguments['--timeout'])
 
     if not arguments['--no-local-import']:
         sys.path.insert(0, '')
@@ -82,8 +86,9 @@ def main():
     test_runner = UnittestRunner(arguments['<test-dir>'])
 
     results = hunt(
-        create_mutants(modules, operators),
-        test_runner)
+        mutation_records=create_mutants(modules, operators),
+        test_runner=test_runner,
+        timeout=timeout)
 
     outcomes = {o: 0 for o in Outcome}
 
