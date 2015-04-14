@@ -16,7 +16,7 @@ import multiprocessing
 import sys
 
 import docopt
-from stevedore import driver
+from stevedore import driver, extension
 
 import cosmic_ray.find_modules
 from cosmic_ray.mutating import create_mutants, run_with_mutant
@@ -83,7 +83,9 @@ def main():
 
     modules = cosmic_ray.find_modules.find_modules(arguments['<module>'])
 
-    operators = cosmic_ray.operators.all_operators()
+    operators = [ext.plugin
+                 for ext in extension.ExtensionManager(
+                         namespace='cosmic_ray.operators')]
 
     test_runner = driver.DriverManager(
         namespace='cosmic_ray.test_runners',

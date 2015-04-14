@@ -39,5 +39,9 @@ setup(
         'cosmic_ray.test_runners': [
             'unittest = cosmic_ray.testing.unittest_runner:UnittestRunner',
         ],
+        'cosmic_ray.operators': [
+            'number_replacer = '
+            'cosmic_ray.operators.number_replacer:NumberReplacer',
+        ],
     },
 )
