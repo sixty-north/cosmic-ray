@@ -42,6 +42,10 @@ setup(
         'cosmic_ray.operators': [
             'number_replacer = '
             'cosmic_ray.operators.number_replacer:NumberReplacer',
+            'relational_operator_replacement ='
+            'cosmic_ray.operators.relational_operator_replacement:create_operator',
+            'arithmetic_operator_deletion ='
+            'cosmic_ray.operators.arithmetic_operator_deletion:ReverseUnarySub',
         ],
     },
 )

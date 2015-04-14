@@ -28,6 +28,7 @@ SKIP = {
     (ast.NotEq, ast.IsNot),
 }
 
+
 def create_operator(from_op, to_op):
     """Create an operator which replaces `from_op` with `to_op`.
 

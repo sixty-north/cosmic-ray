@@ -83,9 +83,10 @@ def main():
 
     modules = cosmic_ray.find_modules.find_modules(arguments['<module>'])
 
-    operators = [ext.plugin
-                 for ext in extension.ExtensionManager(
-                         namespace='cosmic_ray.operators')]
+    operator_plugins = extension.ExtensionManager(
+        namespace='cosmic_ray.operators')
+
+    operators = cosmic_ray.operators.all_operators()
 
     test_runner = driver.DriverManager(
         namespace='cosmic_ray.test_runners',
