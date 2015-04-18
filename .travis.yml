@@ -1,0 +1,7 @@
+language: python
+python:
+  - "3.4"
+
+install: python setup.py install
+
+script:  python -m unittest discover cosmic_ray/test
