@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/sixty-north/cosmic-ray.png?branch=master)](https://travis-ci.org/sixty-north/cosmic-ray)
+
 # Cosmic Ray: mutation testing for Python
 
 *"Four human beings -- changed by space-born cosmic rays into something more than merely human."*  
