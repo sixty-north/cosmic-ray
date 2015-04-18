@@ -110,5 +110,7 @@ def main():
     print('Survival rate: {:0.2f}%'.format(
         100 * outcomes[Outcome.SURVIVED] / total_count))
 
+    sys.exit(0 if outcomes[Outcome.SURVIVED] == 0 else 1)
+
 if __name__ == '__main__':
     main()
