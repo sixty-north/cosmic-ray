@@ -107,8 +107,12 @@ def main():
         print(format_test_result(mutation_record, test_result))
 
     total_count = sum(outcomes.values())
-    print('Survival rate: {:0.2f}%'.format(
-        100 * outcomes[Outcome.SURVIVED] / total_count))
+
+    if total_count > 0:
+        print('Survival rate: {:0.2f}%'.format(
+            100 * outcomes[Outcome.SURVIVED] / total_count))
+    else:
+        print('No tests run (no mutations generated).')
 
     sys.exit(0 if outcomes[Outcome.SURVIVED] == 0 else 1)
 
