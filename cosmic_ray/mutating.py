@@ -1,8 +1,12 @@
 import ast
+from importlib.abc import MetaPathFinder
+from importlib.machinery import ModuleSpec
 import logging
 import sys
 import types
 from collections import namedtuple
+
+from .importing import using_mutant
 
 
 log = logging.getLogger()
@@ -44,8 +48,5 @@ def run_with_mutant(func, mutation_record):
     its result.
     """
     module_name, module_file, _, _, mutant = mutation_record
-    new_mod = types.ModuleType(module_name)
-    code = compile(mutant, module_file, 'exec')
-    sys.modules[module_name] = new_mod
-    exec(code,  new_mod.__dict__)
-    return func()
+    with using_mutant(module_name, mutant):
+        return func()
