@@ -7,7 +7,7 @@ from importlib.machinery import ModuleSpec
 import sys
 
 
-class ASTLoader:
+class ASTLoader:  # pylint:disable=old-style-class
     """An `importlib.abc.Loader` which loads an AST for a particular name.
 
     You construct this with an AST and a module name. The
@@ -39,7 +39,7 @@ class ASTFinder(MetaPathFinder):
         self._fullname = fullname
         self._ast = ast
 
-    def find_spec(self, fullname, path, target=None):
+    def find_spec(self, fullname, path, target=None):  # pylint:disable=unused-argument
         if fullname == self._fullname:
             return ModuleSpec(fullname,
                               ASTLoader(self._ast, fullname))

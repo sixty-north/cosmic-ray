@@ -34,10 +34,11 @@ def find_modules(name):
             yield module
 
             if hasattr(module, '__path__'):
-                for loader, name, ispkg in pkgutil.iter_modules(module.__path__):
+                for _, name, ispkg in pkgutil.iter_modules(module.__path__):
                     module_names.append(
                         '{}.{}'.format(
                             module_name, name))
         except Exception:
             log.exception(
-                'Unable to import {}'.format(module_name))
+                'Unable to import %s',
+                module_name)

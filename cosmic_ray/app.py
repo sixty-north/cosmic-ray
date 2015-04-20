@@ -55,7 +55,7 @@ def hunt(mutation_records, test_runner, timeout):
                                           args=(test_runner, rec)))
                         for rec in mutation_records)
 
-        logging.info('all tests initiated')
+        log.info('all tests initiated')
 
         for rec, async_result in test_results:
             try:
@@ -64,8 +64,8 @@ def hunt(mutation_records, test_runner, timeout):
             except multiprocessing.TimeoutError:
                 result = TestResult(Outcome.INCOMPETENT, 'timeout')
 
-            logging.info('mutation record: {}'.format(rec))
-            logging.info('result: {}'.format(result))
+            log.info('mutation record: %s', rec)
+            log.info('result: %s', result)
 
             yield (rec, result)
 
@@ -83,7 +83,9 @@ def main():
 
     modules = cosmic_ray.find_modules.find_modules(arguments['<module>'])
 
-    operator_plugins = extension.ExtensionManager(
+    # We don't use the extensions directly. This just forces importing
+    # of modules which contain operators.
+    extension.ExtensionManager(
         namespace='cosmic_ray.operators')
 
     operators = cosmic_ray.operators.all_operators()
