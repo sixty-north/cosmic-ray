@@ -4,8 +4,7 @@ from .operator import Operator
 
 
 class NumberReplacer(Operator):
-    """A NodeTransformer that replaces a `Num` node with another `Num`
-    node holding a different numeric value.
+    """An operator that modifies numeric constants.
     """
 
     def visit_Num(self, node):  # noqa

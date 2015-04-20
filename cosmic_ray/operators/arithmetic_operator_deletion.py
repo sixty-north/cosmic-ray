@@ -4,7 +4,7 @@ from .operator import Operator
 
 
 class ReverseUnarySub(Operator):
-    """A NodeTransformer that deletes unary subtraction (i.e. negation.)
+    """A NodeTransformer that deletes unary subtraction (i.e. negation).
     """
 
     def visit_UnaryOp(self, node):  # noqa
@@ -25,7 +25,7 @@ class ReverseUnarySub(Operator):
 
 
 class ReverseUnaryAdd(Operator):
-    """A NodeTransformer that reverses unary addition (i.e. the positive sign.)
+    """A NodeTransformer that reverses unary addition (i.e. the positive sign).
     """
 
     def visit_UnaryOp(self, node):  # noqa
