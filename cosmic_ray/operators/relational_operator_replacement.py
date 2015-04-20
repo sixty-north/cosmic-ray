@@ -29,7 +29,7 @@ SKIP = {
 }
 
 
-def create_operator(from_op, to_op):
+def create_operator(from_op, to_op):  # pylint:disable=redefined-outer-name
     """Create an operator which replaces `from_op` with `to_op`.
 
     This inserts the class into the global namespace with the name

@@ -8,7 +8,7 @@ class PrintVisitor(ast.NodeVisitor):
     def generic_visit(self, node):
         print(self.indent, repr(node))
         self.indent += '    '
-        super().generic_visit(node)
+        super().generic_visit(node)  # pyline:disable=missing-super-argument
         self.indent = self.indent[:-4]
 
     def visit_Num(self, node):

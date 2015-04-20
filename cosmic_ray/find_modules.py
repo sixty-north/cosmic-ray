@@ -34,11 +34,11 @@ def find_modules(name):
             yield module
 
             if hasattr(module, '__path__'):
-                for _, name, ispkg in pkgutil.iter_modules(module.__path__):
+                for _, name, _ in pkgutil.iter_modules(module.__path__):
                     module_names.append(
                         '{}.{}'.format(
                             module_name, name))
-        except Exception:
+        except Exception:  # pylint:disable=broad-except
             log.exception(
                 'Unable to import %s',
                 module_name)

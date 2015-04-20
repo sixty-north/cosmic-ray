@@ -21,7 +21,7 @@ class ASTLoader:  # pylint:disable=old-style-class
         self._name = name
 
     def exec_module(self, mod):
-        exec(compile(self._ast, self._name, 'exec'),
+        exec(compile(self._ast, self._name, 'exec'),  # pylint:disable=exec-used
              mod.__dict__)
 
 
