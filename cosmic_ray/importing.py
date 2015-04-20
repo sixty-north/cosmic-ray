@@ -7,7 +7,7 @@ from importlib.machinery import ModuleSpec
 import sys
 
 
-class ASTLoader:  # pylint:disable=old-style-class
+class ASTLoader:  # pylint:disable=old-style-class,too-few-public-methods
     """An `importlib.abc.Loader` which loads an AST for a particular name.
 
     You construct this with an AST and a module name. The
@@ -25,7 +25,7 @@ class ASTLoader:  # pylint:disable=old-style-class
              mod.__dict__)
 
 
-class ASTFinder(MetaPathFinder):
+class ASTFinder(MetaPathFinder):  # pylint:disable=too-few-public-methods
     """An `importlib.ast.MetaPathFinder` that associates a module name
     with an AST.
 

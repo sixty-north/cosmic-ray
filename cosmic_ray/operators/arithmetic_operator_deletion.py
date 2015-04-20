@@ -7,7 +7,7 @@ class ReverseUnarySub(Operator):
     """A NodeTransformer that deletes unary subtraction (i.e. negation.)
     """
 
-    def visit_UnaryOp(self, node):
+    def visit_UnaryOp(self, node):  # noqa
         if isinstance(node.op, ast.USub):
             return self.visit_mutation_site(node)
         else:
@@ -26,7 +26,7 @@ class ReverseUnaryAdd(Operator):
     """A NodeTransformer that reverses unary addition (i.e. the positive sign.)
     """
 
-    def visit_UnaryOp(self, node):
+    def visit_UnaryOp(self, node):  # noqa
         if isinstance(node.op, ast.UAdd):
             return self.visit_mutation_site(node)
         else:

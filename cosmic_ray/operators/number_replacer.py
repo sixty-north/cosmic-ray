@@ -8,7 +8,7 @@ class NumberReplacer(Operator):
     node holding a different numeric value.
     """
 
-    def visit_Num(self, node):
+    def visit_Num(self, node):  # noqa
         return self.visit_mutation_site(node)
 
     def mutate(self, node):

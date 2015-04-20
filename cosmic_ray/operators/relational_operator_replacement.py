@@ -41,7 +41,7 @@ def create_operator(from_op, to_op):  # pylint:disable=redefined-outer-name
         from_op.__name__, to_op.__name__)
 
     visit_func_name = 'visit_{}'.format(from_op.__name__)
-    visit_func = lambda self, node: self.visit_mutation_site(node)
+    visit_func = lambda self, node: self.visit_mutation_site(node)  # noqa
 
     new_op = type(
         operator_name,
@@ -58,7 +58,7 @@ def create_operator(from_op, to_op):  # pylint:disable=redefined-outer-name
 
 # For each relational operator A, create one class for each *other*
 # relational operator B which replaces A with B in an AST.
-operators = [create_operator(from_op, to_op)
+OPERATORS = [create_operator(from_op, to_op)
              for from_op in RELATIONAL_OPERATORS
              for to_op in RELATIONAL_OPERATORS.difference({from_op})
              if (from_op, to_op) not in SKIP]

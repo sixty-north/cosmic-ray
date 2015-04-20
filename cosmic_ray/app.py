@@ -24,7 +24,7 @@ import cosmic_ray.operators
 from cosmic_ray.testing.test_runner import TestResult, Outcome
 
 
-log = logging.getLogger()
+logger = logging.getLogger()
 
 
 def format_test_result(mutation_record, test_result):
@@ -55,7 +55,7 @@ def hunt(mutation_records, test_runner, timeout):
                                           args=(test_runner, rec)))
                         for rec in mutation_records)
 
-        log.info('all tests initiated')
+        logger.info('all tests initiated')
 
         for rec, async_result in test_results:
             try:
@@ -64,8 +64,8 @@ def hunt(mutation_records, test_runner, timeout):
             except multiprocessing.TimeoutError:
                 result = TestResult(Outcome.INCOMPETENT, 'timeout')
 
-            log.info('mutation record: %s', rec)
-            log.info('result: %s', result)
+            logger.info('mutation record: %s', rec)
+            logger.info('result: %s', result)
 
             yield (rec, result)
 

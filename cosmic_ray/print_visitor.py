@@ -8,16 +8,15 @@ class PrintVisitor(ast.NodeVisitor):
     def generic_visit(self, node):
         print(self.indent, repr(node))
         self.indent += '    '
-        super().generic_visit(node)  # pyline:disable=missing-super-argument
+        super().generic_visit(node)  # pylint:disable=missing-super-argument
         self.indent = self.indent[:-4]
 
-    def visit_Num(self, node):
-        import pdb; pdb.set_trace()
+    def visit_Num(self, node):  # noqa
         print('a number:', node)
 
 
 def dump_mod():
     import mod
-    with open(mod.__file__, 'rt') as f:
-        nodes = ast.parse(f.read())
+    with open(mod.__file__, 'rt') as module_file:
+        nodes = ast.parse(module_file.read())
     PrintVisitor().visit(nodes)

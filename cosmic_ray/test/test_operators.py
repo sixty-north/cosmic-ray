@@ -1,3 +1,6 @@
+"""Tests for the various mutation operators.
+"""
+
 import ast
 import copy
 import unittest
@@ -72,7 +75,7 @@ RELATIONAL_OP_MAP = {op: 'if x {} 1: pass'.format(token)
 
 class test_ReplaceRelationalOp(unittest.TestCase):
     def test_ast_node_is_modified(self):
-        for replacer in ROR.operators:
+        for replacer in ROR.OPERATORS:
             code = RELATIONAL_OP_MAP[replacer.from_op]
             node = ast.parse(code)
             self.assertIsInstance(

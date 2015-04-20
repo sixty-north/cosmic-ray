@@ -5,7 +5,7 @@ import logging
 
 from ..util import get_line_number
 
-log = logging.getLogger()
+logger = logging.getLogger()
 
 
 def _full_module_name(obj):

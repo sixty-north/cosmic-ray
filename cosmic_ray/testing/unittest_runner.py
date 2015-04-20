@@ -4,7 +4,7 @@ import unittest
 from .test_runner import TestRunner
 
 
-class UnittestRunner(TestRunner):
+class UnittestRunner(TestRunner):  # pylint:disable=no-init, too-few-public-methods
     """A TestRunner using `unittest`'s discovery mechanisms.
 
     This discovers all tests under `test_dir` and executes them.

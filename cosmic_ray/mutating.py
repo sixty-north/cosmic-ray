@@ -5,7 +5,7 @@ from collections import namedtuple
 from .importing import using_mutant
 
 
-log = logging.getLogger()
+logger = logging.getLogger()
 
 
 MutationRecord = namedtuple('MutationRecord', ['module_name',
@@ -23,11 +23,11 @@ def create_mutants(modules, operators):
 
     """
     for module in modules:
-        with open(module.__file__, 'rt', encoding='utf-8') as f:
-            log.info('reading module %s from %s',
-                     module.__name__,
-                     module.__file__)
-            source = f.read()
+        with open(module.__file__, 'rt', encoding='utf-8') as module_file:
+            logger.info('reading module %s from %s',
+                        module.__name__,
+                        module.__file__)
+            source = module_file.read()
 
         pristine_ast = ast.parse(source, module.__file__, 'exec')
 
