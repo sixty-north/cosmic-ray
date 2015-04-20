@@ -1,24 +1,26 @@
 """cosmic-ray
 
 Usage:
-  cosmic-ray [options] <module> <test-dir>
+  cosmic-ray [options] [--exclude-modules=P ...] <module> <test-dir>
 
 Options:
-  -h --help         Show this screen.
-  --timeout=T       Maximum time (seconds) a mutant may run [default: 5]
-  --verbose         Produce verbose output
-  --no-local-import Allow importing module from the current directory
-  --test-runner=R   Test-runner plugin to use [default: unittest]
+  -h --help           Show this screen.
+  --timeout=T         Maximum time (seconds) a mutant may run [default: 5]
+  --verbose           Produce verbose output
+  --no-local-import   Allow importing module from the current directory
+  --test-runner=R     Test-runner plugin to use [default: unittest]
+  --exclude-modules=P Pattern of module names to exclude from mutation
 """
 
 import logging
 import multiprocessing
+import re
 import sys
 
 import docopt
 from stevedore import driver, extension
 
-import cosmic_ray.find_modules
+from cosmic_ray.find_modules import find_modules
 from cosmic_ray.mutating import create_mutants, run_with_mutant
 import cosmic_ray.operators
 from cosmic_ray.testing.test_runner import TestResult, Outcome
@@ -70,6 +72,14 @@ def hunt(mutation_records, test_runner, timeout):
             yield (rec, result)
 
 
+def filtered_modules(modules, excludes):
+    exclude_patterns = [re.compile(ex) for ex in excludes]
+    for module in modules:
+        if not any([pattern.match(module.__name__)
+                    for pattern in exclude_patterns]):
+            yield module
+
+
 def main():
     arguments = docopt.docopt(__doc__, version='cosmic-ray v.2')
 
@@ -81,7 +91,9 @@ def main():
     if not arguments['--no-local-import']:
         sys.path.insert(0, '')
 
-    modules = cosmic_ray.find_modules.find_modules(arguments['<module>'])
+    modules = filtered_modules(
+        find_modules(arguments['<module>']),
+        arguments['--exclude-modules'])
 
     # We don't use the extensions directly. This just forces importing
     # of modules which contain operators.
