@@ -2,10 +2,15 @@ import ast
 
 
 class PrintVisitor(ast.NodeVisitor):
+    """A `NodeVisitor` which simply prints information about the nodes it
+    visits.
+    """
     def __init__(self):
         self.indent = ''
 
     def generic_visit(self, node):
+        """Print `node` and manage an indentation state.
+        """
         print(self.indent, repr(node))
         self.indent += '    '
         super().generic_visit(node)  # pylint:disable=missing-super-argument

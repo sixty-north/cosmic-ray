@@ -12,6 +12,8 @@ class NumberReplacer(Operator):
         return self.visit_mutation_site(node)
 
     def mutate(self, node):
+        """Modify the numeric value on `node`.
+        """
         new_node = ast.Num(n=node.n + 1)
         return new_node
 

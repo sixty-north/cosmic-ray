@@ -2,7 +2,7 @@ import importlib
 import logging
 import pkgutil
 
-log = logging.getLogger()
+LOG = logging.getLogger()
 
 
 def find_modules(name):
@@ -39,6 +39,6 @@ def find_modules(name):
                         '{}.{}'.format(
                             module_name, name))
         except Exception:  # pylint:disable=broad-except
-            log.exception(
+            LOG.exception(
                 'Unable to import %s',
                 module_name)

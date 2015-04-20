@@ -14,6 +14,8 @@ class ReverseUnarySub(Operator):
             return node
 
     def mutate(self, node):
+        """Replace the unary-sub operator with unary-add.
+        """
         node.op = ast.UAdd()
         return node
 
@@ -33,6 +35,8 @@ class ReverseUnaryAdd(Operator):
             return node
 
     def mutate(self, node):
+        """Replace the unary-add operator with unary-sub.
+        """
         node.op = ast.USub()
         return node
 

@@ -24,7 +24,7 @@ import cosmic_ray.operators
 from cosmic_ray.testing.test_runner import TestResult, Outcome
 
 
-logger = logging.getLogger()
+LOG = logging.getLogger()
 
 
 def format_test_result(mutation_record, test_result):
@@ -55,7 +55,7 @@ def hunt(mutation_records, test_runner, timeout):
                                           args=(test_runner, rec)))
                         for rec in mutation_records)
 
-        logger.info('all tests initiated')
+        LOG.info('all tests initiated')
 
         for rec, async_result in test_results:
             try:
@@ -64,8 +64,8 @@ def hunt(mutation_records, test_runner, timeout):
             except multiprocessing.TimeoutError:
                 result = TestResult(Outcome.INCOMPETENT, 'timeout')
 
-            logger.info('mutation record: %s', rec)
-            logger.info('result: %s', result)
+            LOG.info('mutation record: %s', rec)
+            LOG.info('result: %s', result)
 
             yield (rec, result)
 
@@ -106,7 +106,7 @@ def main():
 
     for mutation_record, test_result in results:
         outcomes[test_result.outcome] += 1
-        print(format_test_result(mutation_record, test_result))
+        print(format_test_result(mutation_record, test_result))  # pylint:disable=superfluous-parens
 
     total_count = sum(outcomes.values())
 
@@ -114,7 +114,7 @@ def main():
         print('Survival rate: {:0.2f}%'.format(
             100 * outcomes[Outcome.SURVIVED] / total_count))
     else:
-        print('No tests run (no mutations generated).')
+        print('No tests run (no mutations generated).')  # pylint:disable=superfluous-parens
 
     sys.exit(0 if outcomes[Outcome.SURVIVED] == 0 else 1)
 

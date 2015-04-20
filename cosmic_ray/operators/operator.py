@@ -1,11 +1,8 @@
 import ast
 import copy
 import itertools
-import logging
 
 from ..util import get_line_number
-
-logger = logging.getLogger()
 
 
 def _full_module_name(obj):
@@ -28,6 +25,11 @@ class Operator(ast.NodeTransformer):
 
     @property
     def activation_record(self):
+        """The activation record for the operator.
+
+        The activation record is a dict describing where and how the
+        operator was applied.
+        """
         return self._activation_record
 
     def visit_mutation_site(self, node):
