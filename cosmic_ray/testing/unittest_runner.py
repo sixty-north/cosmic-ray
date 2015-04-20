@@ -13,6 +13,7 @@ class UnittestRunner(TestRunner):  # pylint:disable=no-init, too-few-public-meth
     def _run(self):
         suite = unittest.TestLoader().discover(self.test_dir)
         result = unittest.TestResult()
+        result.failfast = True
         suite.run(result)
 
         return (
