@@ -25,12 +25,77 @@ If you just want to get down to the business of finding and killing
 mutants, here's what you do:
 
 ```
-% python -m cosmic_ray.app my_module path/to/tests
+python setup.py install
+cosmic-ray run my_module path/to/tests
 ```
 
 This will print out a bunch of information about what Cosmic Ray is
 doing, including stuff about what kinds of mutants are being created,
 which were killed, and – chillingly – which survived.
+
+## Installing and running Cosmic Ray
+
+To install Cosmic Ray, just use the supplied `setup.py`:
+```
+python setup.py install
+```
+
+This will install the Cosmic Ray package and create an executable
+called `cosmic-ray`.
+
+(PyPI installation should be coming soon.)
+
+Once installed, you can run `cosmic-ray` to get it a useful help
+message:
+```
+cosmic-ray -h
+```
+
+The primary way of running `cosmic-ray` is by passing the `run`
+command-line argument. With this command you tell Cosmic Ray a) which
+module(s) you with to mutate and b) the location of the test
+suite. For example, if you've a package named `allele` and if the
+`unittest` tests for the package are all under the directory
+`allele_tests`, you would run `cosmic-ray` like this:
+```
+cosmic-ray allele allele_tests
+```
+
+There are a number of other options you can pass to the `run` command;
+see the help message for more details.
+
+### Running with a config file
+
+For many projects you'll probably be running the same `cosmic-ray`
+command over and over. Instead of having to remember and retype
+potentially complex commands each time, you can store `cosmic-ray`
+commands in a config file. You can then execute these command by
+passing the `load` command to `cosmic-ray`.
+
+Each line in the config file is treated as a separate command-line
+argument to `cosmic-ray`. Empty lines in the file are skipped, and you
+can have comments in config file that start with `#`.
+
+So, for example, if you need to invoke this command for your project:
+```
+cosmic-ray run --verbose --timeout=30 --no-local-import allele allele/tests/unittests
+```
+
+you could instead create a config file, `cr-allele.conf`, with these
+contents:
+```
+run
+--verbose
+--timeout=30
+--no-local-import
+allele
+allele/tests/unittests
+```
+
+Then to run the command in that config file:
+```
+cosmic-ray load cr-allele.conf
+```
 
 ## Tests
 
@@ -50,7 +115,7 @@ there's a problem. Run these tests like this:
 
 ```
 cd test_project
-cosmic-ray adam tests
+cosmic-ray load cosmic-ray.conf
 ```
 
 ## Theory

@@ -1,7 +1,8 @@
 """cosmic-ray
 
 Usage:
-  cosmic-ray [options] [--exclude-modules=P ...]
+  cosmic-ray run [options] [--exclude-modules=P ...] <top-module> <test-dir>
+  cosmic-ray load <config-file>
 
 Options:
   -h --help           Show this screen.
@@ -9,24 +10,32 @@ Options:
   --verbose           Produce verbose output
   --no-local-import   Allow importing module from the current directory
   --test-runner=R     Test-runner plugin to use [default: unittest]
-  --config=F          Name of config file to load [default: .cosmic-ray.conf]
   --exclude-modules=P Pattern of module names to exclude from mutation
-  -m M                Module/package to mutate
-  -t T                Directory containing tests to run
 """
 
 import docopt
 
 
+def load_file(config_file):
+    """Read configuration from a file.
+
+    This reads `config_file`, yielding each non-empty line with
+    whitespace and comments stripped off.
+    """
+    with open(config_file, 'rt', encoding='utf-8') as f:
+        for line in f:
+            line = line.split('#')[0] # Remove comments
+            line = line.strip()       # Remove edge-whitespace
+            if line:
+                yield line
+
+
 def load_configuration():
-    cl_arguments = docopt.docopt(__doc__, version='cosmic-ray v.2')
-    return cl_arguments
+    config = docopt.docopt(__doc__, version='cosmic-ray v.2')
 
-    # config_file = cl_arguments['--config']
+    if config['load']:
+        filename = config['<config-file>']
+        args = list(load_file(filename))
+        config = docopt.docopt(__doc__, argv=args, version='cosmic-ray v.2')
 
-    # if os.path.exists(config_file):
-    #     LOG.info('Loading config file %s.', config_file)
-    #     with open(config_file, 'rt', encoding='utf-8') as f:
-
-    # else:
-    #     LOG.info('Config file %s not found. Ignoring.', config_file)
+    return config

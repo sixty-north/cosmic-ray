@@ -78,7 +78,7 @@ def main():
         sys.path.insert(0, '')
 
     modules = filtered_modules(
-        find_modules(configuration['-m']),
+        find_modules(configuration['<top-module>']),
         configuration['--exclude-modules'])
 
     # We don't use the extensions directly. This just forces importing
@@ -92,7 +92,7 @@ def main():
         namespace='cosmic_ray.test_runners',
         name=configuration['--test-runner'],
         invoke_on_load=True,
-        invoke_args=(configuration['-t'],),
+        invoke_args=(configuration['<test-dir>'],),
     ).driver
 
     results = hunt(
