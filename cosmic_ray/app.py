@@ -1,25 +1,11 @@
-"""cosmic-ray
-
-Usage:
-  cosmic-ray [options] [--exclude-modules=P ...] <module> <test-dir>
-
-Options:
-  -h --help           Show this screen.
-  --timeout=T         Maximum time (seconds) a mutant may run [default: 5]
-  --verbose           Produce verbose output
-  --no-local-import   Allow importing module from the current directory
-  --test-runner=R     Test-runner plugin to use [default: unittest]
-  --exclude-modules=P Pattern of module names to exclude from mutation
-"""
-
 import logging
 import multiprocessing
 import re
 import sys
 
-import docopt
 from stevedore import driver, extension
 
+from cosmic_ray.config import load_configuration
 from cosmic_ray.find_modules import find_modules
 from cosmic_ray.mutating import create_mutants, run_with_mutant
 import cosmic_ray.operators
@@ -81,19 +67,19 @@ def filtered_modules(modules, excludes):
 
 
 def main():
-    arguments = docopt.docopt(__doc__, version='cosmic-ray v.2')
+    configuration = load_configuration()
 
-    if arguments['--verbose']:
+    if configuration['--verbose']:
         logging.basicConfig(level=logging.INFO)
 
-    timeout = float(arguments['--timeout'])
+    timeout = float(configuration['--timeout'])
 
-    if not arguments['--no-local-import']:
+    if not configuration['--no-local-import']:
         sys.path.insert(0, '')
 
     modules = filtered_modules(
-        find_modules(arguments['<module>']),
-        arguments['--exclude-modules'])
+        find_modules(configuration['<module>']),
+        configuration['--exclude-modules'])
 
     # We don't use the extensions directly. This just forces importing
     # of modules which contain operators.
@@ -104,9 +90,9 @@ def main():
 
     test_runner = driver.DriverManager(
         namespace='cosmic_ray.test_runners',
-        name=arguments['--test-runner'],
+        name=configuration['--test-runner'],
         invoke_on_load=True,
-        invoke_args=(arguments['<test-dir>'],),
+        invoke_args=(configuration['<test-dir>'],),
     ).driver
 
     results = hunt(
