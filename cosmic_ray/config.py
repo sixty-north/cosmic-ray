@@ -1,7 +1,7 @@
 """cosmic-ray
 
 Usage:
-  cosmic-ray [options] [--exclude-modules=P ...] <module> <test-dir>
+  cosmic-ray [options] [--exclude-modules=P ...]
 
 Options:
   -h --help           Show this screen.
@@ -9,8 +9,10 @@ Options:
   --verbose           Produce verbose output
   --no-local-import   Allow importing module from the current directory
   --test-runner=R     Test-runner plugin to use [default: unittest]
-  --config=F          Name of config file to load [default: .cosmic-ray.yaml]
+  --config=F          Name of config file to load [default: .cosmic-ray.conf]
   --exclude-modules=P Pattern of module names to exclude from mutation
+  -m M                Module/package to mutate
+  -t T                Directory containing tests to run
 """
 
 import docopt
