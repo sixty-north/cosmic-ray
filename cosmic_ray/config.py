@@ -14,6 +14,21 @@ Options:
 """
 
 import docopt
+from transducer.functional import compose
+from transducer.lazy import transduce
+from transducer.transducers import filtering, mapping
+
+
+# This is really an experiment in using transducers in "the real
+# world". You could accomplish the same parsing goals in fewer lines
+# (and probably more quickly) using more traditional means. But this
+# approach does have a certain charm and elegance to it.
+REMOVE_COMMENTS = mapping(lambda x: x.split('#')[0])
+REMOVE_WHITESPACE = mapping(str.strip)
+NON_EMPTY = filtering(bool)
+PARSER = compose(REMOVE_COMMENTS,
+                 REMOVE_WHITESPACE,
+                 NON_EMPTY)
 
 
 def load_file(config_file):
@@ -23,11 +38,7 @@ def load_file(config_file):
     whitespace and comments stripped off.
     """
     with open(config_file, 'rt', encoding='utf-8') as f:
-        for line in f:
-            line = line.split('#')[0] # Remove comments
-            line = line.strip()       # Remove edge-whitespace
-            if line:
-                yield line
+        yield from transduce(PARSER, f)
 
 
 def load_configuration():
@@ -35,7 +46,7 @@ def load_configuration():
 
     if config['load']:
         filename = config['<config-file>']
-        args = list(load_file(filename))
+        args = load_file(filename)
         config = docopt.docopt(__doc__, argv=args, version='cosmic-ray v.2')
 
     return config
