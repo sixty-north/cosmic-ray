@@ -33,20 +33,28 @@ This will print out a bunch of information about what Cosmic Ray is
 doing, including stuff about what kinds of mutants are being created,
 which were killed, and – chillingly – which survived.
 
-## Installing and running Cosmic Ray
+## Installation
 
-To install Cosmic Ray, just use the supplied `setup.py`:
+You can install Cosmic Ray using `pip`:
+
+```
+pip install cosmic_ray
+```
+
+Or you can use the supplied `setup.py`:
+
 ```
 python setup.py install
 ```
 
-This will install the Cosmic Ray package and create an executable
-called `cosmic-ray`.
+Both of these approaches will install the Cosmic Ray package and
+create an executable called `cosmic-ray`.
 
-(PyPI installation should be coming soon.)
+## Running Cosmic Ray
 
-Once installed, you can run `cosmic-ray` to get it a useful help
+Once installed, you can pass `-h` to `cosmic-ray` to get useful a help
 message:
+
 ```
 cosmic-ray -h
 ```
@@ -57,6 +65,7 @@ module(s) you with to mutate and b) the location of the test
 suite. For example, if you've a package named `allele` and if the
 `unittest` tests for the package are all under the directory
 `allele_tests`, you would run `cosmic-ray` like this:
+
 ```
 cosmic-ray allele allele_tests
 ```
@@ -77,12 +86,14 @@ argument to `cosmic-ray`. Empty lines in the file are skipped, and you
 can have comments in config file that start with `#`.
 
 So, for example, if you need to invoke this command for your project:
+
 ```
 cosmic-ray run --verbose --timeout=30 --no-local-import allele allele/tests/unittests
 ```
 
 you could instead create a config file, `cr-allele.conf`, with these
 contents:
+
 ```
 run
 --verbose
@@ -93,6 +104,7 @@ allele/tests/unittests
 ```
 
 Then to run the command in that config file:
+
 ```
 cosmic-ray load cr-allele.conf
 ```
