@@ -5,4 +5,4 @@ python:
 install: python setup.py install
 
 script: python -m unittest discover cosmic_ray/test
-script: cd test_project; cosmic-ray adam tests
+script: cd test_project; cosmic-ray load cosmic-ray.conf
