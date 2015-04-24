@@ -25,7 +25,7 @@ If you just want to get down to the business of finding and killing
 mutants, here's what you do:
 
 ```
-python setup.py install
+pip install cosmic_ray
 cosmic-ray run my_module path/to/tests
 ```
 
@@ -61,7 +61,7 @@ cosmic-ray -h
 
 The primary way of running `cosmic-ray` is by passing the `run`
 command-line argument. With this command you tell Cosmic Ray a) which
-module(s) you with to mutate and b) the location of the test
+module(s) you wish to mutate and b) the location of the test
 suite. For example, if you've a package named `allele` and if the
 `unittest` tests for the package are all under the directory
 `allele_tests`, you would run `cosmic-ray` like this:
@@ -78,12 +78,12 @@ see the help message for more details.
 For many projects you'll probably be running the same `cosmic-ray`
 command over and over. Instead of having to remember and retype
 potentially complex commands each time, you can store `cosmic-ray`
-commands in a config file. You can then execute these command by
+commands in a config file. You can then execute these commands by
 passing the `load` command to `cosmic-ray`.
 
 Each line in the config file is treated as a separate command-line
 argument to `cosmic-ray`. Empty lines in the file are skipped, and you
-can have comments in config file that start with `#`.
+can have comments in config files that start with `#`.
 
 So, for example, if you need to invoke this command for your project:
 
@@ -96,8 +96,8 @@ contents:
 
 ```
 run
---verbose
---timeout=30
+--verbose     # this can be useful for debugging
+--timeout=30  # this is plenty of time
 --no-local-import
 allele
 allele/tests/unittests
@@ -108,6 +108,8 @@ Then to run the command in that config file:
 ```
 cosmic-ray load cr-allele.conf
 ```
+
+and it will have the same effect as running the original command.
 
 ## Tests
 
