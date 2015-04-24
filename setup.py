@@ -5,7 +5,7 @@ with open('README.md', 'rt') as readme:
 
 setup(
     name='cosmic_ray',
-    version='0.1.0',
+    version='0.1.2',
     packages=find_packages(),
 
     author='Sixty North AS',
@@ -50,5 +50,5 @@ setup(
             'cosmic_ray.operators.arithmetic_operator_deletion:ReverseUnarySub',
         ],
     },
-    long_description=long_description
+    long_description=long_description,
 )
