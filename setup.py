@@ -32,6 +32,7 @@ setup(
         'decorator',
         'docopt',
         'stevedore',
+        'transducer',
         'with_fixture',
     ],
     entry_points={
