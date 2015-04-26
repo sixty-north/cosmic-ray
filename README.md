@@ -200,3 +200,9 @@ to run the tests in parallel and also to implement mutant
 sandboxing. This provides a nice speed-up in many cases, though if your
 tests are IO bound or use other common resources then this could
 actually slow things down.
+
+Another interesting technology used in Cosmic Ray is
+[the pykka actor library](https://github.com/jodal/pykka). Actors – in
+conjunction with a top-level event loop provided by
+[`asyncio`](https://docs.python.org/3/library/asyncio.html) – serve as
+an excellent way to model the flow of data processing in Cosmic Ray.
