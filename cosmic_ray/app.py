@@ -35,7 +35,7 @@ class QueueManager(pykka.ThreadingActor):
     """An actor that distributes the mutation records to testers.
     """
     def __init__(self, mutation_records):
-        super().__init__()
+        super().__init__()  # pylint:disable=missing-super-argument
         self._record_iterator = iter(mutation_records)
 
     def next(self):
@@ -61,7 +61,7 @@ class Summarizer(pykka.ThreadingActor):
     """An actor that maintains simple statistics on the testing outcomes.
     """
     def __init__(self):
-        super().__init__()
+        super().__init__()  # pylint:disable=missing-super-argument
         self.outcomes = {o: 0 for o in Outcome}
 
     def handle_result(self, mutation_record, test_result):
@@ -72,7 +72,7 @@ class MutantTester(pykka.ThreadingActor):
     """An actor that executes tests on mutants.
     """
     def __init__(self, test_runner, timeout, *handlers):
-        super().__init__()
+        super().__init__()  # pylint:disable=missing-super-argument
         self._test_runner = test_runner
         self._timeout = timeout
         self._handlers = handlers
@@ -192,13 +192,14 @@ def main():
     loop.close()
     LOG.info('Event loop closed')
 
+    outcomes = summarizer.outcomes.get()
+
     LOG.info('Stopping actors')
     queue.stop()
     logger.stop()
     summarizer.stop()
     LOG.info('Actors stopped')
 
-    outcomes = summarizer.outcomes.get()
     total_count = sum(outcomes.values())
 
     if total_count > 0:
