@@ -31,6 +31,7 @@ setup(
     install_requires=[
         'decorator',
         'docopt',
+        'pykka',
         'stevedore',
         'transducer',
         'with_fixture',

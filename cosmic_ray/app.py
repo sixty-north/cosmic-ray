@@ -1,8 +1,11 @@
+import concurrent.futures
+import asyncio
 import logging
 import multiprocessing
 import re
 import sys
 
+import pykka
 from stevedore import driver, extension
 
 from cosmic_ray.config import load_configuration
@@ -29,33 +32,68 @@ def format_test_result(mutation_record, test_result):
         reason=test_result.results)
 
 
-def hunt(mutation_records, test_runner, timeout):
-    """Call `test_runner` for each mutant in `mutation_records`.
+class MutantQueue(pykka.ThreadingActor):
+    def __init__(self, mutation_records):
+        super().__init__()
+        self._record_iterator = iter(mutation_records)
 
-    `test_runner` should be a `TestRunner` instance.
+    def next(self):
+        try:
+            return next(self._record_iterator)
+        except StopIteration:
+            return None
 
-    Returns a sequence of `(MutationRecord, TestResult)` tuples.
-    """
 
-    with multiprocessing.Pool(maxtasksperchild=1) as pool:
-        test_results = ((rec,
-                         pool.apply_async(run_with_mutant,
-                                          args=(test_runner, rec)))
-                        for rec in mutation_records)
+class Logger(pykka.ThreadingActor):
+    def handle_result(self, mutation_record, test_result):
+        print(format_test_result(mutation_record, test_result))
 
-        LOG.info('all tests initiated')
 
-        for rec, async_result in test_results:
-            try:
-                # TODO: This timeout needs to be configurable.
-                result = async_result.get(timeout=timeout)
-            except multiprocessing.TimeoutError:
-                result = TestResult(Outcome.INCOMPETENT, 'timeout')
+class Summarizer(pykka.ThreadingActor):
+    def __init__(self):
+        super().__init__()
+        self.outcomes = {o: 0 for o in Outcome}
 
-            LOG.info('mutation record: %s', rec)
-            LOG.info('result: %s', result)
+    def handle_result(self, mutation_record, test_result):
+        self.outcomes[test_result.outcome] += 1
 
-            yield (rec, result)
+
+class MutantTester(pykka.ThreadingActor):
+    def __init__(self, test_runner, timeout, *handlers):
+        super().__init__()
+        self._test_runner = test_runner
+        self._timeout = timeout
+        self._handlers = handlers
+        self._executor = concurrent.futures.ProcessPoolExecutor(max_workers=1)
+
+    def on_stop(self):
+        self._executor.shutdown()
+
+    def on_receive(self, msg):
+        if 'process_queue' in msg:
+            self._process_queue(msg['process_queue'])
+
+    def _process_queue(self, queue):
+        record = queue.next().get()
+
+        if record is None:
+            self.stop()
+            return
+
+        result_future = self._executor.submit(
+            run_with_mutant,
+            self._test_runner,
+            record)
+
+        try:
+            result = result_future.result(timeout=self._timeout)
+        except concurrent.futures.TimeoutError:
+            result = TestResult(Outcome.INCOMPETENT, 'timeout')
+
+        for h in self._handlers:
+            h.handle_result(record, result)
+
+        self.actor_ref.tell({'process_queue': queue})
 
 
 def filtered_modules(modules, excludes):
@@ -95,17 +133,51 @@ def main():
         invoke_args=(configuration['<test-dir>'],),
     ).driver
 
-    results = hunt(
-        mutation_records=create_mutants(modules, operators),
-        test_runner=test_runner,
-        timeout=timeout)
+    mutation_records = create_mutants(modules, operators)
 
-    outcomes = {o: 0 for o in Outcome}
+    LOG.info('Creating actors')
 
-    for mutation_record, test_result in results:
-        outcomes[test_result.outcome] += 1
-        print(format_test_result(mutation_record, test_result))  # pylint:disable=superfluous-parens
+    queue = MutantQueue.start(mutation_records).proxy()
+    logger = Logger.start().proxy()
+    summarizer = Summarizer.start().proxy()
+    testers = [MutantTester.start(test_runner, timeout, logger, summarizer)
+               for _ in range(4)]  # TODO: Configurable!
 
+    LOG.info('Created actors')
+
+    for tester in testers:
+        tester.tell({'process_queue': queue})
+
+    LOG.info('started tester processing')
+
+    loop = asyncio.get_event_loop()
+
+    LOG.info('created event loop')
+
+    def check_testers():
+        if any([t.is_alive() for t in testers]):
+            loop.call_soon(check_testers)
+        else:
+            LOG.info('stopping loopg...')
+            loop.stop()
+
+    # Schedule a call to hello_world()
+    loop.call_soon(check_testers)
+
+    LOG.info('scheduled test checking')
+
+    # Blocking call interrupted by loop.stop()
+    LOG.info('running forever...')
+    loop.run_forever()
+    LOG.info('not running forever...')
+    loop.close()
+    LOG.info('loop closed...')
+
+    queue.stop()
+    logger.stop()
+    summarizer.stop()
+
+    outcomes = summarizer.outcomes.get()
     total_count = sum(outcomes.values())
 
     if total_count > 0:
