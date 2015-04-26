@@ -1,4 +1,3 @@
-import concurrent.futures
 import asyncio
 import logging
 import multiprocessing
@@ -64,10 +63,10 @@ class MutantTester(pykka.ThreadingActor):
         self._test_runner = test_runner
         self._timeout = timeout
         self._handlers = handlers
-        self._executor = concurrent.futures.ProcessPoolExecutor(max_workers=1)
+        self._pool = multiprocessing.Pool(maxtasksperchild=1)
 
     def on_stop(self):
-        self._executor.shutdown()
+        self._pool.terminate()
 
     def on_receive(self, msg):
         if 'process_queue' in msg:
@@ -80,14 +79,13 @@ class MutantTester(pykka.ThreadingActor):
             self.stop()
             return
 
-        result_future = self._executor.submit(
+        future = self._pool.apply_async(
             run_with_mutant,
-            self._test_runner,
-            record)
+            (self._test_runner, record))
 
         try:
-            result = result_future.result(timeout=self._timeout)
-        except concurrent.futures.TimeoutError:
+            result = future.get(timeout=self._timeout)
+        except multiprocessing.TimeoutError:
             result = TestResult(Outcome.INCOMPETENT, 'timeout')
 
         for h in self._handlers:
