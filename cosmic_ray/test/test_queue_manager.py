@@ -4,7 +4,11 @@ from cosmic_ray.app import QueueManager
 
 
 class QueueManagerTest(unittest.TestCase):
-    def test_iteration_produe_sequence(self):
+    """Testcase for the QueueManager actor.
+    """
+    def test_iteration_produces_sequence(self):
+        """The QueueManager will produce the input sequence you hand it.
+        """
         size = 10
         qm = QueueManager.start(range(size)).proxy()
         try:
@@ -14,6 +18,9 @@ class QueueManagerTest(unittest.TestCase):
             qm.stop()
 
     def test_none_produced_after_iteration(self):
+        """The QueueManager will produce None values after it exhausts its
+        input sequence.
+        """
         size = 10
         qm = QueueManager.start(range(size)).proxy()
         try:

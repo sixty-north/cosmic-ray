@@ -6,6 +6,8 @@ from cosmic_ray.testing.test_runner import Outcome, TestResult
 
 
 class SummarizerTest(unittest.TestCase):
+    """Testcase for the Summarizer actor.
+    """
     def setUp(self):
         self._summarizer = Summarizer.start().proxy()
 
@@ -25,6 +27,8 @@ class SummarizerTest(unittest.TestCase):
                          incompetent)
 
     def test_statistics_are_correct(self):
+        """Test that statistics seems correct as records are added.
+        """
         mutation_record = MutationRecord(
             'foo', 'foo.py', 'operator',
             {'description': 'desc',

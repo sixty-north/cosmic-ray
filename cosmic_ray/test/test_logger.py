@@ -7,6 +7,8 @@ from cosmic_ray.testing.test_runner import Outcome, TestResult
 
 
 class LoggerTest(unittest.TestCase):
+    """Testcase for the Logger actor.
+    """
     def setUp(self):
         self._file_like = StringIO()
         self._logger = Logger.start(file_like=self._file_like).proxy()
@@ -19,6 +21,8 @@ class LoggerTest(unittest.TestCase):
         self._logger.actor_stopped.get().wait()
 
     def test_records_are_recorded(self):
+        """Verify that logging records produces messages.
+        """
         mutation_record = MutationRecord(
             'foo', 'foo.py', 'operator',
             {'description': 'desc',
