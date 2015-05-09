@@ -25,9 +25,9 @@ def format_test_result(mutation_record, test_result):
 
     return '{outcome} -> {desc} @ {filename}:{lineno}\n{reason}'.format(
         outcome=test_result.outcome,
-        desc=arec['description'],
+        desc=arec.get('description', '<NO DESCRIPTION>'),
         filename=mutation_record.module_file,
-        lineno=arec['line_number'],
+        lineno=arec.get('line_number', '<NO LINE NUMBER>'),
         reason=test_result.results)
 
 
