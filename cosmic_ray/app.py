@@ -53,8 +53,13 @@ class Logger(pykka.ThreadingActor):
 
     This received test results and just writes them to the console.
     """
+    def __init__(self, file_like=sys.stdout):
+        super().__init__()  # pylint:disable=missing-super-argument
+        self._file_like = file_like
+
     def handle_result(self, mutation_record, test_result):
-        print(format_test_result(mutation_record, test_result))
+        print(format_test_result(mutation_record, test_result),
+              file=self._file_like)
 
 
 class Summarizer(pykka.ThreadingActor):
