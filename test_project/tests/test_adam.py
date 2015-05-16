@@ -32,3 +32,8 @@ class Tests(unittest.TestCase):
         self.assertEqual(
             adam.use_break(10),
             0)
+
+    def test_continue_to_break(self):
+        self.assertEqual(
+            adam.use_continue(10),
+            9)

@@ -29,3 +29,9 @@ def use_break(limit):
     for x in range(limit):
         break
     return x
+
+
+def use_continue(limit):
+    for x in range(limit):
+        continue
+    return x

@@ -7,7 +7,8 @@ import unittest
 
 import cosmic_ray.operators.relational_operator_replacement as ROR
 from cosmic_ray.operators.number_replacer import NumberReplacer
-from cosmic_ray.operators.break_continue import ReplaceBreakWithContinue
+from cosmic_ray.operators.break_continue import (ReplaceBreakWithContinue,
+                                                 ReplaceContinueWithBreak)
 
 
 class Linearizer(ast.NodeVisitor):
@@ -26,7 +27,7 @@ def linearize_tree(node):
 
 
 class TestReplaceBreakWithContinue(unittest.TestCase):
-    def test_replament_activated_replacer(self):
+    def test_replacement_activated_replacer(self):
         node = ast.parse('while True: break')
         replacer = ReplaceBreakWithContinue(0)
         replacer.visit(node)
@@ -45,6 +46,29 @@ class TestReplaceBreakWithContinue(unittest.TestCase):
         self.assertNotEqual(
             ast.dump(node),
             ast.dump(mutant))
+
+
+class TestReplaceContinueWithBreak(unittest.TestCase):
+    def test_replacement_activated_replacer(self):
+        node = ast.parse('while False: continue')
+        replacer = ReplaceContinueWithBreak(0)
+        replacer.visit(node)
+        self.assertTrue(replacer.activation_record)
+
+    def test_remove_first(self):
+        node = ast.parse('while False: continue')
+        mutant = ReplaceContinueWithBreak(0).visit(copy.deepcopy(node))
+
+        orig_nodes = linearize_tree(node)
+        mutant_nodes = linearize_tree(mutant)
+
+        self.assertEqual(len(orig_nodes),
+                         len(mutant_nodes))
+
+        self.assertNotEqual(
+            ast.dump(node),
+            ast.dump(mutant))
+
 
 
 class TestNumberReplacer(unittest.TestCase):
