@@ -23,3 +23,9 @@ def equals(vals):
     return all([constraint(x, y)
                 for x in vals
                 for y in vals])
+
+
+def use_break(limit):
+    for x in range(limit):
+        break
+    return x

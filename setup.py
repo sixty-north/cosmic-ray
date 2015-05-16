@@ -50,6 +50,8 @@ setup(
             'cosmic_ray.operators.relational_operator_replacement:create_operator',
             'arithmetic_operator_deletion ='
             'cosmic_ray.operators.arithmetic_operator_deletion:ReverseUnarySub',
+            'break_continue_replacement ='
+            'cosmic_ray.operators.break_continue:ReplaceBreakWithContinue',
         ],
     },
     long_description=long_description,

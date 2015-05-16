@@ -27,3 +27,8 @@ class Tests(unittest.TestCase):
         vals.append(copy.copy(vals[0]))
         self.assertTrue(
             adam.equals(vals))
+
+    def test_break_to_continue(self):
+        self.assertEqual(
+            adam.use_break(10),
+            0)
