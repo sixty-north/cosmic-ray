@@ -1,3 +1,4 @@
 site_name: Cosmic Ray
 pages:
     - [index.md, Home]
+    - [operators.md, Mutation Operators]
