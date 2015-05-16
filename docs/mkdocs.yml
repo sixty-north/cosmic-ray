@@ -1,6 +1,5 @@
 site_name: Cosmic Ray
-docs_dir: docs
 theme: readthedocs
 pages:
-    - [index.md, Home]
-    - [operators.md, Mutation Operators]
+    - [docs/index.md, Home]
+    - [docs/operators.md, Mutation Operators]
