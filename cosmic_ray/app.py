@@ -5,7 +5,7 @@ import re
 import sys
 
 import pykka
-from stevedore import driver, extension
+from stevedore import driver, extension, ExtensionManager
 
 from cosmic_ray.config import load_configuration
 from cosmic_ray.find_modules import find_modules
@@ -126,6 +126,28 @@ def filtered_modules(modules, excludes):
             yield module
 
 
+def get_test_runner(configuration):
+    """Get the test-runner instance specified in the configuration.
+
+    This also checks to see if the user has requested a list of
+    test-runners. If so, this prints the runners and exits the
+    program.
+    """
+    if configuration['test-runners']:
+        for name in ExtensionManager('cosmic_ray.test_runners').names():
+            print(name)
+        sys.exit(0)
+
+    test_runner_manager = driver.DriverManager(
+        namespace='cosmic_ray.test_runners',
+        name=configuration['--test-runner'],
+        invoke_on_load=True,
+        invoke_args=(configuration['<test-dir>'],),
+    )
+
+    return test_runner_manager.driver
+
+
 def main():
     configuration = load_configuration()
 
@@ -147,13 +169,7 @@ def main():
         namespace='cosmic_ray.operators')
 
     operators = cosmic_ray.operators.all_operators()
-
-    test_runner = driver.DriverManager(
-        namespace='cosmic_ray.test_runners',
-        name=configuration['--test-runner'],
-        invoke_on_load=True,
-        invoke_args=(configuration['<test-dir>'],),
-    ).driver
+    test_runner = get_test_runner(configuration)
 
     mutation_records = create_mutants(modules, operators)
 

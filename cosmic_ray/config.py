@@ -3,6 +3,7 @@
 Usage:
   cosmic-ray run [options] [--exclude-modules=P ...] <top-module> <test-dir>
   cosmic-ray load <config-file>
+  cosmic-ray test-runners
 
 Options:
   -h --help           Show this screen.
