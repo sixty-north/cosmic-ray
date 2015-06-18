@@ -119,6 +119,10 @@ class MutantTester(pykka.ThreadingActor):
 
 
 def filtered_modules(modules, excludes):
+    """Get the sequence of modules in `modules` which aren't filtered out
+    by a regex in `excludes`.
+
+    """
     exclude_patterns = [re.compile(ex) for ex in excludes]
     for module in modules:
         if not any([pattern.match(module.__name__)
