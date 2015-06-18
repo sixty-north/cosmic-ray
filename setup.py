@@ -42,6 +42,7 @@ setup(
         ],
         'cosmic_ray.test_runners': [
             'unittest = cosmic_ray.testing.unittest_runner:UnittestRunner',
+            'pytest = cosmic_ray.testing.pytest_runner:PytestRunner',
         ],
         'cosmic_ray.operators': [
             'number_replacer = '
