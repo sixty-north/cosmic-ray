@@ -4,3 +4,4 @@ dist
 venv
 .ropeproject
 docs/site
+__pycache__
