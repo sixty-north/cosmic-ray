@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import multiprocessing
+import os
 import re
 import sys
 
@@ -152,6 +153,22 @@ def get_test_runner(configuration):
     return test_runner_manager.driver
 
 
+def get_num_testers(configuration, default=4):
+    """Get the number of concurrent testers to use.
+
+    If the value is positive then it's returned. If it's non-positive,
+    then `os.cpu_count()` is checked. If this is not `None` then it's
+    returned, otherwise this returns `default`.
+
+    """
+    num_testers = int(configuration['--num-testers'])
+    if num_testers < 1:
+        num_testers = os.cpu_count()
+    if num_testers is None:
+        num_testers = default
+    return int(num_testers)
+
+
 def main():
     configuration = load_configuration()
 
@@ -159,7 +176,7 @@ def main():
         logging.basicConfig(level=logging.INFO)
 
     timeout = float(configuration['--timeout'])
-
+    num_testers = get_num_testers(configuration)
     if not configuration['--no-local-import']:
         sys.path.insert(0, '')
 
@@ -177,13 +194,14 @@ def main():
 
     mutation_records = create_mutants(modules, operators)
 
+    LOG.info('Using {} concurrent testers'.format(num_testers))
     LOG.info('Creating actors')
 
     queue = QueueManager.start(mutation_records).proxy()
     logger = Logger.start().proxy()
     summarizer = Summarizer.start().proxy()
     testers = [MutantTester.start(test_runner, timeout, logger, summarizer)
-               for _ in range(4)]  # TODO: Configurable!
+               for _ in range(num_testers)]
 
     LOG.info('Created actors')
 

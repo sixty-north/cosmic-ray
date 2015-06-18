@@ -12,6 +12,7 @@ Options:
   --no-local-import   Allow importing module from the current directory
   --test-runner=R     Test-runner plugin to use [default: unittest]
   --exclude-modules=P Pattern of module names to exclude from mutation
+  --num-testers=N     Number of concurrent testers to run (0 = os.cpu_count()) [default: 0]
 """
 
 import docopt
