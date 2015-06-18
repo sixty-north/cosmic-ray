@@ -13,6 +13,7 @@ from cosmic_ray.find_modules import find_modules
 from cosmic_ray.mutating import create_mutants, run_with_mutant
 import cosmic_ray.operators
 from cosmic_ray.testing.test_runner import TestResult, Outcome
+from cosmic_ray.util import Timer
 
 
 LOG = logging.getLogger()
@@ -169,13 +170,45 @@ def get_num_testers(configuration, default=4):
     return int(num_testers)
 
 
+def get_timeout(configuration, test_runner):
+    """Determine the timeout to use for test runners.
+
+    If `--timeout` is specified in the configuration, then this is
+    returned. Otherwise, the configured test suite is run and
+    timed. This time is multiplied by the value of `--baseline` and
+    returned.
+    """
+    timeout = configuration['--timeout']
+    if timeout is not None:
+        return float(timeout)
+
+    # If timeout wasn't specified, then a baseline multipler must have
+    # been.
+    baseline_multiplier = float(configuration['--baseline'])
+    assert baseline_multiplier is not None
+
+    LOG.info('running baseline timing')
+
+    with Timer() as t:
+        p = multiprocessing.Process(target=test_runner)
+        p.start()
+        p.join()
+
+    baseline = t.elapsed.total_seconds()
+    LOG.info('baseline timing = {} seconds'.format(baseline))
+    return baseline_multiplier * baseline
+
+
 def main():
     configuration = load_configuration()
 
     if configuration['--verbose']:
         logging.basicConfig(level=logging.INFO)
 
-    timeout = float(configuration['--timeout'])
+    test_runner = get_test_runner(configuration)
+    timeout = get_timeout(configuration, test_runner)
+    LOG.info('timeout = {} seconds'.format(timeout))
+
     num_testers = get_num_testers(configuration)
     if not configuration['--no-local-import']:
         sys.path.insert(0, '')
@@ -190,7 +223,6 @@ def main():
         namespace='cosmic_ray.operators')
 
     operators = cosmic_ray.operators.all_operators()
-    test_runner = get_test_runner(configuration)
 
     mutation_records = create_mutants(modules, operators)
 
@@ -221,7 +253,7 @@ def main():
         if any([t.is_alive() for t in testers]):
             loop.call_soon(check_testers)
         else:
-            LOG.info('stopping loopg...')
+            LOG.info('stopping loop...')
             loop.stop()
 
     # Schedule a call to check_testers

@@ -1,13 +1,14 @@
 """cosmic-ray
 
 Usage:
-  cosmic-ray run [options] [--exclude-modules=P ...] <top-module> <test-dir>
+  cosmic-ray run [options] [--exclude-modules=P ...] (--timeout=T | --baseline=M) <top-module> <test-dir>
   cosmic-ray load <config-file>
   cosmic-ray test-runners
 
 Options:
   -h --help           Show this screen.
-  --timeout=T         Maximum time (seconds) a mutant may run [default: 5]
+  --timeout=T         Maximum time (seconds) a mutant may run
+  --baseline=M        Calculate timeout as M times a baseline test run
   --verbose           Produce verbose output
   --no-local-import   Allow importing module from the current directory
   --test-runner=R     Test-runner plugin to use [default: unittest]
