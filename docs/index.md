@@ -71,6 +71,27 @@ cosmic-ray allele allele_tests
 There are a number of other options you can pass to the `run` command;
 see the help message for more details.
 
+### Test runners
+
+Cosmic Ray supports multiple *test runners*. A test runner is simply a
+plugin that supports a particular way of running tests. For example,
+there is a test runner for tests written with the standard `unittest`
+module, and there's another for tests written using
+[`py.test`](pytest.org).
+
+To specify a particular test runner when running Cosmic Ray, pass the
+`--test-runner` flag to the `run` subcommand. For example, to use the
+`pytest` runner you would use:
+```
+cosmic-ray run --test-runner=pytest allele allele/tests
+```
+
+To get a list of the available test runners, use the `test-runners`
+subcommand:
+```
+cosmic-ray test-runners
+```
+
 ### Running with a config file
 
 For many projects you'll probably be running the same `cosmic-ray`
