@@ -13,6 +13,7 @@ from cosmic_ray.find_modules import find_modules
 from cosmic_ray.mutating import create_mutants, run_with_mutant
 import cosmic_ray.operators
 from cosmic_ray.testing.test_runner import TestResult, Outcome
+from cosmic_ray.util import Timer
 
 
 LOG = logging.getLogger()
@@ -192,6 +193,13 @@ def main():
     operators = cosmic_ray.operators.all_operators()
     test_runner = get_test_runner(configuration)
 
+    # Baseline the time for a test
+    with Timer() as t:
+        p = multiprocessing.Process(target=test_runner)
+        p.start()
+        p.join()
+    print("Baseline testing time: {}".format(t.elapsed))
+
     mutation_records = create_mutants(modules, operators)
 
     LOG.info('Using {} concurrent testers'.format(num_testers))
@@ -221,7 +229,7 @@ def main():
         if any([t.is_alive() for t in testers]):
             loop.call_soon(check_testers)
         else:
-            LOG.info('stopping loopg...')
+            LOG.info('stopping loop...')
             loop.stop()
 
     # Schedule a call to check_testers
