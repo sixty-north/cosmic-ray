@@ -12,7 +12,7 @@ code.
 
 At this time Cosmic Ray is young and incomplete. It doesn't support
 all of the mutations it should, its output format is crude, it only
-supports one kind of test discovery, it may fall over on exotic
+supports some forms of test discovery, it may fall over on exotic
 modules...[the list goes on and on](https://github.com/abingham/cosmic-ray/issues). Still,
 for the adventurous it *does* work. Hopefully things will improve
 fairly rapidly.
@@ -26,7 +26,7 @@ mutants, here's what you do:
 
 ```
 pip install cosmic_ray
-cosmic-ray run my_module path/to/tests
+cosmic-ray run --baseline=2 my_module path/to/tests
 ```
 
 This will print out a bunch of information about what Cosmic Ray is

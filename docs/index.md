@@ -10,7 +10,7 @@ code.
 
 At this time Cosmic Ray is young and incomplete. It doesn't support
 all of the mutations it should, its output format is crude, it only
-supports one kind of test discovery, it may fall over on exotic
+supports some forms of test discovery, it may fall over on exotic
 modules...[the list goes on and on](https://github.com/abingham/cosmic-ray/issues). Still,
 for the adventurous it *does* work. Hopefully things will improve
 fairly rapidly.
@@ -24,7 +24,7 @@ mutants, here's what you do:
 
 ```
 pip install cosmic_ray
-cosmic-ray run my_module path/to/tests
+cosmic-ray run --baseline=2 my_module path/to/tests
 ```
 
 This will print out a bunch of information about what Cosmic Ray is
@@ -65,7 +65,7 @@ suite. For example, if you've a package named `allele` and if the
 `allele_tests`, you would run `cosmic-ray` like this:
 
 ```
-cosmic-ray allele allele_tests
+cosmic-ray --baseline=2 allele allele_tests
 ```
 
 There are a number of other options you can pass to the `run` command;
@@ -92,6 +92,29 @@ subcommand:
 cosmic-ray test-runners
 ```
 
+### Specifying test timeouts
+
+One difficulty mutation testing tools have to face is how to deal with
+mutations that result in infinite loops (or other pathological runtime
+effects). Cosmic Ray takes the simple approach of using a *timeout* to
+determine when to kill a test and consider it *incompetent*. That is,
+if a test of a mutant takes longer than the timeout, the test is
+killed an the mutant is marked incompetent.
+
+There are two ways to specify timeout values to Cosmic Ray. The first
+is through the `--timeout` flag for the `run` subcommand. This flags
+specifies an absolute number of seconds that a test will be allowed to
+run. After the timeout is up, the test is killed.
+
+The second way is by using a baseline timing. To use this technique,
+pass the `--baseline` argument to the `run` subcommand. When Cosmic
+Ray sees this flag it will make an initial run of the tests on an
+un-mutated version of the module under test. The amount of time this
+takes is considered the *baseline timing*. Then, Cosmic Ray multiplies
+this baseline timing by the value of `--baseline` and this final value
+is used as the timeout for tests. This baseline technique is
+particularly useful if your testsuite runtime is in flux.
+
 ### Running with a config file
 
 For many projects you'll probably be running the same `cosmic-ray`
@@ -107,7 +130,7 @@ can have comments in config files that start with `#`.
 So, for example, if you need to invoke this command for your project:
 
 ```
-cosmic-ray run --verbose --timeout=30 --no-local-import allele allele/tests/unittests
+cosmic-ray run --verbose --timeout=30 --no-local-import --baseline=2 allele allele/tests/unittests
 ```
 
 you could instead create a config file, `cr-allele.conf`, with these
@@ -118,6 +141,7 @@ run
 --verbose     # this can be useful for debugging
 --timeout=30  # this is plenty of time
 --no-local-import
+--baseline=2
 allele
 allele/tests/unittests
 ```
