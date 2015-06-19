@@ -6,4 +6,4 @@ venv
 docs/site
 __pycache__
 *~
-site/
+site
