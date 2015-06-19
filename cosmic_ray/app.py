@@ -224,13 +224,6 @@ def main():
 
     operators = cosmic_ray.operators.all_operators()
 
-    # Baseline the time for a test
-    with Timer() as t:
-        p = multiprocessing.Process(target=test_runner)
-        p.start()
-        p.join()
-    print("Baseline testing time: {}".format(t.elapsed))
-
     mutation_records = create_mutants(modules, operators)
 
     LOG.info('Using {} concurrent testers'.format(num_testers))
