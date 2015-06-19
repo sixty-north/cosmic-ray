@@ -104,7 +104,11 @@ killed an the mutant is marked incompetent.
 There are two ways to specify timeout values to Cosmic Ray. The first
 is through the `--timeout` flag for the `run` subcommand. This flags
 specifies an absolute number of seconds that a test will be allowed to
-run. After the timeout is up, the test is killed.
+run. After the timeout is up, the test is killed. For example, to
+specify that tests should timeout after 10 seconds, use:
+```
+cosmic-ray run --timeout=10 allele allele/tests
+```
 
 The second way is by using a baseline timing. To use this technique,
 pass the `--baseline` argument to the `run` subcommand. When Cosmic
@@ -112,8 +116,14 @@ Ray sees this flag it will make an initial run of the tests on an
 un-mutated version of the module under test. The amount of time this
 takes is considered the *baseline timing*. Then, Cosmic Ray multiplies
 this baseline timing by the value of `--baseline` and this final value
-is used as the timeout for tests. This baseline technique is
-particularly useful if your testsuite runtime is in flux.
+is used as the timeout for tests. For example, to tell Cosmic Ray to
+timeout tests when they take 3 times longer than a baseline run, use:
+```
+cosmic-ray run --baseline=3 allele allele/tests
+```
+
+This baseline technique is particularly useful if your testsuite
+runtime is in flux.
 
 ### Running with a config file
 
