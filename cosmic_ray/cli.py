@@ -85,7 +85,7 @@ Load a command configuration from a file and run it.
     """
     filename = config['<config-file>']
     argv = _load_file(filename)
-    return main(argv=argv)
+    return main(argv=list(argv))
 
 
 def handle_run(configuration):
