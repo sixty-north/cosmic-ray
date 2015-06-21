@@ -45,6 +45,14 @@ def load_file(config_file):
 
 
 def load_configuration():
+    """Parse the command-line arguments.
+
+    This reads `sys.argv`. If the command-line specifies that a config
+    file be loaded, this also loads that config file, returning the
+    configuration contained in that file.
+
+    Returns a config-dictionary.
+    """
     config = docopt.docopt(__doc__, version='cosmic-ray v.2')
 
     if config['load']:
