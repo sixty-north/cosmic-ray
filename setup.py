@@ -38,7 +38,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'cosmic-ray = cosmic_ray.app:main',
+            'cosmic-ray = cosmic_ray.cli:main',
         ],
         'cosmic_ray.test_runners': [
             'unittest = cosmic_ray.testing.unittest_runner:UnittestRunner',

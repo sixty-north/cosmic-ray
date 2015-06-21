@@ -1,7 +1,7 @@
 from io import StringIO
 import unittest
 
-from cosmic_ray.app import Logger
+from cosmic_ray.core import Logger
 from cosmic_ray.mutating import MutationRecord
 from cosmic_ray.testing.test_runner import Outcome, TestResult
 

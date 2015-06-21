@@ -1,63 +1,47 @@
-"""cosmic-ray
+import logging
+import multiprocessing
+import os
+import re
 
-Usage:
-  cosmic-ray run [options] [--exclude-modules=P ...] (--timeout=T | --baseline=M) <top-module> <test-dir>
-  cosmic-ray load <config-file>
-  cosmic-ray test-runners
+from .util import Timer
 
-Options:
-  -h --help           Show this screen.
-  --timeout=T         Maximum time (seconds) a mutant may run
-  --baseline=M        Calculate timeout as M times a baseline test run
-  --verbose           Produce verbose output
-  --no-local-import   Allow importing module from the current directory
-  --test-runner=R     Test-runner plugin to use [default: unittest]
-  --exclude-modules=P Pattern of module names to exclude from mutation
-  --num-testers=N     Number of concurrent testers to run (0 = os.cpu_count()) [default: 0]
-"""
-
-import docopt
-from transducer.functional import compose
-from transducer.lazy import transduce
-from transducer.transducers import filtering, mapping
+LOG = logging.getLogger()
 
 
-# This is really an experiment in using transducers in "the real
-# world". You could accomplish the same parsing goals in fewer lines
-# (and probably more quickly) using more traditional means. But this
-# approach does have a certain charm and elegance to it.
-REMOVE_COMMENTS = mapping(lambda x: x.split('#')[0])
-REMOVE_WHITESPACE = mapping(str.strip)
-NON_EMPTY = filtering(bool)
-PARSER = compose(REMOVE_COMMENTS,
-                 REMOVE_WHITESPACE,
-                 NON_EMPTY)
+def find_baseline(test_runner):
+    LOG.info('running baseline timing')
+
+    with Timer() as t:
+        p = multiprocessing.Process(target=test_runner)
+        p.start()
+        p.join()
+
+    baseline = t.elapsed.total_seconds()
+    LOG.info('baseline timing = {} seconds'.format(baseline))
+    return baseline
 
 
-def load_file(config_file):
-    """Read configuration from a file.
+def get_num_testers(num_testers, default=4):
+    """Determine the number of testers to use.
 
-    This reads `config_file`, yielding each non-empty line with
-    whitespace and comments stripped off.
+    If `num_testers` is None, this returns `default`. If it's less
+    than 1, this returns `os.cpu_count()`. Otherwise it returns
+    `num_testers`. In all cases the return value will be integeral.
     """
-    with open(config_file, 'rt', encoding='utf-8') as f:
-        yield from transduce(PARSER, f)
+    if num_testers < 1:
+        num_testers = os.cpu_count()
+    if num_testers is None:
+        num_testers = default
+    return int(num_testers)
 
 
-def load_configuration():
-    """Parse the command-line arguments.
+def filtered_modules(modules, excludes):
+    """Get the sequence of modules in `modules` which aren't filtered out
+    by a regex in `excludes`.
 
-    This reads `sys.argv`. If the command-line specifies that a config
-    file be loaded, this also loads that config file, returning the
-    configuration contained in that file.
-
-    Returns a config-dictionary.
     """
-    config = docopt.docopt(__doc__, version='cosmic-ray v.2')
-
-    if config['load']:
-        filename = config['<config-file>']
-        args = load_file(filename)
-        config = docopt.docopt(__doc__, argv=args, version='cosmic-ray v.2')
-
-    return config
+    exclude_patterns = [re.compile(ex) for ex in excludes]
+    for module in modules:
+        if not any([pattern.match(module.__name__)
+                    for pattern in exclude_patterns]):
+            yield module

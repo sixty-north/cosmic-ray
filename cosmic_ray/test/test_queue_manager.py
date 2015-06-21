@@ -1,6 +1,6 @@
 import unittest
 
-from cosmic_ray.app import QueueManager
+from cosmic_ray.core import QueueManager
 
 
 class QueueManagerTest(unittest.TestCase):
