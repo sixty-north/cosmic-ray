@@ -12,7 +12,7 @@ class ASTLoader:  # pylint:disable=old-style-class,too-few-public-methods
 
     You construct this with an AST and a module name. The
     `exec_module` method simply compiles the AST with the name and
-    execs the resulting code against the procided module dict.
+    execs the resulting code against the provided module dict.
 
     In practice, this is how cosmic-ray loads mutated ASTs for modules.
     """
