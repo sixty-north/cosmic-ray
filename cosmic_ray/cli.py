@@ -15,7 +15,7 @@ from transducer.transducers import filtering, mapping
 from cosmic_ray import config, mutating, plugins
 import cosmic_ray.operators
 from cosmic_ray.find_modules import find_modules
-import cosmic_ray.core
+import cosmic_ray.processing
 from cosmic_ray.testing.test_runner import Outcome
 
 
@@ -125,7 +125,7 @@ options:
 
     summarizer = Summarizer()
 
-    cosmic_ray.core.test_mutants(
+    cosmic_ray.processing.test_mutants(
         mutation_records,
         test_runner,
         num_testers,

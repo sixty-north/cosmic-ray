@@ -106,6 +106,23 @@ def test_mutants(mutation_records,
                  num_testers,
                  timeout,
                  *handlers):
+    """The core test-running algorithm.
+
+    This takes in a sequence of mutation records, a `TestRunner`, and
+    some parameters describing how to run the tests, and then it runs
+    the test suite of the various mutants.
+
+    Args:
+        mutation_records: a sequence of `MutationRecords` describing
+            the mutants to test.
+        test_runner: A TestRunner implementation to use for testing
+            each mutant.
+        num_testers: The number of concurrent testers to run.
+        timeout: The maximum amount of time a test will be allowed to
+            run before it's cancelled.
+        handlers: A sequence of objects with a `handle_result` member
+            callable which are called for each result that generated.
+    """
     LOG.info('Using {} concurrent testers'.format(num_testers))
     LOG.info('Creating actors')
 
