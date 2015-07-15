@@ -11,7 +11,7 @@ code.
 At this time Cosmic Ray is young and incomplete. It doesn't support
 all of the mutations it should, its output format is crude, it only
 supports some forms of test discovery, it may fall over on exotic
-modules...[the list goes on and on](https://github.com/abingham/cosmic-ray/issues). Still,
+modules...[the list goes on and on](https://github.com/sixty-north/cosmic-ray/issues). Still,
 for the adventurous it *does* work. Hopefully things will improve
 fairly rapidly.
 
