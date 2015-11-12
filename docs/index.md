@@ -171,18 +171,32 @@ first suite is a standard `unittest` test suite that validates some if
 its internals. You can run that like this:
 
 ```
-python -m unittest discover cosmic_ray/tests
+python -m unittest discover cosmic_ray/test
 ```
 
 There is also a set of tests which verify the various mutation
 operators. These tests comprise a specially prepared body of code,
 `adam.py`, and a full-coverage test-suite. The idea here is that
 Cosmic Ray should be 100% lethal against the mutants of `adam.py` or
-there's a problem. Run these tests like this:
+there's a problem.
+
+These tests can be run via both the standard `unittest` and `py.test`. In both
+cases, first go to the `test_project` directory:
 
 ```
 cd test_project
-cosmic-ray load cosmic-ray.conf
+```
+
+Run the operator tests with `unittest` like this:
+
+```
+cosmic-ray load cosmic-ray.unittest.conf
+```
+
+and with `py.test` like this:
+
+```
+cosmic-ray load cosmic-ray.pytest.conf
 ```
 
 ## Theory
