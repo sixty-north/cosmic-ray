@@ -1,7 +1,25 @@
 from stevedore import driver, ExtensionManager
 
 
-def test_runner(name, test_dir):
+def get_operator(name):
+    """Get an operator class from a plugin.
+
+    Attrs:
+        name: The name of the plugin containing the operator class.
+
+    Returns: The operator *class object* (i.e. not an instance) provided by the
+        plugin named `name`.
+    """
+    return ExtensionManager('cosmic_ray.operators')[name].plugin
+
+
+def operators():
+    """Get an iterable of all operator plugin names.
+    """
+    return ExtensionManager('cosmic_ray.operators').names()
+
+
+def get_test_runner(name, test_dir):
     """Get a test-runner instance by name.
     """
     test_runner_manager = driver.DriverManager(

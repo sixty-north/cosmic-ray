@@ -17,6 +17,7 @@ import cosmic_ray.operators
 from cosmic_ray.find_modules import find_modules
 import cosmic_ray.processing
 from cosmic_ray.testing.test_runner import Outcome
+from cosmic_ray.worker import worker
 
 
 LOG = logging.getLogger()
@@ -33,6 +34,7 @@ Available commands:
   run
   load
   test-runners
+  worker
 
 See 'cosmic-ray help <command>' for help on specific commands.
 """
@@ -98,7 +100,7 @@ options:
   --exclude-modules=P Pattern of module names to exclude from mutation
   --num-testers=N     Number of concurrent testers to run (0 = os.cpu_count()) [default: 0]
 """
-    test_runner = plugins.test_runner(
+    test_runner = plugins.get_test_runner(
         configuration['--test-runner'],
         configuration['<test-dir>'])
 
@@ -149,11 +151,47 @@ List the available test-runner plugins.
     print('\n'.join(plugins.test_runners()))
     return 0
 
+
+def handle_operators(config):
+    """usage: cosmic-ray operators
+
+List the available operator plugins.
+"""
+    print('\n'.join(plugins.operators()))
+    return 0
+
+
+def handle_worker(config):
+    """usage: cosmic-ray worker [options] <module> <operator> <occurrence> <test-runner> <test-dir> <timeout>
+
+options:
+  --verbose           Produce verbose output
+  --no-local-import   Disallow importing module from the current directory
+"""
+    if not config['--no-local-import']:
+        sys.path.insert(0, '')
+
+    operator = plugins.get_operator(config['<operator>'])
+    test_runner = plugins.get_test_runner(
+        config['<test-runner>'],
+        config['<test-dir>'])
+
+    result = worker(
+        config['<module>'],
+        operator,
+        int(config['<occurrence>']),
+        test_runner,
+        float(config['<timeout>']))
+    print(result)
+
+
 COMMAND_HANDLER_MAP = {
     'help':         handle_help,
     'load':         handle_load,
     'run':          handle_run,
     'test-runners': handle_test_runners,
+    'operators':    handle_operators,
+    'worker':       handle_worker,
 }
 
 
