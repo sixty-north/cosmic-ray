@@ -11,17 +11,7 @@ def _full_module_name(obj):
         obj.__class__.__name__)
 
 
-class CountingCore:
-    def __init__(self):
-        self.count = 0
-
-    def visit_mutation_site(self, node, op):
-        self.count += 1
-
-    def repr_args(self):
-        return []
-
-
+# TODO: Should this core be relocated elsewhere?
 class MutatingCore:
     def __init__(self, target):
         self._target = target

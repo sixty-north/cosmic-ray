@@ -14,6 +14,7 @@ from transducer.lazy import transduce
 from transducer.transducers import filtering, mapping
 
 from cosmic_ray import config, mutating, plugins
+from cosmic_ray.counting import count_mutants
 import cosmic_ray.operators
 from cosmic_ray.find_modules import find_modules
 import cosmic_ray.processing
@@ -107,6 +108,7 @@ options:
 
     if configuration['--timeout'] is not None:
         timeout = float(configuration['--timeout'])
+
     else:
         baseline_mult = float(configuration['--baseline'])
         assert baseline_mult is not None
@@ -124,24 +126,10 @@ options:
 
     operators = cosmic_ray.operators.all_operators()
 
-    mutation_records = mutating.create_mutants(modules, operators)
+    counts = count_mutants(modules, operators)
 
-    summarizer = Summarizer()
-
-    cosmic_ray.processing.test_mutants(
-        mutation_records,
-        test_runner,
-        num_testers,
-        timeout,
-        summarizer)
-
-    total_count = sum(summarizer.outcomes.values())
-
-    if total_count > 0:
-        print('Survival rate: {:0.2f}%'.format(
-            100 * summarizer.outcomes[Outcome.SURVIVED] / total_count))
-    else:
-        print('No tests run (no mutations generated).')  # pylint:disable=superfluous-parens
+    # TODO: For each mod-op pair, send out the appropriate number of mutation
+    # requests through celery. Collect the results and print a summary.
 
 
 def handle_test_runners(config):

@@ -12,6 +12,7 @@ import sys
 
 from .celery import app
 from .importing import using_mutant
+from .parsing import get_ast
 from . import plugins
 
 LOG = logging.getLogger()
@@ -49,12 +50,7 @@ def worker(module_name,
     # TODO: Timeout?
 
     module = importlib.import_module(module_name)
-    with open(module.__file__, 'rt', encoding='utf-8') as module_file:
-            LOG.info('reading module %s from %s',
-                     module.__name__,
-                     module.__file__)
-            source = module_file.read()
-    module_ast = ast.parse(source, module.__file__, 'exec')
+    module_ast = get_ast(module)
     operator = operator_class(occurrence)
     operator.visit(module_ast)
 

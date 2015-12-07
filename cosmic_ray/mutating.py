@@ -3,6 +3,7 @@ import logging
 from collections import namedtuple
 
 from .importing import using_mutant
+from .parsing import get_ast
 
 
 LOG = logging.getLogger()
@@ -23,13 +24,7 @@ def create_mutants(modules, operators):
 
     """
     for module in modules:
-        with open(module.__file__, 'rt', encoding='utf-8') as module_file:
-            LOG.info('reading module %s from %s',
-                     module.__name__,
-                     module.__file__)
-            source = module_file.read()
-
-        pristine_ast = ast.parse(source, module.__file__, 'exec')
+        pristine_ast = get_ast(module)
 
         for operator in operators:
             for activation_record, mutant in operator.bombard(pristine_ast):
