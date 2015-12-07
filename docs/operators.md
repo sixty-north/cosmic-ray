@@ -32,15 +32,14 @@ b) missing survivors due to interacting/interfering mutations.
 ## Implementing an operator
 
 To implement a new operator you need to create a subclass of
-`cosmic_ray.operators.operator.Operator`. This, again, is a subclass
-of `ast.NodeTransformer`. The `NodeTransformer` class provides a
-number of `visit_*` functions which are called during AST traversal as different
-types of nodes are visited. Examples include `visit_Num` which is
-called when a `Number` node is visitied, or `visit_UnaryOp` which is
-called when a unary operator is visited. Your operator class should
-override the `visit_*` functions that it needs in order to determine
-when it can apply its mutation. In any of these functions, if your
-operator can perform a mutation it should call
+`cosmic_ray.operators.operator.Operator`. This, again, is a subclass of
+`ast.NodeTransformer`. The `NodeTransformer` class provides a number of
+`visit_*` functions which are called during AST traversal as different types of
+nodes are visited. Examples include `visit_Num` which is called when a `Number`
+node is visitied, or `visit_UnaryOp` which is called when a unary operator is
+visited. Your operator class should override the `visit_*` functions that it
+needs in order to determine when it can apply its mutation. In any of these
+functions, if your operator can perform a mutation it should call
 `Operator.visit_mutation_site()`.
 
 Your operator class should also implement `Operator.mutate()`. This is
@@ -93,9 +92,10 @@ setup(
 )
 ```
 
-The first thing we need to do is create a new Python source file to
-hold our new operator. Create a file named `number_replacer.py` in the
-`example` directory. It has the following contents:
+The first thing we need to do is create a new Python source file to hold our new
+operator. Create a file named `number_replacer.py` in the `example` directory.
+It has the following contents:
+
 ```
 import ast
 
@@ -111,14 +111,15 @@ class NumberReplacer(Operator):
         return new_node
 ```
 
-Let's step by this line-by-line. We first import `ast` because we'll
-need to create new `ast.Num` nodes later and we need access to its
-constructor.
+Let's step through this line-by-line. We first import `ast` because we'll need
+to create new `ast.Num` nodes later and we need access to its constructor.
+
 ```
 import ast
 ```
 
 Next we import the `Operator` base class.
+
 ```
 from cosmic_ray.operators.operator import Operator
 ```
@@ -129,13 +130,13 @@ We define our new operator by creating a subclass of `Operator` called
 class NumberReplacer(Operator):
 ```
 
-In order to do its job, `NumberReplacer` needs to detect when AST
-traversal reaches `Num` nodes. To do this, it implements
-`ast.NodeTransformer.visit_Num()` which is called when `Num` nodes are
-visited. Since our operator can mutate *any* `Num` node, it implements
-this method by simply calling `visit_mutation_site()`; remember that
-this informs the rest of the mutation machinery that its possible to
-perform a mutation at this node:
+In order to do its job, `NumberReplacer` needs to detect when AST traversal
+reaches `Num` nodes. To do this, it implements `ast.NodeTransformer.visit_Num()`
+which is called when `Num` nodes are visited. Since our operator can mutate
+*any* `Num` node, it implements this method by simply calling
+`visit_mutation_site()`; remember that this informs the rest of the mutation
+machinery that its possible to perform a mutation at this node:
+
 ```
     def visit_Num(self, node):
         return self.visit_mutation_site(node)
@@ -147,19 +148,18 @@ perform the mutation. `mutate()` should return one of:
 * `None` if the `node` argument should be removed from the AST, or
 * a new `ast.Node` instance to replace the original one
 
-In this case, simply create a new `Num` node with a new value and
-return it:
+In this case, simply create a new `Num` node with a new value and return it:
+
 ```
     def mutate(self, node):
         new_node = ast.Num(n=node.n + 1)
         return new_node
 ```
 
-That's all there is to it. This mutation operator is now ready to be
-applied to any code you want to test.
+That's all there is to it. This mutation operator is now ready to be applied to
+any code you want to test.
 
-However, before it can really be used you need to make it available as
-a plugin.
+However, before it can really be used you need to make it available as a plugin.
 
 ### Creating the plugin
 

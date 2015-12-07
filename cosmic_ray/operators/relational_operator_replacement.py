@@ -29,7 +29,7 @@ SKIP = {
 }
 
 
-def create_operator(from_op, to_op):  # pylint:disable=redefined-outer-name
+def _create_operator(from_op, to_op):  # pylint:disable=redefined-outer-name
     """Create an operator which replaces `from_op` with `to_op`.
 
     This inserts the class into the global namespace with the name
@@ -48,9 +48,7 @@ def create_operator(from_op, to_op):  # pylint:disable=redefined-outer-name
         (Operator,),
         {'mutate': lambda self, node: to_op(),
          visit_func_name: visit_func,
-         'from_op': from_op,
-         '__repr__': lambda self: 'replace {} with {}'.format(
-             from_op.__name__, to_op.__name__)})
+         'from_op': from_op})
 
     globals()[operator_name] = new_op
     return new_op
@@ -58,7 +56,7 @@ def create_operator(from_op, to_op):  # pylint:disable=redefined-outer-name
 
 # For each relational operator A, create one class for each *other*
 # relational operator B which replaces A with B in an AST.
-OPERATORS = [create_operator(from_op, to_op)
+OPERATORS = [_create_operator(from_op, to_op)
              for from_op in RELATIONAL_OPERATORS
              for to_op in RELATIONAL_OPERATORS.difference({from_op})
              if (from_op, to_op) not in SKIP]

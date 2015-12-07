@@ -19,10 +19,6 @@ class ReverseUnarySub(Operator):
         node.op = ast.UAdd()
         return node
 
-    def __repr__(self):
-        return 'ReverseUnarySub(target={})'.format(
-            self._target)
-
 
 class ReverseUnaryAdd(Operator):
     """A NodeTransformer that reverses unary addition (i.e. the positive sign).
@@ -39,7 +35,3 @@ class ReverseUnaryAdd(Operator):
         """
         node.op = ast.USub()
         return node
-
-    def __repr__(self):
-        return 'ReverseUnaryAdd(target={})'.format(
-            self._target)

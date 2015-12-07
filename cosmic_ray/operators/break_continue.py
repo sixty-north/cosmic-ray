@@ -13,10 +13,6 @@ class ReplaceBreakWithContinue(Operator):
         assert isinstance(node, ast.Break)
         return ast.Continue()
 
-    def __repr__(self):
-        return 'ReplaceBreakWithContinue(target={})'.format(
-            self._target)
-
 
 class ReplaceContinueWithBreak(Operator):
     def visit_Continue(self, node):
@@ -27,7 +23,3 @@ class ReplaceContinueWithBreak(Operator):
         """
         assert isinstance(node, ast.Continue)
         return ast.Break()
-
-    def __repr__(self):
-        return 'ReplaceContinueWithBreak(target={})'.format(
-            self._target)
