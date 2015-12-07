@@ -4,6 +4,7 @@ Here we manage command-line parsing and launching of the internal
 machinery that does mutation testing.
 """
 
+import json
 import logging
 import sys
 
@@ -182,7 +183,7 @@ options:
         int(config['<occurrence>']),
         test_runner,
         float(config['<timeout>']))
-    print(result)
+    sys.stdout.write(json.dumps(result))
 
 
 COMMAND_HANDLER_MAP = {

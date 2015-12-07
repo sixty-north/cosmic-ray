@@ -7,11 +7,27 @@ one location with one operator, runs the tests, reports the results, and dies.
 import ast
 import importlib
 import logging
+import subprocess
+import sys
 
+from .celery import app
 from .importing import using_mutant
 from . import plugins
 
 LOG = logging.getLogger()
+
+
+@app.task
+def worker_task(*args)
+    command = [
+        'cosmic-ray',
+        'worker',
+    ] + args
+    proc = subprocess.run(command,
+                          stdout=subprocess.PIPE,
+                          universal_newlines=True)
+    result = json.loads(proc.stdout)
+    return result
 
 
 def worker(module_name,
