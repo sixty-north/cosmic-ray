@@ -4,22 +4,20 @@ A worker is intended to run as a process that imports a module, mutates it in
 one location with one operator, runs the tests, reports the results, and dies.
 """
 
-import ast
 import importlib
+import json
 import logging
 import subprocess
-import sys
 
 from .celery import app
 from .importing import using_mutant
 from .parsing import get_ast
-from . import plugins
 
 LOG = logging.getLogger()
 
 
 @app.task
-def worker_task(*args)
+def worker_task(*args):
     command = [
         'cosmic-ray',
         'worker',

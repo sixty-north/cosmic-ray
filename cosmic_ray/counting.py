@@ -4,6 +4,7 @@ cross-products of operators and modules.
 
 from .parsing import get_ast
 
+
 class _CountingCore:
     """An operator core which simply counts how many times an operator finds a
     mutation site in a module.
@@ -22,7 +23,7 @@ def _count(module, op_cls):
     "Count mutants for a single module-operator pair."
     core = _CountingCore()
     op = op_cls(core)
-    op.visit(get_ast(module)
+    op.visit(get_ast(module))
     return core.count
 
 
