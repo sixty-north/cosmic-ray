@@ -15,6 +15,7 @@ from transducer.transducers import filtering, mapping
 
 from cosmic_ray import config, mutating, plugins
 from cosmic_ray.counting import count_mutants
+import cosmic_ray.json_util
 import cosmic_ray.operators
 from cosmic_ray.find_modules import find_modules
 import cosmic_ray.processing
@@ -33,8 +34,9 @@ options:
   --verbose  Produce more verbose output
 
 Available commands:
-  run
   load
+  operators
+  run
   test-runners
   worker
 
@@ -171,7 +173,9 @@ options:
         int(config['<occurrence>']),
         test_runner,
         float(config['<timeout>']))
-    sys.stdout.write(json.dumps(result))
+    sys.stdout.write(
+        json.dumps(result,
+                   cls=cosmic_ray.json_util.JSONEncoder))
 
 
 COMMAND_HANDLER_MAP = {

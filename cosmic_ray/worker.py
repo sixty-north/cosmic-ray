@@ -11,6 +11,7 @@ import subprocess
 
 from .celery import app
 from .importing import using_mutant
+from .operators.operator import MutatingCore
 from .parsing import get_ast
 
 LOG = logging.getLogger()
@@ -49,12 +50,13 @@ def worker(module_name,
 
     module = importlib.import_module(module_name)
     module_ast = get_ast(module)
-    operator = operator_class(occurrence)
+    core = MutatingCore(occurrence)
+    operator = operator_class(core)
     operator.visit(module_ast)
 
-    if operator.activation_record:
+    if core.activation_record:
         with using_mutant(module_name, module_ast):
-            return (operator.activation_record,
+            return (core.activation_record,
                     test_runner())
 
     return None
