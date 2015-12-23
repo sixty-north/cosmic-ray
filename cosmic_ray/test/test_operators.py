@@ -123,7 +123,6 @@ RELATIONAL_OP_MAP = {op: 'if x {} 1: pass'.format(token)
                          }.items()}
 
 
-@unittest.skip('reenable me!')
 class test_ReplaceRelationalOp(unittest.TestCase):
     def test_ast_node_is_modified(self):
         for replacer in ROR.OPERATORS:
@@ -133,7 +132,8 @@ class test_ReplaceRelationalOp(unittest.TestCase):
                 node.body[0].test.ops[0],
                 replacer.from_op)
 
-        node = replacer(0).visit(node)
+        core = MutatingCore(0)
+        node = replacer(core).visit(node)
         self.assertNotIsInstance(
             node.body[0].test.ops[0],
             replacer.from_op)
