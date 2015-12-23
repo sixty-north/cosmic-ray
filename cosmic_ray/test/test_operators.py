@@ -61,17 +61,18 @@ class TestReplaceBreakWithContinueCounting(unittest.TestCase):
         self.assertEqual(core.count, 1)
 
 
-@unittest.skip('reenable me!')
-class TestReplaceContinueWithBreak(unittest.TestCase):
+class TestReplaceContinueWithBreakMutating(unittest.TestCase):
     def test_replacement_activated_replacer(self):
         node = ast.parse('while False: continue')
-        replacer = ReplaceContinueWithBreak(0)
+        core = MutatingCore(0)
+        replacer = ReplaceContinueWithBreak(core)
         replacer.visit(node)
-        self.assertTrue(replacer.activation_record)
+        self.assertTrue(core.activation_record)
 
     def test_remove_first(self):
         node = ast.parse('while False: continue')
-        mutant = ReplaceContinueWithBreak(0).visit(copy.deepcopy(node))
+        core = MutatingCore(0)
+        mutant = ReplaceContinueWithBreak(core).visit(copy.deepcopy(node))
 
         orig_nodes = linearize_tree(node)
         mutant_nodes = linearize_tree(mutant)
@@ -84,17 +85,27 @@ class TestReplaceContinueWithBreak(unittest.TestCase):
             ast.dump(mutant))
 
 
-@unittest.skip('reenable me!')
+class TestReplaceContinueWithBreakCounting(unittest.TestCase):
+    def test_replacement_activated_core(self):
+        node = ast.parse('while False: continue')
+        core = _CountingCore()
+        replacer = ReplaceContinueWithBreak(core)
+        replacer.visit(node)
+        self.assertEqual(core.count, 1)
+
+
 class TestNumberReplacer(unittest.TestCase):
     def test_replacement_activated_replacer(self):
         node = ast.parse('x = 1')
-        replacer = NumberReplacer(0)
+        core = MutatingCore(0)
+        replacer = NumberReplacer(core)
         replacer.visit(node)
-        self.assertTrue(replacer.activation_record)
+        self.assertTrue(core.activation_record)
 
     def test_remove_first(self):
         node = ast.parse('x = 1')
-        mutant = NumberReplacer(0).visit(copy.deepcopy(node))
+        core = MutatingCore(0)
+        mutant = NumberReplacer(core).visit(copy.deepcopy(node))
 
         orig_nodes = linearize_tree(node)
         mutant_nodes = linearize_tree(mutant)
@@ -108,16 +119,19 @@ class TestNumberReplacer(unittest.TestCase):
 
     def test_non_replacement_does_not_activate_replacer(self):
         node = ast.parse('x = 1')
-        replacer = NumberReplacer(1)
+        core = MutatingCore(1)
+        replacer = NumberReplacer(core)
         replacer.visit(node)
-        self.assertFalse(replacer.activation_record)
+        self.assertFalse(core.activation_record)
 
     def test_replacer_ignore_non_nth_sites(self):
         node = ast.parse('x = 1')
 
+        core = MutatingCore(1)
+        replacer = NumberReplacer(core)
         self.assertEqual(
             ast.dump(node),
-            ast.dump(NumberReplacer(1).visit(copy.deepcopy(node))))
+            ast.dump(replacer.visit(copy.deepcopy(node))))
 
 RELATIONAL_OP_MAP = {op: 'if x {} 1: pass'.format(token)
                      for op, token in {
