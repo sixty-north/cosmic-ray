@@ -11,7 +11,7 @@ import subprocess
 
 from .celery import app
 from .importing import using_mutant
-from .operators.operator import MutatingCore
+from .mutating import MutatingCore
 from .parsing import get_ast
 
 LOG = logging.getLogger()

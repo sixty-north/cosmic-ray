@@ -9,7 +9,7 @@ from cosmic_ray.counting import _CountingCore
 from cosmic_ray.operators.break_continue import (ReplaceBreakWithContinue,
                                                  ReplaceContinueWithBreak)
 from cosmic_ray.operators.number_replacer import NumberReplacer
-from cosmic_ray.operators.operator import MutatingCore
+from cosmic_ray.mutating import MutatingCore
 
 
 class Linearizer(ast.NodeVisitor):
