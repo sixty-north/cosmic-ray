@@ -3,24 +3,21 @@
 Here we manage command-line parsing and launching of the internal
 machinery that does mutation testing.
 """
-
 import json
 import logging
 import sys
 
+import cosmic_ray.json_util
+import cosmic_ray.operators
 import docopt
+from cosmic_ray import plugins
+from cosmic_ray.counting import count_mutants
+from cosmic_ray.find_modules import find_modules
+from cosmic_ray.testing.test_runner import Outcome
+from cosmic_ray.worker import worker
 from transducer.functional import compose
 from transducer.lazy import transduce
 from transducer.transducers import filtering, mapping
-
-from cosmic_ray import config, mutating, plugins
-from cosmic_ray.counting import count_mutants
-import cosmic_ray.json_util
-import cosmic_ray.operators
-from cosmic_ray.find_modules import find_modules
-import cosmic_ray.processing
-from cosmic_ray.testing.test_runner import Outcome
-from cosmic_ray.worker import worker
 
 
 LOG = logging.getLogger()
