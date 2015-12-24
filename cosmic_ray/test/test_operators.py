@@ -28,7 +28,7 @@ def linearize_tree(node):
     return l.nodes
 
 
-class MutationTestBase:
+class MutationTextMixin:
     def test_activation_record_created(self):
         node = ast.parse(self.code())
         core = MutatingCore(0)
@@ -69,7 +69,7 @@ class MutationTestBase:
             ast.dump(replacer.visit(copy.deepcopy(node))))
 
 
-class CountingTestBase:
+class CountingTextMixin:
     def test_replacement_activated_core(self):
         node = ast.parse(self.code())
         core = _CountingCore()
@@ -79,8 +79,8 @@ class CountingTestBase:
 
 
 class TestReplaceBreakWithContinue(unittest.TestCase,
-                                   MutationTestBase,
-                                   CountingTestBase):
+                                   MutationTextMixin,
+                                   CountingTextMixin):
     def code(self):
         return 'while True: break'
 
@@ -89,8 +89,8 @@ class TestReplaceBreakWithContinue(unittest.TestCase,
 
 
 class TestReplaceContinueWithBreak(unittest.TestCase,
-                                   MutationTestBase,
-                                   CountingTestBase):
+                                   MutationTextMixin,
+                                   CountingTextMixin):
     def code(self):
         return 'while False: continue'
 
@@ -99,8 +99,8 @@ class TestReplaceContinueWithBreak(unittest.TestCase,
 
 
 class TestNumberReplacer(unittest.TestCase,
-                         MutationTestBase,
-                         CountingTestBase):
+                         MutationTextMixin,
+                         CountingTextMixin):
     def code(self):
         return 'x = 1'
 
