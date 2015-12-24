@@ -1,6 +1,5 @@
 """Tests for the various mutation operators.
 """
-
 import ast
 import copy
 import unittest
@@ -14,6 +13,15 @@ from cosmic_ray.operators.operator import MutatingCore
 
 
 class Linearizer(ast.NodeVisitor):
+    """A NodeVisitor which builds a linear list of nodes it visits.
+
+    The basic point is to be able to take a tree of nodes and reproducably
+    construct a simple list. This list is useful for e.g. comparison between
+    trees.
+
+    After using this to visit an AST, the `nodes` attribute holds the list of
+    nodes.
+    """
     def __init__(self):
         self.nodes = []
 
@@ -23,12 +31,24 @@ class Linearizer(ast.NodeVisitor):
 
 
 def linearize_tree(node):
+    "Given an AST, return a list of the nodes therein."
     l = Linearizer()
     l.visit(node)
     return l.nodes
 
 
 class MutationTextMixin:
+    """A set of mutation-oriented tests for `Operators`.
+
+    This is designed to be used as a mixin with `unittest.TestCase`. That is,
+    if you subclass from both this and `TestCase` then this will provide actual
+    test functions. The tests are all oriented to testing whether the operator
+    behaves correctly when supplied with a MutatingCore.
+
+    Each subclass of this must provide two functions:
+    - source(): returns a body of code on which the operator can function.
+    - operator(): returns an `Operator` class object.
+    """
     def test_activation_record_created(self):
         node = ast.parse(self.code())
         core = MutatingCore(0)
@@ -70,6 +90,17 @@ class MutationTextMixin:
 
 
 class CountingTextMixin:
+    """A set of counting-oriented tests for `Operators`.
+
+    This is designed to be used as a mixin with `unittest.TestCase`. That is,
+    if you subclass from both this and `TestCase` then this will provide actual
+    test functions. The tests are all oriented to testing whether the operator
+    behaves correctly when supplied with a CountingCore.
+
+    Each subclass of this must provide two functions:
+    - source(): returns a body of code on which the operator can function.
+    - operator(): returns an `Operator` class object.
+    """
     def test_replacement_activated_core(self):
         node = ast.parse(self.code())
         core = _CountingCore()
