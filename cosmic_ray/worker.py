@@ -5,6 +5,7 @@ one location with one operator, runs the tests, reports the results, and dies.
 """
 
 import importlib
+import itertools
 import json
 import logging
 import subprocess
@@ -17,12 +18,17 @@ from .parsing import get_ast
 LOG = logging.getLogger()
 
 
-@app.task
+@app.task(name='cosmic_ray.greeting')
+def greeting_task(*args):
+    return 'Hello, {}, I hope you like celery!'.format(args)
+
+
+@app.task(name='cosmic_ray.worker')
 def worker_task(*args):
-    command = [
-        'cosmic-ray',
-        'worker',
-    ] + args
+    command = tuple(
+        itertools.chain(
+            ('cosmic-ray', 'worker'),
+            map(str, args)))
     proc = subprocess.run(command,
                           stdout=subprocess.PIPE,
                           universal_newlines=True)

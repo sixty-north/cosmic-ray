@@ -3,6 +3,7 @@ cross-products of operators and modules.
 """
 
 from .parsing import get_ast
+from .plugins import get_operator
 
 
 class _CountingCore:
@@ -19,16 +20,23 @@ class _CountingCore:
         return []
 
 
-def _count(module, op_cls):
+def _count(module, op_name):
     "Count mutants for a single module-operator pair."
     core = _CountingCore()
-    op = op_cls(core)
+    op = get_operator(op_name)(core)
     op.visit(get_ast(module))
     return core.count
 
 
 def count_mutants(modules, operators):
     """Count how many mutations each operator will peform on each module.
+
+    Args:
+        modules: A sequence of module objects
+        operators: A sequence of operator plugin names (not operator instances)
+
+    Returns: A dict of the form `{ module-object: {operator-name: count} }`,
+        giving a per-operator count for each module.
     """
     return {
         mod: {
@@ -37,4 +45,3 @@ def count_mutants(modules, operators):
         }
         for mod in modules
     }
-

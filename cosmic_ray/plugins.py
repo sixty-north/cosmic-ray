@@ -13,7 +13,7 @@ def get_operator(name):
     return ExtensionManager('cosmic_ray.operators')[name].plugin
 
 
-def operators():
+def operator_names():
     """Get an iterable of all operator plugin names.
     """
     return ExtensionManager('cosmic_ray.operators').names()
@@ -32,7 +32,7 @@ def get_test_runner(name, test_dir):
     return test_runner_manager.driver
 
 
-def test_runners():
+def test_runner_names():
     """Get iterable of test-runner plugin names.
     """
     return ExtensionManager('cosmic_ray.test_runners').names()

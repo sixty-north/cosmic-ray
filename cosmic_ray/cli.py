@@ -136,7 +136,7 @@ def handle_test_runners(config):
 
 List the available test-runner plugins.
 """
-    print('\n'.join(plugins.test_runners()))
+    print('\n'.join(plugins.test_runner_names()))
     return 0
 
 
@@ -145,7 +145,7 @@ def handle_operators(config):
 
 List the available operator plugins.
 """
-    print('\n'.join(plugins.operators()))
+    print('\n'.join(plugins.operator_names()))
     return 0
 
 
