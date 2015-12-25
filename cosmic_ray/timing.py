@@ -1,0 +1,42 @@
+import datetime
+import multiprocessing
+
+
+class Timer:
+    """A simple context manager for timing events.
+
+    Generally use it like this:
+
+        with Timer() as t:
+            do_something()
+        print(t.elapsed())
+    """
+    def __init__(self):
+        self.reset()
+
+    def reset(self):
+        self._start = datetime.datetime.now()
+
+    @property
+    def elapsed(self):
+        """Get the elapsed time between the last call to `reset` and now.
+
+        Returns a `datetime.timedelta` object.
+        """
+        return datetime.datetime.now() - self._start
+
+    def __enter__(self):
+        self.reset()
+        return self
+
+    def __exit__(self, ex_type, ex_value, ex_traceback):
+        pass
+
+
+def time_execution(test_runner):
+    p = multiprocessing.Process(target=test_runner)
+    with Timer() as t:
+        p.start()
+        p.join()
+
+    return t.elapsed.total_seconds()

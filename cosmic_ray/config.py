@@ -1,24 +1,8 @@
 import logging
-import multiprocessing
 import os
 import re
 
-from .util import Timer
-
 LOG = logging.getLogger()
-
-
-def find_baseline(test_runner):
-    LOG.info('running baseline timing')
-
-    with Timer() as t:
-        p = multiprocessing.Process(target=test_runner)
-        p.start()
-        p.join()
-
-    baseline = t.elapsed.total_seconds()
-    LOG.info('baseline timing = {} seconds'.format(baseline))
-    return baseline
 
 
 def get_num_testers(num_testers, default=4):

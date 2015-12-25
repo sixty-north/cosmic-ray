@@ -5,16 +5,16 @@ import cosmic_ray.config
 import cosmic_ray.counting
 import cosmic_ray.find_modules
 import cosmic_ray.plugins
+import cosmic_ray.timing
 import cosmic_ray.worker
 import docopt
 
 LOG = logging.getLogger()
 
-OPTIONS = """usage: frontend.py [options] [--exclude-modules=P ...] <top-module> <test-dir>
+OPTIONS = """usage: frontend.py [options] [--exclude-modules=P ...] (--timeout=T | --baseline=M) <top-module> <test-dir>
 
 options:
   --verbose           Produce verbose output
-  --no-local-import   Allow importing module from the current directory
   --test-runner=R     Test-runner plugin to use [default: unittest]
   --exclude-modules=P Pattern of module names to exclude from mutation
 """
@@ -33,26 +33,17 @@ def main(argv=None):
     if configuration['--verbose']:
         logging.basicConfig(level=logging.INFO)
 
-    test_runner = cosmic_ray.plugins.get_test_runner(
-        configuration['--test-runner'],
-        configuration['<test-dir>'])
-
-    timeout = 10000
-
-    # if configuration['--timeout'] is not None:
-    #     timeout = float(configuration['--timeout'])
-
-    # else:
-    #     baseline_mult = float(configuration['--baseline'])
-    #     assert baseline_mult is not None
-    #     timeout = config.find_baseline(test_runner) * baseline_mult
+    if configuration['--timeout'] is not None:
+        timeout = float(configuration['--timeout'])
+    else:
+        test_runner = cosmic_ray.plugins.get_test_runner(
+            configuration['--test-runner'],
+            configuration['<test-dir>'])
+        baseline_mult = float(configuration['--baseline'])
+        assert baseline_mult is not None
+        timeout = cosmic_ray.timing.time_execution(test_runner) * baseline_mult
 
     LOG.info('timeout = {} seconds'.format(timeout))
-
-    # num_testers = config.get_num_testers(int(configuration['--num-testers']))
-
-    if not configuration['--no-local-import']:
-        sys.path.insert(0, '')
 
     modules = cosmic_ray.config.filtered_modules(
         cosmic_ray.find_modules.find_modules(configuration['<top-module>']),

@@ -8,12 +8,10 @@ replaces the first operator with the second.
 The generated classes are named `Replace<from-op>With<to-op>` where
 `from-op` is the relational operator being replaced and `to-op` is the
 replacement operator.
-
-The global list `operators` also contains a all of the generated
-classes. This list is primarily used for testing.
 """
 
 import ast
+from itertools import permutations
 
 from .operator import Operator
 
@@ -27,6 +25,12 @@ RELATIONAL_OPERATORS = {ast.Eq, ast.NotEq, ast.Lt, ast.LtE, ast.Gt, ast.GtE,
 SKIP = {
     (ast.NotEq, ast.IsNot),
 }
+
+
+def relational_operator_pairs():
+    return filter(
+        lambda x: x not in SKIP,
+        permutations(RELATIONAL_OPERATORS, 2))
 
 
 def _create_operator(from_op, to_op):  # pylint:disable=redefined-outer-name
@@ -57,6 +61,5 @@ def _create_operator(from_op, to_op):  # pylint:disable=redefined-outer-name
 # For each relational operator A, create one class for each *other*
 # relational operator B which replaces A with B in an AST.
 OPERATORS = [_create_operator(from_op, to_op)
-             for from_op in RELATIONAL_OPERATORS
-             for to_op in RELATIONAL_OPERATORS.difference({from_op})
-             if (from_op, to_op) not in SKIP]
+             for (from_op, to_op)
+             in relational_operator_pairs()]

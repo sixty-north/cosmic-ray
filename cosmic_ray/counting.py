@@ -20,11 +20,11 @@ class _CountingCore:
         return []
 
 
-def _count(module, op_name):
+def _count(module_ast, op_name):
     "Count mutants for a single module-operator pair."
     core = _CountingCore()
     op = get_operator(op_name)(core)
-    op.visit(get_ast(module))
+    op.visit(module_ast)
     return core.count
 
 
@@ -40,8 +40,10 @@ def count_mutants(modules, operators):
     """
     return {
         mod: {
-            op: _count(mod, op)
+            op: _count(mod_ast, op)
             for op in operators
         }
-        for mod in modules
+        for (mod, mod_ast)
+        in ((m, get_ast(m))
+            for m in modules)
     }
