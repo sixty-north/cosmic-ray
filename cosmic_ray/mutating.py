@@ -1,22 +1,21 @@
 import ast
+import collections
 import copy
 import itertools
 import logging
-from collections import namedtuple
 
-from .importing import using_mutant
-from .parsing import get_ast
-from .util import get_line_number
+import cosmic_ray.util
 
 
 LOG = logging.getLogger()
 
 
-MutationRecord = namedtuple('MutationRecord', ['module_name',
-                                               'module_file',
-                                               'operator',
-                                               'activation_record',
-                                               'mutant'])
+MutationRecord = collections.namedtuple('MutationRecord',
+                                        ['module_name',
+                                         'module_file',
+                                         'operator',
+                                         'activation_record',
+                                         'mutant'])
 
 
 def _full_module_name(obj):
@@ -62,7 +61,7 @@ class MutatingCore:
             self._activation_record = {
                 'operator': _full_module_name(self),
                 'description': str(self),
-                'line_number': get_line_number(node)
+                'line_number': cosmic_ray.util.get_line_number(node)
             }
 
             old_node = node
@@ -74,49 +73,3 @@ class MutatingCore:
 
     def repr_args(self):
         return [('target', self._target)]
-
-    @classmethod
-    def bombard(cls, node):
-        """Bombard `node` with cosmic rays, generating a sequence of odious
-        mutants.
-
-        The returns an iterable sequence of mutated copies of `node`,
-        with one mutant for each potential mutation site in `node`
-        with respect to the `Operator` subclass which is performing
-        the mutations.
-        """
-        for target in itertools.count():
-            operator = cls(target)
-            mutant = operator.visit(copy.deepcopy(node))
-            if not operator.activation_record:
-                break
-
-            yield operator.activation_record, mutant
-
-
-def create_mutants(modules, operators):
-    """Mutate `modules` with `operators`.
-
-    Returns an iterable of `MutationRecord`s, one for each application
-    of an operator to a location in a module.
-
-    """
-    for module in modules:
-        pristine_ast = get_ast(module)
-
-        for operator in operators:
-            for activation_record, mutant in operator.bombard(pristine_ast):
-                yield MutationRecord(module_name=module.__name__,
-                                     module_file=module.__file__,
-                                     operator=operator,
-                                     activation_record=activation_record,
-                                     mutant=mutant)
-
-
-def run_with_mutant(func, mutation_record):
-    """Install the mutation record and run the callable `func`, returning
-    its result.
-    """
-    module_name, _, _, _, mutant = mutation_record
-    with using_mutant(module_name, mutant):
-        return func()
