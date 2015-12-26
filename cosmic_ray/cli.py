@@ -3,6 +3,7 @@
 Here we manage command-line parsing and launching of the internal
 machinery that does mutation testing.
 """
+import itertools
 import json
 import logging
 import sys
@@ -126,7 +127,14 @@ options:
 
     counts = cosmic_ray.counting.count_mutants(modules, operators)
 
-    results = (
+    LOG.info('Mutation counts: %s', counts)
+    LOG.info('Total test runs: %s',
+             sum(itertools.chain(
+                 *(d.values() for d in counts.values()))))
+
+    LOG.info('Launching worker requests.')
+
+    results = [
         cosmic_ray.worker.worker_task.delay(module.__name__,
                                             opname,
                                             occurrence,
@@ -135,7 +143,9 @@ options:
                                             timeout)
         for module, ops in counts.items()
         for opname, count in ops.items()
-        for occurrence in range(count))
+        for occurrence in range(count)]
+
+    LOG.info('Worker requests launched.')
 
     for r in results:
         print(r.get())
