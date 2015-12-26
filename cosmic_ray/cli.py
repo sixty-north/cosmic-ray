@@ -14,7 +14,7 @@ import transducer.transducers
 
 import cosmic_ray.config
 import cosmic_ray.counting
-import cosmic_ray.find_modules
+import cosmic_ray.modules
 import cosmic_ray.json_util
 import cosmic_ray.worker
 import cosmic_ray.testing
@@ -119,8 +119,8 @@ options:
 
     LOG.info('timeout = {} seconds'.format(timeout))
 
-    modules = cosmic_ray.config.filtered_modules(
-        cosmic_ray.find_modules.find_modules(configuration['<top-module>']),
+    modules = cosmic_ray.modules.filtered_modules(
+        cosmic_ray.modules.find_modules(configuration['<top-module>']),
         configuration['--exclude-modules'])
 
     operators = cosmic_ray.plugins.operator_names()

@@ -1,6 +1,7 @@
 import importlib
 import logging
 import pkgutil
+import re
 
 LOG = logging.getLogger()
 
@@ -42,3 +43,15 @@ def find_modules(name):
             LOG.exception(
                 'Unable to import %s',
                 module_name)
+
+
+def filtered_modules(modules, excludes):
+    """Get the sequence of modules in `modules` which aren't filtered out
+    by a regex in `excludes`.
+
+    """
+    exclude_patterns = [re.compile(ex) for ex in excludes]
+    for module in modules:
+        if not any([pattern.match(module.__name__)
+                    for pattern in exclude_patterns]):
+            yield module

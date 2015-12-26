@@ -1,11 +1,10 @@
 import contextlib
-import os
 import os.path
 import tempfile
 
 import with_fixture
 
-from cosmic_ray.find_modules import find_modules
+import cosmic_ray.modules
 
 
 @contextlib.contextmanager
@@ -46,7 +45,7 @@ class FindModulesTest(with_fixture.TestCase):
                  for path in paths]
         [make_file(p) for p in paths]
 
-        results = find_modules('a')
+        results = cosmic_ray.modules.find_modules('a')
         self.assertListEqual(
             sorted(paths),
             sorted(map(lambda m: m.__file__, results)))
