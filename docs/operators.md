@@ -1,5 +1,8 @@
 # Mutation Operators
 
+**TODO:** Update this to reflect the changes that occurred during celery
+  development.
+
 In Cosmic Ray we use *mutation operators* to implement the various
 forms of mutation that we support. For each specific kind of mutation
 – constant replacement, break/continue swaps, and so forth – there is

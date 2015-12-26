@@ -22,9 +22,24 @@ And, of course, patches and ideas are welcome.
 If you just want to get down to the business of finding and killing
 mutants, here's what you do:
 
+1. Install Cosmic Ray
+
 ```
 pip install cosmic_ray
-cosmic-ray run --baseline=2 my_module path/to/tests
+```
+
+2. Install and start RabbitMQ
+
+3. Start a Cosmic Ray worker task
+
+```
+celery -A cosmic_ray.worker worker
+```
+
+4. Run the top-level Cosmic Ray task manager
+
+```
+cosmic-ray run --baseline=10 <module name> <test directory>
 ```
 
 This will print out a bunch of information about what Cosmic Ray is
@@ -48,21 +63,45 @@ python setup.py install
 Both of these approaches will install the Cosmic Ray package and
 create an executable called `cosmic-ray`.
 
+### Virtual environments
+
+You'll often want to install Cosmic Ray into a virtual environment. However, you
+generally *don't* want to install it into its own. Rather, you want to install
+it into the virtual environment of the project you want to test. This ensure
+that the workers have access to the modules they are supposed to test.
+
+### Installing RabbitMQ
+
+Cosmic Ray uses [Celery](http://www.celeryproject.org/) to distribute tasks to
+workers, and currently we only support the [RabbitMQ](https://www.rabbitmq.com/)
+backend of Celery. So you need to install RabbitMQ onto your system. This should
+be straightforward.
+
+Once installed, make sure to start the RabbitMQ server.
+
 ## Running Cosmic Ray
 
-Once installed, you can pass `-h` to `cosmic-ray` to get useful a help
-message:
+Once RabbitMQ is running, you need to start one or more worker tasks. These are
+started using the `celery` command, and these workers listen for testing
+instructions from the Cosmic Ray executive level. You can have as many workers
+as you want, and they can be on multiple machines (in principle...we don't
+really support that as of this writing).
+
+Start worker processes like this:
 
 ```
-cosmic-ray -h
+celery -A cosmic_ray.worker worker
 ```
 
-The primary way of running `cosmic-ray` is by passing the `run`
-command-line argument. With this command you tell Cosmic Ray a) which
-module(s) you wish to mutate and b) the location of the test
-suite. For example, if you've a package named `allele` and if the
-`unittest` tests for the package are all under the directory
-`allele_tests`, you would run `cosmic-ray` like this:
+You should do this, of course, from the virtual environment into which you've
+installed Cosmic Ray.
+
+Once you've got some workers running, you can make them do work by passing the
+`run` command-line argument. With this command you tell Cosmic Ray a) which
+module(s) you wish to mutate and b) the location of the test suite. For example,
+if you've a package named `allele` and if the `unittest` tests for the package
+are all under the directory `allele_tests`, you would run `cosmic-ray` like
+this:
 
 ```
 cosmic-ray run --baseline=2 allele allele_tests
@@ -83,7 +122,7 @@ To specify a particular test runner when running Cosmic Ray, pass the
 `--test-runner` flag to the `run` subcommand. For example, to use the
 `pytest` runner you would use:
 ```
-cosmic-ray run --test-runner=pytest allele allele/tests
+cosmic-ray run --test-runner=pytest allele allele_tests
 ```
 
 To get a list of the available test runners, use the `test-runners`
@@ -93,6 +132,8 @@ cosmic-ray test-runners
 ```
 
 ### Specifying test timeouts
+
+**TODO:** Update this once timeouts are re-implemented.
 
 One difficulty mutation testing tools have to face is how to deal with
 mutations that result in infinite loops (or other pathological runtime
@@ -126,6 +167,9 @@ This baseline technique is particularly useful if your testsuite
 runtime is in flux.
 
 ### Running with a config file
+
+**TODO:** Update this once we settle the celery implementation down. In
+  particular, make it clear that you still need to start workers, etc.
 
 For many projects you'll probably be running the same `cosmic-ray`
 command over and over. Instead of having to remember and retype
@@ -165,6 +209,8 @@ cosmic-ray load cr-allele.conf
 and it will have the same effect as running the original command.
 
 ## Tests
+
+**TODO:** Update this once teh celery implementation is more complete.
 
 Cosmic Ray has a number of test suites to help ensure that it works. The
 first suite is a standard `unittest` test suite that validates some if
@@ -261,15 +307,4 @@ for mod in modules_under_test:
 Obviously this can result in a lot of tests, and it can take some time
 if your test suite is large and/or slow.
 
-Cosmic Ray uses the
-[multiprocessing module](https://docs.python.org/3/library/multiprocessing.html)
-to run the tests in parallel and also to implement mutant
-sandboxing. This provides a nice speed-up in many cases, though if your
-tests are IO bound or use other common resources then this could
-actually slow things down.
-
-Another interesting technology used in Cosmic Ray is
-[the pykka actor library](https://github.com/jodal/pykka). Actors – in
-conjunction with a top-level event loop provided by
-[`asyncio`](https://docs.python.org/3/library/asyncio.html) – serve as
-an excellent way to model the flow of data processing in Cosmic Ray.
+**TODO:** Add information about how we use celery.
