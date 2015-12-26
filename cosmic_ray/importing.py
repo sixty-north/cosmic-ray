@@ -51,13 +51,15 @@ class ASTFinder(MetaPathFinder):  # pylint:disable=too-few-public-methods
 def using_mutant(module_name, mutant):
     """Create a new Finder as a context-manager.
 
-    This installs the finder for the duration of the with-block,
-    yielding the Finder in the with-statement. After the with-block,
-    the Finder is uninstalled.
+    This creates a new Finder which loads the AST `mutant` when `module_name`
+    is requested. It installs this finder at the head of `sys.meta_path` for
+    the duration of the with-block, yielding the Finder in the with-statement.
+    After the with-block, the Finder is uninstalled.
 
     This also removes `module_name` from `sys.modules` before doing
     anything else. Then ensures that the finder gets asked to load the
     mutated AST.
+
     """
     if module_name in sys.modules:
         del sys.modules[module_name]

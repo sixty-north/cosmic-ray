@@ -1,5 +1,5 @@
 """Facilities for counting how many mutants will be created in a
-cross-products of operators and modules.
+cross-product of operators and modules.
 """
 
 from .parsing import get_ast

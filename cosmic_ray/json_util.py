@@ -1,3 +1,9 @@
+"""Utilities for working with JSON data.
+
+This is where we provide support for JSON en/decoding of any special types we
+have.
+"""
+
 import json
 
 from .testing.test_runner import Outcome

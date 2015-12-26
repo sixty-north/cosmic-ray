@@ -1,3 +1,9 @@
+"""Support for timing the execution of functions.
+
+This is primarily intended to support baselining, but it's got some reasonable
+generic functionality.
+"""
+
 import datetime
 import multiprocessing
 
