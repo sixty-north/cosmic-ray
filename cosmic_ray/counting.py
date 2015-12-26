@@ -39,10 +39,11 @@ def count_mutants(modules, operators):
         giving a per-operator count for each module.
     """
     return {
-        mod: {
-            op: _count(mod_ast, op)
-            for op in operators
-        }
+        mod: dict(
+            filter(
+                lambda t:  t[1] > 0,
+                ((op, _count(mod_ast, op))
+                 for op in operators)))
         for (mod, mod_ast)
         in ((m, get_ast(m))
             for m in modules)
