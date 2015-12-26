@@ -12,7 +12,6 @@ import transducer.functional
 import transducer.lazy
 import transducer.transducers
 
-import cosmic_ray.config
 import cosmic_ray.counting
 import cosmic_ray.modules
 import cosmic_ray.json_util
