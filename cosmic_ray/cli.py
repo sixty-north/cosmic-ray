@@ -7,17 +7,18 @@ import json
 import logging
 import sys
 
-import cosmic_ray.json_util
-import cosmic_ray.operators
 import docopt
-from cosmic_ray import plugins
-from cosmic_ray.counting import count_mutants
-from cosmic_ray.find_modules import find_modules
-from cosmic_ray.testing.test_runner import Outcome
-from cosmic_ray.worker import worker
-from transducer.functional import compose
-from transducer.lazy import transduce
-from transducer.transducers import filtering, mapping
+import transducer.functional
+import transducer.lazy
+import transducer.transducers
+
+import cosmic_ray.config
+import cosmic_ray.counting
+import cosmic_ray.find_modules
+import cosmic_ray.json_util
+import cosmic_ray.worker
+import cosmic_ray.testing
+import cosmic_ray.timing
 
 
 LOG = logging.getLogger()
@@ -42,14 +43,14 @@ See 'cosmic-ray help <command>' for help on specific commands.
 
 # This is really an experiment in using transducers in "the real
 # world". You could accomplish the same parsing goals in fewer lines
-# (and probably more quickly) using more traditional means. But this
+# (and probably more quckly) using more traditional means. But this
 # approach does have a certain charm and elegance to it.
-REMOVE_COMMENTS = mapping(lambda x: x.split('#')[0])
-REMOVE_WHITESPACE = mapping(str.strip)
-NON_EMPTY = filtering(bool)
-CONFIG_FILE_PARSER = compose(REMOVE_COMMENTS,
-                             REMOVE_WHITESPACE,
-                             NON_EMPTY)
+REMOVE_COMMENTS = transducer.transducers.mapping(lambda x: x.split('#')[0])
+REMOVE_WHITESPACE = transducer.transducers.mapping(str.strip)
+NON_EMPTY = transducer.transducers.filtering(bool)
+CONFIG_FILE_PARSER = transducer.functional.compose(REMOVE_COMMENTS,
+                                                   REMOVE_WHITESPACE,
+                                                   NON_EMPTY)
 
 
 def _load_file(config_file):
@@ -59,7 +60,7 @@ def _load_file(config_file):
     whitespace and comments stripped off.
     """
     with open(config_file, 'rt', encoding='utf-8') as f:
-        yield from transduce(CONFIG_FILE_PARSER, f)
+        yield from transducer.lazy.transduce(CONFIG_FILE_PARSER, f)
 
 
 def handle_help(config):
@@ -101,34 +102,44 @@ options:
   --exclude-modules=P Pattern of module names to exclude from mutation
   --num-testers=N     Number of concurrent testers to run (0 = os.cpu_count()) [default: 0]
 """
-    test_runner = plugins.get_test_runner(
-        configuration['--test-runner'],
-        configuration['<test-dir>'])
+    # This lets us import modules from the current directory. Should probably
+    # be optional, and needs to also be applied to workers!
+    sys.path.insert(0, '')
 
     if configuration['--timeout'] is not None:
         timeout = float(configuration['--timeout'])
-
     else:
+        cosmic_ray.testing.test_runner = cosmic_ray.plugins.get_test_runner(
+            configuration['--test-runner'],
+            configuration['<test-dir>'])
         baseline_mult = float(configuration['--baseline'])
         assert baseline_mult is not None
-        timeout = config.find_baseline(test_runner) * baseline_mult
+        timeout = baseline_mult * cosmic_ray.timing.time_execution(
+            cosmic_ray.testing.test_runner)
+
     LOG.info('timeout = {} seconds'.format(timeout))
 
-    num_testers = config.get_num_testers(int(configuration['--num-testers']))
-
-    if not configuration['--no-local-import']:
-        sys.path.insert(0, '')
-
-    modules = config.filtered_modules(
-        find_modules(configuration['<top-module>']),
+    modules = cosmic_ray.config.filtered_modules(
+        cosmic_ray.find_modules.find_modules(configuration['<top-module>']),
         configuration['--exclude-modules'])
 
-    operators = cosmic_ray.operators.all_operators()
+    operators = cosmic_ray.plugins.operator_names()
 
-    counts = count_mutants(modules, operators)
+    counts = cosmic_ray.counting.count_mutants(modules, operators)
 
-    # TODO: For each mod-op pair, send out the appropriate number of mutation
-    # requests through celery. Collect the results and print a summary.
+    results = (
+        cosmic_ray.worker.worker_task.delay(module.__name__,
+                                            opname,
+                                            occurrence,
+                                            configuration['--test-runner'],
+                                            configuration['<test-dir>'],
+                                            timeout)
+        for module, ops in counts.items()
+        for opname, count in ops.items()
+        for occurrence in range(count))
+
+    for r in results:
+        print(r.get())
 
 
 def handle_test_runners(config):
@@ -136,7 +147,7 @@ def handle_test_runners(config):
 
 List the available test-runner plugins.
 """
-    print('\n'.join(plugins.test_runner_names()))
+    print('\n'.join(cosmic_ray.plugins.test_runner_names()))
     return 0
 
 
@@ -145,7 +156,7 @@ def handle_operators(config):
 
 List the available operator plugins.
 """
-    print('\n'.join(plugins.operator_names()))
+    print('\n'.join(cosmic_ray.plugins.operator_names()))
     return 0
 
 
@@ -159,16 +170,16 @@ options:
     if not config['--no-local-import']:
         sys.path.insert(0, '')
 
-    operator = plugins.get_operator(config['<operator>'])
-    test_runner = plugins.get_test_runner(
+    operator = cosmic_ray.plugins.get_operator(config['<operator>'])
+    cosmic_ray.testing.test_runner = cosmic_ray.plugins.get_test_runner(
         config['<test-runner>'],
         config['<test-dir>'])
 
-    result = worker(
+    result = cosmic_ray.worker.worker(
         config['<module>'],
         operator,
         int(config['<occurrence>']),
-        test_runner,
+        cosmic_ray.testing.test_runner,
         float(config['<timeout>']))
     sys.stdout.write(
         json.dumps(result,
@@ -183,16 +194,6 @@ COMMAND_HANDLER_MAP = {
     'operators':    handle_operators,
     'worker':       handle_worker,
 }
-
-
-class Summarizer:
-    """A result-handler that collects simple statistics.
-    """
-    def __init__(self):
-        self.outcomes = {o: 0 for o in Outcome}
-
-    def handle_result(self, mutation_record, test_result):
-        self.outcomes[test_result.outcome] += 1
 
 
 def main(argv=None):

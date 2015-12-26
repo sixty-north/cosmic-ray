@@ -54,7 +54,6 @@ setup(
         'celery',
         'decorator',
         'docopt',
-        'pykka',
         'stevedore',
         'transducer',
         'with_fixture',
