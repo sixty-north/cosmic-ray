@@ -33,6 +33,10 @@ def main(argv=None):
     if configuration['--verbose']:
         logging.basicConfig(level=logging.INFO)
 
+    # This lets us import modules from the current directory. Should probably
+    # be optional, and needs to also be applied to workers!
+    sys.path.insert(0, '')
+
     if configuration['--timeout'] is not None:
         timeout = float(configuration['--timeout'])
     else:
