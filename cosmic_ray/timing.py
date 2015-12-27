@@ -5,7 +5,7 @@ generic functionality.
 """
 
 import datetime
-import multiprocessing
+import subprocess
 
 
 class Timer:
@@ -39,10 +39,14 @@ class Timer:
         pass
 
 
-def time_execution(test_runner):
-    p = multiprocessing.Process(target=test_runner)
+def run_baseline(test_runner, module_name, test_dir):
+    command = ('cosmic-ray',
+               'baseline',
+               '--test-runner={}'.format(test_runner),
+               module_name,
+               test_dir,)
+
     with Timer() as t:
-        p.start()
-        p.join()
+        subprocess.run(command)
 
     return t.elapsed.total_seconds()

@@ -92,6 +92,22 @@ Load a command configuration from a file and run it.
     return main(argv=list(argv))
 
 
+def handle_baseline(configuration):
+    """usage: cosmic-ray baseline [options] <top-module> <test-dir>
+
+options:
+  --verbose           Produce verbose output
+  --no-local-import   Allow importing module from the current directory
+  --test-runner=R     Test-runner plugin to use [default: unittest]
+"""
+    sys.path.insert(0, '')
+    test_runner = cosmic_ray.plugins.get_test_runner(
+            configuration['--test-runner'],
+            configuration['<test-dir>'])
+
+    test_runner()
+    
+
 def handle_run(configuration):
     """usage: cosmic-ray run [options] [--exclude-modules=P ...] (--timeout=T | --baseline=M) <top-module> <test-dir>
 
@@ -109,13 +125,12 @@ options:
     if configuration['--timeout'] is not None:
         timeout = float(configuration['--timeout'])
     else:
-        cosmic_ray.testing.test_runner = cosmic_ray.plugins.get_test_runner(
-            configuration['--test-runner'],
-            configuration['<test-dir>'])
         baseline_mult = float(configuration['--baseline'])
         assert baseline_mult is not None
-        timeout = baseline_mult * cosmic_ray.timing.time_execution(
-            cosmic_ray.testing.test_runner)
+        timeout = baseline_mult * cosmic_ray.timing.run_baseline(
+            configuration['--test-runner'],
+            configuration['<top-module>'],
+            configuration['<test-dir>'])
 
     LOG.info('timeout = {} seconds'.format(timeout))
 
@@ -132,8 +147,6 @@ options:
              sum(itertools.chain(
                  *(d.values() for d in counts.values()))))
 
-    LOG.info('Launching worker requests.')
-
     results = [
         cosmic_ray.worker.worker_task.delay(module.__name__,
                                             opname,
@@ -144,8 +157,6 @@ options:
         for module, ops in counts.items()
         for opname, count in ops.items()
         for occurrence in range(count)]
-
-    LOG.info('Worker requests launched.')
 
     for r in results:
         print(r.get())
@@ -196,6 +207,7 @@ options:
 
 
 COMMAND_HANDLER_MAP = {
+    'baseline':     handle_baseline,
     'help':         handle_help,
     'load':         handle_load,
     'run':          handle_run,
