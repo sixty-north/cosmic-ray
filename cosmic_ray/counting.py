@@ -15,6 +15,7 @@ class _CountingCore:
 
     def visit_mutation_site(self, node, op):
         self.count += 1
+        return node
 
     def repr_args(self):
         return []
