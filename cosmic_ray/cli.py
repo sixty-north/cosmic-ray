@@ -6,6 +6,7 @@ machinery that does mutation testing.
 import itertools
 import json
 import logging
+import pprint
 import sys
 
 import docopt
@@ -142,11 +143,6 @@ options:
 
     counts = cosmic_ray.counting.count_mutants(modules, operators)
 
-    LOG.info('Mutation counts: %s', counts)
-    LOG.info('Total test runs: %s',
-             sum(itertools.chain(
-                 *(d.values() for d in counts.values()))))
-
     results = [
         cosmic_ray.worker.worker_task.delay(module.__name__,
                                             opname,
@@ -160,6 +156,32 @@ options:
 
     for r in results:
         print(r.get())
+
+
+def handle_counts(configuration):
+    """usage: cosmic-ray counts [options] [--exclude-modules=P ...] <top-module>
+
+options:
+  --no-local-import   Allow importing module from the current directory
+  --test-runner=R     Test-runner plugin to use [default: unittest]
+  --exclude-modules=P Pattern of module names to exclude from mutation
+  --num-testers=N     Number of concurrent testers to run (0 = os.cpu_count()) [default: 0]
+"""
+    sys.path.insert(0, '')
+
+    modules = cosmic_ray.modules.filtered_modules(
+        cosmic_ray.modules.find_modules(configuration['<top-module>']),
+        configuration['--exclude-modules'])
+
+    operators = cosmic_ray.plugins.operator_names()
+
+    counts = cosmic_ray.counting.count_mutants(modules, operators)
+
+    print('[Counts]')
+    pprint.pprint(counts)
+    print('\n[Total test runs]\n',
+          sum(itertools.chain(
+              *(d.values() for d in counts.values()))))
 
 
 def handle_test_runners(config):
@@ -208,6 +230,7 @@ options:
 
 COMMAND_HANDLER_MAP = {
     'baseline':     handle_baseline,
+    'counts':       handle_counts,
     'help':         handle_help,
     'load':         handle_load,
     'run':          handle_run,
