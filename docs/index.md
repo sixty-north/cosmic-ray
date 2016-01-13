@@ -65,7 +65,7 @@ suite. For example, if you've a package named `allele` and if the
 `allele_tests`, you would run `cosmic-ray` like this:
 
 ```
-cosmic-ray --baseline=2 allele allele_tests
+cosmic-ray run --baseline=2 allele allele_tests
 ```
 
 There are a number of other options you can pass to the `run` command;
