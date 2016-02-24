@@ -213,7 +213,7 @@ options:
         sys.path.insert(0, '')
 
     operator = cosmic_ray.plugins.get_operator(config['<operator>'])
-    cosmic_ray.testing.test_runner = cosmic_ray.plugins.get_test_runner(
+    test_runner = cosmic_ray.plugins.get_test_runner(
         config['<test-runner>'],
         config['<test-dir>'])
 
@@ -221,7 +221,7 @@ options:
         config['<module>'],
         operator,
         int(config['<occurrence>']),
-        cosmic_ray.testing.test_runner,
+        test_runner,
         float(config['<timeout>']))
     sys.stdout.write(
         json.dumps(result,
