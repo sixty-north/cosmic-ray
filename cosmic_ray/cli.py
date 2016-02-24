@@ -67,7 +67,7 @@ def _load_file(config_file):
 def handle_help(config):
     """usage: cosmic-ray help [<command>]
 
-Get help on a specific command.
+Get the top-level help, or help for <command> if specified.
 """
     command = config['<command>']
     if not command:
@@ -86,7 +86,10 @@ Get help on a specific command.
 def handle_load(config):
     """usage: cosmic-ray load <config-file>
 
-Load a command configuration from a file and run it.
+Load a command configuration from <config-file> and run it.
+
+A "command configuration" is simply a command-line invocation for cosmic-ray, 
+where each token of the command is on a separate line.
     """
     filename = config['<config-file>']
     argv = _load_file(filename)
@@ -95,6 +98,10 @@ Load a command configuration from a file and run it.
 
 def handle_baseline(configuration):
     """usage: cosmic-ray baseline [options] <top-module> <test-dir>
+
+Run an un-mutated baseline of <top-module> using the tests in <test-dir>. 
+This is largely like running a "worker" process, with the difference 
+that a baseline run doesn't mutate the code.
 
 options:
   --verbose           Produce verbose output
@@ -111,6 +118,10 @@ options:
 
 def handle_run(configuration):
     """usage: cosmic-ray run [options] [--exclude-modules=P ...] (--timeout=T | --baseline=M) <top-module> <test-dir>
+
+Perform a full mutation testing run of <top-module> using the tests 
+in <test-dir>. This requires that the rest of your mutation testing 
+infrastructure (e.g. worker processes) are already running.
 
 options:
   --verbose           Produce verbose output
@@ -161,6 +172,10 @@ options:
 def handle_counts(configuration):
     """usage: cosmic-ray counts [options] [--exclude-modules=P ...] <top-module>
 
+Count the number of tests that would be run for a given testing configuration. 
+This is mostly useful for estimating run times and keeping track of testing 
+statistics.
+
 options:
   --no-local-import   Allow importing module from the current directory
   --test-runner=R     Test-runner plugin to use [default: unittest]
@@ -204,6 +219,15 @@ List the available operator plugins.
 
 def handle_worker(config):
     """usage: cosmic-ray worker [options] <module> <operator> <occurrence> <test-runner> <test-dir> <timeout>
+
+Run a worker process which performs a single mutation and test run. Each
+worker does a minimal, isolated chunk of work: it mutates the <occurence>-th 
+instance of <operator> in <module>, runs the test suite defined by 
+<test-runner> and <test-dir>, prints the results, and exits. If the test run 
+takes longer than <timeout>, the test it killed.
+
+Normally you won't run this directly. Rather, it will be launched by celery 
+worker tasks.
 
 options:
   --verbose           Produce verbose output
