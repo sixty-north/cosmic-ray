@@ -114,7 +114,7 @@ options:
             configuration['<test-dir>'])
 
     test_runner()
-    
+
 
 def handle_run(configuration):
     """usage: cosmic-ray run [options] [--exclude-modules=P ...] (--timeout=T | --baseline=M) <top-module> <test-dir>
@@ -241,14 +241,18 @@ options:
         config['<test-runner>'],
         config['<test-dir>'])
 
-    result = cosmic_ray.worker.worker(
+    result_type, data = cosmic_ray.worker.worker(
         config['<module>'],
         operator,
         int(config['<occurrence>']),
         test_runner,
         float(config['<timeout>']))
+
+    if result_type == 'exception':
+        data = str(data)
+
     sys.stdout.write(
-        json.dumps(result,
+        json.dumps((result_type, data),
                    cls=cosmic_ray.json_util.JSONEncoder))
 
 
