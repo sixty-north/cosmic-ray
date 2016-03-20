@@ -1,6 +1,6 @@
 # Cosmic Ray: mutation testing for Python
 
-*"Four human beings -- changed by space-born cosmic rays into something more than merely human."*  
+*"Four human beings -- changed by space-born cosmic rays into something more than merely human."*
 *— The Fantastic Four*
 
 Cosmic Ray is a tool for performing mutation testing on Python
@@ -210,7 +210,7 @@ and it will have the same effect as running the original command.
 
 ## Tests
 
-**TODO:** Update this once teh celery implementation is more complete.
+**TODO:** Update this once the celery implementation is more complete.
 
 Cosmic Ray has a number of test suites to help ensure that it works. The
 first suite is a standard `unittest` test suite that validates some if
@@ -220,11 +220,10 @@ its internals. You can run that like this:
 python -m unittest discover cosmic_ray/test
 ```
 
-There is also a set of tests which verify the various mutation
-operators. These tests comprise a specially prepared body of code,
-`adam.py`, and a full-coverage test-suite. The idea here is that
-Cosmic Ray should be 100% lethal against the mutants of `adam.py` or
-there's a problem.
+There is also a set of tests which verify the various mutation operators. These
+tests comprise a specially prepared body of code, `adam.py`, and a full-coverage
+test-suite. The idea here is that Cosmic Ray should be 100% lethal against the
+mutants of `adam.py` or there's a problem.
 
 These tests can be run via both the standard `unittest` and `py.test`. In both
 cases, first go to the `test_project` directory:
@@ -301,10 +300,11 @@ for mod in modules_under_test:
 				else:
 				    print('The mutant was killed.')
 	        except Exception:
-			    print('The mutant was incompetent.')		
+			    print('The mutant was incompetent.')
 ```
-				
+
 Obviously this can result in a lot of tests, and it can take some time
 if your test suite is large and/or slow.
 
+### Scaling up with celery
 **TODO:** Add information about how we use celery.
