@@ -11,6 +11,8 @@ import logging
 import subprocess
 import sys
 
+import celery
+
 from .celery import app
 from .importing import using_mutant
 from .mutating import MutatingCore
@@ -25,16 +27,37 @@ def greeting_task(*args):
 
 
 @app.task(name='cosmic_ray.worker')
-def worker_task(*args):
-    command = tuple(
-        itertools.chain(
-            ('cosmic-ray', 'worker'),
-            map(str, args)))
+def worker_task(module,
+                operator,
+                occurrence,
+                test_runner,
+                test_directory,
+                timeout):
+    command = ('cosmic-ray',
+               'worker',
+               module,
+               operator,
+               str(occurrence),
+               test_runner,
+               test_directory,
+               str(timeout))
     proc = subprocess.run(command,
                           stdout=subprocess.PIPE,
                           universal_newlines=True)
     result = json.loads(proc.stdout)
     return result
+
+
+def execute_jobs(test_runner, test_directory, timeout, jobs):
+    return celery.group(
+        worker_task.delay(module.__name__,
+                          op_name,
+                          occurrence,
+                          test_runner,
+                          test_directory,
+                          timeout)
+        for module, op_name, occurrence
+        in jobs)
 
 
 def worker(module_name,

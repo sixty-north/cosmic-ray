@@ -88,7 +88,7 @@ def handle_load(config):
 
 Load a command configuration from <config-file> and run it.
 
-A "command configuration" is simply a command-line invocation for cosmic-ray, 
+A "command configuration" is simply a command-line invocation for cosmic-ray,
 where each token of the command is on a separate line.
     """
     filename = config['<config-file>']
@@ -99,8 +99,8 @@ where each token of the command is on a separate line.
 def handle_baseline(configuration):
     """usage: cosmic-ray baseline [options] <top-module> <test-dir>
 
-Run an un-mutated baseline of <top-module> using the tests in <test-dir>. 
-This is largely like running a "worker" process, with the difference 
+Run an un-mutated baseline of <top-module> using the tests in <test-dir>.
+This is largely like running a "worker" process, with the difference
 that a baseline run doesn't mutate the code.
 
 options:
@@ -119,8 +119,8 @@ options:
 def handle_run(configuration):
     """usage: cosmic-ray run [options] [--exclude-modules=P ...] (--timeout=T | --baseline=M) <top-module> <test-dir>
 
-Perform a full mutation testing run of <top-module> using the tests 
-in <test-dir>. This requires that the rest of your mutation testing 
+Perform a full mutation testing run of <top-module> using the tests
+in <test-dir>. This requires that the rest of your mutation testing
 infrastructure (e.g. worker processes) are already running.
 
 options:
@@ -154,16 +154,14 @@ options:
 
     counts = cosmic_ray.counting.count_mutants(modules, operators)
 
-    results = [
-        cosmic_ray.worker.worker_task.delay(module.__name__,
-                                            opname,
-                                            occurrence,
-                                            configuration['--test-runner'],
-                                            configuration['<test-dir>'],
-                                            timeout)
-        for module, ops in counts.items()
-        for opname, count in ops.items()
-        for occurrence in range(count)]
+    results = cosmic_ray.worker.execute_jobs(
+        configuration['--test-runner'],
+        configuration['<test-dir>'],
+        timeout,
+        ((module, opname, occurrence)
+         for module, ops in counts.items()
+         for opname, count in ops.items()
+         for occurrence in range(count)))
 
     for r in results:
         print(r.get())
@@ -172,8 +170,8 @@ options:
 def handle_counts(configuration):
     """usage: cosmic-ray counts [options] [--exclude-modules=P ...] <top-module>
 
-Count the number of tests that would be run for a given testing configuration. 
-This is mostly useful for estimating run times and keeping track of testing 
+Count the number of tests that would be run for a given testing configuration.
+This is mostly useful for estimating run times and keeping track of testing
 statistics.
 
 options:
@@ -221,12 +219,12 @@ def handle_worker(config):
     """usage: cosmic-ray worker [options] <module> <operator> <occurrence> <test-runner> <test-dir> <timeout>
 
 Run a worker process which performs a single mutation and test run. Each
-worker does a minimal, isolated chunk of work: it mutates the <occurence>-th 
-instance of <operator> in <module>, runs the test suite defined by 
-<test-runner> and <test-dir>, prints the results, and exits. If the test run 
+worker does a minimal, isolated chunk of work: it mutates the <occurence>-th
+instance of <operator> in <module>, runs the test suite defined by
+<test-runner> and <test-dir>, prints the results, and exits. If the test run
 takes longer than <timeout>, the test it killed.
 
-Normally you won't run this directly. Rather, it will be launched by celery 
+Normally you won't run this directly. Rather, it will be launched by celery
 worker tasks.
 
 options:
