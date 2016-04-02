@@ -55,6 +55,7 @@ setup(
         'decorator',
         'docopt',
         'stevedore',
+        'tinydb',
         'transducer',
         'with_fixture',
     ],

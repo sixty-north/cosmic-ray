@@ -1,0 +1,10 @@
+* Consider not storing test-runner/test-dir in the database
+right now we store the test-runner/test-dir in a special table in the database
+as part of the init phase. This is perhaps unnecessary since we can, in
+principle, reuse all of the work-items for any test-runner/test-dir pair.
+Perhaps it would be better to specify test-runner/-dir at exec time and create
+results tables for each combination.
+
+* work-db should be able to require that a file exists
+In many cases, we only want to *open* a work db, not create a new one should it
+be missing. We should support this.

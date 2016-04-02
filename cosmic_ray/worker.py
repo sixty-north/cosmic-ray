@@ -21,13 +21,9 @@ from .parsing import get_ast
 LOG = logging.getLogger()
 
 
-@app.task(name='cosmic_ray.greeting')
-def greeting_task(*args):
-    return 'Hello, {}, I hope you like celery!'.format(args)
-
-
 @app.task(name='cosmic_ray.worker')
-def worker_task(module,
+def worker_task(job_id,
+                module,
                 operator,
                 occurrence,
                 test_runner,
@@ -45,18 +41,19 @@ def worker_task(module,
                           stdout=subprocess.PIPE,
                           universal_newlines=True)
     result = json.loads(proc.stdout)
-    return result
+    return (job_id, result)
 
 
 def execute_jobs(test_runner, test_directory, timeout, jobs):
     return celery.group(
-        worker_task.delay(module.__name__,
+        worker_task.delay(job_id,
+                          module_name,
                           op_name,
                           occurrence,
                           test_runner,
                           test_directory,
                           timeout)
-        for module, op_name, occurrence
+        for job_id, module_name, op_name, occurrence
         in jobs)
 
 
@@ -74,7 +71,7 @@ def worker(module_name,
     There are three high-level ways that a worker can finish. First, it could
     fail exceptionally, meaning that some uncaught exception made its way from
     some part of the operation to terminate the function. This function will
-    intercept all exceptions and return it in a non-exceptional structur.
+    intercept all exceptions and return it in a non-exceptional structure.
 
     Second, the mutation testing machinery may determine that there is no
     OCCURENCE-th instance for OPERATOR_NAME in the module under test. In this

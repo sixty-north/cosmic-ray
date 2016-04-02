@@ -10,9 +10,10 @@ import pprint
 import sys
 
 import docopt
-import transducer.functional
+import transducer.eager
+from transducer.functional import compose
 import transducer.lazy
-import transducer.transducers
+from transducer.transducers import filtering, mapping
 
 import cosmic_ray.counting
 import cosmic_ray.modules
@@ -20,38 +21,21 @@ import cosmic_ray.json_util
 import cosmic_ray.worker
 import cosmic_ray.testing
 import cosmic_ray.timing
+import cosmic_ray.work_db
 
 
 LOG = logging.getLogger()
-
-OPTIONS = """cosmic-ray
-
-Usage: cosmic-ray [--verbose] [--help] <command> [<args> ...]
-
-options:
-  --help     Show this screen.
-  --verbose  Produce more verbose output
-
-Available commands:
-  load
-  operators
-  run
-  test-runners
-  worker
-
-See 'cosmic-ray help <command>' for help on specific commands.
-"""
 
 # This is really an experiment in using transducers in "the real
 # world". You could accomplish the same parsing goals in fewer lines
 # (and probably more quckly) using more traditional means. But this
 # approach does have a certain charm and elegance to it.
-REMOVE_COMMENTS = transducer.transducers.mapping(lambda x: x.split('#')[0])
-REMOVE_WHITESPACE = transducer.transducers.mapping(str.strip)
-NON_EMPTY = transducer.transducers.filtering(bool)
-CONFIG_FILE_PARSER = transducer.functional.compose(REMOVE_COMMENTS,
-                                                   REMOVE_WHITESPACE,
-                                                   NON_EMPTY)
+REMOVE_COMMENTS = mapping(lambda x: x.split('#')[0])
+REMOVE_WHITESPACE = mapping(str.strip)
+NON_EMPTY = filtering(bool)
+CONFIG_FILE_PARSER = compose(REMOVE_COMMENTS,
+                             REMOVE_WHITESPACE,
+                             NON_EMPTY)
 
 
 def _load_file(config_file):
@@ -116,20 +100,30 @@ options:
     test_runner()
 
 
-def handle_run(configuration):
-    """usage: cosmic-ray run [options] [--exclude-modules=P ...] (--timeout=T | --baseline=M) <top-module> <test-dir>
+def get_db_name(session_name):
+    return '{}.json'.format(session_name)
 
-Perform a full mutation testing run of <top-module> using the tests
-in <test-dir>. This requires that the rest of your mutation testing
-infrastructure (e.g. worker processes) are already running.
+
+def handle_init(configuration):
+    """usage: cosmic-ray init [options] [--exclude-modules=P ...] (--timeout=T | --baseline=M) <session-name> <top-module> <test-dir>
+
+Initialize a mutation testing run. The primarily creates a database of "work to
+be done" which describes all of the mutations and test runs that need to be
+executed for a full mutation testing run. The testing run will mutate
+<top-module> (and submodules) using the tests in <test-dir>. This doesn't
+actually run any tests. Instead, it scans the modules-under-test and simply
+generates the work order which can be executed with other commands.
+
+The session-name argument identifies the run you're creating. It's most
+important role is that it's used to name the database file.
 
 options:
   --verbose           Produce verbose output
   --no-local-import   Allow importing module from the current directory
   --test-runner=R     Test-runner plugin to use [default: unittest]
   --exclude-modules=P Pattern of module names to exclude from mutation
-  --num-testers=N     Number of concurrent testers to run (0 = os.cpu_count()) [default: 0]
-"""
+
+    """
     # This lets us import modules from the current directory. Should probably
     # be optional, and needs to also be applied to workers!
     sys.path.insert(0, '')
@@ -154,17 +148,111 @@ options:
 
     counts = cosmic_ray.counting.count_mutants(modules, operators)
 
-    results = cosmic_ray.worker.execute_jobs(
-        configuration['--test-runner'],
-        configuration['<test-dir>'],
-        timeout,
-        ((module, opname, occurrence)
-         for module, ops in counts.items()
-         for opname, count in ops.items()
-         for occurrence in range(count)))
+    db_name = get_db_name(configuration['<session-name>'])
 
-    for r in results:
-        print(r.get())
+    with cosmic_ray.work_db.use_db(db_name) as db:
+        db.set_work_parameters(
+            test_runner=configuration['--test-runner'],
+            test_directory=configuration['<test-dir>'],
+            timeout=timeout)
+
+        db.clear_work_items()
+
+        db.add_work_items(
+            (module.__name__, opname, occurrence)
+            for module, ops in counts.items()
+            for opname, count in ops.items()
+            for occurrence in range(count))
+
+
+def handle_exec(configuration):
+    """usage: cosmic-ray exec [options] <session-name>
+
+Perform the remaining work to be done in the specified session. This requires
+that the rest of your mutation testing infrastructure (e.g. worker processes)
+are already running.
+
+options:
+  --verbose           Produce verbose output
+
+    """
+    db_name = get_db_name(configuration['<session-name>'])
+
+    with cosmic_ray.work_db.use_db(db_name) as db:
+        test_runner, test_directory, timeout = db.get_work_parameters()
+        results = cosmic_ray.worker.execute_jobs(test_runner,
+                                                 test_directory,
+                                                 timeout,
+                                                 db.pending_work)
+
+        for r in results:
+            job_id, (result_type, result_data) = r.get()
+            db.add_results(job_id, result_type, result_data)
+
+
+def handle_run(configuration):
+    """usage: cosmic-ray run [options] [--exclude-modules=P ...] (--timeout=T | --baseline=M) <session-name> <top-module> <test-dir>
+
+This simply runs the "init" command followed by the "exec" command.
+
+It's important to remember that "init" clears the session database, including
+any results you may have already received. So DO NOT USE THIS COMMAND TO
+CONTINUE EXECUTION OF AN INTERRUPTED SESSION! If you do this, you will lose any
+existing results.
+
+options:
+  --verbose           Produce verbose output
+  --no-local-import   Allow importing module from the current directory
+  --test-runner=R     Test-runner plugin to use [default: unittest]
+  --exclude-modules=P Pattern of module names to exclude from mutation
+
+    """
+    handle_init(configuration)
+    handle_exec(configuration)
+
+
+def handle_report(configuration):
+    """usage: cosmic-ray report <session-name>
+
+Print a nicely formatted report of test results and some basic statistics.
+
+    """
+    def print_item(item):
+        print('job ID:', item.eid)
+        print('module:', item['module-name'])
+        print('operator:', item['op-name'])
+        print('occurrence:', item['occurrence'])
+        try:
+            print('result type:', item['results-type'])
+            print('data:', item['results-data'])
+        except KeyError:
+            pass
+
+    def get_kills(db):
+        completed = filtering(lambda r: 'results-type' in r)
+        normal = filtering(lambda r: r['results-type'] == 'normal')
+        killed = filtering(lambda r: r['results-data'][1][0] == 'Outcome.KILLED')
+        find_kills = compose(completed, normal, killed)
+        return transducer.eager.transduce(find_kills, transducer.reducers.Appending(), db.work_items)
+
+    db_name = get_db_name(configuration['<session-name>'])
+
+    with cosmic_ray.work_db.use_db(db_name) as db:
+        for item in db.work_items:
+            print_item(item)
+            print('')
+
+        total_jobs =  sum(1 for _ in db.work_items)
+        pending_jobs = sum(1 for _ in db.pending_work)
+        completed_jobs = total_jobs - pending_jobs
+        kills = get_kills(db)
+        print('total jobs:', total_jobs)
+
+        if completed_jobs > 0:
+            print('complete: {}%'.format(completed_jobs / total_jobs * 100))
+            print('survival rate: {}%'.format((1 - len(kills) / completed_jobs) * 100))
+        else:
+            print('no jobs completed')
 
 
 def handle_counts(configuration):
@@ -178,7 +266,6 @@ options:
   --no-local-import   Allow importing module from the current directory
   --test-runner=R     Test-runner plugin to use [default: unittest]
   --exclude-modules=P Pattern of module names to exclude from mutation
-  --num-testers=N     Number of concurrent testers to run (0 = os.cpu_count()) [default: 0]
 """
     sys.path.insert(0, '')
 
@@ -253,17 +340,33 @@ options:
         json.dumps((result_type, data),
                    cls=cosmic_ray.json_util.JSONEncoder))
 
-
 COMMAND_HANDLER_MAP = {
     'baseline':     handle_baseline,
     'counts':       handle_counts,
+    'exec':         handle_exec,
     'help':         handle_help,
+    'init':         handle_init,
     'load':         handle_load,
+    'report':       handle_report,
     'run':          handle_run,
     'test-runners': handle_test_runners,
     'operators':    handle_operators,
     'worker':       handle_worker,
 }
+
+OPTIONS = """cosmic-ray
+
+Usage: cosmic-ray [--verbose] [--help] <command> [<args> ...]
+
+options:
+  --help     Show this screen.
+  --verbose  Produce more verbose output
+
+Available commands:
+  {}
+
+See 'cosmic-ray help <command>' for help on specific commands.
+""".format('\n  '.join(sorted(COMMAND_HANDLER_MAP)))
 
 
 def main(argv=None):
