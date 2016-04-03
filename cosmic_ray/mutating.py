@@ -9,7 +9,7 @@ import cosmic_ray.util
 
 LOG = logging.getLogger()
 
-
+# TODO: Can this be removed?
 MutationRecord = collections.namedtuple('MutationRecord',
                                         ['module_name',
                                          'module_file',
