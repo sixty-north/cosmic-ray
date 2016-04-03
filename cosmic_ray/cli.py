@@ -21,15 +21,11 @@ import cosmic_ray.json_util
 import cosmic_ray.worker
 import cosmic_ray.testing
 import cosmic_ray.timing
-import cosmic_ray.work_db
+from cosmic_ray.work_db import use_db, WorkDB
 
 
 LOG = logging.getLogger()
 
-# This is really an experiment in using transducers in "the real
-# world". You could accomplish the same parsing goals in fewer lines
-# (and probably more quckly) using more traditional means. But this
-# approach does have a certain charm and elegance to it.
 REMOVE_COMMENTS = mapping(lambda x: x.split('#')[0])
 REMOVE_WHITESPACE = mapping(str.strip)
 NON_EMPTY = filtering(bool)
@@ -100,7 +96,7 @@ options:
     test_runner()
 
 
-def get_db_name(session_name):
+def _get_db_name(session_name):
     return '{}.json'.format(session_name)
 
 
@@ -148,9 +144,9 @@ options:
 
     counts = cosmic_ray.counting.count_mutants(modules, operators)
 
-    db_name = get_db_name(configuration['<session-name>'])
+    db_name = _get_db_name(configuration['<session-name>'])
 
-    with cosmic_ray.work_db.use_db(db_name) as db:
+    with use_db(db_name) as db:
         db.set_work_parameters(
             test_runner=configuration['--test-runner'],
             test_directory=configuration['<test-dir>'],
@@ -176,9 +172,9 @@ options:
   --verbose           Produce verbose output
 
     """
-    db_name = get_db_name(configuration['<session-name>'])
+    db_name = _get_db_name(configuration['<session-name>'])
 
-    with cosmic_ray.work_db.use_db(db_name) as db:
+    with use_db(db_name, mode=WorkDB.Mode.open) as db:
         test_runner, test_directory, timeout = db.get_work_parameters()
         results = cosmic_ray.worker.execute_jobs(test_runner,
                                                  test_directory,
@@ -235,9 +231,9 @@ Print a nicely formatted report of test results and some basic statistics.
         find_kills = compose(completed, normal, killed)
         return transducer.eager.transduce(find_kills, transducer.reducers.Appending(), db.work_items)
 
-    db_name = get_db_name(configuration['<session-name>'])
+    db_name = _get_db_name(configuration['<session-name>'])
 
-    with cosmic_ray.work_db.use_db(db_name) as db:
+    with use_db(db_name) as db:
         for item in db.work_items:
             print_item(item)
             print('')
