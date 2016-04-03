@@ -46,15 +46,14 @@ def worker_task(job_id,
 
 def execute_jobs(test_runner, test_directory, timeout, jobs):
     return celery.group(
-        worker_task.delay(job_id,
-                          module_name,
-                          op_name,
-                          occurrence,
+        worker_task.delay(job.work_id,
+                          job.module_name,
+                          job.operator_name,
+                          job.occurrence,
                           test_runner,
                           test_directory,
                           timeout)
-        for job_id, module_name, op_name, occurrence
-        in jobs)
+        for job in jobs)
 
 
 def worker(module_name,

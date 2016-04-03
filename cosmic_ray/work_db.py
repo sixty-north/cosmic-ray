@@ -19,6 +19,7 @@
 #  - for 'normal', there is an *activation-record* (a dict) and a
 #    test_runner.TestResult.
 
+import collections
 import contextlib
 from enum import Enum
 import os
@@ -26,6 +27,25 @@ import os
 # This db may well not scale very well. We need to be ready to switch it out
 # for something quicker if not. But for now it's *very* convenient.
 import tinydb
+
+
+WorkItem = collections.namedtuple('WorkItem',
+                                  ['work_id',
+                                   'module_name',
+                                   'operator_name',
+                                   'occurrence',
+                                   'result_type',
+                                   'result_data'])
+
+
+def _make_work_item(rec):
+    return WorkItem(
+        rec.eid,
+        rec['module-name'],
+        rec['op-name'],
+        rec['occurrence'],
+        rec.get('result-type', None),
+        rec.get('result-data', None))
 
 
 class WorkDB:
@@ -131,7 +151,7 @@ class WorkDB:
 
     @property
     def work_items(self):
-        """The sequence of work items in the session.
+        """The sequence of `WorkItem`s in the session.
 
         This include both complete and incomplete items.
 
@@ -140,7 +160,7 @@ class WorkDB:
         and `results-data`.
 
         """
-        return self._work_items.all()
+        return (_make_work_item(r) for r in self._work_items.all())
 
     def add_results(self, job_id, results_type, results_data):
         """Add a result to the session for the work-item with id `job_id`.
@@ -156,28 +176,21 @@ class WorkDB:
         table = self._work_items
         table.update(
             {
-                'results-type': results_type,
-                'results-data': results_data,
+                'result-type': results_type,
+                'result-data': results_data,
             },
             eids=[job_id])
 
     @property
     def pending_work(self):
-        """The sequence of pending work in the session.
-
-        Each item is a tuple of the form `(job-id, module-name, operator-name,
-        occurrence)`.
-
+        """The sequence of pending `WorkItem`s in the session.
         """
         table = self._work_items
         work_item = tinydb.Query()
 
-        return ((record.eid,
-                 record['module-name'],
-                 record['op-name'],
-                 record['occurrence'])
+        return (_make_work_item(record)
                 for record
-                in table.search(~ work_item['results-type'].exists()))
+                in table.search(~ work_item['result-type'].exists()))
 
 
 @contextlib.contextmanager
@@ -196,7 +209,7 @@ def use_db(path, mode=WorkDB.Mode.create):
         exist.
     """
 
-    db = WorkDB(path)
+    db = WorkDB(path, mode)
     try:
         yield db
     except Exception:
