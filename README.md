@@ -2,7 +2,7 @@
 
 # Cosmic Ray: mutation testing for Python
 
-*"Four human beings -- changed by space-born cosmic rays into something more than merely human."*  
+*"Four human beings -- changed by space-born cosmic rays into something more than merely human."*
 *— The Fantastic Four*
 
 Cosmic Ray is a mutation testing tool for Python.
@@ -55,14 +55,34 @@ processes they spawn - need to be able to import the modules you want to test.
 As a result, you generally want to start them in the virtual environment into
 which you've installed Cosmic Ray.
 
-Finally, you're ready to start killing mutants. To do this, use Cosmic Ray's "run" command:
+Finally, you're ready to start killing mutants. Cosmic Ray uses a notion of
+*sessions* to encompass a full mutation testing suite. Since mutation testing
+runs can take a long time, and since you might need to stop and start them,
+sessions store data about the progress of a run. The first step in a full
+testing run, then, is to initialize a session:
 
 ```
-cosmic-ray run --baseline=10 <top module name> <test directory>
+cosmic-ray init --baseline=10 <session name> <top module name> <test directory>
 ```
 
-This will print out a bunch of information about what Cosmic Ray is
-doing, including stuff about what kinds of mutants are being created,
-which were killed, and – chillingly – which survived.
+This will create a database file called `<session name>.json`. Once this is
+created, you can start executing tests with the `exec` command:
+
+```
+cosmic-ray exec <session name>
+```
+
+Unless there are error, this won't print anything.
+
+Once the execution is complete (i.e. all mutations have been performed and
+tested), you can see the results of you session with the `report` command:
+
+```
+cosmic-ray report <session name>
+```
+
+This will print out a bunch of information about the work that was performed,
+including stuff about what kinds of mutants were created, which were killed, and
+– chillingly – which survived.
 
 **[Further documentation is available at readthedocs](http://cosmic-ray.readthedocs.org/en/latest/).**
