@@ -59,8 +59,8 @@ class MutatingCore:
         """
         if self._count == self._target:
             self._activation_record = {
-                'operator': _full_module_name(self),
-                'description': str(self),
+                'operator': _full_module_name(op),
+                'occurrence': self._target,
                 'line_number': cosmic_ray.util.get_line_number(node)
             }
 
