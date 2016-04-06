@@ -23,6 +23,8 @@ And, of course, patches and ideas are welcome.
 If you just want to get down to the business of finding and killing
 mutants, you still need to set a few things up.
 
+### Install Cosmic Ray
+
 First install Cosmic Ray. You can do this with `pip`:
 
 ```
@@ -37,6 +39,8 @@ python setup.py install
 
 We recommend installing it into a virtual environment. Often it makes sense to
 install it into the virtual environment of the package you want to test.
+
+### Install RabbitMQ and start a worker
 
 Next you need to install [RabbitMQ](https://www.rabbitmq.com/). Cosmic Ray uses
 this message queue (via [Celery](http://www.celeryproject.org/)) to distribute
@@ -54,6 +58,8 @@ You can start as many workers as you want. Be aware that these workers - and the
 processes they spawn - need to be able to import the modules you want to test.
 As a result, you generally want to start them in the virtual environment into
 which you've installed Cosmic Ray.
+
+### Create a session and run tests
 
 Finally, you're ready to start killing mutants. Cosmic Ray uses a notion of
 *sessions* to encompass a full mutation testing suite. Since mutation testing
@@ -73,6 +79,8 @@ cosmic-ray exec <session name>
 ```
 
 Unless there are error, this won't print anything.
+
+### View the results
 
 Once the execution is complete (i.e. all mutations have been performed and
 tested), you can see the results of you session with the `report` command:
