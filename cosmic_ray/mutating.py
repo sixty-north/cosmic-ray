@@ -1,7 +1,5 @@
 import ast
 import collections
-import copy
-import itertools
 import logging
 
 import cosmic_ray.util
