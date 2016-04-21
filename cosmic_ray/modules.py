@@ -9,8 +9,12 @@ import re
 LOG = logging.getLogger()
 
 
-def find_modules(name):
+def find_modules(name, excludes):
     """Generate sequence of all submodules of NAME, including NAME itself.
+
+    `excludes` is a sequence of regular expression. If a full module name
+    matches any of these expressions then it won't be returned in the results.
+    Critically, no module beneath an excluded module will be reported either.
 
     Given a directory structure like this:
 
@@ -28,11 +32,18 @@ def find_modules(name):
          <module 'a.b' from 'a/b.py'>,
          <module 'a.c' from 'a/c/__init__.py'>,
          <module 'a.c.d' from 'a/c/d.py'>]
+
     """
     module_names = [name]
+    exclude_patterns = [re.compile(ex) for ex in excludes]
     while module_names:
         module_name = module_names.pop()
         try:
+
+            if any([pattern.match(module_name)
+                    for pattern in exclude_patterns]):
+                continue
+
             module = importlib.import_module(module_name)
 
             yield module
@@ -46,15 +57,3 @@ def find_modules(name):
             LOG.exception(
                 'Unable to import %s',
                 module_name)
-
-
-def filtered_modules(modules, excludes):
-    """Get the sequence of modules in `modules` which aren't filtered out
-    by a regex in `excludes`.
-
-    """
-    exclude_patterns = [re.compile(ex) for ex in excludes]
-    for module in modules:
-        if not any([pattern.match(module.__name__)
-                    for pattern in exclude_patterns]):
-            yield module

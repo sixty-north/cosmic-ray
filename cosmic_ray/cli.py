@@ -84,7 +84,6 @@ This is largely like running a "worker" process, with the difference
 that a baseline run doesn't mutate the code.
 
 options:
-  --verbose           Produce verbose output
   --no-local-import   Allow importing module from the current directory
   --test-runner=R     Test-runner plugin to use [default: unittest]
 """
@@ -114,7 +113,6 @@ The session-name argument identifies the run you're creating. It's most
 important role is that it's used to name the database file.
 
 options:
-  --verbose           Produce verbose output
   --no-local-import   Allow importing module from the current directory
   --test-runner=R     Test-runner plugin to use [default: unittest]
   --exclude-modules=P Pattern of module names to exclude from mutation
@@ -136,9 +134,12 @@ options:
 
     LOG.info('timeout = {} seconds'.format(timeout))
 
-    modules = cosmic_ray.modules.filtered_modules(
-        cosmic_ray.modules.find_modules(configuration['<top-module>']),
-        configuration['--exclude-modules'])
+    modules = set(
+        cosmic_ray.modules.find_modules(
+            configuration['<top-module>'],
+            configuration['--exclude-modules']))
+
+    LOG.info('Modules discovered: %s',  [m.__name__ for m in modules])
 
     operators = cosmic_ray.plugins.operator_names()
 
@@ -162,14 +163,11 @@ options:
 
 
 def handle_exec(configuration):
-    """usage: cosmic-ray exec [options] <session-name>
+    """usage: cosmic-ray exec <session-name>
 
 Perform the remaining work to be done in the specified session. This requires
 that the rest of your mutation testing infrastructure (e.g. worker processes)
 are already running.
-
-options:
-  --verbose           Produce verbose output
 
     """
     db_name = _get_db_name(configuration['<session-name>'])
@@ -197,7 +195,6 @@ CONTINUE EXECUTION OF AN INTERRUPTED SESSION! If you do this, you will lose any
 existing results.
 
 options:
-  --verbose           Produce verbose output
   --no-local-import   Allow importing module from the current directory
   --test-runner=R     Test-runner plugin to use [default: unittest]
   --exclude-modules=P Pattern of module names to exclude from mutation
@@ -243,8 +240,9 @@ Print a nicely formatted report of test results and some basic statistics.
         print('total jobs:', total_jobs)
 
         if completed_jobs > 0:
-            print('complete: {}%'.format(completed_jobs / total_jobs * 100))
-            print('survival rate: {}%'.format(
+            print('complete: {} ({:.2f}%)'.format(
+                completed_jobs, completed_jobs / total_jobs * 100))
+            print('survival rate: {:.2f}%'.format(
                 (1 - len(kills) / completed_jobs) * 100))
         else:
             print('no jobs completed')
@@ -264,8 +262,8 @@ options:
 """
     sys.path.insert(0, '')
 
-    modules = cosmic_ray.modules.filtered_modules(
-        cosmic_ray.modules.find_modules(configuration['<top-module>']),
+    modules = cosmic_ray.modules.find_modules(
+        configuration['<top-module>'],
         configuration['--exclude-modules'])
 
     operators = cosmic_ray.plugins.operator_names()
@@ -310,7 +308,6 @@ Normally you won't run this directly. Rather, it will be launched by celery
 worker tasks.
 
 options:
-  --verbose           Produce verbose output
   --no-local-import   Disallow importing module from the current directory
 """
     if not config['--no-local-import']:
@@ -351,7 +348,7 @@ COMMAND_HANDLER_MAP = {
 
 OPTIONS = """cosmic-ray
 
-Usage: cosmic-ray [--verbose] [--help] <command> [<args> ...]
+Usage: cosmic-ray [options] <command> [<args> ...]
 
 options:
   --help     Show this screen.
