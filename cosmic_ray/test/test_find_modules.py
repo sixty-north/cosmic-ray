@@ -1,5 +1,6 @@
 import contextlib
 import os.path
+import sys
 import tempfile
 
 import with_fixture
@@ -34,7 +35,11 @@ class FindModulesTest(with_fixture.TestCase):
         with tempfile.TemporaryDirectory(
                 dir=os.path.dirname(__file__)) as self.root:
             with excursion(self.root):
-                yield
+                sys.path = [self.root] + sys.path
+                try:
+                    yield
+                finally:
+                    sys.path = sys.path[1:]
 
     def test_small_directory_tree(self):
         paths = [['a', '__init__.py'],
