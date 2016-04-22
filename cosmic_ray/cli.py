@@ -3,9 +3,11 @@
 Here we manage command-line parsing and launching of the internal
 machinery that does mutation testing.
 """
+from contextlib import redirect_stdout
 import itertools
 import json
 import logging
+import os
 import pprint
 import sys
 
@@ -319,15 +321,15 @@ options:
         config['<test-runner>'],
         config['<test-dir>'])
 
-    result_type, data = cosmic_ray.worker.worker(
-        config['<module>'],
-        operator,
-        int(config['<occurrence>']),
-        test_runner,
-        float(config['<timeout>']))
-
-    if result_type == 'exception':
-        data = str(data)
+    with open(os.devnull, 'w') as devnull, redirect_stdout(devnull):
+        result_type, data = cosmic_ray.worker.worker(
+            config['<module>'],
+            operator,
+            int(config['<occurrence>']),
+            test_runner,
+            float(config['<timeout>']))
+        if result_type == 'exception':
+            data = str(data)
 
     sys.stdout.write(
         json.dumps((result_type, data),
