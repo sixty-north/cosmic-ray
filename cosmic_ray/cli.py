@@ -116,7 +116,6 @@ options:
   --no-local-import   Allow importing module from the current directory
   --test-runner=R     Test-runner plugin to use [default: unittest]
   --exclude-modules=P Pattern of module names to exclude from mutation
-
     """
     # This lets us import modules from the current directory. Should probably
     # be optional, and needs to also be applied to workers!
@@ -311,7 +310,6 @@ worker tasks.
 
 options:
   --no-local-import   Disallow importing module from the current directory
-  --verbose  Produce more verbose output
 """
     if not config['--no-local-import']:
         sys.path.insert(0, '')
@@ -375,6 +373,7 @@ def main(argv=None):
         version='cosmic-ray v.2')
     if configuration['--verbose']:
         logging.basicConfig(level=logging.INFO)
+        argv.remove('--verbose')
 
     command = configuration['<command>']
     if command is None:
