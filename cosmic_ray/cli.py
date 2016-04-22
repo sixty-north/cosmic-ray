@@ -17,6 +17,7 @@ from transducer.functional import compose
 import transducer.lazy
 from transducer.transducers import filtering, mapping
 
+import cosmic_ray.commands.report
 import cosmic_ray.counting
 import cosmic_ray.modules
 import cosmic_ray.json_util
@@ -213,45 +214,12 @@ def handle_report(configuration):
 Print a nicely formatted report of test results and some basic statistics.
 
     """
-    def print_item(item):
-        print('job ID:', item.work_id)
-        print('module:', item.module_name)
-        print('operator:', item.operator_name)
-        print('occurrence:', item.occurrence)
-        print('command:', ' '.join(item.command) if item.command is not None else '')
-        print('result type:', item.result_type)
-        print('data:', item.result_data)
-
-    def get_kills(db):
-        normal = filtering(lambda r: r.result_type == 'normal')
-        killed = filtering(lambda r: r.result_data[1][0] == 'Outcome.KILLED')
-        find_kills = compose(normal, killed)
-        return transducer.eager.transduce(find_kills,
-                                          transducer.reducers.Appending(),
-                                          db.work_items)
-
     db_name = _get_db_name(configuration['<session-name>'])
     show_pending = configuration['--show-pending']
 
     with use_db(db_name, WorkDB.Mode.open) as db:
-        for item in db.work_items:
-            if (item.result_type is not None) or show_pending:
-                print_item(item)
-                print('')
-
-        total_jobs = sum(1 for _ in db.work_items)
-        pending_jobs = sum(1 for _ in db.pending_work)
-        completed_jobs = total_jobs - pending_jobs
-        kills = get_kills(db)
-        print('total jobs:', total_jobs)
-
-        if completed_jobs > 0:
-            print('complete: {} ({:.2f}%)'.format(
-                completed_jobs, completed_jobs / total_jobs * 100))
-            print('survival rate: {:.2f}%'.format(
-                (1 - len(kills) / completed_jobs) * 100))
-        else:
-            print('no jobs completed')
+        for line in cosmic_ray.commands.report.create_report(db, show_pending):
+            print(line)
 
 
 def handle_counts(configuration):
