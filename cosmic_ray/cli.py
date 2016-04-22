@@ -205,7 +205,7 @@ options:
 
 
 def handle_report(configuration):
-    """usage: cosmic-ray report <session-name>
+    """usage: cosmic-ray report [--show-pending] <session-name>
 
 Print a nicely formatted report of test results and some basic statistics.
 
@@ -227,11 +227,13 @@ Print a nicely formatted report of test results and some basic statistics.
                                           db.work_items)
 
     db_name = _get_db_name(configuration['<session-name>'])
+    show_pending = configuration['--show-pending']
 
     with use_db(db_name, WorkDB.Mode.open) as db:
         for item in db.work_items:
-            print_item(item)
-            print('')
+            if (item.result_type is not None) or show_pending:
+                print_item(item)
+                print('')
 
         total_jobs = sum(1 for _ in db.work_items)
         pending_jobs = sum(1 for _ in db.pending_work)
@@ -309,6 +311,7 @@ worker tasks.
 
 options:
   --no-local-import   Disallow importing module from the current directory
+  --verbose  Produce more verbose output
 """
     if not config['--no-local-import']:
         sys.path.insert(0, '')
