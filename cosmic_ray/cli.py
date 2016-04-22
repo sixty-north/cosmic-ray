@@ -17,9 +17,7 @@ from transducer.functional import compose
 import transducer.lazy
 from transducer.transducers import filtering, mapping
 
-import cosmic_ray.commands.execute
-import cosmic_ray.commands.init
-import cosmic_ray.commands.report
+import cosmic_ray.commands
 import cosmic_ray.counting
 import cosmic_ray.modules
 import cosmic_ray.json_util
@@ -148,7 +146,7 @@ options:
     db_name = _get_db_name(configuration['<session-name>'])
 
     with use_db(db_name) as db:
-        cosmic_ray.commands.init.init(
+        cosmic_ray.commands.init(
             modules,
             db,
             configuration['--test-runner'],
@@ -167,7 +165,7 @@ are already running.
     db_name = _get_db_name(configuration['<session-name>'])
 
     with use_db(db_name, mode=WorkDB.Mode.open) as db:
-        cosmic_ray.commands.execute.execute(db)
+        cosmic_ray.commands.execute(db)
 
 
 def handle_run(configuration):
@@ -200,7 +198,7 @@ Print a nicely formatted report of test results and some basic statistics.
     show_pending = configuration['--show-pending']
 
     with use_db(db_name, WorkDB.Mode.open) as db:
-        for line in cosmic_ray.commands.report.create_report(db, show_pending):
+        for line in cosmic_ray.commands.create_report(db, show_pending):
             print(line)
 
 
