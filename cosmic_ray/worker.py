@@ -37,11 +37,12 @@ def worker_task(job_id,
                test_runner,
                test_directory,
                str(timeout))
+    LOG.info('executing:', command)
     proc = subprocess.run(command,
                           stdout=subprocess.PIPE,
                           universal_newlines=True)
     result = json.loads(proc.stdout)
-    return (job_id, result)
+    return (job_id, command, result)
 
 
 def execute_jobs(test_runner, test_directory, timeout, jobs):

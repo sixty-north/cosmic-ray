@@ -181,8 +181,8 @@ are already running.
                                                  db.pending_work)
 
         for r in results:
-            job_id, (result_type, result_data) = r.get()
-            db.add_results(job_id, result_type, result_data)
+            job_id, command, (result_type, result_data) = r.get()
+            db.add_results(job_id, command, result_type, result_data)
 
 
 def handle_run(configuration):
@@ -216,6 +216,7 @@ Print a nicely formatted report of test results and some basic statistics.
         print('module:', item.module_name)
         print('operator:', item.operator_name)
         print('occurrence:', item.occurrence)
+        print('command:', ' '.join(item.command) if item.command is not None else '')
         print('result type:', item.result_type)
         print('data:', item.result_data)
 

@@ -34,6 +34,7 @@ WorkItem = collections.namedtuple('WorkItem',
                                    'module_name',
                                    'operator_name',
                                    'occurrence',
+                                   'command',
                                    'result_type',
                                    'result_data'])
 
@@ -44,6 +45,7 @@ def _make_work_item(rec):
         rec['module-name'],
         rec['op-name'],
         rec['occurrence'],
+        rec.get('command', None),
         rec.get('result-type', None),
         rec.get('result-data', None))
 
@@ -162,7 +164,7 @@ class WorkDB:
         """
         return (_make_work_item(r) for r in self._work_items.all())
 
-    def add_results(self, job_id, results_type, results_data):
+    def add_results(self, job_id, command, results_type, results_data):
         """Add a result to the session for the work-item with id `job_id`.
 
         Args:
@@ -176,6 +178,7 @@ class WorkDB:
         table = self._work_items
         table.update(
             {
+                'command': command,
                 'result-type': results_type,
                 'result-data': results_data,
             },
