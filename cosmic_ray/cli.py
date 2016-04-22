@@ -18,6 +18,7 @@ import transducer.lazy
 from transducer.transducers import filtering, mapping
 
 import cosmic_ray.commands.execute
+import cosmic_ray.commands.init
 import cosmic_ray.commands.report
 import cosmic_ray.counting
 import cosmic_ray.modules
@@ -144,25 +145,15 @@ options:
 
     LOG.info('Modules discovered: %s',  [m.__name__ for m in modules])
 
-    operators = cosmic_ray.plugins.operator_names()
-
-    counts = cosmic_ray.counting.count_mutants(modules, operators)
-
     db_name = _get_db_name(configuration['<session-name>'])
 
     with use_db(db_name) as db:
-        db.set_work_parameters(
-            test_runner=configuration['--test-runner'],
-            test_directory=configuration['<test-dir>'],
-            timeout=timeout)
-
-        db.clear_work_items()
-
-        db.add_work_items(
-            (module.__name__, opname, occurrence)
-            for module, ops in counts.items()
-            for opname, count in ops.items()
-            for occurrence in range(count))
+        cosmic_ray.commands.init.init(
+            modules,
+            db,
+            configuration['--test-runner'],
+            configuration['<test-dir>'],
+            timeout)
 
 
 def handle_exec(configuration):
