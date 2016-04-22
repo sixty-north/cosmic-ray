@@ -9,7 +9,7 @@ import re
 LOG = logging.getLogger()
 
 
-def find_modules(name, excludes):
+def find_modules(name, excludes=None):
     """Generate sequence of all submodules of NAME, including NAME itself.
 
     `excludes` is a sequence of regular expression. If a full module name
@@ -34,6 +34,7 @@ def find_modules(name, excludes):
          <module 'a.c.d' from 'a/c/d.py'>]
 
     """
+    excludes = excludes or []
     module_names = [name]
     exclude_patterns = [re.compile(ex) for ex in excludes]
     while module_names:
