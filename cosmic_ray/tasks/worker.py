@@ -46,7 +46,11 @@ def worker_task(work_id,
     return (work_id, command, result)
 
 
-def execute_work_items(test_runner, test_directory, timeout, work_items):
+def execute_work_items(test_runner,
+                       test_directory,
+                       timeout,
+                       work_items):
+
     """Execute a suite of tests for a given set of work items.
 
     Args:
@@ -57,6 +61,7 @@ def execute_work_items(test_runner, test_directory, timeout, work_items):
 
     Returns: An iterable of `(work_id, command, results)` tuples as described
       in `worker_task()`.
+
     """
     return celery.group(
         worker_task.delay(work_item.work_id,
