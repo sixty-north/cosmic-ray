@@ -33,7 +33,7 @@ pip install cosmic_ray
 3. Start a Cosmic Ray worker task
 
 ```
-celery -A cosmic_ray.worker worker
+celery -A cosmic_ray.tasks.worker worker
 ```
 
 4. Initialize a Cosmic Ray session
@@ -103,7 +103,7 @@ really support that as of this writing).
 Start worker processes like this:
 
 ```
-celery -A cosmic_ray.worker worker
+celery -A cosmic_ray.tasks.worker worker
 ```
 
 You should do this, of course, from the virtual environment into which you've

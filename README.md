@@ -51,7 +51,7 @@ Once RabbitMQ is running, you need to start one or more Cosmic Ray worker tasks
 to listen for commmands on the queue. Start a worker like this:
 
 ```
-celery -A cosmic_ray.worker worker
+celery -A cosmic_ray.tasks.worker worker
 ```
 
 You can start as many workers as you want. Be aware that these workers - and the
