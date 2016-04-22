@@ -5,56 +5,14 @@ one location with one operator, runs the tests, reports the results, and dies.
 """
 
 import importlib
-import itertools
-import json
 import logging
-import subprocess
 import sys
 
-import celery
-
-from .celery import app
 from .importing import using_mutant
 from .mutating import MutatingCore
 from .parsing import get_ast
 
 LOG = logging.getLogger()
-
-
-@app.task(name='cosmic_ray.worker')
-def worker_task(job_id,
-                module,
-                operator,
-                occurrence,
-                test_runner,
-                test_directory,
-                timeout):
-    command = ('cosmic-ray',
-               'worker',
-               module,
-               operator,
-               str(occurrence),
-               test_runner,
-               test_directory,
-               str(timeout))
-    LOG.info('executing:', command)
-    proc = subprocess.run(command,
-                          stdout=subprocess.PIPE,
-                          universal_newlines=True)
-    result = json.loads(proc.stdout)
-    return (job_id, command, result)
-
-
-def execute_jobs(test_runner, test_directory, timeout, jobs):
-    return celery.group(
-        worker_task.delay(job.work_id,
-                          job.module_name,
-                          job.operator_name,
-                          job.occurrence,
-                          test_runner,
-                          test_directory,
-                          timeout)
-        for job in jobs)
 
 
 def worker(module_name,
