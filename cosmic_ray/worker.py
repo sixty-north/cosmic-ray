@@ -7,6 +7,7 @@ one location with one operator, runs the tests, reports the results, and dies.
 import importlib
 import logging
 import sys
+import traceback
 
 from .importing import using_mutant
 from .mutating import MutatingCore
@@ -77,4 +78,5 @@ def worker(module_name,
                  results))
 
     except Exception:
-        return ('exception', sys.exc_info())
+        return ('exception',
+                traceback.format_exception(*sys.exc_info()))
