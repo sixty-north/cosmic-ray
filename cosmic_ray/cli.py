@@ -17,12 +17,12 @@ from transducer.functional import compose
 import transducer.lazy
 from transducer.transducers import filtering, mapping
 
+import cosmic_ray.commands.execute
 import cosmic_ray.commands.report
 import cosmic_ray.counting
 import cosmic_ray.modules
 import cosmic_ray.json_util
 import cosmic_ray.worker
-import cosmic_ray.tasks.worker
 import cosmic_ray.testing
 import cosmic_ray.timing
 from cosmic_ray.work_db import use_db, WorkDB
@@ -176,16 +176,7 @@ are already running.
     db_name = _get_db_name(configuration['<session-name>'])
 
     with use_db(db_name, mode=WorkDB.Mode.open) as db:
-        test_runner, test_directory, timeout = db.get_work_parameters()
-        results = cosmic_ray.tasks.worker.execute_work_items(
-            test_runner,
-            test_directory,
-            timeout,
-            db.pending_work)
-
-        for r in results:
-            job_id, command, (result_type, result_data) = r.get()
-            db.add_results(job_id, command, result_type, result_data)
+        cosmic_ray.commands.execute.execute(db)
 
 
 def handle_run(configuration):
