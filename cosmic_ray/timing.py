@@ -47,6 +47,6 @@ def run_baseline(test_runner, module_name, test_dir):
                test_dir,)
 
     with Timer() as t:
-        subprocess.run(command)
+        subprocess.call(command)
 
     return t.elapsed.total_seconds()

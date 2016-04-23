@@ -202,6 +202,18 @@ Print a nicely formatted report of test results and some basic statistics.
             print(line)
 
 
+def handle_survival_rate(configuration):
+    """usage: cosmic-ray survival-rate <session-name>
+
+Print the session's survival rate.
+    """
+    db_name = _get_db_name(configuration['<session-name>'])
+
+    with use_db(db_name, WorkDB.Mode.open) as db:
+        rate = cosmic_ray.commands.survival_rate(db)
+        print('{:.2f}'.format(rate))
+
+
 def handle_counts(configuration):
     """usage: cosmic-ray counts [options] [--exclude-modules=P ...] <top-module>
 
@@ -287,17 +299,18 @@ options:
                    cls=cosmic_ray.json_util.JSONEncoder))
 
 COMMAND_HANDLER_MAP = {
-    'baseline':     handle_baseline,
-    'counts':       handle_counts,
-    'exec':         handle_exec,
-    'help':         handle_help,
-    'init':         handle_init,
-    'load':         handle_load,
-    'report':       handle_report,
-    'run':          handle_run,
-    'test-runners': handle_test_runners,
-    'operators':    handle_operators,
-    'worker':       handle_worker,
+    'baseline':      handle_baseline,
+    'counts':        handle_counts,
+    'exec':          handle_exec,
+    'help':          handle_help,
+    'init':          handle_init,
+    'load':          handle_load,
+    'report':        handle_report,
+    'run':           handle_run,
+    'survival-rate': handle_survival_rate,
+    'test-runners':  handle_test_runners,
+    'operators':     handle_operators,
+    'worker':        handle_worker,
 }
 
 OPTIONS = """cosmic-ray
