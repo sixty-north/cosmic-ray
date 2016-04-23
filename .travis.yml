@@ -4,5 +4,16 @@ python:
 
 install: python setup.py install
 
+services: rabbitmq
+
+before_script:
+  - cd test_project
+  - celery -A cosmic_ray.tasks.worker worker &
+
 script:
   - py.test cosmic_ray/test
+  - cd test_project
+  - cosmic-ray run cosmic-ray.unittest.conf
+  - cosmic-ray report adam_tests.unittest
+  - cosmic-ray run cosmic-ray.pytest.conf
+  - cosmic-ray report adam_tests.pytest
