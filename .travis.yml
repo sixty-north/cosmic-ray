@@ -7,8 +7,9 @@ install: python setup.py install
 services: rabbitmq
 
 before_script:
-  - cd test_project
+  - pushd test_project
   - celery -A cosmic_ray.tasks.worker worker &
+  - popd
 
 script:
   - py.test cosmic_ray/test
