@@ -19,8 +19,7 @@ LOG = logging.getLogger()
 def worker(module_name,
            operator_class,
            occurrence,
-           test_runner,
-           timeout):
+           test_runner):
     """Mutate the OCCURRENCE-th site for OPERATOR_NAME in MODULE_NAME, run the
     tests, and report the results.
 
@@ -40,8 +39,7 @@ def worker(module_name,
 
     Finally, and hopefully normally, the worker will find that it can run a
     test. It will do so and report back the result - killed, survived, or
-    incompetent - in a structured way. Note that timeouts are interpreted as
-    *incomptent* results for the purposes of this function.
+    incompetent - in a structured way.
 
     Returns: A tuple `(result-type, data)`. `result-type` is either the string
         'exception', 'no-test', or 'normal'.
@@ -58,8 +56,6 @@ def worker(module_name,
         will be reported using the 'exception' result-type in the return value.
 
     """
-    # TODO: Timeout?
-
     try:
         module = importlib.import_module(module_name)
         module_ast = get_ast(module)

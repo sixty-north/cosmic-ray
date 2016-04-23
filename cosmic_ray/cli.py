@@ -262,13 +262,12 @@ List the available operator plugins.
 
 
 def handle_worker(config):
-    """usage: cosmic-ray worker [options] <module> <operator> <occurrence> <test-runner> <test-dir> <timeout>
+    """usage: cosmic-ray worker [options] <module> <operator> <occurrence> <test-runner> <test-dir>
 
 Run a worker process which performs a single mutation and test run. Each
 worker does a minimal, isolated chunk of work: it mutates the <occurence>-th
 instance of <operator> in <module>, runs the test suite defined by
-<test-runner> and <test-dir>, prints the results, and exits. If the test run
-takes longer than <timeout>, the test it killed.
+<test-runner> and <test-dir>, prints the results, and exits.
 
 Normally you won't run this directly. Rather, it will be launched by celery
 worker tasks.
@@ -289,8 +288,7 @@ options:
             config['<module>'],
             operator,
             int(config['<occurrence>']),
-            test_runner,
-            float(config['<timeout>']))
+            test_runner)
         if result_type == 'exception':
             data = str(data)
 
