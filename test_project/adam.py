@@ -35,3 +35,10 @@ def use_continue(limit):
     for x in range(limit):
         continue
     return x
+
+
+def trigger_infinite_loop():
+    # When `break` becomes `continue`, this should enter an infinite loop. This
+    # helps us test timeouts.
+    while True:
+        break

@@ -37,3 +37,6 @@ class Tests(unittest.TestCase):
         self.assertEqual(
             adam.use_continue(10),
             9)
+
+    def test_trigger_infinite_loop(self):
+        adam.trigger_infinite_loop()
