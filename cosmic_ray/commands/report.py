@@ -20,7 +20,7 @@ def _print_item(item):
 
 def _get_kills(db):
     normal = filtering(lambda r: r.result_type == 'normal')
-    killed = filtering(lambda r: r.result_data[1][0] == 'Outcome.KILLED')
+    killed = filtering(lambda r: r.result_data == 'timeout' or r.result_data[1][0] == 'Outcome.KILLED')
     find_kills = compose(normal, killed)
     return transducer.eager.transduce(find_kills,
                                       transducer.reducers.Appending(),
