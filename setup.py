@@ -54,10 +54,11 @@ setup(
         'celery',
         'decorator',
         'docopt',
+        'pathlib',
+        'pytest',
         'stevedore',
         'tinydb',
         'transducer',
-        'with_fixture',
     ],
     entry_points={
         'console_scripts': [

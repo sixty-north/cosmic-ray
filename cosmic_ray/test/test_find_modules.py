@@ -1,56 +1,35 @@
 import contextlib
 import os.path
+from pathlib import Path
 import sys
-import tempfile
-
-import with_fixture
 
 import cosmic_ray.modules
 
+THIS_DIR = Path(
+    os.path.dirname(
+        os.path.realpath(__file__)))
+
 
 @contextlib.contextmanager
-def excursion(directory):
-    old_dir = os.getcwd()
-    os.chdir(directory)
+def extend_path(directory):
+    """Put `directory` at the front of `sys.path` temporarily.
+    """
+    sys.path = [str(directory)] + sys.path
     try:
         yield
     finally:
-        os.chdir(old_dir)
+        sys.path = sys.path[1:]
 
 
-def make_file(path):
-    dirname = os.path.dirname(path)
-    if not os.path.exists(dirname):
-        os.makedirs(dirname)
-    with open(path, 'wt'):
-        pass
-
-
-class FindModulesTest(with_fixture.TestCase):
-    def withFixture(self):
-        # NOTE: We use dir= here because on some operating systems (OS
-        # X *ahem*) the temp directory can be created in /var which is
-        # some sort of magic alias for /private/var. This can make the
-        # test results appear incorrect when in fact they're fine.
-        with tempfile.TemporaryDirectory(
-                dir=os.path.dirname(__file__)) as self.root:
-            with excursion(self.root):
-                sys.path = [self.root] + sys.path
-                try:
-                    yield
-                finally:
-                    sys.path = sys.path[1:]
-
-    def test_small_directory_tree(self):
-        paths = [['a', '__init__.py'],
-                 ['a', 'b.py'],
-                 ['a', 'c', '__init__.py'],
-                 ['a', 'c', 'd.py']]
-        paths = [os.path.abspath(os.path.join(self.root, *path))
-                 for path in paths]
-        [make_file(p) for p in paths]
-
-        results = cosmic_ray.modules.find_modules('a')
-        self.assertListEqual(
-            sorted(paths),
-            sorted(map(lambda m: m.__file__, results)))
+def test_small_directory_tree():
+    datadir = THIS_DIR / 'data'
+    paths = (('a', '__init__.py'),
+             ('a', 'b.py'),
+             ('a', 'c', '__init__.py'),
+             ('a', 'c', 'd.py'))
+    expected = sorted(datadir / Path(*path) for path in paths)
+    with extend_path(datadir):
+        results = sorted(
+            Path(m.__file__)
+            for m in cosmic_ray.modules.find_modules('a'))
+    assert expected == results

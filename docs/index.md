@@ -280,12 +280,12 @@ and it will have the same effect as running the original command.
 
 ## Tests
 
-Cosmic Ray has a number of test suites to help ensure that it works. The
-first suite is a standard `unittest` test suite that validates some if
-its internals. You can run that like this:
+Cosmic Ray has a number of test suites to help ensure that it works. The first
+suite is a [pytest](http://pytest.org/) test suite that validates some if its
+internals. You can run that like this:
 
 ```
-python -m unittest discover cosmic_ray/test
+py.test cosmic_ray/test
 ```
 
 (Note that these unit tests don't require any workers to be running).

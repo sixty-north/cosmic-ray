@@ -52,7 +52,8 @@ def _create_operator(from_op, to_op):  # pylint:disable=redefined-outer-name
         (Operator,),
         {'mutate': lambda self, node: to_op(),
          visit_func_name: visit_func,
-         'from_op': from_op})
+         'from_op': from_op,
+         'to_op': to_op})
 
     globals()[operator_name] = new_op
     return new_op

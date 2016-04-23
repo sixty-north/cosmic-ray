@@ -2,7 +2,7 @@
 """
 import ast
 import copy
-import unittest
+import pytest
 
 import cosmic_ray.operators.relational_operator_replacement as ROR
 from cosmic_ray.counting import _CountingCore
@@ -36,135 +36,92 @@ def linearize_tree(node):
     l.visit(node)
     return l.nodes
 
+RELATIONAL_NODE_TOKENS = {
+    ast.Eq: '==',
+    ast.NotEq: '!=',
+    ast.Lt: '<',
+    ast.LtE: '<=',
+    ast.Gt: '>',
+    ast.GtE: '>=',
+    ast.Is: 'is',
+    ast.IsNot: 'is not',
+    ast.In: 'in',
+    ast.NotIn: 'not in'
+}
 
-class MutationTextMixin:
-    """A set of mutation-oriented tests for `Operators`.
+RELATIONAL_OPERATOR_SAMPLES = [
+    (op, 'if x {} 1: pass'.format(RELATIONAL_NODE_TOKENS[op.from_op]))
+    for op in ROR.OPERATORS
+]
 
-    This is designed to be used as a mixin with `unittest.TestCase`. That is,
-    if you subclass from both this and `TestCase` then this will provide actual
-    test functions. The tests are all oriented to testing whether the operator
-    behaves correctly when supplied with a MutatingCore.
-
-    Each subclass of this must provide two functions:
-    - source(): returns a body of code on which the operator can function.
-    - operator(): returns an `Operator` class object.
-    """
-    def test_activation_record_created(self):
-        node = ast.parse(self.code())
-        core = MutatingCore(0)
-        op = self.operator()(core)
-        self.assertFalse(core.activation_record)
-        op.visit(node)
-        self.assertTrue(core.activation_record)
-
-    def test_no_activation_record_created(self):
-        node = ast.parse(self.code())
-        core = MutatingCore(1)
-        op = self.operator()(core)
-        op.visit(node)
-        self.assertFalse(core.activation_record)
-
-    def test_mutation_changes_ast(self):
-        node = ast.parse(self.code())
-        core = MutatingCore(0)
-        mutant = self.operator()(core).visit(copy.deepcopy(node))
-
-        orig_nodes = linearize_tree(node)
-        mutant_nodes = linearize_tree(mutant)
-
-        self.assertEqual(len(orig_nodes),
-                         len(mutant_nodes))
-
-        self.assertNotEqual(
-            ast.dump(node),
-            ast.dump(mutant))
-
-    def test_no_mutation_leaves_ast_unchanged(self):
-        node = ast.parse(self.code())
-
-        core = MutatingCore(1)
-        replacer = self.operator()(core)
-        self.assertEqual(
-            ast.dump(node),
-            ast.dump(replacer.visit(copy.deepcopy(node))))
+OPERATOR_SAMPLES = [
+    (ReplaceBreakWithContinue, 'while True: break'),
+    (ReplaceContinueWithBreak, 'while False: continue'),
+    (NumberReplacer, 'x = 1'),
+] + RELATIONAL_OPERATOR_SAMPLES
 
 
-class CountingTextMixin:
-    """A set of counting-oriented tests for `Operators`.
-
-    This is designed to be used as a mixin with `unittest.TestCase`. That is,
-    if you subclass from both this and `TestCase` then this will provide actual
-    test functions. The tests are all oriented to testing whether the operator
-    behaves correctly when supplied with a CountingCore.
-
-    Each subclass of this must provide two functions:
-    - source(): returns a body of code on which the operator can function.
-    - operator(): returns an `Operator` class object.
-    """
-    def test_replacement_activated_core(self):
-        node = ast.parse(self.code())
-        core = _CountingCore()
-        op = self.operator()(core)
-        op.visit(node)
-        self.assertEqual(core.count, 1)
+@pytest.mark.parametrize('operator,code', OPERATOR_SAMPLES)
+def test_activation_record_created(operator, code):
+    node = ast.parse(code)
+    core = MutatingCore(0)
+    op = operator(core)
+    assert core.activation_record is None
+    op.visit(node)
+    assert core.activation_record is not None
 
 
-class TestReplaceBreakWithContinue(unittest.TestCase,
-                                   MutationTextMixin,
-                                   CountingTextMixin):
-    def code(self):
-        return 'while True: break'
-
-    def operator(self):
-        return ReplaceBreakWithContinue
-
-
-class TestReplaceContinueWithBreak(unittest.TestCase,
-                                   MutationTextMixin,
-                                   CountingTextMixin):
-    def code(self):
-        return 'while False: continue'
-
-    def operator(self):
-        return ReplaceContinueWithBreak
+@pytest.mark.parametrize('operator,code', OPERATOR_SAMPLES)
+def test_no_activation_record_created(operator, code):
+    node = ast.parse(code)
+    core = MutatingCore(1)
+    op = operator(core)
+    op.visit(node)
+    assert core.activation_record is None
 
 
-class TestNumberReplacer(unittest.TestCase,
-                         MutationTextMixin,
-                         CountingTextMixin):
-    def code(self):
-        return 'x = 1'
+@pytest.mark.parametrize('operator,code', OPERATOR_SAMPLES)
+def test_mutation_changes_ast(operator, code):
+    node = ast.parse(code)
+    core = MutatingCore(0)
+    mutant = operator(core).visit(copy.deepcopy(node))
 
-    def operator(self):
-        return NumberReplacer
+    orig_nodes = linearize_tree(node)
+    mutant_nodes = linearize_tree(mutant)
 
+    assert len(orig_nodes) == len(mutant_nodes)
 
-RELATIONAL_OP_MAP = {op: 'if x {} 1: pass'.format(token)
-                     for op, token in {
-                         ast.Eq: '==',
-                         ast.NotEq: '!=',
-                         ast.Lt: '<',
-                         ast.LtE: '<=',
-                         ast.Gt: '>',
-                         ast.GtE: '>=',
-                         ast.Is: 'is',
-                         ast.IsNot: 'is not',
-                         ast.In: 'in',
-                         ast.NotIn: 'not in'
-                         }.items()}
+    assert ast.dump(node) != ast.dump(mutant)
 
 
-class test_ReplaceRelationalOp(unittest.TestCase):
-    def test_ast_node_is_modified(self):
-        for replacer in ROR.OPERATORS:
-            code = RELATIONAL_OP_MAP[replacer.from_op]
-            node = ast.parse(code)
-            self.assertIsInstance(
-                node.body[0].test.ops[0],
-                replacer.from_op)
+@pytest.mark.parametrize('operator,code', OPERATOR_SAMPLES)
+def test_no_mutation_leaves_ast_unchanged(operator, code):
+    node = ast.parse(code)
 
-        core = MutatingCore(0)
-        node = replacer(core).visit(node)
-        self.assertNotIsInstance(
-            node.body[0].test.ops[0],
-            replacer.from_op)
+    core = MutatingCore(1)
+    replacer = operator(core)
+    assert ast.dump(node) == ast.dump(replacer.visit(copy.deepcopy(node)))
+
+
+@pytest.mark.parametrize('operator,code', OPERATOR_SAMPLES)
+def test_replacement_activated_core(operator, code):
+    node = ast.parse(code)
+    core = _CountingCore()
+    op = operator(core)
+    op.visit(node)
+    assert core.count == 1
+
+
+
+@pytest.mark.parametrize('operator,code', RELATIONAL_OPERATOR_SAMPLES)
+def test_relational_operator_replacement_modifies_ast_node(operator, code):
+    node = ast.parse(code)
+    assert isinstance(
+        node.body[0].test.ops[0],
+        operator.from_op)
+
+    core = MutatingCore(0)
+    node = operator(core).visit(node)
+    assert isinstance(
+        node.body[0].test.ops[0],
+        operator.to_op)
