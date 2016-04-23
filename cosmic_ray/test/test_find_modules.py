@@ -11,15 +11,14 @@ THIS_DIR = Path(
 
 
 @contextlib.contextmanager
-def excursion(directory):
-    old_dir = os.getcwd()
-    os.chdir(str(directory))
+def extend_path(directory):
+    """Put `directory` at the front of `sys.path` temporarily.
+    """
     sys.path = [str(directory)] + sys.path
     try:
         yield
     finally:
         sys.path = sys.path[1:]
-        os.chdir(old_dir)
 
 
 def test_small_directory_tree():
@@ -28,9 +27,9 @@ def test_small_directory_tree():
              ('a', 'b.py'),
              ('a', 'c', '__init__.py'),
              ('a', 'c', 'd.py'))
-    expected = [datadir / Path(*path) for path in paths]
-    with excursion(datadir):
-        results = sorted(map(
-            lambda m: m.__file__,
-            cosmic_ray.modules.find_modules('a')))
-        assert sorted(map(str, expected)) == results
+    expected = sorted(datadir / Path(*path) for path in paths)
+    with extend_path(datadir):
+        results = sorted(
+            Path(m.__file__)
+            for m in cosmic_ray.modules.find_modules('a'))
+    assert expected == results
