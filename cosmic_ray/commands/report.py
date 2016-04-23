@@ -1,9 +1,3 @@
-import transducer.eager
-from transducer.functional import compose
-import transducer.lazy
-from transducer.transducers import filtering
-
-
 def _print_item(item):
     return [
         'job ID: {}'.format(item.work_id),
@@ -19,12 +13,16 @@ def _print_item(item):
 
 
 def _get_kills(db):
-    normal = filtering(lambda r: r.result_type == 'normal')
-    killed = filtering(lambda r: r.result_data == 'timeout' or r.result_data[1][0] == 'Outcome.KILLED')
-    find_kills = compose(normal, killed)
-    return transducer.eager.transduce(find_kills,
-                                      transducer.reducers.Appending(),
-                                      db.work_items)
+    def _keep(w):
+        if w.result_type == 'timeout':
+            return True
+        elif w.result_type == 'normal':
+            if w.result_data[1][0] == 'Outcome.KILLED':
+                return True
+        return False
+
+    return list(filter(_keep, db.work_items))
+
 
 def _base_stats(work_db):
     total_jobs = sum(1 for _ in work_db.work_items)
@@ -32,6 +30,7 @@ def _base_stats(work_db):
     completed_jobs = total_jobs - pending_jobs
     kills = _get_kills(work_db)
     return (total_jobs, pending_jobs, completed_jobs, kills)
+
 
 def create_report(work_db, show_pending):
     for item in work_db.work_items:
