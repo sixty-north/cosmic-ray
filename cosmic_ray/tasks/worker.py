@@ -39,10 +39,9 @@ def worker_task(work_id,
                test_directory,
                str(timeout))
     LOG.info('executing:', command)
-    proc = subprocess.run(command,
-                          stdout=subprocess.PIPE,
-                          universal_newlines=True)
-    result = json.loads(proc.stdout)
+    output = subprocess.check_output(command,
+                                     universal_newlines=True)
+    result = json.loads(output)
     return (work_id, command, result)
 
 
