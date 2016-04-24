@@ -39,7 +39,7 @@ celery -A cosmic_ray.tasks.worker worker
 4. Initialize a Cosmic Ray session
 
 ```
-cosmic-ray init --baseline=10 <session name> <module name> <test directory>
+cosmic-ray init --baseline=10 <session name> <module name> -- <test directory>
 ```
 
 5. Execute the session:
@@ -131,7 +131,7 @@ c) the location of the test suite. For example, if you've a package named
 `allele_tests`, you would run `cosmic-ray init` like this:
 
 ```
-cosmic-ray init --baseline=2 test_session allele allele_tests
+cosmic-ray init --baseline=2 test_session allele -- allele_tests
 ```
 
 You'll notice that this creates a new file called "test_session.json". This the
@@ -192,7 +192,7 @@ To specify a particular test runner when running Cosmic Ray, pass the
 `--test-runner` flag to the `init` subcommand. For example, to use the
 `pytest` runner you would use:
 ```
-cosmic-ray init --test-runner=pytest test_session allele allele_tests
+cosmic-ray init --test-runner=pytest test_session allele -- allele_tests
 ```
 
 To get a list of the available test runners, use the `test-runners`
@@ -201,11 +201,21 @@ subcommand:
 cosmic-ray test-runners
 ```
 
+Tests runners require information about which tests to run, flags controlling their behavior, and so forth. Since each test runner implementation takes different kinds of information, we allow users to pass arbitrary lists of arguments to test runners. When running the `cosmic-ray init` command, everything after the lone `--` token is passed verbatim to the test runner initializer.
+
+For example, the command:
+```
+cosmic-ray init --test-runner=pytest sess allele -- -x -k test_foo allele_tests
+```
+
+would pass the list `['-x', '-k', 'test_foo', 'allele_tests']` to the pytest
+runner initializer. This plugin passes this list directly to the `pytest.main()`
+function which treats them as command line arguments; in this case, it means
+"exit on first failure, only running tests under 'allele_tests' which match
+'test_foo'". Each test runner will accept different arguments, so see their
+documentation for details on who to use them.
+
 ### Specifying test timeouts
-
-**TODO:** Update this once timeouts are re-implemented.
-
-**NB: This section is probably incorrect right now!**
 
 One difficulty mutation testing tools have to face is how to deal with
 mutations that result in infinite loops (or other pathological runtime
@@ -220,7 +230,7 @@ specifies an absolute number of seconds that a test will be allowed to
 run. After the timeout is up, the test is killed. For example, to
 specify that tests should timeout after 10 seconds, use:
 ```
-cosmic-ray init --timeout=10 test_session allele allele/tests
+cosmic-ray init --timeout=10 test_session allele -- allele/tests
 ```
 
 The second way is by using a baseline timing. To use this technique,
@@ -232,7 +242,7 @@ this baseline timing by the value of `--baseline` and this final value
 is used as the timeout for tests. For example, to tell Cosmic Ray to
 timeout tests when they take 3 times longer than a baseline run, use:
 ```
-cosmic-ray init --baseline=3 test_session allele allele/tests
+cosmic-ray init --baseline=3 test_session allele -- allele/tests
 ```
 
 This baseline technique is particularly useful if your testsuite
@@ -253,7 +263,7 @@ can have comments in config files that start with `#`.
 So, for example, if you need to invoke this command for your project:
 
 ```
-cosmic-ray run --verbose --timeout=30 --no-local-import --baseline=2 allele allele/tests/unittests
+cosmic-ray run --verbose --timeout=30 --no-local-import --baseline=2 allele -- allele/tests/unittests
 ```
 
 you could instead create a config file, `cr-allele.conf`, with these
@@ -267,6 +277,7 @@ init
 --baseline=2
 test_session
 allele
+--
 allele/tests/unittests
 ```
 
