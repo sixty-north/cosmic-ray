@@ -24,14 +24,14 @@ class TestRunner(metaclass=abc.ABCMeta):
     supported by Cosmic Ray should be provided by a TestRunner
     implementation.
     """
-    def __init__(self, test_dir):
-        self._test_dir = test_dir
+    def __init__(self, test_args):
+        self._test_args = test_args
 
     @property
-    def test_dir(self):
-        """The directory containing the tests to be run.
+    def test_args(self):
+        """The sequence of arguments for the test runner.
         """
-        return self._test_dir
+        return self._test_args
 
     @abc.abstractmethod
     def _run(self):

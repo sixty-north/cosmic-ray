@@ -68,7 +68,7 @@ sessions store data about the progress of a run. The first step in a full
 testing run, then, is to initialize a session:
 
 ```
-cosmic-ray init --baseline=10 <session name> <top module name> <test directory>
+cosmic-ray init --baseline=10 <session name> <top module name> -- <test directory>
 ```
 
 This will create a database file called `<session name>.json`. Once this is

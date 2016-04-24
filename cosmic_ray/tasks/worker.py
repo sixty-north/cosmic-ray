@@ -1,6 +1,7 @@
 """The celery-specific details for routing work requests to Cosmic Ray workers.
 
 """
+import itertools
 import json
 import logging
 import subprocess
@@ -17,7 +18,7 @@ def worker_task(work_id,
                 operator,
                 occurrence,
                 test_runner,
-                test_directory,
+                test_args,
                 timeout):
     """The celery task which performs a single mutation and runs a test suite.
 
@@ -30,13 +31,16 @@ def worker_task(work_id,
     the JSON-decoded value printed by the worker subprocess.
 
     """
-    command = ('cosmic-ray',
-               'worker',
-               module,
-               operator,
-               str(occurrence),
-               test_runner,
-               test_directory)
+    command = list(itertools.chain(
+        ('cosmic-ray',
+         'worker',
+         module,
+         operator,
+         str(occurrence),
+         test_runner,
+         '--',),
+        test_args))
+
     LOG.info('executing:', command)
 
     proc = subprocess.Popen(command,
@@ -52,7 +56,7 @@ def worker_task(work_id,
 
 
 def execute_work_items(test_runner,
-                       test_directory,
+                       test_args,
                        timeout,
                        work_items):
 
@@ -60,7 +64,7 @@ def execute_work_items(test_runner,
 
     Args:
       test_runner: The `TestRunner` instance to use for running tests.
-      test_directory: The directory to pass to `test_runner`.
+      test_args: The list of arguments to pass to the test runner.
       timeout: The max length of time to let a test run before it's killed.
       work_items: An iterable of `work_db.WorkItem`s.
 
@@ -74,6 +78,6 @@ def execute_work_items(test_runner,
                           work_item.operator_name,
                           work_item.occurrence,
                           test_runner,
-                          test_directory,
+                          test_args,
                           timeout)
         for work_item in work_items)

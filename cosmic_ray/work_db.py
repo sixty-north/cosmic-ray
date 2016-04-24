@@ -9,7 +9,7 @@
 #  - operator name
 #  - occurrence
 #  - test runner name
-#  - test directory
+#  - test args
 #  - timeout
 #
 # What describes results?
@@ -91,26 +91,26 @@ class WorkDB:
         """
         return self._db.table('work-items')
 
-    def set_work_parameters(self, test_runner, test_directory, timeout):
+    def set_work_parameters(self, test_runner, test_args, timeout):
         """Set (replace) the work parameters for the session.
 
         Args:
           test_runner: The name of the test runner plugin to use.
-          test_directory: The directory containing tests to run.
+          test_args: The arguments to pass to the test runner.
           timeout: The timeout for tests.
         """
         table = self._work_parameters
         table.purge()
         table.insert({
             'test-runner': test_runner,
-            'test-directory': test_directory,
+            'test-args': test_args,
             'timeout': timeout,
         })
 
     def get_work_parameters(self):
         """Get the work parameters (if set) for the session.
 
-        Returns: a tuple of `(test-runner, test-directory, timeout)`.
+        Returns: a tuple of `(test-runner, test-args, timeout)`.
 
         Raises:
           ValueError: If there are no work parameters set for the session.
@@ -123,7 +123,7 @@ class WorkDB:
             raise ValueError('work-db has no work parameters')
 
         return (record['test-runner'],
-                record['test-directory'],
+                record['test-args'],
                 record['timeout'])
 
     def add_work_items(self, items):

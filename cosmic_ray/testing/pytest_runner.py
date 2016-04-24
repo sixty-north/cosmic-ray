@@ -17,14 +17,17 @@ class ResultCollector:
 class PytestRunner(TestRunner):
     """A TestRunner using py.test.
 
-    This discovers all tests under `test_dir` and executes them.
+    This treats `test_args` as a list of arguments to `pytest.main()`. The args
+    are passed directly to that function, so see it's documentation for a
+    description of how the arguments are used.
+
     """
 
     def _run(self):
         collector = ResultCollector()
 
         with open(os.devnull, 'w') as devnull, redirect_stdout(devnull):
-            pytest.main(['-x', self.test_dir],
+            pytest.main(list(self.test_args),
                         plugins=[collector])
 
         return (
