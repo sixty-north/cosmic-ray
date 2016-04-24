@@ -169,7 +169,7 @@ are already running.
 
 
 def handle_run(configuration):
-    """usage: cosmic-ray run [options] [--exclude-modules=P ...] (--timeout=T | --baseline=M) <session-name> <top-module> <test-dir>
+    """usage: cosmic-ray run [options] [--exclude-modules=P ...] (--timeout=T | --baseline=M) <session-name> <top-module> [-- <test-args> ...]
 
 This simply runs the "init" command followed by the "exec" command.
 
