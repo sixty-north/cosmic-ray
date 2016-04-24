@@ -47,6 +47,7 @@ def worker_task(work_id,
         result = json.loads(outs)
     except subprocess.TimeoutExpired as e:
         result = ('timeout', e.timeout)
+        proc.kill()
     return (work_id, command, result)
 
 
