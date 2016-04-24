@@ -8,7 +8,7 @@ LOG = logging.getLogger()
 def init(modules,
          work_db,
          test_runner,
-         test_dir,
+         test_args,
          timeout):
     """Clear and initialize a work-db with work items.
 
@@ -21,7 +21,7 @@ def init(modules,
     counts = cosmic_ray.counting.count_mutants(modules, operators)
     work_db.set_work_parameters(
         test_runner=test_runner,
-        test_directory=test_dir,
+        test_args=test_args,
         timeout=timeout)
 
     work_db.clear_work_items()

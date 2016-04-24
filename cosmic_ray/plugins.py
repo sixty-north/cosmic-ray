@@ -19,14 +19,14 @@ def operator_names():
     return ExtensionManager('cosmic_ray.operators').names()
 
 
-def get_test_runner(name, test_dir):
+def get_test_runner(name, test_args):
     """Get a test-runner instance by name.
     """
     test_runner_manager = driver.DriverManager(
         namespace='cosmic_ray.test_runners',
         name=name,
         invoke_on_load=True,
-        invoke_args=(test_dir,),
+        invoke_args=(test_args,),
     )
 
     return test_runner_manager.driver

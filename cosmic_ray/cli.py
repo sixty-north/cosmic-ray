@@ -80,7 +80,7 @@ where each token of the command is on a separate line.
 
 
 def handle_baseline(configuration):
-    """usage: cosmic-ray baseline [options] <top-module> <test-dir>
+    """usage: cosmic-ray baseline [options] <top-module> [-- <test-args> ...]
 
 Run an un-mutated baseline of <top-module> using the tests in <test-dir>.
 This is largely like running a "worker" process, with the difference
@@ -93,7 +93,7 @@ options:
     sys.path.insert(0, '')
     test_runner = cosmic_ray.plugins.get_test_runner(
             configuration['--test-runner'],
-            configuration['<test-dir>'])
+            configuration['<test-args>'])
 
     test_runner()
 
@@ -103,7 +103,7 @@ def _get_db_name(session_name):
 
 
 def handle_init(configuration):
-    """usage: cosmic-ray init [options] [--exclude-modules=P ...] (--timeout=T | --baseline=M) <session-name> <top-module> <test-dir>
+    """usage: cosmic-ray init [options] [--exclude-modules=P ...] (--timeout=T | --baseline=M) <session-name> <top-module> [-- <test-args> ...]
 
 Initialize a mutation testing run. The primarily creates a database of "work to
 be done" which describes all of the mutations and test runs that need to be
@@ -132,7 +132,7 @@ options:
         timeout = baseline_mult * cosmic_ray.timing.run_baseline(
             configuration['--test-runner'],
             configuration['<top-module>'],
-            configuration['<test-dir>'])
+            configuration['<test-args>'])
 
     LOG.info('timeout = {} seconds'.format(timeout))
 
@@ -150,7 +150,7 @@ options:
             modules,
             db,
             configuration['--test-runner'],
-            configuration['<test-dir>'],
+            configuration['<test-args>'],
             timeout)
 
 
@@ -262,12 +262,12 @@ List the available operator plugins.
 
 
 def handle_worker(config):
-    """usage: cosmic-ray worker [options] <module> <operator> <occurrence> <test-runner> <test-dir>
+    """usage: cosmic-ray worker [options] <module> <operator> <occurrence> <test-runner> [-- <test-args> ...]
 
 Run a worker process which performs a single mutation and test run. Each
 worker does a minimal, isolated chunk of work: it mutates the <occurence>-th
 instance of <operator> in <module>, runs the test suite defined by
-<test-runner> and <test-dir>, prints the results, and exits.
+<test-runner> and <test-args>, prints the results, and exits.
 
 Normally you won't run this directly. Rather, it will be launched by celery
 worker tasks.
@@ -281,7 +281,7 @@ options:
     operator = cosmic_ray.plugins.get_operator(config['<operator>'])
     test_runner = cosmic_ray.plugins.get_test_runner(
         config['<test-runner>'],
-        config['<test-dir>'])
+        config['<test-args>'])
 
     with open(os.devnull, 'w') as devnull, redirect_stdout(devnull):
         result_type, data = cosmic_ray.worker.worker(

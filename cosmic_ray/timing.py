@@ -5,6 +5,7 @@ generic functionality.
 """
 
 import datetime
+import itertools
 import subprocess
 
 
@@ -39,12 +40,14 @@ class Timer:
         pass
 
 
-def run_baseline(test_runner, module_name, test_dir):
-    command = ('cosmic-ray',
-               'baseline',
-               '--test-runner={}'.format(test_runner),
-               module_name,
-               test_dir,)
+def run_baseline(test_runner, module_name, test_args):
+    command = list(itertools.chain(
+        ('cosmic-ray',
+         'baseline',
+         '--test-runner={}'.format(test_runner),
+         module_name,
+         '--',),
+        test_args))
 
     with Timer() as t:
         subprocess.call(command)

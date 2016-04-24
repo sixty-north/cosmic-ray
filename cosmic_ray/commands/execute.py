@@ -9,11 +9,11 @@ def execute(work_db, purge_queue=True):
     executed, and records any results that arrive.
 
     """
-    test_runner, test_directory, timeout = work_db.get_work_parameters()
+    test_runner, test_args, timeout = work_db.get_work_parameters()
     try:
         results = cosmic_ray.tasks.worker.execute_work_items(
             test_runner,
-            test_directory,
+            test_args,
             timeout,
             work_db.pending_work)
 
