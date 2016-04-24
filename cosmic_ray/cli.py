@@ -274,6 +274,7 @@ worker tasks.
 
 options:
   --no-local-import   Disallow importing module from the current directory
+  --keep-stdout       Do not squelch stdout
 """
     if not config['--no-local-import']:
         sys.path.insert(0, '')
@@ -283,7 +284,8 @@ options:
         config['<test-runner>'],
         config['<test-args>'])
 
-    with open(os.devnull, 'w') as devnull, redirect_stdout(devnull):
+    with open(os.devnull, 'w') as devnull,\
+         redirect_stdout(sys.stdout if config['--keep-stdout'] else devnull):
         result_type, data = cosmic_ray.worker.worker(
             config['<module>'],
             operator,
