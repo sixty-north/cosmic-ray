@@ -112,7 +112,7 @@ executed for a full mutation testing run. The testing run will mutate
 actually run any tests. Instead, it scans the modules-under-test and simply
 generates the work order which can be executed with other commands.
 
-The session-name argument identifies the run you're creating. It's most
+The session-name argument identifies the run you're creating. Its most
 important role is that it's used to name the database file.
 
 options:
