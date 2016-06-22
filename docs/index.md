@@ -24,36 +24,35 @@ mutants, here's what you do:
 
 1. Install Cosmic Ray
 
-```
-pip install cosmic_ray
-```
+    ```
+    pip install cosmic_ray
+    ```
 
 2. Install and start RabbitMQ
 
 3. Start a Cosmic Ray worker task
 
-```
-celery -A cosmic_ray.tasks.worker worker
-```
+    ```
+    celery -A cosmic_ray.tasks.worker worker
+    ```
 
 4. Initialize a Cosmic Ray session
 
-```
-cosmic-ray init --baseline=10 <session name> <module name> -- <test directory>
-```
+    ```
+    cosmic-ray init --baseline=10 <session name> <module name> -- <test directory>
+    ```
 
 5. Execute the session:
 
-```
-cosmic-ray exec <session name>
-```
+    ```
+    cosmic-ray exec <session name>
+    ```
 
 6. View the results:
 
-
-```
-cosmic-ray report <session name>
-```
+    ```
+    cosmic-ray report <session name>
+    ```
 
 This will print out a bunch of information about what Cosmic Ray did, including
 stuff about what kinds of mutants were created, which were killed, and –
@@ -191,6 +190,7 @@ module, and there's another for tests written using
 To specify a particular test runner when running Cosmic Ray, pass the
 `--test-runner` flag to the `init` subcommand. For example, to use the
 `pytest` runner you would use:
+
 ```
 cosmic-ray init --test-runner=pytest test_session allele -- allele_tests
 ```
