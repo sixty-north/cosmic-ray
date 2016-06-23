@@ -78,19 +78,19 @@ created, you can start executing tests with the `exec` command:
 cosmic-ray exec <session name>
 ```
 
-Unless there are error, this won't print anything.
+Unless there are errors, this won't print anything.
 
 ### View the results
 
-Once the execution is complete (i.e. all mutations have been performed and
-tested), you can see the results of you session with the `report` command:
+Once the execution is complete (i.e., all mutations have been performed and
+tested), you can see the results of your session with the `report` command:
 
 ```
 cosmic-ray report <session name>
 ```
 
 This will print out a bunch of information about the work that was performed,
-including stuff about what kinds of mutants were created, which were killed, and
+including what kinds of mutants were created, which were killed, and
 – chillingly – which survived.
 
 **[Further documentation is available at readthedocs](http://cosmic-ray.readthedocs.org/en/latest/).**
