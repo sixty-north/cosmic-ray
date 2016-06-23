@@ -55,7 +55,7 @@ mutants, here's what you do:
     ```
 
 This will print out a bunch of information about what Cosmic Ray did, including
-stuff about what kinds of mutants were created, which were killed, and –
+what kinds of mutants were created, which were killed, and –
 chillingly – which survived.
 
 ## Installation
@@ -79,7 +79,7 @@ create an executable called `cosmic-ray`.
 
 You'll often want to install Cosmic Ray into a virtual environment. However, you
 generally *don't* want to install it into its own. Rather, you want to install
-it into the virtual environment of the project you want to test. This ensure
+it into the virtual environment of the project you want to test. This ensures
 that the workers have access to the modules they are supposed to test.
 
 ### Installing RabbitMQ
@@ -171,7 +171,7 @@ between initialization and execution of the tests. It did all of its work using
 the `run` command.
 
 Recent versions of Cosmic Ray still support the `run` command. All this command
-does is first do an `init` followed be an `exec`. This can be convenient for
+does is first do an `init` followed by an `exec`. This can be convenient for
 small test runs.
 
 Be aware, however, that `init` **can destroy an existing session database**! If
@@ -201,7 +201,12 @@ subcommand:
 cosmic-ray test-runners
 ```
 
-Tests runners require information about which tests to run, flags controlling their behavior, and so forth. Since each test runner implementation takes different kinds of information, we allow users to pass arbitrary lists of arguments to test runners. When running the `cosmic-ray init` command, everything after the lone `--` token is passed verbatim to the test runner initializer.
+Test runners require information about which tests to run, flags controlling
+their behavior, and so forth. Since each test runner implementation takes
+different kinds of information, we allow users to pass arbitrary lists of
+arguments to test runners. When running the `cosmic-ray init` command,
+everything after the lone `--` token is passed verbatim to the test runner
+initializer.
 
 For example, the command:
 ```
@@ -213,7 +218,7 @@ runner initializer. This plugin passes this list directly to the `pytest.main()`
 function which treats them as command line arguments; in this case, it means
 "exit on first failure, only running tests under 'allele_tests' which match
 'test_foo'". Each test runner will accept different arguments, so see their
-documentation for details on who to use them.
+documentation for details on how to use them.
 
 ### Specifying test timeouts
 
@@ -222,7 +227,7 @@ mutations that result in infinite loops (or other pathological runtime
 effects). Cosmic Ray takes the simple approach of using a *timeout* to
 determine when to kill a test and consider it *incompetent*. That is,
 if a test of a mutant takes longer than the timeout, the test is
-killed an the mutant is marked incompetent.
+killed, and the mutant is marked incompetent.
 
 There are two ways to specify timeout values to Cosmic Ray. The first
 is through the `--timeout` flag for the `init` subcommand. This flags
@@ -320,7 +325,7 @@ Run the operator tests with `unittest` like this:
 cosmic-ray load cosmic-ray.unittest.conf
 ```
 
-View ther results of this test with `report`:
+View the results of this test with `report`:
 
 ```
 cosmic-ray report adam_tests.unittest
@@ -370,7 +375,7 @@ introducing mutation testing as well.
 ## Implementation
 
 Cosmic Ray works by parsing the module under test (MUT) and its
-submodules into a abstract syntax trees using
+submodules into abstract syntax trees using
 [the `ast` module](https://docs.python.org/3/library/ast.html). It
 then uses
 [the `ast.NodeTransformer` class](https://docs.python.org/3/library/ast.html#ast.NodeTransformer)
@@ -387,16 +392,16 @@ In effect, the mutation testing algorithm is something like this:
 for mod in modules_under_test:
     for op in mutation_operators:
         for site in mutation_sites(op, mod):
-	        mutant_ast = mutate_ast(op, mod, site)
-			replace_module(mod.name, compile(mutant_ast)
-
-	        try:
-			    if discover_and_run_tests():
-				    print('Oh no! The mutant survived!')
-				else:
-				    print('The mutant was killed.')
-	        except Exception:
-			    print('The mutant was incompetent.')
+            mutant_ast = mutate_ast(op, mod, site)
+            replace_module(mod.name, compile(mutant_ast)
+            
+            try:
+                if discover_and_run_tests():
+                    print('Oh no! The mutant survived!')
+                else:
+                    print('The mutant was killed.')
+            except Exception:
+                print('The mutant was incompetent.')
 ```
 
 Obviously this can result in a lot of tests, and it can take some time
@@ -405,7 +410,7 @@ if your test suite is large and/or slow.
 ### Scaling up with celery
 
 One of the main practical challenges to mutation testing is that it can take a
-long time. Even on moderately sized projects, you might needs millions of
+long time. Even on moderately sized projects, you might need millions of
 individual mutations and test runs. This can be prohibitive to run on a single
 system.
 
@@ -430,10 +435,10 @@ corrupt the runtime of the worker processes. And ultimately the cost of starting
 the process is likely to be very small compared to the runtime of the test
 suite.
 
-By it's nature, Celery lets you start workers on as many systems as you want,
+By its nature, Celery lets you start workers on as many systems as you want,
 all connected to the same task queue. So you could potentially have thousands of
 workers performing mutation testing runs, giving nearly perfect scaling! While
 not everyone has thousands of machines on hand to do their testing work, it's
 conceivable that Cosmic Ray will one day be able to work with machines on
 commodity cloud providers, meaning that highly-scaled mutation testing for
-Python will available to anyone who wants it.
+Python will be available to anyone who wants it.
