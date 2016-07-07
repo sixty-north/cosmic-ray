@@ -3,13 +3,13 @@
 """
 import itertools
 import json
-import logging
 import subprocess
 import celery
 
 from .celery import app
+from celery.utils.log import get_logger
 
-LOG = logging.getLogger()
+LOG = get_logger(__name__)
 
 
 @app.task(name='cosmic_ray.tasks.worker')
