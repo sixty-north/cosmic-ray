@@ -3,11 +3,26 @@
 
 import importlib
 import logging
+import os
 import pkgutil
 import re
 
 LOG = logging.getLogger()
 
+def find_local_modules(name, excludes=None):
+    """
+        Just calls find_modules() but taking into
+        account the fact that name may be a relative or full
+        path to a .py file or directory.
+    """
+    # helps when using bash completion
+    if os.path.exists(name):
+        if name.endswith('.py'):
+            name = name[:-3]
+        name = name.replace('/', '.')
+
+    for module in find_modules(name, excludes):
+        yield module
 
 def find_modules(name, excludes=None):
     """Generate sequence of all submodules of NAME, including NAME itself.
