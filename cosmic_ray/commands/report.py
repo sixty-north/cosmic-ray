@@ -1,15 +1,23 @@
 def _print_item(item):
-    return [
-        'job ID: {}'.format(item.work_id),
-        'module: {}'.format(item.module_name),
-        'operator: {}'.format(item.operator_name),
-        'occurrence: {}'.format(item.occurrence),
+    result = item.result_data
+    result_type = item.result_type
+    if result_type in ['normal', 'exception']:
+        result_type = result[1][0]
+    ret_val = [
+        'job ID {}:{}:{}'.format(
+            item.work_id,
+            result_type,
+            item.module_name),
         'command: {}'.format(
             ' '.join(item.command)
             if item.command is not None else ''),
-        'result type: {}'.format(item.result_type),
-        'data: {}'.format(item.result_data)
         ]
+    if result_type == 'timeout':
+        ret_val.append("timeout: {:.3f} sec".format(result))
+    elif result_type in ['normal', 'exception']:
+        ret_val += result[1][1]
+
+    return ret_val
 
 
 def _get_kills(db):
