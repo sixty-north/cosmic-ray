@@ -99,7 +99,10 @@ options:
 
 
 def _get_db_name(session_name):
-    return '{}.json'.format(session_name)
+    if session_name.endswith('.json'):
+        return session_name
+    else:
+        return '{}.json'.format(session_name)
 
 
 def handle_init(configuration):

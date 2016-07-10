@@ -23,8 +23,8 @@ Each operator is ultimately a subclass of
 `ast.NodeTransformer`. `NodeTransformer` is used to traverse and
 modify ASTs, so our operators work by hooking into the
 `NodeTransformer` protocol to add and remove nodes from the AST. When
-an operator visits a potential mutation site (i.e. a node that it
-knows how to mutate) it informs the `Operator` machinery which in turn
+an operator visits a potential mutation site (i.e., a node that it
+knows how to mutate), it informs the `Operator` machinery, which in turn
 decides if the mutation should be supplied.
 
 An operator always operates on a copy of the original AST. In this way
@@ -39,7 +39,7 @@ To implement a new operator you need to create a subclass of
 `ast.NodeTransformer`. The `NodeTransformer` class provides a number of
 `visit_*` functions which are called during AST traversal as different types of
 nodes are visited. Examples include `visit_Num` which is called when a `Number`
-node is visitied, or `visit_UnaryOp` which is called when a unary operator is
+node is visited, or `visit_UnaryOp` which is called when a unary operator is
 visited. Your operator class should override the `visit_*` functions that it
 needs in order to determine when it can apply its mutation. In any of these
 functions, if your operator can perform a mutation it should call
@@ -47,7 +47,7 @@ functions, if your operator can perform a mutation it should call
 
 Your operator class should also implement `Operator.mutate()`. This is
 the function that actually mutates the AST by adding or removing
-nodes. This method will only over be called with nodes for which your
+nodes. This method will only ever be called with nodes for which your
 operator called `visit_mutation_site()` during traversal. In other
 words, Cosmic Ray splits mutation into two phases:
 
@@ -138,7 +138,7 @@ reaches `Num` nodes. To do this, it implements `ast.NodeTransformer.visit_Num()`
 which is called when `Num` nodes are visited. Since our operator can mutate
 *any* `Num` node, it implements this method by simply calling
 `visit_mutation_site()`; remember that this informs the rest of the mutation
-machinery that its possible to perform a mutation at this node:
+machinery that it's possible to perform a mutation at this node:
 
 ```
     def visit_Num(self, node):
@@ -162,7 +162,7 @@ In this case, simply create a new `Num` node with a new value and return it:
 That's all there is to it. This mutation operator is now ready to be applied to
 any code you want to test.
 
-However, before it can really be used you need to make it available as a plugin.
+However, before it can really be used, you need to make it available as a plugin.
 
 ### Creating the plugin
 
