@@ -4,7 +4,10 @@ A worker is intended to run as a process that imports a module, mutates it in
 one location with one operator, runs the tests, reports the results, and dies.
 """
 
+import astunparse
+import difflib
 import importlib
+import inspect
 import logging
 import sys
 import traceback
@@ -12,6 +15,7 @@ import traceback
 from .importing import using_mutant
 from .mutating import MutatingCore
 from .parsing import get_ast
+from .testing.test_runner import TestResult, Outcome
 
 LOG = logging.getLogger()
 
@@ -58,21 +62,44 @@ def worker(module_name,
     """
     try:
         module = importlib.import_module(module_name)
+        module_source_file = inspect.getsourcefile(module)
         module_ast = get_ast(module)
+        module_source = astunparse.unparse(module_ast)
+
         core = MutatingCore(occurrence)
         operator = operator_class(core)
-        operator.visit(module_ast)
+        # note: after this step module_ast and modified_ast
+        # appear to be the same
+        modified_ast = operator.visit(module_ast)
+        modified_source = astunparse.unparse(modified_ast)
 
         if not core.activation_record:
             return ('no-test', None)
 
+        # generate a source diff to visualize how the mutation
+        # operator has changed the code
+        module_diff = ["--- mutation diff ---"]
+        for line in difflib.unified_diff(
+                        module_source.split('\n'),
+                        modified_source.split('\n'),
+                        fromfile="a"+module_source_file,
+                        tofile="b"+module_source_file,
+                        lineterm=""):
+            module_diff.append(line)
+
         with using_mutant(module_name, module_ast):
             results = test_runner()
+            # append the diff to whatever result was returned
+            res = results[1] or []
+            res.extend(module_diff)
+            results = TestResult(results[0], res)
 
         return ('normal',
                 (core.activation_record,
                  results))
 
     except Exception:
-        return ('exception',
-                traceback.format_exception(*sys.exc_info()))
+        res = traceback.format_exception(*sys.exc_info())
+        res.extend(module_diff)
+        results = [Outcome.INCOMPETENT, res]
+        return ('exception', (None, results))

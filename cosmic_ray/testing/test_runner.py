@@ -1,6 +1,8 @@
 import abc
 from collections import namedtuple
 from enum import Enum
+import sys
+import traceback
 
 
 class Outcome(Enum):
@@ -64,6 +66,6 @@ class TestRunner(metaclass=abc.ABCMeta):
             else:
                 return TestResult(Outcome.KILLED,
                                   test_result[1])
-        except Exception as e:
+        except Exception:
             return TestResult(Outcome.INCOMPETENT,
-                              str(e))
+                              traceback.format_exception(*sys.exc_info()))

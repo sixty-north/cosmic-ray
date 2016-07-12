@@ -71,6 +71,7 @@ setup(
     platforms='any',
     include_package_data=True,
     install_requires=[
+        'astunparse',
         'celery',
         'decorator',
         'docopt',

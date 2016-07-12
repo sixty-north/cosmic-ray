@@ -294,8 +294,6 @@ options:
             operator,
             int(config['<occurrence>']),
             test_runner)
-        if result_type == 'exception':
-            data = str(data)
 
     sys.stdout.write(
         json.dumps((result_type, data),
