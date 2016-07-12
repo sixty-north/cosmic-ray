@@ -12,9 +12,9 @@ def _print_item(item):
             ' '.join(item.command)
             if item.command is not None else ''),
         ]
-    if result_type == 'timeout':
+    if item.result_type == 'timeout':
         ret_val.append("timeout: {:.3f} sec".format(result))
-    elif result_type in ['normal', 'exception']:
+    elif item.result_type in ['normal', 'exception']:
         ret_val += result[1][1]
 
     return ret_val
