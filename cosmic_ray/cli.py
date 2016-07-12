@@ -140,8 +140,8 @@ options:
     LOG.info('timeout = {} seconds'.format(timeout))
 
     modules = set(
-        cosmic_ray.modules.find_local_modules(
-            configuration['<top-module>'],
+        cosmic_ray.modules.find_modules(
+            cosmic_ray.modules.fixup_module_name(configuration['<top-module>']),
             configuration['--exclude-modules']))
 
     LOG.info('Modules discovered: %s',  [m.__name__ for m in modules])
@@ -231,8 +231,8 @@ options:
 """
     sys.path.insert(0, '')
 
-    modules = cosmic_ray.modules.find_local_modules(
-        configuration['<top-module>'],
+    modules = cosmic_ray.modules.find_modules(
+        cosmic_ray.modules.fixup_module_name(configuration['<top-module>']),
         configuration['--exclude-modules'])
 
     operators = cosmic_ray.plugins.operator_names()

@@ -9,20 +9,23 @@ import re
 
 LOG = logging.getLogger()
 
-def find_local_modules(name, excludes=None):
+
+def fixup_module_name(name):
+    """If `name` appears to be a source file name, this converts it to a module
+    name. Otherwise this returns `name` inchanged.
+
+    For example, if you pass in "foo/bar.py", this will return "foo.bar". If
+    you pass in "llama.yak", this just returns "llama.yak".
+
+    This is primarily a convenience function to allow users to use
+    bash-completion when specifying module names.
     """
-        Just calls find_modules() but taking into
-        account the fact that name may be a relative or full
-        path to a .py file or directory.
-    """
-    # helps when using bash completion
     if os.path.exists(name):
         if name.endswith('.py'):
             name = name[:-3]
         name = name.replace('/', '.')
+    return name
 
-    for module in find_modules(name, excludes):
-        yield module
 
 def find_modules(name, excludes=None):
     """Generate sequence of all submodules of NAME, including NAME itself.
