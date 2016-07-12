@@ -140,7 +140,7 @@ options:
     LOG.info('timeout = {} seconds'.format(timeout))
 
     modules = set(
-        cosmic_ray.modules.find_modules(
+        cosmic_ray.modules.find_local_modules(
             configuration['<top-module>'],
             configuration['--exclude-modules']))
 
@@ -231,7 +231,7 @@ options:
 """
     sys.path.insert(0, '')
 
-    modules = cosmic_ray.modules.find_modules(
+    modules = cosmic_ray.modules.find_local_modules(
         configuration['<top-module>'],
         configuration['--exclude-modules'])
 
