@@ -22,6 +22,4 @@ class UnittestRunner(TestRunner):  # pylint:disable=no-init, too-few-public-meth
 
         return (
             result.wasSuccessful(),
-            [(str(r[0]), r[1])
-             for r in chain(result.errors,
-                            result.failures)])
+            [r[1] for r in chain(result.errors, result.failures)])
