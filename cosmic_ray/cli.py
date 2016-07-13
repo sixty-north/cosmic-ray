@@ -192,7 +192,7 @@ options:
 
 
 def handle_report(configuration):
-    """usage: cosmic-ray report [--full-kill-report] [--show-pending] <session-name>
+    """usage: cosmic-ray report [--full-report] [--show-pending] <session-name>
 
 Print a nicely formatted report of test results and some basic statistics.
 
