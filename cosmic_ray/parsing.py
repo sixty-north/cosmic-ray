@@ -2,6 +2,7 @@
 """
 
 import ast
+import inspect
 import logging
 
 LOG = logging.getLogger()
@@ -15,11 +16,21 @@ def get_ast(module):
     """Generate an AST from a module object.
 
     This will be the AST for the contents of the module.
-    """
-    with open(module.__file__, 'rt', encoding='utf-8') as module_file:
-            LOG.info('reading module %s from %s',
-                     module.__name__,
-                     module.__file__)
-            source = module_file.read()
 
-    return ast.parse(source, module.__file__, 'exec')
+    Raises:
+        OSError: If the source code for `module` can't be found.
+        TypeError: If the source file for `module` can't be found.
+    """
+    try:
+        source = inspect.getsource(module)
+    except OSError:
+        LOG.warning("Unable to read source for module %s", module)
+        raise
+
+    try:
+        source_file = inspect.getsourcefile(module)
+    except TypeError:
+        LOG.error("Unable to get source file for object %s", module)
+        raise
+
+    return ast.parse(source, source_file, 'exec')
