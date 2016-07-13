@@ -1,4 +1,4 @@
-def _print_item(item):
+def _print_item(item, full_report):
     result = item.result_data
     result_type = item.result_type
     if result_type in ['normal', 'exception']:
@@ -12,7 +12,9 @@ def _print_item(item):
             ' '.join(item.command)
             if item.command is not None else ''),
         ]
-    if item.result_type == 'timeout':
+    if result_type == 'Outcome.KILLED' and not full_report:
+        pass
+    elif item.result_type == 'timeout':
         ret_val.append("timeout: {:.3f} sec".format(result))
     elif item.result_type in ['normal', 'exception']:
         ret_val += result[1][1]
@@ -40,10 +42,10 @@ def _base_stats(work_db):
     return (total_jobs, pending_jobs, completed_jobs, kills)
 
 
-def create_report(work_db, show_pending):
+def create_report(work_db, show_pending, full_report=False):
     for item in work_db.work_items:
         if (item.result_type is not None) or show_pending:
-            yield from _print_item(item)
+            yield from _print_item(item, full_report)
             yield ''
 
     total_jobs, pending_jobs, completed_jobs, kills = _base_stats(work_db)

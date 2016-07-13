@@ -192,16 +192,20 @@ options:
 
 
 def handle_report(configuration):
-    """usage: cosmic-ray report [--show-pending] <session-name>
+    """usage: cosmic-ray report [--full-kill-report] [--show-pending] <session-name>
 
 Print a nicely formatted report of test results and some basic statistics.
+
+options:
+    --full-report  Show tes output and mutation diff for killed mutants
 
     """
     db_name = _get_db_name(configuration['<session-name>'])
     show_pending = configuration['--show-pending']
+    full_report = configuration['--full-report']
 
     with use_db(db_name, WorkDB.Mode.open) as db:
-        for line in cosmic_ray.commands.create_report(db, show_pending):
+        for line in cosmic_ray.commands.create_report(db, show_pending, full_report):
             print(line)
 
 
