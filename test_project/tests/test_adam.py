@@ -11,6 +11,16 @@ class Tests(unittest.TestCase):
             adam.constant_number(),
             42)
 
+    def test_constant_true(self):
+        self.assertEqual(
+            adam.constant_true(),
+            True)
+
+    def test_constant_false(self):
+        self.assertEqual(
+            adam.constant_false(),
+            False)
+
     def test_unary_sub(self):
         self.assertEqual(
             adam.unary_sub(),

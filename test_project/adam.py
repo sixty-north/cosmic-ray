@@ -7,6 +7,13 @@
 def constant_number():
     return 42
 
+def constant_true():
+    return True
+
+
+def constant_false():
+    return False
+
 
 def unary_sub():
     return -1

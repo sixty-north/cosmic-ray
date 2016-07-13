@@ -6,6 +6,7 @@ import pytest
 
 import cosmic_ray.operators.relational_operator_replacement as ROR
 from cosmic_ray.counting import _CountingCore
+from cosmic_ray.operators.boolean_replacer import BooleanReplacer
 from cosmic_ray.operators.break_continue import (ReplaceBreakWithContinue,
                                                  ReplaceContinueWithBreak)
 from cosmic_ray.operators.number_replacer import NumberReplacer
@@ -55,6 +56,7 @@ RELATIONAL_OPERATOR_SAMPLES = [
 ]
 
 OPERATOR_SAMPLES = [
+    (BooleanReplacer, 'True'),
     (ReplaceBreakWithContinue, 'while True: break'),
     (ReplaceContinueWithBreak, 'while False: continue'),
     (NumberReplacer, 'x = 1'),
