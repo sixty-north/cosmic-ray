@@ -86,6 +86,7 @@ setup(
             'cosmic-ray = cosmic_ray.cli:main',
         ],
         'cosmic_ray.test_runners': [
+            'nose = cosmic_ray.testing.nose_runner:NoseRunner',
             'unittest = cosmic_ray.testing.unittest_runner:UnittestRunner',
             'pytest = cosmic_ray.testing.pytest_runner:PytestRunner',
         ],
