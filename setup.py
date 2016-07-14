@@ -38,6 +38,9 @@ operators = [
     'number_replacer = '
     'cosmic_ray.operators.number_replacer:NumberReplacer',
 
+    'boolean_replacer = '
+    'cosmic_ray.operators.boolean_replacer:BooleanReplacer',
+
     'arithmetic_operator_deletion ='
     'cosmic_ray.operators.arithmetic_operator_deletion:ReverseUnarySub',
 

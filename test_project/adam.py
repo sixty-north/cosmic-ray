@@ -7,6 +7,13 @@
 def constant_number():
     return 42
 
+def constant_true():
+    return True
+
+
+def constant_false():
+    return False
+
 
 def unary_sub():
     return -1
@@ -40,5 +47,9 @@ def use_continue(limit):
 def trigger_infinite_loop():
     # When `break` becomes `continue`, this should enter an infinite loop. This
     # helps us test timeouts.
-    while True:
+    # Any object which isn't None passes the truth value testing so here
+    # we use `while object()` instead of `while True` b/c the later becomes
+    # `while False` when BooleanReplacer is applied and we don't trigger an
+    # infinite loop.
+    while object():
         break
