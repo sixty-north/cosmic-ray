@@ -16,7 +16,7 @@ RESULT=`cosmic-ray survival-rate adam_tests.pytest`
 if [ $RESULT != 0.00 ]; then exit 1; fi
 
 cosmic-ray load cosmic-ray.nosetest.conf
-cosmic-ray report adam_tests.nosetest
+#cosmic-ray report adam_tests.nosetest
 #cosmic-ray survival-rate adam_tests.nosetest
 RESULT=`cosmic-ray survival-rate adam_tests.nosetest`
 if [ $RESULT != 0.00 ]; then exit 1; fi
