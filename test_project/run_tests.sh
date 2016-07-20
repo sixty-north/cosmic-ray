@@ -21,4 +21,11 @@ cosmic-ray load cosmic-ray.nosetest.conf
 RESULT=`cosmic-ray survival-rate adam_tests.nosetest`
 if [ $RESULT != 0.00 ]; then exit 1; fi
 
+# Run import tests
+cosmic-ray load cosmic-ray.import.conf
+#cosmic-ray report import_tests
+#cosmic-ray survival-rate import_tests
+RESULT=`cosmic-ray survival-rate import_tests`
+if [ $RESULT != 0.00 ]; then exit 1; fi
+
 exit 0
