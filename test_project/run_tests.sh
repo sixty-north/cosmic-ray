@@ -21,4 +21,10 @@ cosmic-ray load cosmic-ray.nosetest.conf
 RESULT=`cosmic-ray survival-rate adam_tests.nosetest`
 if [ $RESULT != 0.00 ]; then exit 1; fi
 
+cosmic-ray load cosmic-ray.empty.conf
+cosmic-ray report empty.unittest
+#cosmic-ray survival-rate empty.unittest
+RESULT=`cosmic-ray survival-rate empty.unittest`
+if [ $RESULT != 0.00 ]; then exit 1; fi
+
 exit 0
