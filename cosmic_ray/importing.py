@@ -4,6 +4,7 @@
 import contextlib
 from importlib.abc import MetaPathFinder
 from importlib.machinery import ModuleSpec
+from itertools import accumulate
 import sys
 
 
@@ -61,8 +62,11 @@ def using_mutant(module_name, mutant):
     mutated AST.
 
     """
-    if module_name in sys.modules:
-        del sys.modules[module_name]
+    # delete the module we're mutating and all of it's parent modules
+    # this will force a re-import of the module chain
+    del_mods = set(accumulate(module_name.split('.'), '{}.{}'.format))
+    for k in del_mods:
+        del sys.modules[k]
 
     finder = ASTFinder(module_name, mutant)
     sys.meta_path = [finder] + sys.meta_path
