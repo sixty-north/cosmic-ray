@@ -23,6 +23,7 @@ RELATIONAL_OPERATORS = {ast.Eq, ast.NotEq, ast.Lt, ast.LtE, ast.Gt, ast.GtE,
 # they almost always produce equivalent mutants. This is a set of
 # (FROM-OP, TO-OP) tuples which we don't want to generate.
 SKIP = {
+    (ast.Eq, ast.Is),
     (ast.NotEq, ast.IsNot),
 }
 
