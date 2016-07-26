@@ -22,6 +22,15 @@ RELATIONAL_OPERATORS = {ast.Eq, ast.NotEq, ast.Lt, ast.LtE, ast.Gt, ast.GtE,
 # There are a number of potential replacements which we avoid because
 # they almost always produce equivalent mutants. This is a set of
 # (FROM-OP, TO-OP) tuples which we don't want to generate.
+#
+# NB: This is an imperfect, stop-gap solution to the problem of certain 
+# equivalent mutants. Obviously `==` is not generally  the same as `is`,
+# but that mutation is also a source of a good number of equivalents. The
+# real solution to this problem will probably come in the form of real
+# exception declarations or something. 
+#
+# See https://github.com/sixty-north/cosmic-ray/pull/162 for some more
+# discussion of this issue.
 SKIP = {
     (ast.Eq, ast.Is),
     (ast.NotEq, ast.IsNot),
