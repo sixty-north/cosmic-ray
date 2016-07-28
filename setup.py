@@ -2,6 +2,7 @@ import io
 import os
 import re
 from setuptools import setup, find_packages
+import sys
 
 from cosmic_ray.operators.relational_operator_replacement \
     import relational_operator_pairs
@@ -48,6 +49,22 @@ operators = [
     'cosmic_ray.operators.break_continue:ReplaceBreakWithContinue',
 ] + relational_replacement_operators
 
+INSTALL_REQUIRES = [
+    'astunparse',
+    'decorator',
+    'docopt',
+    'pathlib',
+    'pytest',
+    'stevedore',
+    'tinydb',
+    'transducer',
+]
+
+if sys.version_info >= (3,4):
+    INSTALL_REQUIRES.append('celery')
+else:
+    INSTALL_REQUIRES.append('celery<4')
+
 setup(
     name='cosmic_ray',
     version=find_version('cosmic_ray/version.py'),
@@ -73,17 +90,7 @@ setup(
     ],
     platforms='any',
     include_package_data=True,
-    install_requires=[
-        'astunparse',
-        'celery',
-        'decorator',
-        'docopt',
-        'pathlib',
-        'pytest',
-        'stevedore',
-        'tinydb',
-        'transducer',
-    ],
+    install_requires=INSTALL_REQUIRES,
     entry_points={
         'console_scripts': [
             'cosmic-ray = cosmic_ray.cli:main',
