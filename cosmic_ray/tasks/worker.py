@@ -45,7 +45,7 @@ def worker_task(work_id,
                             stdout=subprocess.PIPE,
                             universal_newlines=True)
     try:
-        outs, errs = proc.communicate(input=None, timeout=timeout)
+        outs, _ = proc.communicate(input=None, timeout=timeout)
         result = json.loads(outs)
     except subprocess.TimeoutExpired as e:
         result = ('timeout', e.timeout)
