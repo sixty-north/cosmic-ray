@@ -73,7 +73,7 @@ INSTALL_REQUIRES = [
     'transducer',
 ]
 
-if sys.version_info >= (3,4):
+if sys.version_info >= (3, 4):
     INSTALL_REQUIRES.append('celery')
 else:
     INSTALL_REQUIRES.append('celery<4')

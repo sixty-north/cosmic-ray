@@ -82,8 +82,8 @@ def worker(module_name,
         for line in difflib.unified_diff(
                         module_source.split('\n'),
                         modified_source.split('\n'),
-                        fromfile="a"+module_source_file,
-                        tofile="b"+module_source_file,
+                        fromfile="a" + module_source_file,
+                        tofile="b" + module_source_file,
                         lineterm=""):
             module_diff.append(line)
 

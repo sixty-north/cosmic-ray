@@ -16,6 +16,7 @@ class NoseResultsCollector(nose.plugins.Plugin):
     def finalize(self, result):
         self.result = result
 
+
 class NoseRunner(TestRunner):
     """A TestRunner using nosetest.
 
@@ -35,4 +36,5 @@ class NoseRunner(TestRunner):
             redirect_stdout(devnull), redirect_stderr(devnull):
             nose.run(argv=argv, plugins=[collector])
         return (collector.result.wasSuccessful(),
-            [r[1] for r in collector.result.errors + collector.result.failures])
+                [r[1] for r in collector.result.errors +
+                               collector.result.failures])

@@ -46,7 +46,7 @@ def count_mutants(modules, operators):
     return {
         mod: dict(
             filter(
-                lambda t:  t[1] > 0,
+                lambda t: t[1] > 0,
                 ((op, _count(mod_ast, op))
                  for op in operators)))
         for (mod, mod_ast)

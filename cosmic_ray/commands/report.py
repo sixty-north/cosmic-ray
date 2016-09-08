@@ -11,7 +11,7 @@ def _print_item(item, full_report):
         'command: {}'.format(
             ' '.join(item.command)
             if item.command is not None else ''),
-        ]
+    ]
     if result_type == 'Outcome.KILLED' and not full_report:
         pass
     elif item.result_type == 'timeout':
