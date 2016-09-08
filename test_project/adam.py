@@ -49,7 +49,7 @@ def trigger_infinite_loop():
     # helps us test timeouts.
     # Any object which isn't None passes the truth value testing so here
     # we use `while object()` instead of `while True` b/c the later becomes
-    # `while False` when BooleanReplacer is applied and we don't trigger an
+    # `while False` when ReplaceTrueFalse is applied and we don't trigger an
     # infinite loop.
     while object():
         break
