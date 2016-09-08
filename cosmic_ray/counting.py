@@ -1,4 +1,5 @@
-"""Facilities for counting how many mutants will be created in a
+"""
+Facilities for counting how many mutants will be created in a
 cross-product of operators and modules.
 """
 
@@ -7,9 +8,12 @@ from .plugins import get_operator
 
 
 class _CountingCore:
-    """An operator core which simply counts how many times an operator finds a
+
+    """
+    An operator core which simply counts how many times an operator finds a
     mutation site in a module.
     """
+
     def __init__(self):
         self.count = 0
 
@@ -22,7 +26,7 @@ class _CountingCore:
 
 
 def _count(module_ast, op_name):
-    "Count mutants for a single module-operator pair."
+    """Count mutants for a single module-operator pair."""
     core = _CountingCore()
     op = get_operator(op_name)(core)
     op.visit(module_ast)

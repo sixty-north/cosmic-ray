@@ -18,6 +18,7 @@ class Timer:
             do_something()
         print(t.elapsed())
     """
+
     def __init__(self):
         self.reset()
 

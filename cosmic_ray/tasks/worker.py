@@ -1,6 +1,4 @@
-"""The celery-specific details for routing work requests to Cosmic Ray workers.
-
-"""
+"""Celery specific details for routing work requests to Cosmic Ray workers."""
 import itertools
 import json
 import subprocess
@@ -59,7 +57,6 @@ def execute_work_items(test_runner,
                        test_args,
                        timeout,
                        work_items):
-
     """Execute a suite of tests for a given set of work items.
 
     Args:
@@ -70,7 +67,6 @@ def execute_work_items(test_runner,
 
     Returns: An iterable of `(work_id, command, results)` tuples as described
       in `worker_task()`.
-
     """
     return celery.group(
         worker_task.delay(work_item.work_id,

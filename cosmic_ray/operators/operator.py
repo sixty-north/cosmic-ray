@@ -2,18 +2,21 @@ import ast
 
 
 class Operator(ast.NodeTransformer):
-    """A base class for all mutation operators.
+
+    """
+    A base class for all mutation operators.
 
     This takes care of the basic book-keeping that all operators need
     to do. All operators *must* derive from this class since that's
     how we keep track of them.
     """
+
     def __init__(self, core):
         self._core = core
 
     @property
     def core(self):
-        "The core behavior of the operator."
+        """The core behavior of the operator."""
         return self._core
 
     def repr_args(self):

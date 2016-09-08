@@ -1,2 +1,1 @@
-"""Cosmic Ray is a mutation testing tool for Python.
-"""
+"""Cosmic Ray is a mutation testing tool for Python."""

@@ -81,14 +81,12 @@ class WorkDB:
 
     @property
     def _work_parameters(self):
-        """The table of work parameters.
-        """
+        """The table of work parameters."""
         return self._db.table('work-parameters')
 
     @property
     def _work_items(self):
-        """The table of work items.
-        """
+        """The table of work items."""
         return self._db.table('work-items')
 
     def set_work_parameters(self, test_runner, test_args, timeout):
@@ -186,8 +184,7 @@ class WorkDB:
 
     @property
     def pending_work(self):
-        """The sequence of pending `WorkItem`s in the session.
-        """
+        """The sequence of pending `WorkItem`s in the session."""
         table = self._work_items
         work_item = tinydb.Query()
 
@@ -198,7 +195,8 @@ class WorkDB:
 
 @contextlib.contextmanager
 def use_db(path, mode=WorkDB.Mode.create):
-    """Open a DB in file `path` in mode `mode` as a context manager.
+    """
+    Open a DB in file `path` in mode `mode` as a context manager.
 
     On exiting the context the DB will be automatically closed.
 
@@ -211,7 +209,6 @@ def use_db(path, mode=WorkDB.Mode.create):
       FileNotFoundError: If `mode` is `Mode.open` and `path` does not
         exist.
     """
-
     db = WorkDB(path, mode)
     try:
         yield db

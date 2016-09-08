@@ -10,7 +10,9 @@ from .testing.test_runner import Outcome
 
 
 class JSONEncoder(json.JSONEncoder):
-    """A JSON encoder that knows how to encode any specific types we need.
+
+    """
+    A JSON encoder that knows how to encode any specific types we need.
 
     To use this, pass it as the `cls` argument to `json.dumps`:
 

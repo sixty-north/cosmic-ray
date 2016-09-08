@@ -8,8 +8,7 @@ class ReplaceBreakWithContinue(Operator):
         return self.visit_mutation_site(node)
 
     def mutate(self, node):
-        """Replace a Break node with a Continue node
-        """
+        """Replace a Break node with a Continue node."""
         assert isinstance(node, ast.Break)
         return ast.Continue()
 
@@ -19,7 +18,6 @@ class ReplaceContinueWithBreak(Operator):
         return self.visit_mutation_site(node)
 
     def mutate(self, node):
-        """Replace a Continue node with a Break node
-        """
+        """Replace a Continue node with a Break node."""
         assert isinstance(node, ast.Continue)
         return ast.Break()
