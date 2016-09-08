@@ -4,18 +4,21 @@
 set -e
 
 cosmic-ray load cosmic-ray.unittest.conf
+if [ $? != 0 ]; then exit 1; fi
 #cosmic-ray report adam_tests.unittest
 #cosmic-ray survival-rate adam_tests.unittest
 RESULT=`cosmic-ray survival-rate adam_tests.unittest`
 if [ $RESULT != 0.00 ]; then exit 1; fi
 
 cosmic-ray load cosmic-ray.pytest.conf
+if [ $? != 0 ]; then exit 1; fi
 #cosmic-ray report adam_tests.pytest
 #cosmic-ray survival-rate adam_tests.pytest
 RESULT=`cosmic-ray survival-rate adam_tests.pytest`
 if [ $RESULT != 0.00 ]; then exit 1; fi
 
 cosmic-ray load cosmic-ray.nosetest.conf
+if [ $? != 0 ]; then exit 1; fi
 #cosmic-ray report adam_tests.nosetest
 #cosmic-ray survival-rate adam_tests.nosetest
 RESULT=`cosmic-ray survival-rate adam_tests.nosetest`
@@ -23,6 +26,7 @@ if [ $RESULT != 0.00 ]; then exit 1; fi
 
 # Run import tests
 cosmic-ray load cosmic-ray.import.conf
+if [ $? != 0 ]; then exit 1; fi
 #cosmic-ray report import_tests
 #cosmic-ray survival-rate import_tests
 RESULT=`cosmic-ray survival-rate import_tests`
