@@ -65,6 +65,7 @@ if sys.version_info >= (3,4):
     INSTALL_REQUIRES.append('celery')
 else:
     INSTALL_REQUIRES.append('celery<4')
+    INSTALL_REQUIRES.append('enum34')
 
 setup(
     name='cosmic_ray',

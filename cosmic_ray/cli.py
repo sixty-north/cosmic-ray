@@ -3,7 +3,6 @@
 Here we manage command-line parsing and launching of the internal
 machinery that does mutation testing.
 """
-from contextlib import redirect_stdout
 import itertools
 import json
 import logging
@@ -24,6 +23,7 @@ import cosmic_ray.json_util
 import cosmic_ray.worker
 import cosmic_ray.testing
 import cosmic_ray.timing
+from cosmic_ray.util import redirect_stdout
 from cosmic_ray.work_db import use_db, WorkDB
 
 
