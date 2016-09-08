@@ -15,6 +15,14 @@ def constant_false():
     return False
 
 
+def bool_and():
+    return object() and None
+
+
+def bool_or():
+    return object() or None
+
+
 def unary_sub():
     return -1
 

@@ -21,6 +21,12 @@ class Tests(unittest.TestCase):
             adam.constant_false(),
             False)
 
+    def test_bool_and(self):
+        self.assertFalse(adam.bool_and())
+
+    def test_bool_or(self):
+        self.assertTrue(adam.bool_or())
+
     def test_unary_sub(self):
         self.assertEqual(
             adam.unary_sub(),

@@ -42,6 +42,12 @@ operators = [
     'replace_true_false = '
     'cosmic_ray.operators.boolean_replacer:ReplaceTrueFalse',
 
+    'replace_and_with_or = '
+    'cosmic_ray.operators.boolean_replacer:ReplaceAndWithOr',
+
+    'replace_or_with_and = '
+    'cosmic_ray.operators.boolean_replacer:ReplaceOrWithAnd',
+
     'arithmetic_operator_deletion ='
     'cosmic_ray.operators.arithmetic_operator_deletion:ReverseUnarySub',
 
