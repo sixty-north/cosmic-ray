@@ -348,7 +348,7 @@ def main(argv=None):
 
     command = configuration['<command>']
     if command is None:
-        command == 'help'
+        command = 'help'
 
     try:
         handler = COMMAND_HANDLER_MAP[command]
