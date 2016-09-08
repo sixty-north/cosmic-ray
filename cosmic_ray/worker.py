@@ -98,7 +98,7 @@ def worker(module_name,
                 (core.activation_record,
                  results))
 
-    except Exception:
+    except Exception:  # noqa
         res = traceback.format_exception(*sys.exc_info())
         res.extend(module_diff)
         results = [Outcome.INCOMPETENT, res]

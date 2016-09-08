@@ -17,7 +17,7 @@ class _CountingCore:
     def __init__(self):
         self.count = 0
 
-    def visit_mutation_site(self, node, op):
+    def visit_mutation_site(self, node, op):  # noqa
         self.count += 1
         return node
 
