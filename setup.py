@@ -48,6 +48,12 @@ operators = [
     'replace_or_with_and = '
     'cosmic_ray.operators.boolean_replacer:ReplaceOrWithAnd',
 
+    'remove_not = '
+    'cosmic_ray.operators.boolean_replacer:RemoveNot',
+
+    'add_not = '
+    'cosmic_ray.operators.boolean_replacer:AddNot',
+
     'arithmetic_operator_deletion ='
     'cosmic_ray.operators.arithmetic_operator_deletion:ReverseUnarySub',
 

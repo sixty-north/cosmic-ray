@@ -8,7 +8,10 @@ if [ $? != 0 ]; then exit 1; fi
 #cosmic-ray report adam_tests.unittest
 #cosmic-ray survival-rate adam_tests.unittest
 RESULT=`cosmic-ray survival-rate adam_tests.unittest`
-if [ $RESULT != 0.00 ]; then exit 1; fi
+if [ $RESULT != 0.00 ]; then
+    cosmic-ray report adam_tests.unittest
+    exit 1
+fi
 
 cosmic-ray load cosmic-ray.pytest.conf
 if [ $? != 0 ]; then exit 1; fi

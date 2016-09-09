@@ -27,6 +27,18 @@ class Tests(unittest.TestCase):
     def test_bool_or(self):
         self.assertTrue(adam.bool_or())
 
+    def test_bool_expr_with_not(self):
+        self.assertFalse(adam.bool_expr_with_not())
+
+    def test_bool_if(self):
+        self.assertTrue(adam.bool_if())
+
+    def test_if_expression(self):
+        self.assertTrue(adam.if_expression())
+
+    def test_assert_in_func(self):
+        self.assertTrue(adam.assert_in_func())
+
     def test_unary_sub(self):
         self.assertEqual(
             adam.unary_sub(),
@@ -55,4 +67,4 @@ class Tests(unittest.TestCase):
             9)
 
     def test_trigger_infinite_loop(self):
-        adam.trigger_infinite_loop()
+        self.assertTrue(adam.trigger_infinite_loop())

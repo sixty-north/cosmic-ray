@@ -54,3 +54,52 @@ class ReplaceOrWithAnd(Operator):
     def mutate(self, node):
         """Replace OR with AND."""
         return ast.And()
+
+
+class RemoveNot(Operator):
+
+    """An operator that removes the 'not' keyword from expressions."""
+
+    def visit_UnaryOp(self, node):  # noqa
+        """
+        http://greentreesnakes.readthedocs.io/en/latest/nodes.html#UnaryOp
+        """
+        if isinstance(node.op, ast.Not):
+            return self.visit_mutation_site(node)
+        else:
+            return node
+
+    def mutate(self, node):
+        """Remove the 'not' keyword."""
+        # UnaryOp.operand is any expression node so just
+        # return the expression without the 'not' keyword
+        return node.operand
+
+
+class AddNot(Operator):
+
+    """An operator that adds the 'not' keyword to expressions."""
+
+    def visit_If(self, node):  # noqa
+        return self.visit_mutation_site(node)
+
+    def visit_IfExp(self, node):  # noqa
+        return self.visit_mutation_site(node)
+
+    def visit_Assert(self, node):  # noqa
+        return self.visit_mutation_site(node)
+
+    def visit_While(self, node):  # noqa
+        return self.visit_mutation_site(node)
+
+    def mutate(self, node):
+        """
+        Add the 'not' keyword.
+
+        Note: this will negate the entire if condition.
+        """
+        if hasattr(node, 'test'):
+            node.test = ast.UnaryOp(op=ast.Not(), operand=node.test)
+            # add lineno & col_offset to the nodes we created
+            ast.fix_missing_locations(node)
+            return node
