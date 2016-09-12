@@ -15,6 +15,34 @@ def constant_false():
     return False
 
 
+def bool_and():
+    return object() and None
+
+
+def bool_or():
+    return object() or None
+
+
+def bool_expr_with_not():
+    return not object()
+
+
+def bool_if():
+    if object():
+        return True
+
+    raise Exception('bool_if() failed')
+
+
+def if_expression():
+    return True if object() else None
+
+
+def assert_in_func():
+    assert object()
+    return True
+
+
 def unary_sub():
     return -1
 
@@ -45,11 +73,17 @@ def use_continue(limit):
 
 
 def trigger_infinite_loop():
+    result = None
     # When `break` becomes `continue`, this should enter an infinite loop. This
     # helps us test timeouts.
     # Any object which isn't None passes the truth value testing so here
     # we use `while object()` instead of `while True` b/c the later becomes
-    # `while False` when BooleanReplacer is applied and we don't trigger an
+    # `while False` when ReplaceTrueFalse is applied and we don't trigger an
     # infinite loop.
     while object():
+        result = object()
         break
+
+    # when `while object()` becomes `while not object()`
+    # the code below will be triggered
+    return result

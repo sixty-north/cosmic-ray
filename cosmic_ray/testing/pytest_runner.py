@@ -1,9 +1,8 @@
-from contextlib import redirect_stdout
 import os
-
 import pytest
 
 from .test_runner import TestRunner
+from cosmic_ray.util import redirect_stdout
 
 
 class ResultCollector:

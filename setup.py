@@ -39,8 +39,20 @@ operators = [
     'number_replacer = '
     'cosmic_ray.operators.number_replacer:NumberReplacer',
 
-    'boolean_replacer = '
-    'cosmic_ray.operators.boolean_replacer:BooleanReplacer',
+    'replace_true_false = '
+    'cosmic_ray.operators.boolean_replacer:ReplaceTrueFalse',
+
+    'replace_and_with_or = '
+    'cosmic_ray.operators.boolean_replacer:ReplaceAndWithOr',
+
+    'replace_or_with_and = '
+    'cosmic_ray.operators.boolean_replacer:ReplaceOrWithAnd',
+
+    'remove_not = '
+    'cosmic_ray.operators.boolean_replacer:RemoveNot',
+
+    'add_not = '
+    'cosmic_ray.operators.boolean_replacer:AddNot',
 
     'arithmetic_operator_deletion ='
     'cosmic_ray.operators.arithmetic_operator_deletion:ReverseUnarySub',
@@ -65,6 +77,7 @@ if sys.version_info >= (3,4):
     INSTALL_REQUIRES.append('celery')
 else:
     INSTALL_REQUIRES.append('celery<4')
+    INSTALL_REQUIRES.append('enum34')
 
 setup(
     name='cosmic_ray',

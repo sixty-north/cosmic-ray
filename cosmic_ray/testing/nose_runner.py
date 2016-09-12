@@ -1,20 +1,8 @@
-from contextlib import redirect_stdout
-try:
-    from contextlib import redirect_stderr
-except ImportError:
-    # redirect_stderr was introduced in Python 3.5
-    class redirect_stderr(redirect_stdout):
-        """
-            Copied from Python 3.5's implementation. See:
-            https://github.com/python/cpython/commit/83935e76e35cf8d2fb9fe2599420f8adf421b884#diff-edbcdd20abc32f8b018deb2353ae925a
-        """
-
-        _stream = "stderr"
-
-import nose
 import os
+import nose
 
 from .test_runner import TestRunner
+from cosmic_ray.util import redirect_stdout, redirect_stderr
 
 
 class NoseResultsCollector(nose.plugins.Plugin):
