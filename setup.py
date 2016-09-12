@@ -53,6 +53,7 @@ INSTALL_REQUIRES = [
     'astunparse',
     'decorator',
     'docopt',
+    'nose',
     'pathlib',
     'pytest',
     'stevedore',
