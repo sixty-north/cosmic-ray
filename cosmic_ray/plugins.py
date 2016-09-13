@@ -14,14 +14,12 @@ def get_operator(name):
 
 
 def operator_names():
-    """Get an iterable of all operator plugin names.
-    """
+    """Get an iterable of all operator plugin names."""
     return ExtensionManager('cosmic_ray.operators').names()
 
 
 def get_test_runner(name, test_args):
-    """Get a test-runner instance by name.
-    """
+    """Get a test-runner instance by name."""
     test_runner_manager = driver.DriverManager(
         namespace='cosmic_ray.test_runners',
         name=name,
@@ -33,6 +31,5 @@ def get_test_runner(name, test_args):
 
 
 def test_runner_names():
-    """Get iterable of test-runner plugin names.
-    """
+    """Get iterable of test-runner plugin names."""
     return ExtensionManager('cosmic_ray.test_runners').names()

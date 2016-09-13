@@ -11,7 +11,7 @@ def _print_item(item, full_report):
         'command: {}'.format(
             ' '.join(item.command)
             if item.command is not None else ''),
-        ]
+    ]
     if result_type == 'Outcome.KILLED' and not full_report:
         pass
     elif item.result_type == 'timeout':
@@ -48,7 +48,7 @@ def create_report(work_db, show_pending, full_report=False):
             yield from _print_item(item, full_report)
             yield ''
 
-    total_jobs, pending_jobs, completed_jobs, kills = _base_stats(work_db)
+    total_jobs, _, completed_jobs, kills = _base_stats(work_db)
     yield 'total jobs: {}'.format(total_jobs)
 
     if completed_jobs > 0:
@@ -61,7 +61,7 @@ def create_report(work_db, show_pending, full_report=False):
 
 
 def survival_rate(work_db):
-    total_jobs, pending_jobs, completed_jobs, kills = _base_stats(work_db)
+    _, _, completed_jobs, kills = _base_stats(work_db)
 
     if not completed_jobs:
         return 0

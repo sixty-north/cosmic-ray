@@ -1,5 +1,4 @@
-"""Functions related to finding modules for testing.
-"""
+"""Functions related to finding modules for testing."""
 
 import importlib
 import logging

@@ -1,5 +1,4 @@
-"""Central location for celery-specific stuff.
-"""
+"""Central location for celery-specific stuff."""
 
 from celery import Celery
 

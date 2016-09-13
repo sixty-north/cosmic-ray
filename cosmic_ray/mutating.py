@@ -23,7 +23,9 @@ def _full_module_name(obj):
 
 
 class MutatingCore:
-    """An `Operator` core which performs mutation of ASTs.
+
+    """
+    An `Operator` core which performs mutation of ASTs.
 
     This core is instantiated with a target count N. The Nth time the operator
     using the core calls `visit_mutation_site()`, this core will set the
@@ -31,8 +33,8 @@ class MutatingCore:
     will mutate the `target`-th instance of an operator's mutation candidates
     if such a candidate exists. If there is no `target`-th candidate then
     `activation_record` will remain `None` and no mutation will occur.
-
     """
+
     def __init__(self, target):
         self._target = target
         self._count = 0

@@ -56,7 +56,7 @@ Get the top-level help, or help for <command> if specified.
     if not command:
         options = OPTIONS
     elif command not in COMMAND_HANDLER_MAP:
-        LOG.error('"{}" is not a valid cosmic-ray command'.format(command))
+        LOG.error('"%s" is not a valid cosmic-ray command', command)
         options = OPTIONS
     else:
         options = COMMAND_HANDLER_MAP[command].__doc__
@@ -92,8 +92,9 @@ options:
 """
     sys.path.insert(0, '')
     test_runner = cosmic_ray.plugins.get_test_runner(
-            configuration['--test-runner'],
-            configuration['<test-args>'])
+        configuration['--test-runner'],
+        configuration['<test-args>']
+    )
 
     test_runner()
 
@@ -137,14 +138,14 @@ options:
             configuration['<top-module>'],
             configuration['<test-args>'])
 
-    LOG.info('timeout = {} seconds'.format(timeout))
+    LOG.info('timeout = %f seconds', timeout)
 
     modules = set(
         cosmic_ray.modules.find_modules(
             cosmic_ray.modules.fixup_module_name(configuration['<top-module>']),
             configuration['--exclude-modules']))
 
-    LOG.info('Modules discovered: %s',  [m.__name__ for m in modules])
+    LOG.info('Modules discovered: %s', [m.__name__ for m in modules])
 
     db_name = _get_db_name(configuration['<session-name>'])
 
@@ -292,7 +293,7 @@ options:
         config['<test-args>'])
 
     with open(os.devnull, 'w') as devnull,\
-         redirect_stdout(sys.stdout if config['--keep-stdout'] else devnull):
+        redirect_stdout(sys.stdout if config['--keep-stdout'] else devnull):
         result_type, data = cosmic_ray.worker.worker(
             config['<module>'],
             operator,
@@ -348,12 +349,12 @@ def main(argv=None):
 
     command = configuration['<command>']
     if command is None:
-        command == 'help'
+        command = 'help'
 
     try:
         handler = COMMAND_HANDLER_MAP[command]
     except KeyError:
-        LOG.error('"{}" is not a valid cosmic-ray command'.format(command))
+        LOG.error('"%s" is not a valid cosmic-ray command', command)
         handler = handle_help
         argv = ['help']
 

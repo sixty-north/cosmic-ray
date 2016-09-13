@@ -1,5 +1,4 @@
-"""Facilities for generating ASTs from modules.
-"""
+"""Facilities for generating ASTs from modules."""
 
 import ast
 import inspect

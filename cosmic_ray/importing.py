@@ -1,5 +1,4 @@
-"""Functionality related to Python's import mechanisms.
-"""
+"""Functionality related to Python's import mechanisms."""
 
 import contextlib
 from importlib.abc import MetaPathFinder
@@ -9,7 +8,9 @@ import sys
 
 
 class ASTLoader:  # pylint:disable=old-style-class,too-few-public-methods
-    """An `importlib.abc.Loader` which loads an AST for a particular name.
+
+    """
+    An `importlib.abc.Loader` which loads an AST for a particular name.
 
     You construct this with an AST and a module name. The
     `exec_module` method simply compiles the AST with the name and
@@ -17,6 +18,7 @@ class ASTLoader:  # pylint:disable=old-style-class,too-few-public-methods
 
     In practice, this is how cosmic-ray loads mutated ASTs for modules.
     """
+
     def __init__(self, ast, name):
         self._ast = ast
         self._name = name
@@ -27,7 +29,9 @@ class ASTLoader:  # pylint:disable=old-style-class,too-few-public-methods
 
 
 class ASTFinder(MetaPathFinder):  # pylint:disable=too-few-public-methods
-    """An `importlib.ast.MetaPathFinder` that associates a module name
+
+    """
+    An `importlib.ast.MetaPathFinder` that associates a module name
     with an AST.
 
     Construct this by passing a module name and associated AST. When
@@ -36,6 +40,7 @@ class ASTFinder(MetaPathFinder):  # pylint:disable=too-few-public-methods
 
     We use this to inject mutated ASTs into tests.
     """
+
     def __init__(self, fullname, ast):
         self._fullname = fullname
         self._ast = ast
