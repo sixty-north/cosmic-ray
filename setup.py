@@ -69,7 +69,7 @@ INSTALL_REQUIRES = [
     'pathlib',
     'pytest',
     'stevedore',
-    'tinydb',
+    'tinydb>=3.2.1',
     'transducer',
 ]
 
