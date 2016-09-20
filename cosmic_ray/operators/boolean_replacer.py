@@ -69,15 +69,35 @@ class ReplaceAndWithOr(Operator):
 
 class ReplaceOrWithAnd(Operator):
     """An operator that swaps 'or' with 'and'."""
-    def visit_Or(self, node):  # noqa
+    def visit_BoolOp(self, node):  # noqa
         """
-            http://greentreesnakes.readthedocs.io/en/latest/nodes.html#Or
+            http://greentreesnakes.readthedocs.io/en/latest/nodes.html#BoolOp
         """
-        return self.visit_mutation_site(node)
+        if isinstance(node.op, ast.Or):
+            return self.visit_mutation_site(node, len(node.values))
+        else:
+            return node
 
-    def mutate(self, node, _):
+    def mutate(self, node, idx):
         """Replace OR with AND."""
-        return ast.And()
+        if idx and len(node.values) > 2:
+            left_list = node.values[:idx-1]
+            right_list = node.values[idx+1:]
+            left = node.values[idx-1]
+            right = node.values[idx]
+
+            new_node = ast.BoolOp(op=ast.And(), values=[left, right])
+
+            node.values = []
+            node.values.extend(left_list)
+            node.values.append(new_node)
+            node.values.extend(right_list)
+        else:
+            node.op = ast.And()
+
+        # add lineno and col_offset
+        ast.fix_missing_locations(node)
+        return node
 
 
 class RemoveNot(Operator):
