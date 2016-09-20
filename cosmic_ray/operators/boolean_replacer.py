@@ -62,8 +62,6 @@ class ReplaceAndWithOr(Operator):
             node.values.extend(left)
             node.values.extend(right)
 
-        # add lineno and col_offset
-        ast.fix_missing_locations(node)
         return node
 
 
@@ -95,8 +93,6 @@ class ReplaceOrWithAnd(Operator):
         else:
             node.op = ast.And()
 
-        # add lineno and col_offset
-        ast.fix_missing_locations(node)
         return node
 
 
@@ -144,6 +140,4 @@ class AddNot(Operator):
         """
         if hasattr(node, 'test'):
             node.test = ast.UnaryOp(op=ast.Not(), operand=node.test)
-            # add lineno & col_offset to the nodes we created
-            ast.fix_missing_locations(node)
             return node

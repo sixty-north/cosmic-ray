@@ -67,7 +67,8 @@ class MutatingCore:
 
                 old_node = node
                 node = op.mutate(old_node, idx)
-                ast.copy_location(node, old_node)
+                # add lineno and col_offset for newly creted nodes
+                ast.fix_missing_locations(node)
                 self._count += 1
                 break
             else:
