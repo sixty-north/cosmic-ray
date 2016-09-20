@@ -22,7 +22,7 @@ class ReplaceTrueFalse(Operator):
         else:
             return node
 
-    def mutate(self, node):
+    def mutate(self, node, _):
         """Modify the boolean value on `node`."""
         if sys.version_info >= (3, 4):
             return ast.NameConstant(value=not node.value)
@@ -38,7 +38,7 @@ class ReplaceAndWithOr(Operator):
         """
         return self.visit_mutation_site(node)
 
-    def mutate(self, node):
+    def mutate(self, node, _):
         """Replace AND with OR."""
         return ast.Or()
 
@@ -51,7 +51,7 @@ class ReplaceOrWithAnd(Operator):
         """
         return self.visit_mutation_site(node)
 
-    def mutate(self, node):
+    def mutate(self, node, _):
         """Replace OR with AND."""
         return ast.And()
 
@@ -69,7 +69,7 @@ class RemoveNot(Operator):
         else:
             return node
 
-    def mutate(self, node):
+    def mutate(self, node, _):
         """Remove the 'not' keyword."""
         # UnaryOp.operand is any expression node so just
         # return the expression without the 'not' keyword
@@ -92,7 +92,7 @@ class AddNot(Operator):
     def visit_While(self, node):  # noqa
         return self.visit_mutation_site(node)
 
-    def mutate(self, node):
+    def mutate(self, node, _):
         """
         Add the 'not' keyword.
 

@@ -49,7 +49,7 @@ class MutatingCore:
         """
         return self._activation_record
 
-    def visit_mutation_site(self, node, op):
+    def visit_mutation_site(self, node, op, num_mutations):
         """Potentially mutate `node`, returning the mutated version.
 
         `Operator` calls this when AST iteration reaches a
@@ -57,18 +57,22 @@ class MutatingCore:
         mutation, the subclass instance will be asked to perform the
         mutation.
         """
-        if self._count == self._target:
-            self._activation_record = {
-                'operator': _full_module_name(op),
-                'occurrence': self._target,
-                'line_number': cosmic_ray.util.get_line_number(node)
-            }
+        for idx in range(num_mutations):
+            if self._count == self._target:
+                self._activation_record = {
+                    'operator': _full_module_name(op),
+                    'occurrence': self._target,
+                    'line_number': cosmic_ray.util.get_line_number(node)
+                }
 
-            old_node = node
-            node = op.mutate(old_node)
-            ast.copy_location(node, old_node)
+                old_node = node
+                node = op.mutate(old_node, idx)
+                ast.copy_location(node, old_node)
+                self._count += 1
+                break
+            else:
+                self._count += 1
 
-        self._count += 1
         return node
 
     def repr_args(self):

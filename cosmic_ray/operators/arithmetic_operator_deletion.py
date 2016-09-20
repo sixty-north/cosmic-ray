@@ -13,7 +13,7 @@ class ReverseUnarySub(Operator):
         else:
             return node
 
-    def mutate(self, node):
+    def mutate(self, node, _):
         """Replace the unary-sub operator with unary-add."""
         node.op = ast.UAdd()
         return node
@@ -29,7 +29,7 @@ class ReverseUnaryAdd(Operator):
         else:
             return node
 
-    def mutate(self, node):
+    def mutate(self, node, _):
         """Replace the unary-add operator with unary-sub."""
         node.op = ast.USub()
         return node
