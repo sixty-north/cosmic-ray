@@ -17,8 +17,8 @@ class _CountingCore:
     def __init__(self):
         self.count = 0
 
-    def visit_mutation_site(self, node, _):
-        self.count += 1
+    def visit_mutation_site(self, node, _, count):
+        self.count += count
         return node
 
     def repr_args(self):

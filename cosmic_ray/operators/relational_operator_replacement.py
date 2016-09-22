@@ -60,7 +60,7 @@ def _create_operator(from_op, to_op):  # pylint:disable=redefined-outer-name
     new_op = type(
         operator_name,
         (Operator,),
-        {'mutate': lambda self, node: to_op(),
+        {'mutate': lambda self, node, _: to_op(),
          visit_func_name: visit_func,
          'from_op': from_op,
          'to_op': to_op})

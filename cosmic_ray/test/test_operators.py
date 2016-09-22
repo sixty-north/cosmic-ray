@@ -86,7 +86,7 @@ def test_activation_record_created(operator, code):
 @pytest.mark.parametrize('operator,code', OPERATOR_SAMPLES)
 def test_no_activation_record_created(operator, code):
     node = ast.parse(code)
-    core = MutatingCore(1)
+    core = MutatingCore(-1)
     op = operator(core)
     op.visit(node)
     assert core.activation_record is None
@@ -112,7 +112,7 @@ def test_mutation_changes_ast(operator, code):
 def test_no_mutation_leaves_ast_unchanged(operator, code):
     node = ast.parse(code)
 
-    core = MutatingCore(1)
+    core = MutatingCore(-1)
     replacer = operator(core)
     assert ast.dump(node) == ast.dump(replacer.visit(copy.deepcopy(node)))
 
@@ -123,7 +123,7 @@ def test_replacement_activated_core(operator, code):
     core = _CountingCore()
     op = operator(core)
     op.visit(node)
-    assert core.count == 1
+    assert core.count >= 1
 
 
 

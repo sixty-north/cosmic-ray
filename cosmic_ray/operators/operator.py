@@ -22,15 +22,15 @@ class Operator(ast.NodeTransformer):
     def repr_args(self):
         return self.core.repr_args()
 
-    def visit_mutation_site(self, node):
+    def visit_mutation_site(self, node, num_mutations=1):
         """Subclasses call this when they encounter a node they can potentially mutate.
 
         This functions delegates to the core, letting it do whatever it needs
         to do.
         """
-        return self.core.visit_mutation_site(node, self)
+        return self.core.visit_mutation_site(node, self, num_mutations)
 
-    def mutate(self, node):
+    def mutate(self, node, idx):
         """Mutate a node in an operator-specific manner.
 
         Return the new, mutated node. Return `None` if the node has
