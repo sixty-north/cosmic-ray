@@ -57,23 +57,24 @@ class MutatingCore:
         mutation, the subclass instance will be asked to perform the
         mutation.
         """
-        for idx in range(num_mutations):
-            if self._count == self._target:
-                self._activation_record = {
-                    'operator': _full_module_name(op),
-                    'occurrence': self._target,
-                    'line_number': cosmic_ray.util.get_line_number(node)
-                }
+        # If the current operator will do at least that many mutations,
+        # then let it make the mutation now.
+        if self._count <= self._target < self._count + num_mutations:
+            assert self._activation_record is None
+            assert self._target - self._count < num_mutations
 
-                old_node = node
-                node = op.mutate(old_node, idx)
-                # add lineno and col_offset for newly creted nodes
-                ast.fix_missing_locations(node)
-                self._count += 1
-                break
-            else:
-                self._count += 1
+            self._activation_record = {
+                'operator': _full_module_name(op),
+                'occurrence': self._target,
+                'line_number': cosmic_ray.util.get_line_number(node)
+            }
 
+            old_node = node
+            node = op.mutate(old_node, self._target - self._count)
+            # add lineno and col_offset for newly created nodes
+            ast.fix_missing_locations(node)
+
+        self._count += num_mutations
         return node
 
     def repr_args(self):
