@@ -4,7 +4,8 @@ import ast
 import copy
 import pytest
 
-import cosmic_ray.operators.relational_operator_replacement as ROR
+from cosmic_ray.operators.comparison_operator_replacement import \
+    MutateComparisonOperator
 from cosmic_ray.counting import _CountingCore
 from cosmic_ray.operators.boolean_replacer import (ReplaceTrueFalse,
                                                    ReplaceAndWithOr,
@@ -40,23 +41,6 @@ def linearize_tree(node):
     l.visit(node)
     return l.nodes
 
-RELATIONAL_NODE_TOKENS = {
-    ast.Eq: '==',
-    ast.NotEq: '!=',
-    ast.Lt: '<',
-    ast.LtE: '<=',
-    ast.Gt: '>',
-    ast.GtE: '>=',
-    ast.Is: 'is',
-    ast.IsNot: 'is not',
-    ast.In: 'in',
-    ast.NotIn: 'not in'
-}
-
-RELATIONAL_OPERATOR_SAMPLES = [
-    (op, 'if x {} 1: pass'.format(RELATIONAL_NODE_TOKENS[op.from_op]))
-    for op in ROR.OPERATORS
-]
 
 OPERATOR_SAMPLES = [
     (ReplaceTrueFalse, 'True'),
@@ -70,7 +54,8 @@ OPERATOR_SAMPLES = [
     (ReplaceBreakWithContinue, 'while True: break'),
     (ReplaceContinueWithBreak, 'while False: continue'),
     (NumberReplacer, 'x = 1'),
-] + RELATIONAL_OPERATOR_SAMPLES
+    (MutateComparisonOperator, 'if x > y: pass')
+]
 
 
 @pytest.mark.parametrize('operator,code', OPERATOR_SAMPLES)
@@ -124,18 +109,3 @@ def test_replacement_activated_core(operator, code):
     op = operator(core)
     op.visit(node)
     assert core.count >= 1
-
-
-
-@pytest.mark.parametrize('operator,code', RELATIONAL_OPERATOR_SAMPLES)
-def test_relational_operator_replacement_modifies_ast_node(operator, code):
-    node = ast.parse(code)
-    assert isinstance(
-        node.body[0].test.ops[0],
-        operator.from_op)
-
-    core = MutatingCore(0)
-    node = operator(core).visit(node)
-    assert isinstance(
-        node.body[0].test.ops[0],
-        operator.to_op)
