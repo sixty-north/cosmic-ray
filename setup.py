@@ -4,9 +4,6 @@ import re
 from setuptools import setup, find_packages
 import sys
 
-from cosmic_ray.operators.relational_operator_replacement \
-    import relational_operator_pairs
-
 
 def read(*names, **kwargs):
     with io.open(
@@ -28,16 +25,12 @@ def find_version(*file_paths):
 long_description = read('README.md', mode='rt')
 
 
-relational_replacement_operators = [
-    'replace_{0}_with_{1} = '
-    'cosmic_ray.operators.relational_operator_replacement:'
-    'Replace{0}With{1}'.format(
-        from_op.__name__, to_op.__name__)
-    for (from_op, to_op) in relational_operator_pairs()]
-
 operators = [
     'number_replacer = '
     'cosmic_ray.operators.number_replacer:NumberReplacer',
+
+    'mutate_comparison_operator = '
+    'cosmic_ray.operators.comparison_operator_replacement:MutateComparisonOperator',
 
     'replace_true_false = '
     'cosmic_ray.operators.boolean_replacer:ReplaceTrueFalse',
@@ -59,7 +52,7 @@ operators = [
 
     'break_continue_replacement ='
     'cosmic_ray.operators.break_continue:ReplaceBreakWithContinue',
-] + relational_replacement_operators
+]
 
 INSTALL_REQUIRES = [
     'astunparse',
