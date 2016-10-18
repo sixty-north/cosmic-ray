@@ -51,3 +51,18 @@ def get_line_number(node):
         return node.lineno
     else:
         return '<UNKNOWN>'
+
+def build_mutations(ops, to_ops):
+    """The sequence of `(idx, to-op)` tuples describing the mutations for `ops`.
+
+    Each `idx` is an index into `ops` indicating the operator to be mutated
+    from. Each `to-op` is the operator class to be mutated to.
+
+    @ops - a list of operations we want to mutate
+    @to_ops - callable - yields all possible values to mutate to
+    """
+    return [
+        (idx, to_op)
+        for idx, from_op in enumerate(ops)
+        for to_op in to_ops(from_op)
+    ]
