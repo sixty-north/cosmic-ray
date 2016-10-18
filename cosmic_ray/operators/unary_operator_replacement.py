@@ -27,7 +27,7 @@ def _to_ops(from_op):
 
 
 class MutateUnaryOperator(Operator):
-    """An operator that modifies comparisons."""
+    """An operator that modifies unary operators."""
 
     def visit_UnaryOp(self, node):
         """
