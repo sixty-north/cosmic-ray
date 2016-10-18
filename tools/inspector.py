@@ -3,12 +3,16 @@
 # This can be useful for developing new operators, etc.
 
 import ast
+from cosmic_ray.mutating import MutatingCore
+from cosmic_ray.operators.comparison_operator_replacement import MutateComparisonOperator
 
-from cosmic_ray.operators.relational_operator_replacement import ReplaceEq
-
-
-node = ast.parse('if x == 1: pass')
+code = "((x is not y) ^ (x is y))"
+node = ast.parse(code)
+print()
 print(ast.dump(node))
 
-node = ReplaceEq(0).visit(node)
-print(ast.dump(node))
+core = MutatingCore(0)
+operator = MutateComparisonOperator(core)
+new_node = operator.visit(node)
+print()
+print(ast.dump(new_node))
