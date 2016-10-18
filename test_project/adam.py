@@ -51,6 +51,9 @@ def unary_add():
     return +1
 
 
+def binary_add():
+    return 5 + 6
+
 def equals(vals):
     def constraint(x, y):
         return (x == y) ^ (x != y)
