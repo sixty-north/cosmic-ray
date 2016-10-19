@@ -13,11 +13,18 @@ def _print_item(item, full_report):
             if item.command is not None else ''),
     ]
     if result_type == 'Outcome.KILLED' and not full_report:
-        pass
+        ret_val = []
     elif item.result_type == 'timeout':
-        ret_val.append("timeout: {:.3f} sec".format(result))
+        if full_report:
+            ret_val.append("timeout: {:.3f} sec".format(result))
+        else:
+            ret_val = []
     elif item.result_type in ['normal', 'exception']:
         ret_val += result[1][1]
+
+    # for presentation purposes only
+    if ret_val:
+        ret_val.append('')
 
     return ret_val
 
@@ -46,7 +53,6 @@ def create_report(work_db, show_pending, full_report=False):
     for item in work_db.work_items:
         if (item.result_type is not None) or show_pending:
             yield from _print_item(item, full_report)
-            yield ''
 
     total_jobs, _, completed_jobs, kills = _base_stats(work_db)
     yield 'total jobs: {}'.format(total_jobs)
