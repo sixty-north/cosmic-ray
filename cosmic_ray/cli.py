@@ -198,7 +198,7 @@ def handle_report(configuration):
 Print a nicely formatted report of test results and some basic statistics.
 
 options:
-    --full-report  Show tes output and mutation diff for killed mutants
+    --full-report  Show test output and mutation diff for killed mutants
 
     """
     db_name = _get_db_name(configuration['<session-name>'])
