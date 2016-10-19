@@ -4,6 +4,7 @@ comparison operator with another.
 
 import ast
 from .operator import Operator
+from ..util import build_mutations
 
 
 OPERATORS = (ast.Eq, ast.NotEq, ast.Lt, ast.LtE, ast.Gt, ast.GtE,
@@ -39,19 +40,6 @@ def _to_ops(from_op):
             yield to_op
 
 
-def _mutations(ops):
-    """The sequence of `(idx, to-op)` tuples describing the mutations for `ops`.
-
-    Each `idx` is an index into `ops` indicating the operator to be mutated
-    from. Each `to-op` is the operator class to be mutated to.
-    """
-    return [
-        (idx, to_op)
-        for idx, from_op in enumerate(ops)
-        for to_op in _to_ops(from_op)
-    ]
-
-
 class MutateComparisonOperator(Operator):
     """An operator that modifies comparisons."""
 
@@ -61,9 +49,9 @@ class MutateComparisonOperator(Operator):
         """
         return self.visit_mutation_site(
             node,
-            len(_mutations(node.ops)))
+            len(build_mutations(node.ops, _to_ops)))
 
     def mutate(self, node, idx):
-        from_idx, to_op = _mutations(node.ops)[idx]
+        from_idx, to_op = build_mutations(node.ops, _to_ops)[idx]
         node.ops[from_idx] = to_op()
         return node

@@ -6,11 +6,13 @@ import pytest
 
 from cosmic_ray.operators.comparison_operator_replacement import \
     MutateComparisonOperator
+from cosmic_ray.operators.unary_operator_replacement import \
+    MutateUnaryOperator
 from cosmic_ray.counting import _CountingCore
 from cosmic_ray.operators.boolean_replacer import (ReplaceTrueFalse,
                                                    ReplaceAndWithOr,
                                                    ReplaceOrWithAnd,
-                                                   RemoveNot, AddNot)
+                                                   AddNot)
 from cosmic_ray.operators.break_continue import (ReplaceBreakWithContinue,
                                                  ReplaceContinueWithBreak)
 from cosmic_ray.operators.number_replacer import NumberReplacer
@@ -46,7 +48,6 @@ OPERATOR_SAMPLES = [
     (ReplaceTrueFalse, 'True'),
     (ReplaceAndWithOr, 'if True and False: pass'),
     (ReplaceOrWithAnd, 'if True or False: pass'),
-    (RemoveNot, 'if not False: pass'),
     (AddNot, 'if True or False: pass'),
     (AddNot, 'A if B else C'),
     (AddNot, 'assert isinstance(node, ast.Break)'),
@@ -54,7 +55,9 @@ OPERATOR_SAMPLES = [
     (ReplaceBreakWithContinue, 'while True: break'),
     (ReplaceContinueWithBreak, 'while False: continue'),
     (NumberReplacer, 'x = 1'),
-    (MutateComparisonOperator, 'if x > y: pass')
+    (MutateComparisonOperator, 'if x > y: pass'),
+    (MutateUnaryOperator, 'return not X'),
+    (MutateUnaryOperator, 'x = -1'),
 ]
 
 

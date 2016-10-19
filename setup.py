@@ -41,14 +41,11 @@ operators = [
     'replace_or_with_and = '
     'cosmic_ray.operators.boolean_replacer:ReplaceOrWithAnd',
 
-    'remove_not = '
-    'cosmic_ray.operators.boolean_replacer:RemoveNot',
-
     'add_not = '
     'cosmic_ray.operators.boolean_replacer:AddNot',
 
-    'arithmetic_operator_deletion ='
-    'cosmic_ray.operators.arithmetic_operator_deletion:ReverseUnarySub',
+    'mutate_unary_operator ='
+    'cosmic_ray.operators.unary_operator_replacement:MutateUnaryOperator',
 
     'break_continue_replacement ='
     'cosmic_ray.operators.break_continue:ReplaceBreakWithContinue',

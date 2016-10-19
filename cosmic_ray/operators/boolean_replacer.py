@@ -96,29 +96,14 @@ class ReplaceOrWithAnd(Operator):
         return node
 
 
-class RemoveNot(Operator):
-
-    """An operator that removes the 'not' keyword from expressions."""
-
-    def visit_UnaryOp(self, node):  # noqa
-        """
-        http://greentreesnakes.readthedocs.io/en/latest/nodes.html#UnaryOp
-        """
-        if isinstance(node.op, ast.Not):
-            return self.visit_mutation_site(node)
-        else:
-            return node
-
-    def mutate(self, node, _):
-        """Remove the 'not' keyword."""
-        # UnaryOp.operand is any expression node so just
-        # return the expression without the 'not' keyword
-        return node.operand
-
-
 class AddNot(Operator):
 
-    """An operator that adds the 'not' keyword to expressions."""
+    """
+        An operator that adds the 'not' keyword to boolean expressions.
+
+        NOTE: 'not' as unary operator is mutated in `unary_operator_replacement.py`,
+        including deletion of the same operator.
+    """
 
     def visit_If(self, node):  # noqa
         return self.visit_mutation_site(node)
