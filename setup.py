@@ -60,7 +60,7 @@ INSTALL_REQUIRES = [
     'docopt',
     'nose',
     'pathlib',
-    'pytest',
+    'pytest>=3.0',
     'stevedore',
     'tinydb>=3.2.1',
     'transducer',
