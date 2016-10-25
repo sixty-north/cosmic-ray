@@ -3,6 +3,7 @@
 # kill every mutant when that suite is run; if it doesn't, then we've
 # got a problem.
 
+import operator
 
 def constant_number():
     return 42
@@ -51,9 +52,12 @@ def unary_add():
     return +1
 
 
+def binary_add():
+    return 5 + 6
+
 def equals(vals):
     def constraint(x, y):
-        return (x == y) ^ (x != y)
+        return operator.xor(x == y, x != y)
 
     return all([constraint(x, y)
                 for x in vals

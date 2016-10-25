@@ -47,6 +47,9 @@ operators = [
     'mutate_unary_operator ='
     'cosmic_ray.operators.unary_operator_replacement:MutateUnaryOperator',
 
+    'mutate_binary_operator ='
+    'cosmic_ray.operators.binary_operator_replacement:MutateBinaryOperator',
+
     'break_continue_replacement ='
     'cosmic_ray.operators.break_continue:ReplaceBreakWithContinue',
 ]
@@ -57,7 +60,7 @@ INSTALL_REQUIRES = [
     'docopt',
     'nose',
     'pathlib',
-    'pytest',
+    'pytest>=3.0',
     'stevedore',
     'tinydb>=3.2.1',
     'transducer',

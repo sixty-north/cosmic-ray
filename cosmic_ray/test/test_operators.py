@@ -8,6 +8,8 @@ from cosmic_ray.operators.comparison_operator_replacement import \
     MutateComparisonOperator
 from cosmic_ray.operators.unary_operator_replacement import \
     MutateUnaryOperator
+from cosmic_ray.operators.binary_operator_replacement import \
+    MutateBinaryOperator
 from cosmic_ray.counting import _CountingCore
 from cosmic_ray.operators.boolean_replacer import (ReplaceTrueFalse,
                                                    ReplaceAndWithOr,
@@ -58,6 +60,8 @@ OPERATOR_SAMPLES = [
     (MutateComparisonOperator, 'if x > y: pass'),
     (MutateUnaryOperator, 'return not X'),
     (MutateUnaryOperator, 'x = -1'),
+    (MutateBinaryOperator, 'x * y'),
+    (MutateBinaryOperator, 'x - y'),
 ]
 
 
