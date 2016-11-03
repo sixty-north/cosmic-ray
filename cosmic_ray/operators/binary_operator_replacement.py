@@ -10,21 +10,16 @@ OPERATORS = (ast.Add, ast.Sub, ast.Mult, ast.Div, ast.FloorDiv, ast.Mod,
              ast.BitAnd)
 
 # todo: this often leads to unsupported syntax
-#if sys.version_info >= (3, 5):
-#    OPERATORS = OPERATORS + (ast.MatMult, )
+if sys.version_info >= (3, 5):
+    OPERATORS = OPERATORS + (ast.MatMult, )
 
 
 def _to_ops(from_op):
     """
         The sequence of operators which `from_op` could be mutated to.
     """
-
     for to_op in OPERATORS:
-        if to_op and isinstance(from_op, to_op):
-            # skip replacement with self
-            pass
-        else:
-            yield to_op
+        yield to_op
 
 
 class MutateBinaryOperator(Operator):

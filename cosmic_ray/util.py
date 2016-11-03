@@ -64,5 +64,18 @@ def build_mutations(ops, to_ops):
     return [
         (idx, to_op)
         for idx, from_op in enumerate(ops)
-        for to_op in to_ops(from_op)
+        # note: mutations to self are excluded.
+        # None is a special mutation meaning to delete the operator!
+        # 1) when to_op is None isinstance(from_op, None) will blow up because
+        #    the second parameter needs to be a class
+        # 2) when to_op != None we do the isinstance() check to figure out
+        #    whether or not to include the operator in the list of possible mutations
+        #
+        # The `if to_op is None or isinstance(from_op, to_op)` expression handles both
+        # scenarios very elegantly. First we handle 1) and if this is True the rest of
+        # the expression is not evaluated and None is returned. Else we're in scenario 2)
+        # where the left part of the expression is False so the right part is evaluated.
+        # Since the left part of the expression has confirmed that to_op != None then
+        # we're confident that the isinstance() method will always work.
+        for to_op in to_ops(from_op) if to_op is None or not isinstance(from_op, to_op)
     ]
