@@ -22,7 +22,7 @@ import cosmic_ray.modules
 import cosmic_ray.json_util
 import cosmic_ray.worker
 import cosmic_ray.testing
-import cosmic_ray.timing
+from cosmic_ray.timing import Timer
 from cosmic_ray.util import redirect_stdout
 from cosmic_ray.work_db import use_db, WorkDB
 
@@ -133,10 +133,9 @@ options:
     else:
         baseline_mult = float(configuration['--baseline'])
         assert baseline_mult is not None
-        timeout = baseline_mult * cosmic_ray.timing.run_baseline(
-            configuration['--test-runner'],
-            configuration['<top-module>'],
-            configuration['<test-args>'])
+        with Timer() as t:
+            handle_baseline(configuration)
+        timeout = baseline_mult * t.elapsed.total_seconds()
 
     LOG.info('timeout = %f seconds', timeout)
 
