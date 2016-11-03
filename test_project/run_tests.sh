@@ -1,8 +1,6 @@
 # This runs the "adam" tests, returning 0 if all mutants are killed, or 1 if
 # there's a survivor.
 
-set -e
-
 cosmic-ray load cosmic-ray.unittest.conf
 if [ $? != 0 ]; then exit 1; fi
 RESULT=`cosmic-ray survival-rate adam_tests.unittest`
@@ -42,6 +40,13 @@ if [ $? != 0 ]; then exit 1; fi
 RESULT=`cosmic-ray survival-rate empty.unittest`
 if [ $RESULT != 0.00 ]; then
     cosmic-ray report empty.unittest
+    exit 1
+fi
+
+# Run failing baseline tests
+cosmic-ray load cosmic-ray.baseline_fail.conf
+if [ $? != 2 ]; then
+    echo "baseline didn't fail"
     exit 1
 fi
 
