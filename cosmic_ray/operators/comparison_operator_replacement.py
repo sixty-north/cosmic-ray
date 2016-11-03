@@ -30,9 +30,7 @@ def _to_ops(from_op):
     """
 
     for to_op in OPERATORS:
-        if isinstance(from_op, to_op):
-            pass
-        elif isinstance(from_op, ast.Eq) and to_op is ast.Is:
+        if isinstance(from_op, ast.Eq) and to_op is ast.Is:
             pass
         elif isinstance(from_op, ast.NotEq) and to_op is ast.IsNot:
             pass

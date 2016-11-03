@@ -12,10 +12,7 @@ def _to_ops(from_op):
     """
 
     for to_op in OPERATORS:
-        if to_op and isinstance(from_op, to_op):
-            # skip replacement with self
-            pass
-        elif to_op and isinstance(from_op, ast.Not):
+        if to_op and isinstance(from_op, ast.Not):
             # 'not' can only be removed but not replaced with
             # '+', '-' or '~' b/c that may lead to strange results
             pass
