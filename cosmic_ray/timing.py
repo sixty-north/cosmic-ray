@@ -5,8 +5,6 @@ generic functionality.
 """
 
 import datetime
-import itertools
-import subprocess
 
 
 class Timer:
@@ -39,18 +37,3 @@ class Timer:
 
     def __exit__(self, ex_type, ex_value, ex_traceback):
         pass
-
-
-def run_baseline(test_runner, module_name, test_args):
-    command = list(itertools.chain(
-        ('cosmic-ray',
-         'baseline',
-         '--test-runner={}'.format(test_runner),
-         module_name,
-         '--',),
-        test_args))
-
-    with Timer() as t:
-        subprocess.call(command)
-
-    return t.elapsed.total_seconds()

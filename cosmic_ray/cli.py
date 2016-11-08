@@ -21,10 +21,10 @@ import cosmic_ray.counting
 import cosmic_ray.modules
 import cosmic_ray.json_util
 import cosmic_ray.worker
-import cosmic_ray.testing
-import cosmic_ray.timing
+from cosmic_ray.timing import Timer
 from cosmic_ray.util import redirect_stdout
 from cosmic_ray.work_db import use_db, WorkDB
+from cosmic_ray.testing.test_runner import Outcome
 
 
 LOG = logging.getLogger()
@@ -96,7 +96,19 @@ options:
         configuration['<test-args>']
     )
 
-    test_runner()
+    result = test_runner()
+    # note: test_runner() results are meant to represent
+    # status codes when executed against mutants.
+    # SURVIVED means that the test suite executed without any error
+    # hence CR thinks the mutant survived. However when running the
+    # baseline execution we don't have mutations and really want the
+    # test suite to report PASS, hence the comparison below!
+    if result[0] != Outcome.SURVIVED:
+        # baseline failed, print whatever was returned
+        # from the test runner and exit
+        print(''.join(result[1]))
+        LOG.info('baseline failed')
+        sys.exit(2)
 
 
 def _get_db_name(session_name):
@@ -133,10 +145,9 @@ options:
     else:
         baseline_mult = float(configuration['--baseline'])
         assert baseline_mult is not None
-        timeout = baseline_mult * cosmic_ray.timing.run_baseline(
-            configuration['--test-runner'],
-            configuration['<top-module>'],
-            configuration['<test-args>'])
+        with Timer() as t:
+            handle_baseline(configuration)
+        timeout = baseline_mult * t.elapsed.total_seconds()
 
     LOG.info('timeout = %f seconds', timeout)
 
