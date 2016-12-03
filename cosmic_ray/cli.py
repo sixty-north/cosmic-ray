@@ -170,29 +170,20 @@ options:
 
 
 def handle_exec(configuration):
-    """usage: cosmic-ray exec <session-name>
+    """usage: cosmic-ray exec [--dist] <session-name>
 
 Perform the remaining work to be done in the specified session. This requires
 that the rest of your mutation testing infrastructure (e.g. worker processes)
 are already running.
 
+options:
+    --dist  Distribute tests to remote workers
     """
     db_name = _get_db_name(configuration['<session-name>'])
+    dist = configuration['--dist']
 
     with use_db(db_name, mode=WorkDB.Mode.open) as db:
-        cosmic_ray.commands.execute(db)
-
-
-def handle_local_exec(configuration):
-    """usage: cosmic-ray local-exec <session-name>
-
-Perform the remaining work to be done in the specified session. This runs all
-of the tests on the local machine and doesn't require any extra infrastructure.
-    """
-    db_name = _get_db_name(configuration['<session-name>'])
-
-    with use_db(db_name, mode=WorkDB.Mode.open) as db:
-        cosmic_ray.commands.local_execute(db)
+        cosmic_ray.commands.execute(db, dist)
 
 
 def handle_run(configuration):
@@ -331,7 +322,6 @@ COMMAND_HANDLER_MAP = {
     'baseline':      handle_baseline,
     'counts':        handle_counts,
     'exec':          handle_exec,
-    'local-exec':    handle_local_exec,
     'help':          handle_help,
     'init':          handle_init,
     'load':          handle_load,
