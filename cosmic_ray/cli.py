@@ -183,6 +183,18 @@ are already running.
         cosmic_ray.commands.execute(db)
 
 
+def handle_local_exec(configuration):
+    """usage: cosmic-ray local-exec <session-name>
+
+Perform the remaining work to be done in the specified session. This runs all
+of the tests on the local machine and doesn't require any extra infrastructure.
+    """
+    db_name = _get_db_name(configuration['<session-name>'])
+
+    with use_db(db_name, mode=WorkDB.Mode.open) as db:
+        cosmic_ray.commands.local_execute(db)
+
+
 def handle_run(configuration):
     """usage: cosmic-ray run [options] [--exclude-modules=P ...] (--timeout=T | --baseline=M) <session-name> <top-module> [-- <test-args> ...]
 
@@ -319,6 +331,7 @@ COMMAND_HANDLER_MAP = {
     'baseline':      handle_baseline,
     'counts':        handle_counts,
     'exec':          handle_exec,
+    'local-exec':    handle_local_exec,
     'help':          handle_help,
     'init':          handle_init,
     'load':          handle_load,
