@@ -106,8 +106,8 @@ options:
     if result[0] != Outcome.SURVIVED:
         # baseline failed, print whatever was returned
         # from the test runner and exit
+        LOG.error('baseline failed')
         print(''.join(result[1]))
-        LOG.info('baseline failed')
         sys.exit(2)
 
 
