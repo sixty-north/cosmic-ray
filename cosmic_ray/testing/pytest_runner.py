@@ -30,5 +30,5 @@ class PytestRunner(TestRunner):
                         plugins=[collector])
 
         return (
-            all(r.passed for r in collector.reports),
+            all(not r.failed for r in collector.reports),
             [repr(r) for r in collector.reports if r.failed])
