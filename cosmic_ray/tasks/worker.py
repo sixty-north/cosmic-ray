@@ -39,7 +39,7 @@ def worker_task(work_id,
          '--',),
         test_args))
 
-    LOG.info('executing:', command)
+    LOG.info('executing: %s', command)
 
     proc = subprocess.Popen(command,
                             stdout=subprocess.PIPE,
