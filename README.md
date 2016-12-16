@@ -40,28 +40,9 @@ python setup.py install
 We recommend installing it into a virtual environment. Often it makes sense to
 install it into the virtual environment of the package you want to test.
 
-### Install RabbitMQ and start a worker
-
-Next you need to install [RabbitMQ](https://www.rabbitmq.com/). Cosmic Ray uses
-this message queue (via [Celery](http://www.celeryproject.org/)) to distribute
-testing tasks. Once installed, start the server. This is very platform-specific,
-so see the instructions for RabbitMQ on how to do this.
-
-Once RabbitMQ is running, you need to start one or more Cosmic Ray worker tasks
-to listen for commmands on the queue. Start a worker like this:
-
-```
-celery -A cosmic_ray.tasks.worker worker
-```
-
-You can start as many workers as you want. Be aware that these workers - and the
-processes they spawn - need to be able to import the modules you want to test.
-As a result, you generally want to start them in the virtual environment into
-which you've installed Cosmic Ray.
-
 ### Create a session and run tests
 
-Finally, you're ready to start killing mutants. Cosmic Ray uses a notion of
+Now you're ready to start killing mutants. Cosmic Ray uses a notion of
 *sessions* to encompass a full mutation testing suite. Since mutation testing
 runs can take a long time, and since you might need to stop and start them,
 sessions store data about the progress of a run. The first step in a full
@@ -92,5 +73,41 @@ cosmic-ray report <session name>
 This will print out a bunch of information about the work that was performed,
 including what kinds of mutants were created, which were killed, and
 – chillingly – which survived.
+
+## Distributed testing with Celery
+
+By default Cosmic Ray does all of its testing locally and serially, running only
+one test suite at a time. This can be too slow for many real-world testing
+scenarios. To help speed things up, Cosmic Ray supports distributed mutation
+testing using [Celery](http://www.celeryproject.org/) to send work to more than
+one machine. This is more complex to set up, but it makes mutation testing
+practical for a wider range of projects.
+
+To run Cosmic Ray in distributed mode, you first need to
+install [RabbitMQ](https://www.rabbitmq.com/). Cosmic Ray uses this message
+queue (via Celery) to distribute testing tasks. Once installed, start the
+RabbitMQ server. This is very platform-specific, so see the instructions for
+RabbitMQ on how to do this.
+
+Once RabbitMQ is running, you need to start one or more Cosmic Ray worker tasks
+to listen for commmands on the queue. Start a worker like this:
+
+```
+celery -A cosmic_ray.tasks.worker worker
+```
+
+You can start as many workers as you want. Be aware that these workers - and the
+processes they spawn - need to be able to import the modules you want to test.
+As a result, you generally want to start them in the virtual environment into
+which you've installed Cosmic Ray.
+
+Finally, once the worker(s) are running you need to use the `--dist` flag when
+you run `cosmic-ray exec`:
+```
+cosmic-ray exec --dist
+```
+
+Note that all of the other Cosmic Ray commands --- `init`, `report`, etc. ---
+don't need the `--dist` flag; only `exec` uses it.
 
 **[Further documentation is available at readthedocs](http://cosmic-ray.readthedocs.org/en/latest/).**

@@ -28,27 +28,19 @@ mutants, here's what you do:
     pip install cosmic_ray
     ```
 
-2. Install and start RabbitMQ
-
-3. Start a Cosmic Ray worker task
-
-    ```
-    celery -A cosmic_ray.tasks.worker worker
-    ```
-
-4. Initialize a Cosmic Ray session
+2. Initialize a Cosmic Ray session
 
     ```
     cosmic-ray init --baseline=10 <session name> <module name> -- <test directory>
     ```
 
-5. Execute the session:
+3. Execute the session:
 
     ```
     cosmic-ray exec <session name>
     ```
 
-6. View the results:
+4. View the results:
 
     ```
     cosmic-ray report <session name>
@@ -80,33 +72,7 @@ create an executable called `cosmic-ray`.
 You'll often want to install Cosmic Ray into a virtual environment. However, you
 generally *don't* want to install it into its own. Rather, you want to install
 it into the virtual environment of the project you want to test. This ensures
-that the workers have access to the modules they are supposed to test.
-
-### Installing RabbitMQ
-
-Cosmic Ray uses [Celery](http://www.celeryproject.org/) to distribute tasks to
-workers, and currently we only support the [RabbitMQ](https://www.rabbitmq.com/)
-backend of Celery. So you need to install RabbitMQ onto your system. This should
-be straightforward.
-
-Once installed, make sure to start the RabbitMQ server.
-
-## Running Cosmic Ray
-
-Once RabbitMQ is running, you need to start one or more worker tasks. These are
-started using the `celery` command, and these workers listen for testing
-instructions from the Cosmic Ray executive level. You can have as many workers
-as you want, and they can be on multiple machines (in principle...we don't
-really support that as of this writing).
-
-Start worker processes like this:
-
-```
-celery -A cosmic_ray.tasks.worker worker
-```
-
-You should do this, of course, from the virtual environment into which you've
-installed Cosmic Ray.
+that the test runners have access to the modules they are supposed to test.
 
 ### Sessions
 
@@ -139,6 +105,27 @@ database for your session.
 There are a number of other options you can pass to the `init` command;
 see the help message for more details.
 
+### An important note on separating tests and production code
+
+Cosmic Ray has a relatively simple view of how to mutate modules. Fundamentally,
+it will attempt to mutate any and all code in a module. This means that if you
+have test code in the same module as your code under test, Cosmic Ray will
+happily mutate the test code along with the production code. This is probably
+not what you want.
+
+The best way to avoid this problem is to keep your test code in separate modules
+from your production code. This way you can tell Cosmic Ray precisely what to
+mutate.
+
+Ideally, your test code will be in a different package form your production
+test. This way you can tell Cosmic Ray to mutate an entire package without
+needing to filter anything out. However, if your test code is in the same
+package as your production code (a common configuration), you can use the
+`--exclude-modules` flag of `cosmic-ray init` to prevent mutation of your tests.
+
+Given the choice, though, we recommend keeping your tests outside of the package
+for your code under test.
+
 ### Executing tests
 
 Once a session has been initialized, you can start executing tests by using the
@@ -149,9 +136,7 @@ Once a session has been initialized, you can start executing tests by using the
 cosmic-ray exec test_session
 ```
 
-Normally this won't produce any output unless there are errors. If you look at
-your workers, though, you should see that they are processing commands. These
-are the mutation tests being executed!
+Normally this won't produce any output unless there are errors.
 
 ### Viewing the results
 
@@ -294,6 +279,73 @@ cosmic-ray load cr-allele.conf
 
 and it will have the same effect as running the original command.
 
+## Distributed testing with Celery
+
+One of the main practical challenges to mutation testing is that it can take a
+long time. Even on moderately sized projects, you might need millions of
+individual mutations and test runs. This can be prohibitive to run on a single
+system.
+
+One way to cope with these long runtimes is to parallelize the mutation and
+testing procedures. Fortunately, mutation testing is
+[embarassingly parallel in nature](https://en.wikipedia.org/wiki/Embarrassingly_parallel),
+so we can apply some relatively simple techniques to get really nice scaling up
+of the work. We've chosen to use the
+[Celery distributed task queue](http://www.celeryproject.org/) to spread work
+across multiple nodes.
+
+The basic idea is very simple. Celery lets you start multiple *workers* which
+listen for commands from a task queue. A central process creates all of the
+commands for a mutation testing run, and these commands are distributed to the
+workers as they become available. When a worker receives a command, it starts a
+*new* python process (using the `worker` subcommand to Cosmic Ray) which
+performs a single mutation and runs the test suite.
+
+Spawning a separate process for each test suite may seem expensive. However,
+it's the best way we have for ensuring that pathological mutants can't somehow
+corrupt the runtime of the worker processes. And ultimately the cost of starting
+the process is likely to be very small compared to the runtime of the test
+suite.
+
+By its nature, Celery lets you start workers on as many systems as you want,
+all connected to the same task queue. So you could potentially have thousands of
+workers performing mutation testing runs, giving nearly perfect scaling! While
+not everyone has thousands of machines on hand to do their testing work, it's
+conceivable that Cosmic Ray will one day be able to work with machines on
+commodity cloud providers, meaning that highly-scaled mutation testing for
+Python will be available to anyone who wants it.
+
+### Installing RabbitMQ
+
+Celery is primarily a Python API atop the [RabbitMQ](https://www.rabbitmq.com/)
+task queue. As such, if you want to use Cosmic Ray in distributed mode you first
+need to install RabbitMQ and run the server. The steps for installing and running RabbitMQ are covered in detail at that project's site, so go there for more information. Make sure the RabbitMQ server is installated and running before going any further with distributed execution.
+
+### Starting distributed worker processes
+
+Once RabbitMQ is running, you need to start some worker processes which will do the actualy mutation testing. Start one or more worker processes like this:
+```
+celery -A cosmic_ray.tasks.worker worker
+```
+
+You should do this, of course, from the virtual environment into which you've
+installed Cosmic Ray. Similary, you need to make sure that the worker is in an
+environment in which it can import the modules under test. Generally speaking,
+you can meet both of these criteria if you install Cosmic Ray into and run
+workers from a virtual environment into which you've installed the modules under
+test.
+
+### Running distributed mutation testing
+
+After you've started your workers, the only different between local and
+distributed tesing is that you need to pass `--dist` to the `cosmic-ray exec`
+command to do distributed testing. So a full distributed testing run would look something like this:
+```
+cosmic-ray init --baseline=3 session-name my_module -- tests
+cosmic-ray exec --dist session-name
+cosmic-ray report session-name
+```
+
 ## Tests
 
 Cosmic Ray has a number of test suites to help ensure that it works. The first
@@ -394,7 +446,7 @@ for mod in modules_under_test:
         for site in mutation_sites(op, mod):
             mutant_ast = mutate_ast(op, mod, site)
             replace_module(mod.name, compile(mutant_ast)
-            
+
             try:
                 if discover_and_run_tests():
                     print('Oh no! The mutant survived!')
@@ -406,39 +458,3 @@ for mod in modules_under_test:
 
 Obviously this can result in a lot of tests, and it can take some time
 if your test suite is large and/or slow.
-
-### Scaling up with celery
-
-One of the main practical challenges to mutation testing is that it can take a
-long time. Even on moderately sized projects, you might need millions of
-individual mutations and test runs. This can be prohibitive to run on a single
-system.
-
-One way to cope with these long runtimes is to parallelize the mutation and
-testing procedures. Fortunately, mutation testing is
-[embarassingly parallel in nature](https://en.wikipedia.org/wiki/Embarrassingly_parallel),
-so we can apply some relatively simple techniques to get really nice scaling up
-of the work. We've chosen to use the
-[Celery distributed task queue](http://www.celeryproject.org/) to spread work
-across multiple nodes.
-
-The basic idea is very simple. Celery lets you start multiple *workers* which
-listen for commands from a task queue. A central process creates all of the
-commands for a mutation testing run, and these commands are distributed to the
-workers as they become available. When a worker receives a command, it starts a
-*new* python process (using the `worker` subcommand to Cosmic Ray) which
-performs a single mutation and runs the test suite.
-
-Spawning a separate process for each test suite may seem expensive. However,
-it's the best way we have for ensuring that pathological mutants can't somehow
-corrupt the runtime of the worker processes. And ultimately the cost of starting
-the process is likely to be very small compared to the runtime of the test
-suite.
-
-By its nature, Celery lets you start workers on as many systems as you want,
-all connected to the same task queue. So you could potentially have thousands of
-workers performing mutation testing runs, giving nearly perfect scaling! While
-not everyone has thousands of machines on hand to do their testing work, it's
-conceivable that Cosmic Ray will one day be able to work with machines on
-commodity cloud providers, meaning that highly-scaled mutation testing for
-Python will be available to anyone who wants it.

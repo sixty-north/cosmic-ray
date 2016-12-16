@@ -106,8 +106,8 @@ options:
     if result[0] != Outcome.SURVIVED:
         # baseline failed, print whatever was returned
         # from the test runner and exit
+        LOG.error('baseline failed')
         print(''.join(result[1]))
-        LOG.info('baseline failed')
         sys.exit(2)
 
 
@@ -170,21 +170,24 @@ options:
 
 
 def handle_exec(configuration):
-    """usage: cosmic-ray exec <session-name>
+    """usage: cosmic-ray exec [--dist] <session-name>
 
 Perform the remaining work to be done in the specified session. This requires
 that the rest of your mutation testing infrastructure (e.g. worker processes)
 are already running.
 
+options:
+    --dist  Distribute tests to remote workers
     """
     db_name = _get_db_name(configuration['<session-name>'])
+    dist = configuration['--dist']
 
     with use_db(db_name, mode=WorkDB.Mode.open) as db:
-        cosmic_ray.commands.execute(db)
+        cosmic_ray.commands.execute(db, dist)
 
 
 def handle_run(configuration):
-    """usage: cosmic-ray run [options] [--exclude-modules=P ...] (--timeout=T | --baseline=M) <session-name> <top-module> [-- <test-args> ...]
+    """usage: cosmic-ray run [options] [--dist] [--exclude-modules=P ...] (--timeout=T | --baseline=M) <session-name> <top-module> [-- <test-args> ...]
 
 This simply runs the "init" command followed by the "exec" command.
 
