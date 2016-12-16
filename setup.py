@@ -67,7 +67,7 @@ INSTALL_REQUIRES = [
 ]
 
 if sys.version_info >= (3, 4):
-    INSTALL_REQUIRES.append('celery')
+    INSTALL_REQUIRES.append('celery<4')
 else:
     INSTALL_REQUIRES.append('celery<4')
     INSTALL_REQUIRES.append('enum34')
