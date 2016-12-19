@@ -9,11 +9,19 @@ if [ $RESULT != 0.00 ]; then
     exit 1
 fi
 
-cosmic-ray load cosmic-ray.pytest.conf
+cosmic-ray load cosmic-ray.pytest.dist.conf
 if [ $? != 0 ]; then exit 1; fi
-RESULT=`cosmic-ray survival-rate adam_tests.pytest`
+RESULT=`cosmic-ray survival-rate adam_tests.pytest.dist`
 if [ $RESULT != 0.00 ]; then
-    cosmic-ray report adam_tests.pytest
+    cosmic-ray report adam_tests.pytest.dist
+    exit 1
+fi
+
+cosmic-ray load cosmic-ray.pytest.local.conf
+if [ $? != 0 ]; then exit 1; fi
+RESULT=`cosmic-ray survival-rate adam_tests.pytest.local`
+if [ $RESULT != 0.00 ]; then
+    cosmic-ray report adam_tests.pytest.local
     exit 1
 fi
 
