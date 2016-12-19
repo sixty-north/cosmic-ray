@@ -1,11 +1,19 @@
 # This runs the "adam" tests, returning 0 if all mutants are killed, or 1 if
 # there's a survivor.
 
-cosmic-ray load cosmic-ray.unittest.conf
+cosmic-ray load cosmic-ray.unittest.dist.conf
 if [ $? != 0 ]; then exit 1; fi
-RESULT=`cosmic-ray survival-rate adam_tests.unittest`
+RESULT=`cosmic-ray survival-rate adam_tests.unittest.dist`
 if [ $RESULT != 0.00 ]; then
-    cosmic-ray report adam_tests.unittest
+    cosmic-ray report adam_tests.unittest.dist
+    exit 1
+fi
+
+cosmic-ray load cosmic-ray.unittest.local.conf
+if [ $? != 0 ]; then exit 1; fi
+RESULT=`cosmic-ray survival-rate adam_tests.unittest.local`
+if [ $RESULT != 0.00 ]; then
+    cosmic-ray report adam_tests.unittest.local
     exit 1
 fi
 
