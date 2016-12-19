@@ -101,6 +101,12 @@ processes they spawn - need to be able to import the modules you want to test.
 As a result, you generally want to start them in the virtual environment into
 which you've installed Cosmic Ray.
 
+Also remember that the workers need to be able to find and execute the tests as
+expressed to the `init` command. In other words, if you used `cosmic-ray init .
+. . -- tests` to initialize a session, the test loader (whether local or
+distributed) will look for tests in the `test` directory. So you need to make
+sure that the worker processes are running in directory where this makes sense.
+
 Finally, once the worker(s) are running you need to use the `--dist` flag when
 you run `cosmic-ray exec`:
 ```
@@ -108,6 +114,6 @@ cosmic-ray exec --dist
 ```
 
 Note that all of the other Cosmic Ray commands --- `init`, `report`, etc. ---
-don't need the `--dist` flag; only `exec` uses it.
+don't need the `--dist` flag; only `exec` and `run` use it.
 
 **[Further documentation is available at readthedocs](http://cosmic-ray.readthedocs.org/en/latest/).**

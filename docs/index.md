@@ -50,6 +50,23 @@ This will print out a bunch of information about what Cosmic Ray did, including
 what kinds of mutants were created, which were killed, and –
 chillingly – which survived.
 
+### A concrete example: running the `adam` unittests
+
+Cosmic Ray includes a number of unit tests which perform mutations against a
+simple module called `adam`. As a way of test driving Cosmic Ray, you can run
+these tests, too, like this:
+
+```
+cd test_project
+cosmic-ray init --baseline=10 example-session adam -- tests
+cosmic-ray --verbose exec example-session
+cosmic-ray report example-session
+```
+
+In this case we're passing the `--verbose` flag to the `exec` command so that
+you can see what Cosmic Ray is doing. If everything goes as expected, the
+`report` command will report a 0% survival rate.
+
 ## Installation
 
 You can install Cosmic Ray using `pip`:
@@ -117,8 +134,8 @@ The best way to avoid this problem is to keep your test code in separate modules
 from your production code. This way you can tell Cosmic Ray precisely what to
 mutate.
 
-Ideally, your test code will be in a different package form your production
-test. This way you can tell Cosmic Ray to mutate an entire package without
+Ideally, your test code will be in a different package from your production
+code. This way you can tell Cosmic Ray to mutate an entire package without
 needing to filter anything out. However, if your test code is in the same
 package as your production code (a common configuration), you can use the
 `--exclude-modules` flag of `cosmic-ray init` to prevent mutation of your tests.
