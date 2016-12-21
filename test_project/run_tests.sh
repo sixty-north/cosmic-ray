@@ -13,8 +13,7 @@ for CONFIG in $TEST_CONFIGS; do
     fi
 done
 
-# #
-Run import tests
+# Run import tests
 cosmic-ray load cosmic-ray.import.conf
 if [ $? != 0 ]; then exit 1; fi
 RESULT=`cosmic-ray survival-rate import_tests`

@@ -114,6 +114,6 @@ cosmic-ray exec --dist
 ```
 
 Note that all of the other Cosmic Ray commands --- `init`, `report`, etc. ---
-don't need the `--dist` flag; only `exec` uses it.
+don't need the `--dist` flag; only `exec` and `run` use it.
 
 **[Further documentation is available at readthedocs](http://cosmic-ray.readthedocs.org/en/latest/).**

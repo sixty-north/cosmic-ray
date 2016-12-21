@@ -134,8 +134,8 @@ The best way to avoid this problem is to keep your test code in separate modules
 from your production code. This way you can tell Cosmic Ray precisely what to
 mutate.
 
-Ideally, your test code will be in a different package form your production
-test. This way you can tell Cosmic Ray to mutate an entire package without
+Ideally, your test code will be in a different package from your production
+code. This way you can tell Cosmic Ray to mutate an entire package without
 needing to filter anything out. However, if your test code is in the same
 package as your production code (a common configuration), you can use the
 `--exclude-modules` flag of `cosmic-ray init` to prevent mutation of your tests.
