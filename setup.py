@@ -64,12 +64,10 @@ INSTALL_REQUIRES = [
     'stevedore',
     'tinydb>=3.2.1',
     'transducer',
+    'celery<4',
 ]
 
-if sys.version_info >= (3, 4):
-    INSTALL_REQUIRES.append('celery<4')
-else:
-    INSTALL_REQUIRES.append('celery<4')
+if sys.version_info < (3, 4):
     INSTALL_REQUIRES.append('enum34')
 
 setup(
