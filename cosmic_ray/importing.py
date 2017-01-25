@@ -23,6 +23,9 @@ class ASTLoader:  # pylint:disable=old-style-class,too-few-public-methods
         self._ast = ast
         self._name = name
 
+    def create_module(self, spec):
+        return None
+
     def exec_module(self, mod):
         exec(compile(self._ast, self._name, 'exec'),  # pylint:disable=exec-used
              mod.__dict__)
