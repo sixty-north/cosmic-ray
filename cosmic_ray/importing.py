@@ -57,6 +57,19 @@ class ASTFinder(MetaPathFinder):  # pylint:disable=too-few-public-methods
 
 
 @contextlib.contextmanager
+def preserve_modules():
+    """Remember the state of sys.modules on enter and reset it on exit.
+    """
+    original_mods = dict(sys.modules)
+    try:
+        yield
+    finally:
+        del_mods = {m for m in sys.modules if m not in original_mods}
+        for m in del_mods:
+            del sys.modules[m]
+
+
+@contextlib.contextmanager
 def using_mutant(module_name, mutant):
     """Create a new Finder as a context-manager.
 
@@ -65,17 +78,10 @@ def using_mutant(module_name, mutant):
     the duration of the with-block, yielding the Finder in the with-statement.
     After the with-block, the Finder is uninstalled.
 
-    This also removes `module_name` from `sys.modules` before doing
-    anything else. Then ensures that the finder gets asked to load the
-    mutated AST.
-
+    Note that this does *not* attempt to adjust `sys.modules` in any way. You
+    should make sure to clear out any existing references to the mutant before
+    running this (e.g. with `preserve_modules()` or something similar).
     """
-    # delete the module we're mutating and all of it's parent modules
-    # this will force a re-import of the module chain
-    del_mods = set(accumulate(module_name.split('.'), '{}.{}'.format))
-    for k in del_mods:
-        del sys.modules[k]
-
     finder = ASTFinder(module_name, mutant)
     sys.meta_path = [finder] + sys.meta_path
     try:
