@@ -12,7 +12,7 @@ import logging
 import sys
 import traceback
 
-from .importing import preserve_modules, using_mutant
+from .importing import preserve_modules, using_ast
 from .mutating import MutatingCore
 from .parsing import get_ast
 from .testing.test_runner import TestResult, Outcome
@@ -88,7 +88,7 @@ def worker(module_name,
                             lineterm=""):
                 module_diff.append(line)
 
-        with using_mutant(module_name, module_ast):
+        with using_ast(module_name, module_ast):
             results = test_runner()
             # append the diff to whatever result was returned
             res = results[1] or []

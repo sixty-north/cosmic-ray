@@ -70,19 +70,20 @@ def preserve_modules():
 
 
 @contextlib.contextmanager
-def using_mutant(module_name, mutant):
+def using_ast(module_name, module_ast):
     """Create a new Finder as a context-manager.
 
-    This creates a new Finder which loads the AST `mutant` when `module_name`
-    is requested. It installs this finder at the head of `sys.meta_path` for
-    the duration of the with-block, yielding the Finder in the with-statement.
-    After the with-block, the Finder is uninstalled.
+    This creates a new Finder which loads the AST `module_ast` when
+    `module_name` is requested. It installs this finder at the head of
+    `sys.meta_path` for the duration of the with-block, yielding the Finder in
+    the with-statement. After the with-block, the Finder is uninstalled.
 
     Note that this does *not* attempt to adjust `sys.modules` in any way. You
-    should make sure to clear out any existing references to the mutant before
-    running this (e.g. with `preserve_modules()` or something similar).
+    should make sure to clear out any existing references to `module_name`
+    before running this (e.g. with `preserve_modules()` or something similar).
+
     """
-    finder = ASTFinder(module_name, mutant)
+    finder = ASTFinder(module_name, module_ast)
     sys.meta_path = [finder] + sys.meta_path
     try:
         yield finder
