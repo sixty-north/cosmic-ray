@@ -57,7 +57,7 @@ operators = [
 INSTALL_REQUIRES = [
     'astunparse',
     'decorator',
-    'docopt',
+    'docopt_subcommands',
     'nose',
     'pathlib',
     'pytest>=3.0',

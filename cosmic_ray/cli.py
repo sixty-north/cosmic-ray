@@ -10,7 +10,7 @@ import os
 import pprint
 import sys
 
-import docopt
+import docopt_subcommands as dsc
 import transducer.eager
 from transducer.functional import compose
 import transducer.lazy
@@ -47,25 +47,7 @@ def _load_file(config_file):
         yield from transducer.lazy.transduce(CONFIG_FILE_PARSER, f)
 
 
-def handle_help(config):
-    """usage: cosmic-ray help [<command>]
-
-Get the top-level help, or help for <command> if specified.
-"""
-    command = config['<command>']
-    if not command:
-        options = OPTIONS
-    elif command not in COMMAND_HANDLER_MAP:
-        LOG.error('"%s" is not a valid cosmic-ray command', command)
-        options = OPTIONS
-    else:
-        options = COMMAND_HANDLER_MAP[command].__doc__
-
-    return docopt.docopt(options,
-                         ['--help'],
-                         version='cosmic-ray v.2')
-
-
+@dsc.command('load')
 def handle_load(config):
     """usage: cosmic-ray load <config-file>
 
@@ -79,6 +61,7 @@ where each token of the command is on a separate line.
     return main(argv=list(argv))
 
 
+@dsc.command('baseline')
 def handle_baseline(configuration):
     """usage: cosmic-ray baseline [options] <top-module> [-- <test-args> ...]
 
@@ -118,6 +101,7 @@ def _get_db_name(session_name):
         return '{}.json'.format(session_name)
 
 
+@dsc.command('init')
 def handle_init(configuration):
     """usage: cosmic-ray init [options] [--exclude-modules=P ...] (--timeout=T | --baseline=M) <session-name> <top-module> [-- <test-args> ...]
 
@@ -169,6 +153,7 @@ options:
             timeout)
 
 
+@dsc.command('exec')
 def handle_exec(configuration):
     """usage: cosmic-ray exec [--dist] <session-name>
 
@@ -186,6 +171,7 @@ options:
         cosmic_ray.commands.execute(db, dist)
 
 
+@dsc.command('run')
 def handle_run(configuration):
     """usage: cosmic-ray run [options] [--dist] [--exclude-modules=P ...] (--timeout=T | --baseline=M) <session-name> <top-module> [-- <test-args> ...]
 
@@ -206,6 +192,7 @@ options:
     handle_exec(configuration)
 
 
+@dsc.command('report')
 def handle_report(configuration):
     """usage: cosmic-ray report [--full-report] [--show-pending] <session-name>
 
@@ -224,6 +211,7 @@ options:
             print(line)
 
 
+@dsc.command('survival-rate')
 def handle_survival_rate(configuration):
     """usage: cosmic-ray survival-rate <session-name>
 
@@ -236,6 +224,7 @@ Print the session's survival rate.
         print('{:.2f}'.format(rate))
 
 
+@dsc.command('counts')
 def handle_counts(configuration):
     """usage: cosmic-ray counts [options] [--exclude-modules=P ...] <top-module>
 
@@ -265,6 +254,7 @@ options:
               *(d.values() for d in counts.values()))))
 
 
+@dsc.command('test-runners')
 def handle_test_runners(config):
     """usage: cosmic-ray test-runners
 
@@ -274,6 +264,7 @@ List the available test-runner plugins.
     return 0
 
 
+@dsc.command('operators')
 def handle_operators(config):
     """usage: cosmic-ray operators
 
@@ -283,6 +274,7 @@ List the available operator plugins.
     return 0
 
 
+@dsc.command('worker')
 def handle_worker(config):
     """usage: cosmic-ray worker [options] <module> <operator> <occurrence> <test-runner> [-- <test-args> ...]
 
@@ -318,66 +310,35 @@ options:
         json.dumps((result_type, data),
                    cls=cosmic_ray.json_util.JSONEncoder))
 
-COMMAND_HANDLER_MAP = {
-    'baseline':      handle_baseline,
-    'counts':        handle_counts,
-    'exec':          handle_exec,
-    'help':          handle_help,
-    'init':          handle_init,
-    'load':          handle_load,
-    'report':        handle_report,
-    'run':           handle_run,
-    'survival-rate': handle_survival_rate,
-    'test-runners':  handle_test_runners,
-    'operators':     handle_operators,
-    'worker':        handle_worker,
-}
 
-OPTIONS = """cosmic-ray
+DOC_TEMPLATE = """{program}
 
-Usage: cosmic-ray [options] <command> [<args> ...]
+Usage: {program} [options] <command> [<args> ...]
 
-options:
-  --help     Show this screen.
-  --verbose  Produce more verbose output
+Options:
+  -h --help     Show this screen.
+  -v --verbose  Use verbose logging
 
 Available commands:
-  {}
+  {available_commands}
 
-See 'cosmic-ray help <command>' for help on specific commands.
-""".format('\n  '.join(sorted(COMMAND_HANDLER_MAP)))
+See '{program} help <command>' for help on specific commands.
+"""
+
+
+def common_option_handler(config):
+    if config['--verbose']:
+        logging.basicConfig(level=logging.INFO)
 
 
 def main(argv=None):
-    if argv is None:
-        argv = sys.argv[1:]
-
-    configuration = docopt.docopt(
-        OPTIONS,
+    dsc.main(
+        'cosmic-ray',
+        'cosmic-ray v.2',
         argv=argv,
-        options_first=True,
-        version='cosmic-ray v.2')
-    if configuration['--verbose']:
-        logging.basicConfig(level=logging.INFO)
-        argv.remove('--verbose')
+        doc_template=DOC_TEMPLATE,
+        common_option_handler=common_option_handler)
 
-    command = configuration['<command>']
-    if command is None:
-        command = 'help'
-
-    try:
-        handler = COMMAND_HANDLER_MAP[command]
-    except KeyError:
-        LOG.error('"%s" is not a valid cosmic-ray command', command)
-        handler = handle_help
-        argv = ['help']
-
-    sub_config = docopt.docopt(
-        handler.__doc__,
-        argv,
-        version='cosmic-ray v.2')
-
-    sys.exit(handler(sub_config))
 
 if __name__ == '__main__':
     main()
