@@ -58,6 +58,7 @@ INSTALL_REQUIRES = [
     'astunparse',
     'decorator',
     'docopt_subcommands',
+    'hypothesis',
     'nose',
     'pathlib',
     'pytest>=3.0',

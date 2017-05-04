@@ -4,9 +4,8 @@ This is where we provide support for JSON en/decoding of any special types we
 have.
 """
 
+import enum
 import json
-
-from .testing.test_runner import Outcome
 
 
 class JSONEncoder(json.JSONEncoder):
@@ -21,6 +20,6 @@ class JSONEncoder(json.JSONEncoder):
     """
 
     def default(self, obj):
-        if isinstance(obj, Outcome):
+        if isinstance(obj, enum.Enum):
             return str(obj)
         return json.JSONEncoder.default(self, obj)

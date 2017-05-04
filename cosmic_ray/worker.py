@@ -15,9 +15,19 @@ import traceback
 from .importing import preserve_modules, using_ast
 from .mutating import MutatingCore
 from .parsing import get_ast
-from .testing.test_runner import TestResult, Outcome
+from .testing.test_runner import TestOutcome
+from .work_record import WorkRecord
 
 LOG = logging.getLogger()
+
+
+class WorkerOutcome:
+    """Possible outcomes for a worker.
+    """
+    NORMAL = 'normal'
+    EXCEPTION = 'exception'
+    NO_TEST = 'no-test'
+    TIMEOUT = 'timeout'
 
 
 def worker(module_name,
@@ -45,16 +55,7 @@ def worker(module_name,
     test. It will do so and report back the result - killed, survived, or
     incompetent - in a structured way.
 
-    Returns: A tuple `(result-type, data)`. `result-type` is either the string
-        'exception', 'no-test', or 'normal'.
-
-        If the result is 'exception' then data will be the tuple returned by
-        `sys.exc_info()`.
-
-        If the result is 'no-test' then data will be `None`.
-
-        If the result is 'normal' then the data will be a tuple of
-        (`activation-record`, `test_runner.TestResult`).
+    Returns: a WorkRecord
 
     Raises: This will generally not raise any exceptions. Rather, exceptions
         will be reported using the 'exception' result-type in the return value.
@@ -75,7 +76,8 @@ def worker(module_name,
             modified_source = astunparse.unparse(modified_ast)
 
             if not core.activation_record:
-                return ('no-test', None)
+                return WorkRecord(
+                    work_outcome=WorkerOutcome.NO_TEST)
 
             # generate a source diff to visualize how the mutation
             # operator has changed the code
@@ -89,18 +91,17 @@ def worker(module_name,
                 module_diff.append(line)
 
         with using_ast(module_name, module_ast):
-            results = test_runner()
-            # append the diff to whatever result was returned
-            res = results[1] or []
-            res.extend(module_diff)
-            results = TestResult(results[0], res)
+            rec = test_runner()
 
-        return ('normal',
-                (core.activation_record,
-                 results))
+        rec.update({
+            'diff': module_diff,
+            'worker_outcome': WorkerOutcome.NORMAL
+        })
+        rec.update(core.activation_record)
+        return rec
 
     except Exception:  # noqa
-        res = traceback.format_exception(*sys.exc_info())
-        res.extend(module_diff)
-        results = [Outcome.INCOMPETENT, res]
-        return ('exception', (None, results))
+        return WorkRecord(
+            data=traceback.format_exception(*sys.exc_info()),
+            test_outcome=TestOutcome.INCOMPETENT,
+            worker_outcome=WorkerOutcome.EXCEPTION)

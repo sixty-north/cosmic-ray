@@ -1,6 +1,8 @@
 import logging
+import uuid
 
 import cosmic_ray.modules
+from cosmic_ray.work_record import WorkRecord
 
 LOG = logging.getLogger()
 
@@ -24,10 +26,14 @@ def init(modules,
         test_args=test_args,
         timeout=timeout)
 
-    work_db.clear_work_items()
+    work_db.clear_work_records()
 
-    work_db.add_work_items(
-        (module.__name__, opname, occurrence)
+    work_db.add_work_records(
+        WorkRecord(
+            job_id=uuid.uuid1().hex,
+            module=module.__name__,
+            operator=opname,
+            occurrence=occurrence)
         for module, ops in counts.items()
         for opname, count in ops.items()
         for occurrence in range(count))

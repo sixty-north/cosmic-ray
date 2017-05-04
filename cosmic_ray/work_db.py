@@ -19,7 +19,6 @@
 #  - for 'normal', there is an *activation-record* (a dict) and a
 #    test_runner.TestResult.
 
-import collections
 import contextlib
 from enum import Enum
 import os
@@ -28,26 +27,7 @@ import os
 # for something quicker if not. But for now it's *very* convenient.
 import tinydb
 
-
-WorkItem = collections.namedtuple('WorkItem',
-                                  ['work_id',
-                                   'module_name',
-                                   'operator_name',
-                                   'occurrence',
-                                   'command',
-                                   'result_type',
-                                   'result_data'])
-
-
-def _make_work_item(rec):
-    return WorkItem(
-        rec.eid,
-        rec['module-name'],
-        rec['op-name'],
-        rec['occurrence'],
-        rec.get('command', None),
-        rec.get('result-type', None),
-        rec.get('result-data', None))
+from .work_record import WorkRecord
 
 
 class WorkDB:
@@ -124,25 +104,17 @@ class WorkDB:
                 record['test-args'],
                 record['timeout'])
 
-    def add_work_items(self, items):
-        """Add a sequence of new work items to the session.
-
-        These are added with no associated results and will be considered
-        "pending".
+    def add_work_records(self, records):
+        """Add a sequence of WorkRecords.
 
         Args:
           items: An iterable of tuples of the form `(module-name,
             operator-name, occurrence)`.
 
         """
-        table = self._work_items
-        table.insert_multiple(
-            {'module-name': i[0],
-             'op-name': i[1],
-             'occurrence': i[2]}
-            for i in items)
+        self._work_items.insert_multiple(records)
 
-    def clear_work_items(self):
+    def clear_work_records(self):
         """Clear all work items from the session.
 
         This removes any associated results as well.
@@ -150,7 +122,7 @@ class WorkDB:
         self._work_items.purge()
 
     @property
-    def work_items(self):
+    def work_records(self):
         """The sequence of `WorkItem`s in the session.
 
         This include both complete and incomplete items.
@@ -160,37 +132,29 @@ class WorkDB:
         and `results-data`.
 
         """
-        return (_make_work_item(r) for r in self._work_items.all())
+        return (WorkRecord(r) for r in self._work_items.all())
 
-    def add_results(self, job_id, command, results_type, results_data):
-        """Add a result to the session for the work-item with id `job_id`.
+    # def add_results(self, job_id, command, results_type, results_data):
+    def update_work_record(self, work_record):
+        """Updates an existing WorkRecord by job_id.
 
         Args:
-          job_id: The ID of the work-item to update.
-          results_type: One of 'exception', 'no-test', or 'normal'.
-          results_data: The associated data, if any.
+            work_record: A WorkRecord representing the new state of a job.
 
         Raises:
-          KeyError: If there is no work-item with the id `job_id`.
+          KeyError: If there is no existing record with the same job_id.
         """
-        table = self._work_items
-        table.update(
-            {
-                'command': command,
-                'result-type': results_type,
-                'result-data': results_data,
-            },
-            eids=[job_id])
+        self._work_items.update(
+            work_record,
+            tinydb.Query().job_id == work_record.job_id)
 
     @property
     def pending_work(self):
         """The sequence of pending `WorkItem`s in the session."""
         table = self._work_items
         work_item = tinydb.Query()
-
-        return (_make_work_item(record)
-                for record
-                in table.search(~ work_item['result-type'].exists()))
+        pending = table.search(work_item.worker_outcome == None)
+        return (WorkRecord(r) for r in pending)
 
 
 @contextlib.contextmanager

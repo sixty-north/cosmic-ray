@@ -21,10 +21,10 @@ import cosmic_ray.counting
 import cosmic_ray.modules
 import cosmic_ray.json_util
 import cosmic_ray.worker
+from cosmic_ray.testing.test_runner import TestOutcome
 from cosmic_ray.timing import Timer
 from cosmic_ray.util import redirect_stdout
 from cosmic_ray.work_db import use_db, WorkDB
-from cosmic_ray.testing.test_runner import Outcome
 
 
 LOG = logging.getLogger()
@@ -79,18 +79,18 @@ options:
         configuration['<test-args>']
     )
 
-    result = test_runner()
+    work_record = test_runner()
     # note: test_runner() results are meant to represent
     # status codes when executed against mutants.
     # SURVIVED means that the test suite executed without any error
     # hence CR thinks the mutant survived. However when running the
     # baseline execution we don't have mutations and really want the
     # test suite to report PASS, hence the comparison below!
-    if result[0] != Outcome.SURVIVED:
+    if work_record.test_outcome != TestOutcome.SURVIVED:
         # baseline failed, print whatever was returned
         # from the test runner and exit
         LOG.error('baseline failed')
-        print(''.join(result[1]))
+        print(''.join(work_record[1]))
         sys.exit(2)
 
 
@@ -300,14 +300,14 @@ options:
 
     with open(os.devnull, 'w') as devnull,\
         redirect_stdout(sys.stdout if config['--keep-stdout'] else devnull):
-        result_type, data = cosmic_ray.worker.worker(
+        work_record = cosmic_ray.worker.worker(
             config['<module>'],
             operator,
             int(config['<occurrence>']),
             test_runner)
 
     sys.stdout.write(
-        json.dumps((result_type, data),
+        json.dumps(work_record,
                    cls=cosmic_ray.json_util.JSONEncoder))
 
 

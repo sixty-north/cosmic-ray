@@ -1,22 +1,16 @@
 import abc
-from collections import namedtuple
-from enum import Enum
 import sys
 import traceback
 
+from cosmic_ray.work_record import WorkRecord
 
-class Outcome(Enum):
+
+class TestOutcome:
     """A enum of the possible outcomes for any mutant test run.
     """
     SURVIVED = 'survived'
     KILLED = 'killed'
     INCOMPETENT = 'incompetent'
-
-
-# The type returned by TestRunner runs.
-TestResult = namedtuple('TestResult',
-                        ['outcome',
-                         'results'])
 
 
 class TestRunner(metaclass=abc.ABCMeta):
@@ -49,23 +43,20 @@ class TestRunner(metaclass=abc.ABCMeta):
     def __call__(self):
         """Call `_run()` and return a `TestResult` with the results.
 
-        The `outcome` field of the return value is:
-
-        - SURVIVED if the tests passed
-        - KILLED if the tests failed
-        - INCOMPETENT if the tests raised an exception.
-
-        The `results` field is simply the second field of
-        `test_runner.run()`'s return value.
+        Returns: A `WorkRecord` with the `test_outcome` and `data` fields
+        filled in. The `outcome` field of the return value is:
         """
         try:
             test_result = self._run()
             if test_result[0]:
-                return TestResult(Outcome.SURVIVED,
-                                  test_result[1])
+                return WorkRecord(
+                    test_outcome=TestOutcome.SURVIVED,
+                    data=test_result[1])
             else:
-                return TestResult(Outcome.KILLED,
-                                  test_result[1])
+                return WorkRecord(
+                    test_outcome=TestOutcome.KILLED,
+                    data=test_result[1])
         except Exception:
-            return TestResult(Outcome.INCOMPETENT,
-                              traceback.format_exception(*sys.exc_info()))
+            return WorkRecord(
+                test_outcome=TestOutcome.INCOMPETENT,
+                data=traceback.format_exception(*sys.exc_info()))
