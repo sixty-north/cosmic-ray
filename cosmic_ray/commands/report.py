@@ -1,26 +1,30 @@
-def _print_item(item, full_report):
-    result = item.result_data
-    result_type = item.result_type
-    if result_type in ['normal', 'exception']:
-        result_type = result[1][0]
+from cosmic_ray.testing.test_runner import TestOutcome
+from cosmic_ray.worker import WorkerOutcome
+
+
+def _print_item(work_record, full_report):
+    data = work_record.data
+    outcome = work_record.worker_outcome
+    if outcome in [WorkerOutcome.NORMAL, WorkerOutcome.EXCEPTION]:
+        outcome = work_record.test_outcome
     ret_val = [
         'job ID {}:{}:{}'.format(
-            item.work_id,
-            result_type,
-            item.module_name),
+            work_record.job_id,
+            outcome,
+            work_record.module),
         'command: {}'.format(
-            ' '.join(item.command)
-            if item.command is not None else ''),
+            ' '.join(work_record.command_line)
+            if work_record.command_line is not None else ''),
     ]
-    if result_type == 'Outcome.KILLED' and not full_report:
+    if outcome == TestOutcome.KILLED and not full_report:
         ret_val = []
-    elif item.result_type == 'timeout':
+    elif work_record.worker_outcome == WorkerOutcome.TIMEOUT:
         if full_report:
-            ret_val.append("timeout: {:.3f} sec".format(result))
+            ret_val.append("timeout: {:.3f} sec".format(data))
         else:
             ret_val = []
-    elif item.result_type in ['normal', 'exception']:
-        ret_val += result[1][1]
+    elif work_record.worker_outcome in [WorkerOutcome.NORMAL, WorkerOutcome.EXCEPTION]:
+        ret_val += data
 
     # for presentation purposes only
     if ret_val:
@@ -31,18 +35,18 @@ def _print_item(item, full_report):
 
 def _get_kills(db):
     def _keep(w):
-        if w.result_type == 'timeout':
+        if w.worker_outcome == WorkerOutcome.TIMEOUT:
             return True
-        elif w.result_type == 'normal':
-            if w.result_data[1][0] == 'Outcome.KILLED':
+        elif w.worker_outcome == WorkerOutcome.NORMAL:
+            if w.test_outcome == TestOutcome.KILLED:
                 return True
         return False
 
-    return list(filter(_keep, db.work_items))
+    return list(filter(_keep, db.work_records))
 
 
 def _base_stats(work_db):
-    total_jobs = sum(1 for _ in work_db.work_items)
+    total_jobs = sum(1 for _ in work_db.work_records)
     pending_jobs = sum(1 for _ in work_db.pending_work)
     completed_jobs = total_jobs - pending_jobs
     kills = _get_kills(work_db)
@@ -50,8 +54,8 @@ def _base_stats(work_db):
 
 
 def create_report(work_db, show_pending, full_report=False):
-    for item in work_db.work_items:
-        if (item.result_type is not None) or show_pending:
+    for item in work_db.work_records:
+        if (item.worker_outcome is not None) or show_pending:
             yield from _print_item(item, full_report)
 
     total_jobs, _, completed_jobs, kills = _base_stats(work_db)
