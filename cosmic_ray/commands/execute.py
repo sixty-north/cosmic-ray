@@ -1,5 +1,6 @@
 import cosmic_ray.tasks.celery
 import cosmic_ray.tasks.worker
+from cosmic_ray.work_record import WorkRecord
 
 # TODO: These should be put into plugins. Callers of execute() should pass an
 # executor.
@@ -20,14 +21,14 @@ class CeleryExecutor:
 
     def __call__(self, test_runner, test_args, timeout, pending_work):
         try:
-            results = cosmic_ray.tasks.worker.execute_work_items(
+            results = cosmic_ray.tasks.worker.execute_work_records(
                 test_runner,
                 test_args,
                 timeout,
                 pending_work)
 
             for r in results:
-                yield r.get()
+                yield WorkRecord(r.get())
         finally:
             if self.purge_queue:
                 cosmic_ray.tasks.celery.app.control.purge()

@@ -7,6 +7,7 @@ import subprocess
 
 from .celery import app
 from ..worker import WorkerOutcome
+from ..work_record import WorkRecord
 
 LOG = get_logger(__name__)
 
@@ -22,6 +23,10 @@ def worker_task(work_record,
 
     Returns: An updated WorkRecord
     """
+    # The work_record param may come as just a dict (e.g. if it arrives over
+    # celery), so we reconstruct a WorkRecord to make it easier to work with.
+    work_record = WorkRecord(work_record)
+
     command = list(itertools.chain(
         ('cosmic-ray',
          'worker',

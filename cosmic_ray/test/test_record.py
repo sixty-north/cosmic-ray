@@ -79,3 +79,16 @@ def test_cannot_delete_fields(attr):
     r = make_record('Rec', attr)()
     with pytest.raises(KeyError):
         del r[attr]
+
+
+@given(ST.sets(attributes))
+def test_can_construct_from_dict(attrs):
+    make_record('Rec', *attrs)({a: 42 for a in attrs})
+
+
+@given(attributes, attributes)
+def test_cannot_construct_from_dict_with_non_fields(attr, nonattr):
+    assume(attr != nonattr)
+    R = make_record('Rec', attr)
+    with pytest.raises(KeyError):
+        R({nonattr: 3})
