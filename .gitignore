@@ -8,3 +8,7 @@ __pycache__
 *~
 site
 *pyc
+test_project/*.json
+.cache
+.hypothesis
+.csearchindex
