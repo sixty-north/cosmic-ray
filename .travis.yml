@@ -21,6 +21,6 @@ before_script:
   - popd
 
 script:
-  - py.test cosmic_ray/test
+  - py.test
   - cd test_project
   - bash run_tests.sh
