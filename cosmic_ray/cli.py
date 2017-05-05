@@ -90,7 +90,7 @@ options:
         # baseline failed, print whatever was returned
         # from the test runner and exit
         LOG.error('baseline failed')
-        print(''.join(work_record[1]))
+        print(''.join(work_record.data))
         sys.exit(2)
 
 
