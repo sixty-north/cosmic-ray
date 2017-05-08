@@ -134,7 +134,6 @@ class WorkDB:
         """
         return (WorkRecord(r) for r in self._work_items.all())
 
-    # def add_results(self, job_id, command, results_type, results_data):
     def update_work_record(self, work_record):
         """Updates an existing WorkRecord by job_id.
 
