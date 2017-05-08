@@ -41,10 +41,10 @@ class TestRunner(metaclass=abc.ABCMeta):
         raise NotImplemented()
 
     def __call__(self):
-        """Call `_run()` and return a `TestResult` with the results.
+        """Call `_run()` and return a `WorkRecord` with the results.
 
         Returns: A `WorkRecord` with the `test_outcome` and `data` fields
-        filled in. The `outcome` field of the return value is:
+            filled in.
         """
         try:
             test_result = self._run()
