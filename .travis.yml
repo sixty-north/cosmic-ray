@@ -11,7 +11,9 @@ matrix:
   allow_failures:
     - python: nightly
 
-install: python setup.py install
+install:
+  - python setup.py install
+  - pip install -e ".[test]"
 
 services: rabbitmq
 
