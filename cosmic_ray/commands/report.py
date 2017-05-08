@@ -25,6 +25,7 @@ def _print_item(work_record, full_report):
             ret_val = []
     elif work_record.worker_outcome in [WorkerOutcome.NORMAL, WorkerOutcome.EXCEPTION]:
         ret_val += data
+        ret_val += work_record.diff
 
     # for presentation purposes only
     if ret_val:
