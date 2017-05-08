@@ -30,7 +30,7 @@ def init(modules,
 
     work_db.add_work_records(
         WorkRecord(
-            job_id=uuid.uuid1().hex,
+            job_id=uuid.uuid4().hex,
             module=module.__name__,
             operator=opname,
             occurrence=occurrence)
