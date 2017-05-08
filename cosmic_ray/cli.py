@@ -19,7 +19,6 @@ from transducer.transducers import filtering, mapping
 import cosmic_ray.commands
 import cosmic_ray.counting
 import cosmic_ray.modules
-import cosmic_ray.json_util
 import cosmic_ray.worker
 from cosmic_ray.testing.test_runner import TestOutcome
 from cosmic_ray.timing import Timer
@@ -307,8 +306,7 @@ options:
             test_runner)
 
     sys.stdout.write(
-        json.dumps(work_record,
-                   cls=cosmic_ray.json_util.JSONEncoder))
+        json.dumps(work_record))
 
 
 DOC_TEMPLATE = """{program}
