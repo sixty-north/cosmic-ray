@@ -58,7 +58,6 @@ INSTALL_REQUIRES = [
     'astunparse',
     'decorator',
     'docopt_subcommands',
-    'hypothesis',
     'nose',
     'pathlib',
     'pytest>=3.0',
@@ -97,6 +96,12 @@ setup(
     platforms='any',
     include_package_data=True,
     install_requires=INSTALL_REQUIRES,
+    # List additional groups of dependencies here (e.g. development dependencies).
+    # You can install these using the following syntax, for example:
+    # $ pip install -e .[dev,test]
+    extras_require={
+        'test': ['hypothesis']
+    },
     entry_points={
         'console_scripts': [
             'cosmic-ray = cosmic_ray.cli:main',
