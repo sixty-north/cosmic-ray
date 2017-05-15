@@ -91,3 +91,15 @@ def trigger_infinite_loop():
     # when `while object()` becomes `while not object()`
     # the code below will be triggered
     return result
+
+
+def swallow_exception():
+    result = None
+
+    try:
+        raise FileNotFoundError
+    except FileNotFoundError:
+        result = True
+    except IOError:
+        pass
+    return result
