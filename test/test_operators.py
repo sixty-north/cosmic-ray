@@ -18,6 +18,7 @@ from cosmic_ray.operators.boolean_replacer import (ReplaceTrueFalse,
 from cosmic_ray.operators.break_continue import (ReplaceBreakWithContinue,
                                                  ReplaceContinueWithBreak)
 from cosmic_ray.operators.number_replacer import NumberReplacer
+from cosmic_ray.operators.exception_swallow import ExceptionSwallow
 from cosmic_ray.mutating import MutatingCore
 
 
@@ -54,6 +55,7 @@ OPERATOR_SAMPLES = [
     (AddNot, 'A if B else C'),
     (AddNot, 'assert isinstance(node, ast.Break)'),
     (AddNot, 'while True: pass'),
+    (ExceptionSwallow, 'try: x = 1 \nexcept FileExistsError: x=2 \nexcept IOError: pass'),
     (ReplaceBreakWithContinue, 'while True: break'),
     (ReplaceContinueWithBreak, 'while False: continue'),
     (NumberReplacer, 'x = 1'),

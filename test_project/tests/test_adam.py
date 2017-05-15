@@ -71,3 +71,6 @@ class Tests(unittest.TestCase):
 
     def test_trigger_infinite_loop(self):
         self.assertTrue(adam.trigger_infinite_loop())
+
+    def test_swallow_exception(self):
+        self.assertTrue(adam.swallow_exception())
