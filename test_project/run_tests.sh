@@ -6,9 +6,9 @@ for CONFIG in $TEST_CONFIGS; do
     echo $CONFIG
     cosmic-ray load cosmic-ray.$CONFIG.conf
     if [ $? != 0 ]; then exit 1; fi
-    RESULT=`cosmic-ray survival-rate adam_tests.$CONFIG`
+    RESULT=`cosmic-ray dump adam_tests.$CONFIG | cr-rate`
     if [ $RESULT != 0.00 ]; then
-        cosmic-ray report adam_tests.$CONFIG
+        cosmic-ray dump adam_tests.$CONFIG | cr-report
         exit 1
     fi
 done
@@ -16,18 +16,18 @@ done
 # Run import tests
 cosmic-ray load cosmic-ray.import.conf
 if [ $? != 0 ]; then exit 1; fi
-RESULT=`cosmic-ray survival-rate import_tests`
+RESULT=`cosmic-ray dump import_tests | cr-rate`
 if [ $RESULT != 0.00 ]; then
-    cosmic-ray report import_tests
+    cosmic-ray dump import_tests | cr-report
     exit 1
 fi
 
 # Run tests for empty __init__.py
 cosmic-ray load cosmic-ray.empty.conf
 if [ $? != 0 ]; then exit 1; fi
-RESULT=`cosmic-ray survival-rate empty.unittest`
+RESULT=`cosmic-ray dump empty.unittest | cr-rate`
 if [ $RESULT != 0.00 ]; then
-    cosmic-ray report empty.unittest
+    cosmic-ray dump empty.unittest | cr-report
     exit 1
 fi
 

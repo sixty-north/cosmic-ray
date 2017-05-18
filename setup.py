@@ -106,6 +106,7 @@ setup(
         'console_scripts': [
             'cosmic-ray = cosmic_ray.cli:main',
             'cr-format = cosmic_ray.commands.format:format',
+            'cr-rate = cosmic_ray.commands.format:survival_rate',
         ],
         'cosmic_ray.test_runners': [
             'nose = cosmic_ray.testing.nose_runner:NoseRunner',

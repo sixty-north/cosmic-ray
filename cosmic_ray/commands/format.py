@@ -73,13 +73,33 @@ def create_report(records, show_pending, full_report=False):
         yield 'no jobs completed'
 
 
-def survival_rate(work_db):
-    _, _, completed_jobs, kills = _base_stats(work_db)
+def survival_rate():
+    """cr-rate
+
+Usage: cr-rate
+
+Read JSON work-records from stdin and print the survival rate.
+"""
+    records = (WorkRecord(json.loads(line)) for line in sys.stdin)
+
+    total_jobs = 0
+    pending_jobs = 0
+    kills = 0
+    for item in records:
+        total_jobs += 1
+        if item.worker_outcome is None:
+            pending_jobs += 1
+        if is_killed(item):
+            kills += 1
+
+    completed_jobs = total_jobs - pending_jobs
 
     if not completed_jobs:
-        return 0
+        rate = 0
+    else:
+        rate = (1 - kills / completed_jobs) * 100
 
-    return (1 - len(kills) / completed_jobs) * 100
+    print(rate)
 
 
 def format():
