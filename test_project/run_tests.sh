@@ -8,7 +8,7 @@ for CONFIG in $TEST_CONFIGS; do
     if [ $? != 0 ]; then exit 1; fi
     RESULT=`cosmic-ray dump adam_tests.$CONFIG | cr-rate`
     if [ $RESULT != 0.00 ]; then
-        cosmic-ray dump adam_tests.$CONFIG | cr-report
+        cosmic-ray dump adam_tests.$CONFIG | cr-format
         exit 1
     fi
 done
@@ -18,7 +18,7 @@ cosmic-ray load cosmic-ray.import.conf
 if [ $? != 0 ]; then exit 1; fi
 RESULT=`cosmic-ray dump import_tests | cr-rate`
 if [ $RESULT != 0.00 ]; then
-    cosmic-ray dump import_tests | cr-report
+    cosmic-ray dump import_tests | cr-format
     exit 1
 fi
 
@@ -27,7 +27,7 @@ cosmic-ray load cosmic-ray.empty.conf
 if [ $? != 0 ]; then exit 1; fi
 RESULT=`cosmic-ray dump empty.unittest | cr-rate`
 if [ $RESULT != 0.00 ]; then
-    cosmic-ray dump empty.unittest | cr-report
+    cosmic-ray dump empty.unittest | cr-format
     exit 1
 fi
 
