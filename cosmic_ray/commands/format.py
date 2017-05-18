@@ -99,7 +99,7 @@ Read JSON work-records from stdin and print the survival rate.
     else:
         rate = (1 - kills / completed_jobs) * 100
 
-    print(rate)
+    print('{:.2f}'.format(rate))
 
 
 def format():
