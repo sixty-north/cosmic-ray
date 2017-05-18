@@ -204,19 +204,6 @@ JSON dump of session data.
             print(json.dumps(record))
 
 
-@dsc.command('survival-rate')
-def handle_survival_rate(configuration):
-    """usage: cosmic-ray survival-rate <session-name>
-
-Print the session's survival rate.
-    """
-    db_name = _get_db_name(configuration['<session-name>'])
-
-    with use_db(db_name, WorkDB.Mode.open) as db:
-        rate = cosmic_ray.commands.survival_rate(db)
-        print('{:.2f}'.format(rate))
-
-
 @dsc.command('counts')
 def handle_counts(configuration):
     """usage: cosmic-ray counts [options] [--exclude-modules=P ...] <top-module>
