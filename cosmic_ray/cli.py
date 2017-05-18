@@ -191,23 +191,17 @@ options:
     handle_exec(configuration)
 
 
-@dsc.command('report')
-def handle_report(configuration):
-    """usage: cosmic-ray report [--full-report] [--show-pending] <session-name>
+@dsc.command('dump')
+def handle_dump(configuration):
+    """usage: cosmic-ray dump <session-name>
 
-Print a nicely formatted report of test results and some basic statistics.
-
-options:
-    --full-report  Show test output and mutation diff for killed mutants
-
+JSON dump of session data.
     """
     db_name = _get_db_name(configuration['<session-name>'])
-    show_pending = configuration['--show-pending']
-    full_report = configuration['--full-report']
 
     with use_db(db_name, WorkDB.Mode.open) as db:
-        for line in cosmic_ray.commands.create_report(db, show_pending, full_report):
-            print(line)
+        for record in db.work_records:
+            print(json.dumps(record))
 
 
 @dsc.command('survival-rate')

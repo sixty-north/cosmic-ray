@@ -105,6 +105,7 @@ setup(
     entry_points={
         'console_scripts': [
             'cosmic-ray = cosmic_ray.cli:main',
+            'cr-format = cosmic_ray.commands.format:format',
         ],
         'cosmic_ray.test_runners': [
             'nose = cosmic_ray.testing.nose_runner:NoseRunner',

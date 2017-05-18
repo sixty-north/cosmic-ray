@@ -7,4 +7,3 @@ justify a separate module.
 
 from .execute import execute
 from .init import init
-from .report import create_report, survival_rate

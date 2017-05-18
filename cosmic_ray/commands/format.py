@@ -1,5 +1,9 @@
 from cosmic_ray.testing.test_runner import TestOutcome
+from cosmic_ray.work_record import WorkRecord
 from cosmic_ray.worker import WorkerOutcome
+import docopt
+import json
+import sys
 
 
 def _print_item(work_record, full_report):
@@ -34,39 +38,37 @@ def _print_item(work_record, full_report):
     return ret_val
 
 
-def _get_kills(db):
-    def _keep(w):
-        if w.worker_outcome == WorkerOutcome.TIMEOUT:
+def is_killed(record):
+    if record.worker_outcome == WorkerOutcome.TIMEOUT:
+        return True
+    elif record.worker_outcome == WorkerOutcome.NORMAL:
+        if record.test_outcome == TestOutcome.KILLED:
             return True
-        elif w.worker_outcome == WorkerOutcome.NORMAL:
-            if w.test_outcome == TestOutcome.KILLED:
-                return True
-        return False
-
-    return list(filter(_keep, db.work_records))
+    return False
 
 
-def _base_stats(work_db):
-    total_jobs = sum(1 for _ in work_db.work_records)
-    pending_jobs = sum(1 for _ in work_db.pending_work)
-    completed_jobs = total_jobs - pending_jobs
-    kills = _get_kills(work_db)
-    return (total_jobs, pending_jobs, completed_jobs, kills)
-
-
-def create_report(work_db, show_pending, full_report=False):
-    for item in work_db.work_records:
+def create_report(records, show_pending, full_report=False):
+    total_jobs = 0
+    pending_jobs = 0
+    kills = 0
+    for item in records:
+        total_jobs += 1
+        if item.worker_outcome is None:
+            pending_jobs += 1
+        if is_killed(item):
+            kills += 1
         if (item.worker_outcome is not None) or show_pending:
             yield from _print_item(item, full_report)
 
-    total_jobs, _, completed_jobs, kills = _base_stats(work_db)
+    completed_jobs = total_jobs - pending_jobs
+
     yield 'total jobs: {}'.format(total_jobs)
 
     if completed_jobs > 0:
         yield 'complete: {} ({:.2f}%)'.format(
             completed_jobs, completed_jobs / total_jobs * 100)
         yield 'survival rate: {:.2f}%'.format(
-            (1 - len(kills) / completed_jobs) * 100)
+            (1 - kills / completed_jobs) * 100)
     else:
         yield 'no jobs completed'
 
@@ -78,3 +80,23 @@ def survival_rate(work_db):
         return 0
 
     return (1 - len(kills) / completed_jobs) * 100
+
+
+def format():
+    """cr-report
+
+Usage: cr-format [--full-report] [--show-pending]
+
+Print a nicely formatted report of test results and some basic statistics.
+
+options:
+    --full-report   Show test output and mutation diff for killed mutants
+    --show-pending  Display results for incomplete tasks
+"""
+
+    arguments = docopt.docopt(format.__doc__, version='cr-format 0.1')
+    full_report = arguments['--full-report']
+    show_pending = arguments['--show-pending']
+    records = (WorkRecord(json.loads(line)) for line in sys.stdin)
+    for line in create_report(records, show_pending, full_report):
+        print(line)
