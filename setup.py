@@ -52,6 +52,9 @@ operators = [
 
     'break_continue_replacement ='
     'cosmic_ray.operators.break_continue:ReplaceBreakWithContinue',
+
+    'exception_replacer ='
+    'cosmic_ray.operators.exception_replacer:ExceptionReplacer',
 ]
 
 INSTALL_REQUIRES = [

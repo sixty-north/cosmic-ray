@@ -91,3 +91,13 @@ def trigger_infinite_loop():
     # when `while object()` becomes `while not object()`
     # the code below will be triggered
     return result
+
+
+def raise_exception():
+    result = None
+    try:
+        raise IOError
+    except IOError:
+        result = True
+
+    return result

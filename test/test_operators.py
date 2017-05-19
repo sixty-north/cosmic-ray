@@ -18,6 +18,7 @@ from cosmic_ray.operators.boolean_replacer import (ReplaceTrueFalse,
 from cosmic_ray.operators.break_continue import (ReplaceBreakWithContinue,
                                                  ReplaceContinueWithBreak)
 from cosmic_ray.operators.number_replacer import NumberReplacer
+from cosmic_ray.operators.exception_replacer import ExceptionReplacer
 from cosmic_ray.mutating import MutatingCore
 
 
@@ -62,6 +63,7 @@ OPERATOR_SAMPLES = [
     (MutateUnaryOperator, 'x = -1'),
     (MutateBinaryOperator, 'x * y'),
     (MutateBinaryOperator, 'x - y'),
+    (ExceptionReplacer, 'try: raise OSError \nexcept OSError: pass'),
 ]
 
 
