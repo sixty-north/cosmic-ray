@@ -91,3 +91,13 @@ def trigger_infinite_loop():
     # when `while object()` becomes `while not object()`
     # the code below will be triggered
     return result
+
+
+def single_iteration():
+    result = None
+    iter = [object()]
+
+    for i in iter:
+        result = True
+
+    return result
