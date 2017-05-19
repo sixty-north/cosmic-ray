@@ -55,6 +55,9 @@ operators = [
 
     'exception_replacer ='
     'cosmic_ray.operators.exception_replacer:ExceptionReplacer',
+
+    'zero_iteration_loop ='
+    'cosmic_ray.operators.zero_iteration_loop:ZeroIterationLoop',
 ]
 
 INSTALL_REQUIRES = [

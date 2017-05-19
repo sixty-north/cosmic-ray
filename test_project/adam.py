@@ -93,6 +93,16 @@ def trigger_infinite_loop():
     return result
 
 
+def single_iteration():
+    result = None
+    iter = [object()]
+
+    for i in iter:
+        result = True
+
+    return result
+
+
 def raise_exception():
     result = None
     try:
