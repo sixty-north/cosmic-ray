@@ -12,7 +12,7 @@ class ZeroIterationLoop(Operator):
 
     def mutate(self, node, _):
         """Modify the For loop to evaluate to None"""
-        empty_list_node = ast.List(elts=[], ctx=ast.Load)
+        empty_list_node = ast.List(elts=[], ctx=ast.Load())
         new_node = ast.For(node.target, empty_list_node, node.body,
                            node.orelse)
         return new_node
