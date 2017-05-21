@@ -103,7 +103,7 @@ def single_iteration():
     return result
 
 
-def raise_exception():
+def handle_exception():
     result = None
     try:
         raise IOError
