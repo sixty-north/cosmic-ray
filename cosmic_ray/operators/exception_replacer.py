@@ -2,6 +2,9 @@ import ast
 
 from .operator import Operator
 
+class OutOfNoWhereException(Exception):
+    pass
+
 
 class ExceptionReplacer(Operator):
 
@@ -12,8 +15,7 @@ class ExceptionReplacer(Operator):
 
     def mutate(self, node, _):
         """Modify the exception handler with another exception type."""
-        except_id = 'TypeError' if node.name.id == 'SystemError' else \
-            'SystemError'
+        except_id = OutOfNoWhereException.__name__
         except_type = ast.Name(id=except_id, ctx=ast.Load())
         new_node = ast.ExceptHandler(type=except_type, name=node.name,
                                      body=node.body)
