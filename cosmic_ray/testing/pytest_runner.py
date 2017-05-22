@@ -31,4 +31,4 @@ class PytestRunner(TestRunner):
 
         return (
             all(not r.failed for r in collector.reports),
-            [repr(r) for r in collector.reports if r.failed])
+            [(repr(r), r.longreprtext) for r in collector.reports if r.failed])
