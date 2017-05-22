@@ -1,9 +1,13 @@
 import ast
+import builtins
 
 from .operator import Operator
 
+
 class OutOfNoWhereException(Exception):
     pass
+
+setattr(builtins, OutOfNoWhereException.__name__, OutOfNoWhereException)
 
 
 class ExceptionReplacer(Operator):
