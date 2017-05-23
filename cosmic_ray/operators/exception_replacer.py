@@ -4,10 +4,10 @@ import builtins
 from .operator import Operator
 
 
-class OutOfNoWhereException(Exception):
+class CosmicRayTestingException(Exception):
     pass
 
-setattr(builtins, OutOfNoWhereException.__name__, OutOfNoWhereException)
+setattr(builtins, CosmicRayTestingException.__name__, CosmicRayTestingException)
 
 
 class ExceptionReplacer(Operator):
@@ -19,7 +19,7 @@ class ExceptionReplacer(Operator):
 
     def mutate(self, node, _):
         """Modify the exception handler with another exception type."""
-        except_id = OutOfNoWhereException.__name__
+        except_id = CosmicRayTestingException.__name__
         except_type = ast.Name(id=except_id, ctx=ast.Load())
         new_node = ast.ExceptHandler(type=except_type, name=node.name,
                                      body=node.body)
