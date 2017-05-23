@@ -7,11 +7,13 @@ from .operator import Operator
 class CosmicRayTestingException(Exception):
     pass
 
-setattr(builtins, CosmicRayTestingException.__name__, CosmicRayTestingException)
+
+setattr(builtins,
+        CosmicRayTestingException.__name__,
+        CosmicRayTestingException)
 
 
 class ExceptionReplacer(Operator):
-
     """An operator that modifies exception handlers."""
 
     def visit_ExceptHandler(self, node):  # noqa
