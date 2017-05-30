@@ -77,3 +77,6 @@ class Tests(unittest.TestCase):
 
     def test_handle_exception(self):
         self.assertTrue(adam.handle_exception())
+
+    def test_decorator(self):
+        self.assertTrue(adam.decorated_func())
