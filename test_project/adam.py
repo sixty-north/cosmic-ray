@@ -101,3 +101,13 @@ def single_iteration():
         result = True
 
     return result
+
+
+def handle_exception():
+    result = None
+    try:
+        raise IOError
+    except IOError:
+        result = True
+
+    return result

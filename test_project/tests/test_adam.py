@@ -74,3 +74,6 @@ class Tests(unittest.TestCase):
 
     def test_single_iteration(self):
         self.assertTrue(adam.single_iteration())
+
+    def test_handle_exception(self):
+        self.assertTrue(adam.handle_exception())
