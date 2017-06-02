@@ -7,7 +7,7 @@
 
 Cosmic Ray is a mutation testing tool for Python.
 
-## N.B.! Cosmic Ray is still learning how to walk!
+## Cosmic Ray is still learning how to walk!
 
 At this time Cosmic Ray is young and incomplete. It doesn't support
 all of the mutations it should, its output format is crude, it only
