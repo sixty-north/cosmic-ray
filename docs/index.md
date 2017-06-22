@@ -296,6 +296,29 @@ cosmic-ray load cr-allele.conf
 
 and it will have the same effect as running the original command.
 
+## Details of Common Commands
+
+Cosmic-Ray uses a verb-options pattern for commands, similar to how git does
+things.
+
+Possible verbs are:
+
++ baseline
++ counts
++ [exec](#exec)
++ help
++ [init](#init)
++ load
++ operators
++ [report](#report)
++ run
++ survival-rate
++ test-runners
++ worker
+
+Detailed information on each command can be found by running
+`cosmic-ray help <command>` in the terminal.
+
 ## Distributed testing with Celery
 
 One of the main practical challenges to mutation testing is that it can take a
