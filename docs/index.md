@@ -354,6 +354,52 @@ INFO:cosmic_ray.tasks.worker:executing: ['cosmic-ray', 'worker', 'pyerf.pyerf', 
 The `--verbose` option does not add any additional information to the `report`
 verb.
 
+### Command: init
+
+The `init` verb creates a list of mutations to apply to the source code. It
+has the following optional arguments:
+
++ `--no-local-import`: Allow importing module from the current directory.
++ `--test-runner=R`: Use a different test runner, such as pytest or nose.
++ `exclude-modules=P`: Exclude modules matching this regex pattern from
+  mutation.
+
+Some packages place the tests within a sub-package of the main one:
+
+```
+C:\dev\PyErf
+¦   .gitignore
+¦   .travis.yml
+¦   CHANGELOG.md
+¦   LICENSE
+¦   README.rst
+¦   requirements-dev.txt
+¦   setup.py
+¦
++---docs
+¦       conf.py
+¦       index.rst
+¦       make.bat
+¦       Makefile
+¦
++---pyerf
+    ¦   __init__.py
+    ¦   __about__.py
+    ¦   pyerf.py
+    ¦
+    +---tests
+            __init__.py
+            test_pyerf.py
+```
+
+As mentioned in [here](#An-important-note-on-separating-tests-and-production-code),
+this can be handled via the `--exlcuded-modules` flag. With the example above,
+the command to run would be from the Project directory (`C:\dev\PyErf`):
+
+```
+cosmic-ray init --baseline=2 test_session pyerf --exclude-modules=.*tests.* -- pyerf/tests
+```
+
 ## Distributed testing with Celery
 
 One of the main practical challenges to mutation testing is that it can take a
