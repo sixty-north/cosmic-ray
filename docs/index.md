@@ -400,6 +400,13 @@ the command to run would be from the Project directory (`C:\dev\PyErf`):
 cosmic-ray init --baseline=2 test_session pyerf --exclude-modules=.*tests.* -- pyerf/tests
 ```
 
+### Command: exec
+
+The `exec` command is what actually runs the mutation testing. There is only
+one optional argument: `--dist`. See
+[Running distributed mutation testing](#running-distributed-mutation-testing)
+for details.
+
 ## Distributed testing with Celery
 
 One of the main practical challenges to mutation testing is that it can take a
