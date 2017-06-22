@@ -407,6 +407,29 @@ one optional argument: `--dist`. See
 [Running distributed mutation testing](#running-distributed-mutation-testing)
 for details.
 
+### Command: report
+
+The `report command provides information about the current test status.
+
+```shell
+(.venv-pyerf) ~/PyErf$ cosmic-ray report test_session
+total jobs: 682
+complete: 682 (100.00%)
+survival rate: 0.00%
+```
+
+`cosmic-ray report` **can** be run while `exec` is running! This is
+super useful for seeing how far along a your mutation testing is:
+
+```shell
+# Run exec in the background
+(.venv-pyerf) ~/PyErf$ cosmic-ray exec test_session &
+(.venv-pyerf) ~/PyErf$ cosmic-ray report test_session
+total jobs: 682
+complete: 18 (2.64%)
+survival rate: 0.00%
+```
+
 ## Distributed testing with Celery
 
 One of the main practical challenges to mutation testing is that it can take a
