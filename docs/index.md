@@ -319,6 +319,41 @@ Possible verbs are:
 Detailed information on each command can be found by running
 `cosmic-ray help <command>` in the terminal.
 
+### Verbosity: Getting more Feedback when Running
+
+The base command, `cosmic-ray`, has a single option: `--verbose`. The
+`--verbose` option changes the internal logging level from `WARN` to `INFO`
+and thus prints more information to the terminal.
+
+When used with `init`, `--verbose` will list how long it took to create the
+mutation list and will also list which modules were found:
+
+```shell
+(.venv-pyerf) ~/PyErf$ cosmic-ray --verbose init --baseline=2 test_session pyerf -- pyerf/tests
+INFO:root:timeout = 0.259958 seconds
+INFO:root:Modules discovered: ['pyerf.tests', 'pyerf.tests.test_pyerf', 'pyerf.pyerf', 'pyerf', 'pyerf.__about__']
+(.venv-pyerf) C:\dev\PyErf>cosmic-ray --verbose init --baseline=2 test_session pyerf --exclude-modules=.*tests.* -- pyerf/tests
+INFO:root:timeout = 0.239948 seconds
+INFO:root:Modules discovered: ['pyerf.pyerf', 'pyerf', 'pyerf.__about__']
+```
+
+When used with `exec`, `--verbose` displays which mutation is currently being
+tested:
+
+```shell
+(.venv-pyerf) ~/PyErf$ cosmic-ray --verbose exec test_session
+INFO:cosmic_ray.tasks.worker:executing: ['cosmic-ray', 'worker', 'pyerf.pyerf', 'number_replacer', '0', 'unittest', '--', 'pyerf/tests']
+INFO:cosmic_ray.tasks.worker:executing: ['cosmic-ray', 'worker', 'pyerf.pyerf', 'number_replacer', '1', 'unittest', '--', 'pyerf/tests']
+INFO:cosmic_ray.tasks.worker:executing: ['cosmic-ray', 'worker', 'pyerf.pyerf', 'number_replacer', '2', 'unittest', '--', 'pyerf/tests']
+INFO:cosmic_ray.tasks.worker:executing: ['cosmic-ray', 'worker', 'pyerf.pyerf', 'number_replacer', '3', 'unittest', '--', 'pyerf/tests']
+INFO:cosmic_ray.tasks.worker:executing: ['cosmic-ray', 'worker', 'pyerf.pyerf', 'number_replacer', '4', 'unittest', '--', 'pyerf/tests']
+INFO:cosmic_ray.tasks.worker:executing: ['cosmic-ray', 'worker', 'pyerf.pyerf', 'number_replacer', '5', 'unittest', '--', 'pyerf/tests']
+INFO:cosmic_ray.tasks.worker:executing: ['cosmic-ray', 'worker', 'pyerf.pyerf', 'number_replacer', '6', 'unittest', '--', 'pyerf/tests']
+```
+
+The `--verbose` option does not add any additional information to the `report`
+verb.
+
 ## Distributed testing with Celery
 
 One of the main practical challenges to mutation testing is that it can take a
