@@ -77,7 +77,7 @@ def worker(module_name,
 
             if not core.activation_record:
                 return WorkRecord(
-                    work_outcome=WorkerOutcome.NO_TEST)
+                    worker_outcome=WorkerOutcome.NO_TEST)
 
             # generate a source diff to visualize how the mutation
             # operator has changed the code
