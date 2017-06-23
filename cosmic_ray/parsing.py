@@ -34,7 +34,10 @@ def get_ast(module):
         if source_file.endswith('__init__.py'):
             source = ''
         else:
-            LOG.warning("Unable to read source for module %s", module)
-            raise
+            LOG.info('inspect.getsource() failed.'
+                     'Attempting to read source directly: %s',
+                     module)
+            with open(source_file, mode='rt') as f:
+                source = f.read()
 
     return ast.parse(source, source_file, 'exec')
