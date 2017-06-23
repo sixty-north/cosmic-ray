@@ -1,41 +1,11 @@
-import contextlib
-import os
 from pathlib import Path
-import sys
 
 from cosmic_ray.modules import find_modules, fixup_module_name
-
-THIS_DIR = Path(
-    os.path.dirname(
-        os.path.realpath(__file__)))
-
-
-@contextlib.contextmanager
-def excursion(directory):
-    """Context manager for temporarily setting `directory` as the current working
-    directory.
-    """
-    old_dir = os.getcwd()
-    os.chdir(str(directory))
-    try:
-        yield
-    finally:
-        os.chdir(old_dir)
-
-
-@contextlib.contextmanager
-def extend_path(directory):
-    """Put `directory` at the front of `sys.path` temporarily.
-    """
-    sys.path = [str(directory)] + sys.path
-    try:
-        yield
-    finally:
-        sys.path = sys.path[1:]
+from path_utils import DATA_DIR, excursion, extend_path
 
 
 def test_small_directory_tree():
-    datadir = THIS_DIR / 'data'
+    datadir = DATA_DIR
     paths = (('a', '__init__.py'),
              ('a', 'b.py'),
              ('a', 'py.py'),
@@ -50,7 +20,7 @@ def test_small_directory_tree():
 
 
 def test_finding_modules_via_dir_name():
-    datadir = THIS_DIR / 'data'
+    datadir = DATA_DIR
     paths = (('a', 'c', '__init__.py'),
              ('a', 'c', 'd.py'))
     expected = sorted(datadir / Path(*path) for path in paths)
@@ -63,7 +33,7 @@ def test_finding_modules_via_dir_name():
 
 
 def test_finding_modules_via_dir_name_and_filename_ending_in_py():
-    datadir = THIS_DIR / 'data'
+    datadir = DATA_DIR
     paths = (('a', 'c', 'd.py'),)
     expected = sorted(datadir / Path(*path) for path in paths)
     with extend_path(datadir), excursion(datadir):
@@ -75,7 +45,7 @@ def test_finding_modules_via_dir_name_and_filename_ending_in_py():
 
 
 def test_finding_module_py_dot_py_using_dots():
-    datadir = THIS_DIR / 'data'
+    datadir = DATA_DIR
     paths = (('a', 'py.py'),)
     expected = sorted(datadir / Path(*path) for path in paths)
     with extend_path(datadir), excursion(datadir):
@@ -88,7 +58,7 @@ def test_finding_module_py_dot_py_using_dots():
 
 
 def test_finding_modules_py_dot_py_using_slashes():
-    datadir = THIS_DIR / 'data'
+    datadir = DATA_DIR
     with extend_path(datadir):
         results = sorted(
             Path(m.__file__)
@@ -98,7 +68,7 @@ def test_finding_modules_py_dot_py_using_slashes():
 
 
 def test_finding_modules_py_dot_py_using_slashes_with_full_filename():
-    datadir = THIS_DIR / 'data'
+    datadir = DATA_DIR
     paths = (('a', 'py.py'),)
     expected = sorted(datadir / Path(*path) for path in paths)
     with extend_path(datadir), excursion(datadir):
