@@ -34,7 +34,7 @@ def worker(module_name,
            operator_class,
            occurrence,
            test_runner):
-    """Mutate the OCCURRENCE-th site for OPERATOR_NAME in MODULE_NAME, run the
+    """Mutate the OCCURRENCE-th site for OPERATOR_CLASS in MODULE_NAME, run the
     tests, and report the results.
 
     This is fundamentally the single-mutation-and-test-run process
