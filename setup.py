@@ -114,7 +114,7 @@ setup(
     entry_points={
         'console_scripts': [
             'cosmic-ray = cosmic_ray.cli:main',
-            'cr-format = cosmic_ray.commands.format:format',
+            'cr-report = cosmic_ray.commands.format:report',
             'cr-rate = cosmic_ray.commands.format:survival_rate',
         ],
         'cosmic_ray.test_runners': [

@@ -43,7 +43,7 @@ mutants, here's what you do:
 4. View the results:
 
     ```
-    cosmic-ray report <session name>
+    cosmic-ray dump <session name> | cr-report
     ```
 
 This will print out a bunch of information about what Cosmic Ray did, including
@@ -60,12 +60,12 @@ these tests, too, like this:
 cd test_project
 cosmic-ray init --baseline=10 example-session adam -- tests
 cosmic-ray --verbose exec example-session
-cosmic-ray report example-session
+cosmic-ray dump example-session | cr-report
 ```
 
 In this case we're passing the `--verbose` flag to the `exec` command so that
 you can see what Cosmic Ray is doing. If everything goes as expected, the
-`report` command will report a 0% survival rate.
+`cr-report` command will report a 0% survival rate.
 
 ## Installation
 
@@ -157,10 +157,10 @@ Normally this won't produce any output unless there are errors.
 
 ### Viewing the results
 
-Once your tests have completed, you can view the results using the `report` command:
+Once your tests have completed, you can view the results using the `cr-report` command:
 
 ```
-cosmic-ray report test-session
+cosmic-ray dump test-session | cr-report
 ```
 
 This will give you detailed information about what work was done, followed by a
@@ -298,7 +298,7 @@ and it will have the same effect as running the original command.
 
 ## Details of Common Commands
 
-Cosmic-Ray uses a verb-options pattern for commands, similar to how git does
+Most Cosmic Ray commands use a verb-options pattern, similar to how git does
 things.
 
 Possible verbs are:
@@ -310,7 +310,7 @@ Possible verbs are:
 + [init](#init)
 + load
 + operators
-+ [report](#report)
++ [dump](#dump)
 + run
 + survival-rate
 + test-runners
@@ -318,6 +318,19 @@ Possible verbs are:
 
 Detailed information on each command can be found by running
 `cosmic-ray help <command>` in the terminal.
+
+Cosmic Ray also installs a few other separate commands for producing various
+kinds of reports. These commands are:
+
++ cr-report: provides a report on the status of a session
++ cr-rate: prints the survival rate of a session
+
+Use these by piping the output of `cosmic-ray dump` into them. For example:
+
+```shell
+$ cosmic-ray dump test_session | cr-report
+$ cosmic-ray dump test_session | cr-rate
+```
 
 ### Verbosity: Getting more Feedback when Running
 
@@ -351,7 +364,7 @@ INFO:cosmic_ray.tasks.worker:executing: ['cosmic-ray', 'worker', 'pyerf.pyerf', 
 INFO:cosmic_ray.tasks.worker:executing: ['cosmic-ray', 'worker', 'pyerf.pyerf', 'number_replacer', '6', 'unittest', '--', 'pyerf/tests']
 ```
 
-The `--verbose` option does not add any additional information to the `report`
+The `--verbose` option does not add any additional information to the `dump`
 verb.
 
 ### Command: init
@@ -407,24 +420,35 @@ one optional argument: `--dist`. See
 [Running distributed mutation testing](#running-distributed-mutation-testing)
 for details.
 
-### Command: report
+### Command: dump
 
-The `report command provides information about the current test status.
+The `dump` command writes a detailed JSON representation of a session to stdout.
 
 ```shell
-(.venv-pyerf) ~/PyErf$ cosmic-ray report test_session
-total jobs: 682
-complete: 682 (100.00%)
-survival rate: 0.00%
+$ cosmic-ray dump test_session
+{"data": ["<TestReport 'test_project/tests/test_adam.py::Tests::test_bool_if' when='call' outcome='failed'>"], "test_outcome": "killed", "worker_outcome": "normal", "diff": ["--- mutation diff ---", "--- a/Users/sixtynorth/projects/sixty-north/cosmic-ray/test_project/adam.py", "+++ b/Users/sixtynorth/projects/sixty-north/cosmic-ray/test_project/adam.py", "@@ -20,7 +20,7 @@", "     return (not object())", " ", " def bool_if():", "-    if object():", "+    if (not object()):", "         return True", "     raise Exception('bool_if() failed')", " "], "module": "adam", "operator": "cosmic_ray.operators.boolean_replacer.AddNot", "occurrence": 0, "line_number": 32, "command_line": ["cosmic-ray", "worker", "adam", "add_not", "0", "pytest", "--", "-x", "tests"], "job_id": "c2bb71e6203d44f6af42a7ee35cb5df9"}
+. . .
 ```
 
-`cosmic-ray report` **can** be run while `exec` is running! This is
+Generally you'll want to pipe this output into another tool to generate some
+sort of report. For example, you can find the survival rate of a session by
+piping `cosmic-ray dump` into `cr-rate`:
+
+```shell
+$ cosmic-ray dump test_session | cr-rate
+```
+
+`dump` is designed to allow users to develop their own reports. To do this, you
+need a program which reads a series of JSON structures from stdin. See the
+`cr-rate` and `cr-report` tools included with Cosmic Ray for more details.
+
+`cosmic-ray dump` **can** be run while `exec` is running! This is
 super useful for seeing how far along a your mutation testing is:
 
 ```shell
 # Run exec in the background
 (.venv-pyerf) ~/PyErf$ cosmic-ray exec test_session &
-(.venv-pyerf) ~/PyErf$ cosmic-ray report test_session
+(.venv-pyerf) ~/PyErf$ cosmic-ray dump test_session | cr-report
 total jobs: 682
 complete: 18 (2.64%)
 survival rate: 0.00%
@@ -531,7 +555,7 @@ cosmic-ray load cosmic-ray.unittest.conf
 View the results of this test with `report`:
 
 ```
-cosmic-ray report adam_tests.unittest
+cosmic-ray dump adam_tests.unittest | cr-report
 ```
 
 You should see a 0% survival rate at the end of the report.
@@ -545,7 +569,7 @@ cosmic-ray load cosmic-ray.pytest.conf
 The report will be available from the `adam_tests.pytest` session:
 
 ```
-cosmic-ray report adam_tests.pytest
+cosmic-ray dump adam_tests.pytest | cr-report
 ```
 
 ## Theory

@@ -102,10 +102,10 @@ Read JSON work-records from stdin and print the survival rate.
     print('{:.2f}'.format(rate))
 
 
-def format():
+def report():
     """cr-report
 
-Usage: cr-format [--full-report] [--show-pending]
+Usage: cr-report [--full-report] [--show-pending]
 
 Print a nicely formatted report of test results and some basic statistics.
 
@@ -114,7 +114,7 @@ options:
     --show-pending  Display results for incomplete tasks
 """
 
-    arguments = docopt.docopt(format.__doc__, version='cr-format 0.1')
+    arguments = docopt.docopt(report.__doc__, version='cr-format 0.1')
     full_report = arguments['--full-report']
     show_pending = arguments['--show-pending']
     records = (WorkRecord(json.loads(line)) for line in sys.stdin)

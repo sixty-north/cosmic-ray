@@ -37,7 +37,7 @@ or from source:
 python setup.py install
 ```
 
-We recommend installing it into a virtual environment. Often it makes sense to
+We recommend installing Cosmic Ray into a virtual environment. Often it makes sense to
 install it into the virtual environment of the package you want to test.
 
 ### Create a session and run tests
@@ -64,10 +64,10 @@ Unless there are errors, this won't print anything.
 ### View the results
 
 Once the execution is complete (i.e., all mutations have been performed and
-tested), you can see the results of your session with the `report` command:
+tested), you can see the results of your session with the `cr-report` command:
 
 ```
-cosmic-ray report <session name>
+cosmic-ray dump <session name> | cr-report
 ```
 
 This will print out a bunch of information about the work that was performed,
