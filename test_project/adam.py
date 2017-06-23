@@ -111,3 +111,17 @@ def handle_exception():
         result = True
 
     return result
+
+
+def decorator(func):
+    func.cosmic_ray = True
+    return func
+
+
+@decorator
+def decorated_func():
+    result = None
+    if decorated_func.cosmic_ray:
+        result = True
+
+    return result

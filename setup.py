@@ -58,6 +58,9 @@ operators = [
 
     'zero_iteration_loop ='
     'cosmic_ray.operators.zero_iteration_loop:ZeroIterationLoop',
+
+    'remove_decorator ='
+    'cosmic_ray.operators.remove_decorator:RemoveDecorator',
 ]
 
 INSTALL_REQUIRES = [

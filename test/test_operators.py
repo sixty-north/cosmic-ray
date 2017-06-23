@@ -19,6 +19,7 @@ from cosmic_ray.operators.break_continue import (ReplaceBreakWithContinue,
                                                  ReplaceContinueWithBreak)
 from cosmic_ray.operators.exception_replacer import ExceptionReplacer
 from cosmic_ray.operators.number_replacer import NumberReplacer
+from cosmic_ray.operators.remove_decorator import RemoveDecorator
 from cosmic_ray.operators.zero_iteration_loop import ZeroIterationLoop
 from cosmic_ray.mutating import MutatingCore
 
@@ -66,6 +67,7 @@ OPERATOR_SAMPLES = [
     (MutateBinaryOperator, 'x - y'),
     (ExceptionReplacer, 'try: raise OSError \nexcept OSError: pass'),
     (ZeroIterationLoop, 'for i in range(1,2): pass'),
+    (RemoveDecorator, 'def wrapper(f): f.cosmic_ray=1; return f\n@wrapper\ndef foo(): pass')
 ]
 
 

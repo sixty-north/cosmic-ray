@@ -296,6 +296,140 @@ cosmic-ray load cr-allele.conf
 
 and it will have the same effect as running the original command.
 
+## Details of Common Commands
+
+Cosmic-Ray uses a verb-options pattern for commands, similar to how git does
+things.
+
+Possible verbs are:
+
++ baseline
++ counts
++ [exec](#exec)
++ help
++ [init](#init)
++ load
++ operators
++ [report](#report)
++ run
++ survival-rate
++ test-runners
++ worker
+
+Detailed information on each command can be found by running
+`cosmic-ray help <command>` in the terminal.
+
+### Verbosity: Getting more Feedback when Running
+
+The base command, `cosmic-ray`, has a single option: `--verbose`. The
+`--verbose` option changes the internal logging level from `WARN` to `INFO`
+and thus prints more information to the terminal.
+
+When used with `init`, `--verbose` will list how long it took to create the
+mutation list and will also list which modules were found:
+
+```shell
+(.venv-pyerf) ~/PyErf$ cosmic-ray --verbose init --baseline=2 test_session pyerf -- pyerf/tests
+INFO:root:timeout = 0.259958 seconds
+INFO:root:Modules discovered: ['pyerf.tests', 'pyerf.tests.test_pyerf', 'pyerf.pyerf', 'pyerf', 'pyerf.__about__']
+(.venv-pyerf) C:\dev\PyErf>cosmic-ray --verbose init --baseline=2 test_session pyerf --exclude-modules=.*tests.* -- pyerf/tests
+INFO:root:timeout = 0.239948 seconds
+INFO:root:Modules discovered: ['pyerf.pyerf', 'pyerf', 'pyerf.__about__']
+```
+
+When used with `exec`, `--verbose` displays which mutation is currently being
+tested:
+
+```shell
+(.venv-pyerf) ~/PyErf$ cosmic-ray --verbose exec test_session
+INFO:cosmic_ray.tasks.worker:executing: ['cosmic-ray', 'worker', 'pyerf.pyerf', 'number_replacer', '0', 'unittest', '--', 'pyerf/tests']
+INFO:cosmic_ray.tasks.worker:executing: ['cosmic-ray', 'worker', 'pyerf.pyerf', 'number_replacer', '1', 'unittest', '--', 'pyerf/tests']
+INFO:cosmic_ray.tasks.worker:executing: ['cosmic-ray', 'worker', 'pyerf.pyerf', 'number_replacer', '2', 'unittest', '--', 'pyerf/tests']
+INFO:cosmic_ray.tasks.worker:executing: ['cosmic-ray', 'worker', 'pyerf.pyerf', 'number_replacer', '3', 'unittest', '--', 'pyerf/tests']
+INFO:cosmic_ray.tasks.worker:executing: ['cosmic-ray', 'worker', 'pyerf.pyerf', 'number_replacer', '4', 'unittest', '--', 'pyerf/tests']
+INFO:cosmic_ray.tasks.worker:executing: ['cosmic-ray', 'worker', 'pyerf.pyerf', 'number_replacer', '5', 'unittest', '--', 'pyerf/tests']
+INFO:cosmic_ray.tasks.worker:executing: ['cosmic-ray', 'worker', 'pyerf.pyerf', 'number_replacer', '6', 'unittest', '--', 'pyerf/tests']
+```
+
+The `--verbose` option does not add any additional information to the `report`
+verb.
+
+### Command: init
+
+The `init` verb creates a list of mutations to apply to the source code. It
+has the following optional arguments:
+
++ `--no-local-import`: Allow importing module from the current directory.
++ `--test-runner=R`: Use a different test runner, such as pytest or nose.
++ `exclude-modules=P`: Exclude modules matching this regex pattern from
+  mutation.
+
+Some packages place the tests within a sub-package of the main one:
+
+```
+C:\dev\PyErf
+¦   .gitignore
+¦   .travis.yml
+¦   CHANGELOG.md
+¦   LICENSE
+¦   README.rst
+¦   requirements-dev.txt
+¦   setup.py
+¦
++---docs
+¦       conf.py
+¦       index.rst
+¦       make.bat
+¦       Makefile
+¦
++---pyerf
+    ¦   __init__.py
+    ¦   __about__.py
+    ¦   pyerf.py
+    ¦
+    +---tests
+            __init__.py
+            test_pyerf.py
+```
+
+As mentioned in [here](#An-important-note-on-separating-tests-and-production-code),
+this can be handled via the `--exlcuded-modules` flag. With the example above,
+the command to run would be from the Project directory (`C:\dev\PyErf`):
+
+```
+cosmic-ray init --baseline=2 test_session pyerf --exclude-modules=.*tests.* -- pyerf/tests
+```
+
+### Command: exec
+
+The `exec` command is what actually runs the mutation testing. There is only
+one optional argument: `--dist`. See
+[Running distributed mutation testing](#running-distributed-mutation-testing)
+for details.
+
+### Command: report
+
+The `report command provides information about the current test status.
+
+```shell
+(.venv-pyerf) ~/PyErf$ cosmic-ray report test_session
+total jobs: 682
+complete: 682 (100.00%)
+survival rate: 0.00%
+```
+
+`cosmic-ray report` **can** be run while `exec` is running! This is
+super useful for seeing how far along a your mutation testing is:
+
+```shell
+# Run exec in the background
+(.venv-pyerf) ~/PyErf$ cosmic-ray exec test_session &
+(.venv-pyerf) ~/PyErf$ cosmic-ray report test_session
+total jobs: 682
+complete: 18 (2.64%)
+survival rate: 0.00%
+```
+
 ## Distributed testing with Celery
 
 One of the main practical challenges to mutation testing is that it can take a
