@@ -528,7 +528,7 @@ suite is a [pytest](http://pytest.org/) test suite that validates some if its
 internals. You can run that like this:
 
 ```
-py.test cosmic_ray/test
+py.test test
 ```
 
 (Note that these unit tests don't require any workers to be running).
@@ -549,13 +549,13 @@ cd test_project
 Run the operator tests with `unittest` like this:
 
 ```
-cosmic-ray load cosmic-ray.unittest.conf
+cosmic-ray load cosmic-ray.unittest.local.conf
 ```
 
 View the results of this test with `report`:
 
 ```
-cosmic-ray dump adam_tests.unittest | cr-report
+cosmic-ray dump adam_tests.local.unittest | cr-report
 ```
 
 You should see a 0% survival rate at the end of the report.
@@ -563,10 +563,10 @@ You should see a 0% survival rate at the end of the report.
 Likewise you can run with `py.test` like this:
 
 ```
-cosmic-ray load cosmic-ray.pytest.conf
+cosmic-ray load cosmic-ray.pytest.local.conf
 ```
 
-The report will be available from the `adam_tests.pytest` session:
+The report will be available from the `adam_tests.pytest.local` session:
 
 ```
 cosmic-ray dump adam_tests.pytest | cr-report
