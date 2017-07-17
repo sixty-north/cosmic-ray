@@ -10,7 +10,7 @@ class RemoveDecorator(Operator):
 
     def visit_FunctionDef(self, node):  # noqa
         decorator_candidates = [x for x in node.decorator_list
-                                if x.id not in self.REGULAR_DECORATORS]
+                                if hasattr(x, 'id') and x.id not in self.REGULAR_DECORATORS]
         if decorator_candidates:
             return self.visit_mutation_site(node, len(decorator_candidates))
 
