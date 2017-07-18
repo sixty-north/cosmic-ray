@@ -1,5 +1,3 @@
-import ast
-
 from .operator import Operator
 
 
@@ -8,9 +6,20 @@ class RemoveDecorator(Operator):
     REGULAR_DECORATORS = frozenset(["classmethod", "staticmethod",
                                     "abstractmethod"])
 
+    @classmethod
+    def _candidates(cls, node):
+        """Get a list of indices into `node.decorator_list` of decorators of `node`
+        which can be removed via mutation.
+        """
+        def skip(dec):
+            return hasattr(dec, 'id') and dec.id in cls.REGULAR_DECORATORS
+
+        return [i for (i, d) in enumerate(node.decorator_list)
+                if not skip(d)]
+
     def visit_FunctionDef(self, node):  # noqa
-        decorator_candidates = [x for x in node.decorator_list
-                                if hasattr(x, 'id') and x.id not in self.REGULAR_DECORATORS]
+        decorator_candidates = self._candidates(node)
+
         if decorator_candidates:
             return self.visit_mutation_site(node, len(decorator_candidates))
 
@@ -18,8 +27,6 @@ class RemoveDecorator(Operator):
 
     def mutate(self, node, idx):
         """Modify the decorator list to remove one decorator at each mutation"""
-        candidates = [(i, d) for (i,d) in enumerate(node.decorator_list)
-	              if d.id not in self.REGULAR_DECORATORS]
-        remove_idx, _ = candidates[idx]
-        del node.decorator_list[remove_idx]
+        candidates = self._candidates(node)
+        del node.decorator_list[candidates[idx]]
         return node
