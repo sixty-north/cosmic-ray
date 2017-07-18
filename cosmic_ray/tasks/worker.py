@@ -55,6 +55,9 @@ def worker_task(work_record,
         work_record.worker_outcome = WorkerOutcome.TIMEOUT
         work_record.data = e.timeout
         proc.kill()
+    except json.JSONDecodeError as e:
+        work_record.worker_outcome = WorkerOutcome.EXCEPTION
+        work_record.data = e
 
     work_record.command_line = command
     return work_record
