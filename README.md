@@ -5,7 +5,7 @@
 *"Four human beings -- changed by space-born cosmic rays into something more than merely human."*
 *— The Fantastic Four*
 
-Cosmic Ray is a mutation testing tool for Python.
+Cosmic Ray is a mutation testing tool for Python 3.
 
 ## Cosmic Ray is still learning how to walk!
 
