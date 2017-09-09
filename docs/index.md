@@ -187,7 +187,7 @@ Cosmic Ray supports multiple *test runners*. A test runner is simply a
 plugin that supports a particular way of running tests. For example,
 there is a test runner for tests written with the standard `unittest`
 module, and there's another for tests written using
-[`py.test`](pytest.org).
+[`pytest`](pytest.org).
 
 To specify a particular test runner when running Cosmic Ray, pass the
 `--test-runner` flag to the `init` subcommand. For example, to use the
@@ -528,7 +528,7 @@ suite is a [pytest](http://pytest.org/) test suite that validates some if its
 internals. You can run that like this:
 
 ```
-py.test test
+pytest test
 ```
 
 (Note that these unit tests don't require any workers to be running).
@@ -538,7 +538,7 @@ tests comprise a specially prepared body of code, `adam.py`, and a full-coverage
 test-suite. The idea here is that Cosmic Ray should be 100% lethal against the
 mutants of `adam.py` or there's a problem.
 
-These tests can be run via both the standard `unittest` and `py.test`. In both
+These tests can be run via both the standard `unittest` and `pytest`. In both
 cases, first make sure a worker (or several) is running. Then go to the
 `test_project` directory:
 
@@ -560,7 +560,7 @@ cosmic-ray dump adam_tests.local.unittest | cr-report
 
 You should see a 0% survival rate at the end of the report.
 
-Likewise you can run with `py.test` like this:
+Likewise you can run with `pytest` like this:
 
 ```
 cosmic-ray load cosmic-ray.pytest.local.conf

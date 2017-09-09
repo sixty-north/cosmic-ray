@@ -23,6 +23,6 @@ before_script:
   - popd
 
 script:
-  - py.test
+  - pytest
   - cd test_project
   - bash run_tests.sh
