@@ -14,7 +14,7 @@ class ResultCollector:
 
 
 class PytestRunner(TestRunner):
-    """A TestRunner using py.test.
+    """A TestRunner using pytest.
 
     This treats `test_args` as a list of arguments to `pytest.main()`. The args
     are passed directly to that function, so see it's documentation for a
