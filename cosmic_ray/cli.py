@@ -8,6 +8,7 @@ import json
 import logging
 import os
 import pprint
+import subprocess
 import sys
 
 import docopt_subcommands as dsc
@@ -128,8 +129,17 @@ options:
     else:
         baseline_mult = float(configuration['--baseline'])
         assert baseline_mult is not None
+        command = 'cosmic-ray baseline --test-runner={test_runner} {module} -- {test_args}'.format(
+            test_runner=configuration['--test-runner'],
+            module=configuration['<top-module>'],
+            test_args=' '.join(configuration['<test-args>'])
+        )
+
+        # We run the baseline in a subprocess to more closely emulate the
+        # runtime of a worker subprocess.
         with Timer() as t:
-            handle_baseline(configuration)
+            subprocess.check_call(command.split())
+
         timeout = baseline_mult * t.elapsed.total_seconds()
 
     LOG.info('timeout = %f seconds', timeout)
