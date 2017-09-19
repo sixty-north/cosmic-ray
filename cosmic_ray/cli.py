@@ -210,8 +210,7 @@ JSON dump of session data.
     db_name = _get_db_name(configuration['<session-name>'])
 
     with use_db(db_name, WorkDB.Mode.open) as db:
-        for record in db.work_records:
-            print(json.dumps(record))
+        print(json.dumps(list(db.work_records)))
 
 
 @dsc.command('counts')
