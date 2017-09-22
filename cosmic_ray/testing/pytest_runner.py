@@ -16,9 +16,10 @@ class ResultCollector:
 class PytestRunner(TestRunner):
     """A TestRunner using pytest.
 
-    This treats `test_args` as a list of arguments to `pytest.main()`. The args
-    are passed directly to that function, so see it's documentation for a
-    description of how the arguments are used.
+    This treats `test_args` as a single string. It splits this string and
+    passes the result to `pytest.main()`. The args are passed directly to that
+    function, so see it's documentation for a description of how the arguments
+    are used.
 
     """
 
@@ -26,7 +27,7 @@ class PytestRunner(TestRunner):
         collector = ResultCollector()
 
         with open(os.devnull, 'w') as devnull, redirect_stdout(devnull):
-            pytest.main(list(self.test_args),
+            pytest.main(self.test_args.split(),
                         plugins=[collector])
 
         return (

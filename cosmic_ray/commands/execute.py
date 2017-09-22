@@ -34,7 +34,13 @@ class CeleryExecutor:
                 cosmic_ray.tasks.celery.app.control.purge()
 
 
-def execute(work_db, dist=True):
+ENGINES = {
+    'local': local_executor,
+    'celery': CeleryExecutor()
+}
+
+
+def execute(work_db, engine_config):
     """Execute any pending work in `work_db`, recording the results.
 
     This looks for any work in `work_db` which has no results, schedules to be
@@ -46,7 +52,7 @@ def execute(work_db, dist=True):
     locally.
     """
     test_runner, test_args, timeout = work_db.get_work_parameters()
-    executor = CeleryExecutor() if dist else local_executor
+    executor = ENGINES[engine_config['name']]
     work_records = executor(test_runner,
                             test_args,
                             timeout,

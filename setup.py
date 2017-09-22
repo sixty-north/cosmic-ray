@@ -70,9 +70,10 @@ INSTALL_REQUIRES = [
     'nose',
     'pathlib',
     'pytest>=3.0',
+    # TODO: Re-enable this once you've got internet access ;)
+    # 'pyyaml',
     'stevedore',
     'tinydb>=3.2.1',
-    'transducer',
     'celery<4',
 ]
 

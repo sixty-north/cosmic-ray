@@ -1,0 +1,22 @@
+* DONE Make baseline work
+  CLOSED: [2017-09-21 Thu 22:10]
+* DONE Make report work
+  CLOSED: [2017-09-21 Thu 22:09]
+* TODO Update unittest runner to use new "args" protocol
+* TODO Update nosetest runner to use new "args" protocol
+* TODO create plugins for execution engines
+* TODO Update exec to use config file
+* TODO Get rid of load?
+* DONE Get rid of run?
+  CLOSED: [2017-09-21 Thu 22:04]
+* TODO Update affected docstrings
+** init
+** baseline
+** exec
+* TODO Document the config file format
+* TODO new command for creating default config file
+* Workers
+  How can workers use the new config system? Can we just serialize the config
+  and send it in that way? We wold probably want two modes: one where we send in
+  the config as a string and another where the worker reads a config file (so
+  that it's easy to run the worker manually).

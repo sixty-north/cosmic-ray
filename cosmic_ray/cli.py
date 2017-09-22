@@ -12,10 +12,7 @@ import subprocess
 import sys
 
 import docopt_subcommands as dsc
-import transducer.eager
-from transducer.functional import compose
-import transducer.lazy
-from transducer.transducers import filtering, mapping
+import yaml
 
 import cosmic_ray.commands
 import cosmic_ray.counting
@@ -29,55 +26,31 @@ from cosmic_ray.work_db import use_db, WorkDB
 
 LOG = logging.getLogger()
 
-REMOVE_COMMENTS = mapping(lambda x: x.split('#')[0])
-REMOVE_WHITESPACE = mapping(str.strip)
-NON_EMPTY = filtering(bool)
-CONFIG_FILE_PARSER = compose(REMOVE_COMMENTS,
-                             REMOVE_WHITESPACE,
-                             NON_EMPTY)
+
+def _load_config(filename):
+    with open(filename, mode='rt') as f:
+        return yaml.load(f)
 
 
-def _load_file(config_file):
-    """Read configuration from a file.
-
-    This reads `config_file`, yielding each non-empty line with
-    whitespace and comments stripped off.
-    """
-    with open(config_file, 'rt', encoding='utf-8') as f:
-        yield from transducer.lazy.transduce(CONFIG_FILE_PARSER, f)
+class ConfigError(Exception):
+    pass
 
 
 @dsc.command()
-def handle_load(config):
-    """usage: {program} load <config-file>
+def handle_baseline(args):
+    """usage: cosmic-ray baseline <config-file>
 
-Load a command configuration from <config-file> and run it.
-
-A "command configuration" is simply a command-line invocation for cosmic-ray,
-where each token of the command is on a separate line.
+Run an un-mutated baseline of a module using the tests specified in the config.
+This is largely like running a "worker" process, with the difference that a
+baseline run doesn't mutate the code.
     """
-    filename = config['<config-file>']
-    argv = _load_file(filename)
-    return main(argv=list(argv))
-
-
-@dsc.command()
-def handle_baseline(configuration):
-    """usage: {program} baseline [options] <top-module> [-- <test-args> ...]
-
-Run an un-mutated baseline of <top-module> using the tests in <test-dir>.
-This is largely like running a "worker" process, with the difference
-that a baseline run doesn't mutate the code.
-
-options:
-  --no-local-import   Allow importing module from the current directory
-  --test-runner=R     Test-runner plugin to use [default: unittest]
-"""
     sys.path.insert(0, '')
+
+    config = _load_config(args['<config-file>'])
+
     test_runner = cosmic_ray.plugins.get_test_runner(
-        configuration['--test-runner'],
-        configuration['<test-args>']
-    )
+        config['test_runner']['name'],
+        config['test_runner']['args'])
 
     work_record = test_runner()
     # note: test_runner() results are meant to represent
@@ -102,8 +75,8 @@ def _get_db_name(session_name):
 
 
 @dsc.command()
-def handle_init(configuration):
-    """usage: {program} init [options] [--exclude-modules=P ...] (--timeout=T | --baseline=M) <session-name> <top-module> [-- <test-args> ...]
+def handle_init(args):
+    """usage: cosmic-ray init <config-file>
 
 Initialize a mutation testing run. The primarily creates a database of "work to
 be done" which describes all of the mutations and test runs that need to be
@@ -114,26 +87,20 @@ generates the work order which can be executed with other commands.
 
 The session-name argument identifies the run you're creating. Its most
 important role is that it's used to name the database file.
-
-options:
-  --no-local-import   Allow importing module from the current directory
-  --test-runner=R     Test-runner plugin to use [default: unittest]
-  --exclude-modules=P Pattern of module names to exclude from mutation
     """
     # This lets us import modules from the current directory. Should probably
     # be optional, and needs to also be applied to workers!
     sys.path.insert(0, '')
 
-    if configuration['--timeout'] is not None:
-        timeout = float(configuration['--timeout'])
-    else:
-        baseline_mult = float(configuration['--baseline'])
-        assert baseline_mult is not None
-        command = 'cosmic-ray baseline --test-runner={test_runner} {module} -- {test_args}'.format(
-            test_runner=configuration['--test-runner'],
-            module=configuration['<top-module>'],
-            test_args=' '.join(configuration['<test-args>'])
-        )
+    config = _load_config(args['<config-file>'])
+
+    if 'timeout' in config:
+        timeout = float(config['timeout'])
+    elif 'baseline' in config:
+        baseline_mult = float(config['baseline'])
+        assert baseline_mult is not None # TODO: Should not be assertion
+        command = 'cosmic-ray baseline {}'.format(
+            args['<config-file>'])
 
         # We run the baseline in a subprocess to more closely emulate the
         # runtime of a worker subprocess.
@@ -141,73 +108,55 @@ options:
             subprocess.check_call(command.split())
 
         timeout = baseline_mult * t.elapsed.total_seconds()
+    else:
+        raise ConfigError(
+            "Config must specify either baseline or timeout")
 
     LOG.info('timeout = %f seconds', timeout)
 
     modules = set(
         cosmic_ray.modules.find_modules(
-            cosmic_ray.modules.fixup_module_name(configuration['<top-module>']),
-            configuration['--exclude-modules']))
+            cosmic_ray.modules.fixup_module_name(config['module']),
+            config.get('exclude-modules', None)))
 
     LOG.info('Modules discovered: %s', [m.__name__ for m in modules])
 
-    db_name = _get_db_name(configuration['<session-name>'])
+    db_name = _get_db_name(config['session'])
 
     with use_db(db_name) as db:
         cosmic_ray.commands.init(
             modules,
             db,
-            configuration['--test-runner'],
-            configuration['<test-args>'],
+            config['test_runner']['name'],
+            config['test_runner']['args'],
             timeout)
 
 
 @dsc.command()
-def handle_exec(configuration):
-    """usage: {program} exec [--dist] <session-name>
+def handle_exec(args):
+    """usage: cosmic-ray exec <config-file>
 
 Perform the remaining work to be done in the specified session. This requires
 that the rest of your mutation testing infrastructure (e.g. worker processes)
 are already running.
-
-options:
-    --dist  Distribute tests to remote workers
     """
-    db_name = _get_db_name(configuration['<session-name>'])
-    dist = configuration['--dist']
+
+    config = _load_config(args['<config-file>'])
+
+    db_name = _get_db_name(config['session'])
 
     with use_db(db_name, mode=WorkDB.Mode.open) as db:
-        cosmic_ray.commands.execute(db, dist)
+        cosmic_ray.commands.execute(db, config['execution_engine'])
 
 
 @dsc.command()
-def handle_run(configuration):
-    """usage: {program} run [options] [--dist] [--exclude-modules=P ...] (--timeout=T | --baseline=M) <session-name> <top-module> [-- <test-args> ...]
-
-This simply runs the "init" command followed by the "exec" command.
-
-It's important to remember that "init" clears the session database, including
-any results you may have already received. So DO NOT USE THIS COMMAND TO
-CONTINUE EXECUTION OF AN INTERRUPTED SESSION! If you do this, you will lose any
-existing results.
-
-options:
-  --no-local-import   Allow importing module from the current directory
-  --test-runner=R     Test-runner plugin to use [default: unittest]
-  --exclude-modules=P Pattern of module names to exclude from mutation
-
-    """
-    handle_init(configuration)
-    handle_exec(configuration)
-
-
-@dsc.command()
-def handle_dump(configuration):
-    """usage: {program} dump <session-name>
+def handle_dump(args):
+    """usage: cosmic-ray dump <config-file>
 
 JSON dump of session data.
     """
-    db_name = _get_db_name(configuration['<session-name>'])
+    config = _load_config(args['<config-file>'])
+    db_name = _get_db_name(config['session'])
 
     with use_db(db_name, WorkDB.Mode.open) as db:
         for record in db.work_records:
