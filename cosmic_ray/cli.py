@@ -47,9 +47,9 @@ def _load_file(config_file):
         yield from transducer.lazy.transduce(CONFIG_FILE_PARSER, f)
 
 
-@dsc.command('load')
+@dsc.command()
 def handle_load(config):
-    """usage: cosmic-ray load <config-file>
+    """usage: {program} load <config-file>
 
 Load a command configuration from <config-file> and run it.
 
@@ -61,9 +61,9 @@ where each token of the command is on a separate line.
     return main(argv=list(argv))
 
 
-@dsc.command('baseline')
+@dsc.command()
 def handle_baseline(configuration):
-    """usage: cosmic-ray baseline [options] <top-module> [-- <test-args> ...]
+    """usage: {program} baseline [options] <top-module> [-- <test-args> ...]
 
 Run an un-mutated baseline of <top-module> using the tests in <test-dir>.
 This is largely like running a "worker" process, with the difference
@@ -101,9 +101,9 @@ def _get_db_name(session_name):
         return '{}.json'.format(session_name)
 
 
-@dsc.command('init')
+@dsc.command()
 def handle_init(configuration):
-    """usage: cosmic-ray init [options] [--exclude-modules=P ...] (--timeout=T | --baseline=M) <session-name> <top-module> [-- <test-args> ...]
+    """usage: {program} init [options] [--exclude-modules=P ...] (--timeout=T | --baseline=M) <session-name> <top-module> [-- <test-args> ...]
 
 Initialize a mutation testing run. The primarily creates a database of "work to
 be done" which describes all of the mutations and test runs that need to be
@@ -162,9 +162,9 @@ options:
             timeout)
 
 
-@dsc.command('exec')
+@dsc.command()
 def handle_exec(configuration):
-    """usage: cosmic-ray exec [--dist] <session-name>
+    """usage: {program} exec [--dist] <session-name>
 
 Perform the remaining work to be done in the specified session. This requires
 that the rest of your mutation testing infrastructure (e.g. worker processes)
@@ -180,9 +180,9 @@ options:
         cosmic_ray.commands.execute(db, dist)
 
 
-@dsc.command('run')
+@dsc.command()
 def handle_run(configuration):
-    """usage: cosmic-ray run [options] [--dist] [--exclude-modules=P ...] (--timeout=T | --baseline=M) <session-name> <top-module> [-- <test-args> ...]
+    """usage: {program} run [options] [--dist] [--exclude-modules=P ...] (--timeout=T | --baseline=M) <session-name> <top-module> [-- <test-args> ...]
 
 This simply runs the "init" command followed by the "exec" command.
 
@@ -201,9 +201,9 @@ options:
     handle_exec(configuration)
 
 
-@dsc.command('dump')
+@dsc.command()
 def handle_dump(configuration):
-    """usage: cosmic-ray dump <session-name>
+    """usage: {program} dump <session-name>
 
 JSON dump of session data.
     """
@@ -214,9 +214,9 @@ JSON dump of session data.
             print(json.dumps(record))
 
 
-@dsc.command('counts')
+@dsc.command()
 def handle_counts(configuration):
-    """usage: cosmic-ray counts [options] [--exclude-modules=P ...] <top-module>
+    """usage: {program} counts [options] [--exclude-modules=P ...] <top-module>
 
 Count the number of tests that would be run for a given testing configuration.
 This is mostly useful for estimating run times and keeping track of testing
@@ -244,9 +244,9 @@ options:
               *(d.values() for d in counts.values()))))
 
 
-@dsc.command('test-runners')
+@dsc.command()
 def handle_test_runners(config):
-    """usage: cosmic-ray test-runners
+    """usage: {program} test-runners
 
 List the available test-runner plugins.
 """
@@ -254,9 +254,9 @@ List the available test-runner plugins.
     return 0
 
 
-@dsc.command('operators')
+@dsc.command()
 def handle_operators(config):
-    """usage: cosmic-ray operators
+    """usage: {program} operators
 
 List the available operator plugins.
 """
@@ -264,9 +264,9 @@ List the available operator plugins.
     return 0
 
 
-@dsc.command('worker')
+@dsc.command()
 def handle_worker(config):
-    """usage: cosmic-ray worker [options] <module> <operator> <occurrence> <test-runner> [-- <test-args> ...]
+    """usage: {program} worker [options] <module> <operator> <occurrence> <test-runner> [-- <test-args> ...]
 
 Run a worker process which performs a single mutation and test run. Each
 worker does a minimal, isolated chunk of work: it mutates the <occurence>-th
