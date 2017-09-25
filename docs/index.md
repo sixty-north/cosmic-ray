@@ -166,6 +166,15 @@ cosmic-ray dump test-session | cr-report
 This will give you detailed information about what work was done, followed by a
 summary of the entire session.
 
+### Integrating with CI systems
+
+Continouos integration is an integral part of the development lifecycle.
+cosmic-ray allows integration using xml format similar to JUnit
+
+```
+cosmic-ray dump test-session | cr-xml > cr.xml
+```
+
 ### Short-cut: the `run` command
 
 Originally Cosmic Ray didn't have a notion of sessions, and didn't distinguish

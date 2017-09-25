@@ -116,6 +116,7 @@ setup(
             'cosmic-ray = cosmic_ray.cli:main',
             'cr-report = cosmic_ray.commands.format:report',
             'cr-rate = cosmic_ray.commands.format:survival_rate',
+            'cr-xml = cosmic_ray.commands.format:report_xml',
         ],
         'cosmic_ray.test_runners': [
             'nose = cosmic_ray.testing.nose_runner:NoseRunner',
