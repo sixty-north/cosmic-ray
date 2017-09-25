@@ -160,11 +160,11 @@ def create_xml_report(records):
         total_jobs += 1
         if item.worker_outcome is None:
             errors += 1
-            if is_killed(item):
-                failed += 1
-                if (item.worker_outcome is not None):
-                    subelement = create_element_from_item(item)
-                    root_elem.append(subelement)
+        if is_killed(item):
+            failed += 1
+        if (item.worker_outcome is not None):
+            subelement = create_element_from_item(item)
+            root_elem.append(subelement)
 
     root_elem.set('errors', str(errors))
     root_elem.set('failures', str(failed))
