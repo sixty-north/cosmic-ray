@@ -123,7 +123,7 @@ options:
         print(line)
 
 
-def create_element_from_item(work_record):
+def _create_element_from_item(work_record):
     data = work_record.data
     sub_elem = xml.etree.ElementTree.Element('testcase')
 
@@ -151,7 +151,7 @@ def create_element_from_item(work_record):
     return sub_elem
 
 
-def create_xml_report(records):
+def _create_xml_report(records):
     total_jobs = 0
     errors = 0
     failed = 0
@@ -162,8 +162,8 @@ def create_xml_report(records):
             errors += 1
         if is_killed(item):
             failed += 1
-        if (item.worker_outcome is not None):
-            subelement = create_element_from_item(item)
+        if item.worker_outcome is not None:
+            subelement = _create_element_from_item(item)
             root_elem.append(subelement)
 
     root_elem.set('errors', str(errors))
@@ -181,5 +181,5 @@ Usage: cr-xml
 Print an XML formatted report of test results for continuos integration systems
 """
     records = (WorkRecord(json.loads(line)) for line in sys.stdin)
-    xml_elem = create_xml_report(records)
+    xml_elem = _create_xml_report(records)
     xml_elem.write(sys.stdout.buffer, encoding='utf-8', xml_declaration=True)
