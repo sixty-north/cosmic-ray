@@ -2,6 +2,7 @@
   CLOSED: [2017-09-21 Thu 22:10]
 * DONE Make report work
   CLOSED: [2017-09-21 Thu 22:09]
+* TODO counts command
 * TODO Update unittest runner to use new "args" protocol
 * TODO Update nosetest runner to use new "args" protocol
 * TODO create plugins for execution engines
@@ -20,3 +21,11 @@
   and send it in that way? We wold probably want two modes: one where we send in
   the config as a string and another where the worker reads a config file (so
   that it's easy to run the worker manually).
+** TODO Workers should accept a config file on the command line
+   They'll take the config file along with the parameters telling them what mutation to run.
+   This will make it easier to run workers locally/manually when necessary.
+** TODO Workers should be able to read their config via stdin
+   This is how they'll get config under normal operation.
+* No-local-import
+  This should probably be part of the config file. Does it only apply to
+  workers? Or does it apply to baseline as well?

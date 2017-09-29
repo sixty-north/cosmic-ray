@@ -1,5 +1,7 @@
+from cosmic_ray.config import get_db_name
 import cosmic_ray.tasks.celery
 import cosmic_ray.tasks.worker
+from cosmic_ray.work_db import use_db, WorkDB
 from cosmic_ray.work_record import WorkRecord
 
 # TODO: These should be put into plugins. Callers of execute() should pass an
@@ -40,7 +42,7 @@ ENGINES = {
 }
 
 
-def execute(work_db, engine_config):
+def execute(config, work_db, engine_config):
     """Execute any pending work in `work_db`, recording the results.
 
     This looks for any work in `work_db` which has no results, schedules to be
@@ -51,11 +53,17 @@ def execute(work_db, engine_config):
     tests to actually run! If `dist` is `False` then all tests will be run
     locally.
     """
-    test_runner, test_args, timeout = work_db.get_work_parameters()
+
+    db_name = get_db_name(config['session'])
+    engine_config = config['execution-engine']
     executor = ENGINES[engine_config['name']]
-    work_records = executor(test_runner,
-                            test_args,
-                            timeout,
-                            work_db.pending_work)
-    for work_record in work_records:
-        work_db.update_work_record(work_record)
+
+    with use_db(db_name, mode=WorkDB.Mode.open) as db:
+        test_runner, test_args, timeout = db.get_work_parameters()
+        work_records = executor(test_runner,
+                                test_args,
+                                timeout,
+                                work_db.pending_work)
+
+        for work_record in work_records:
+            db.update_work_record(work_record)

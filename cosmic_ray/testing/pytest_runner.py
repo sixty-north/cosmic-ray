@@ -26,6 +26,7 @@ class PytestRunner(TestRunner):
     def _run(self):
         collector = ResultCollector()
 
+        print(self.test_args)
         with open(os.devnull, 'w') as devnull, redirect_stdout(devnull):
             pytest.main(self.test_args.split(),
                         plugins=[collector])

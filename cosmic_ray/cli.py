@@ -12,9 +12,9 @@ import subprocess
 import sys
 
 import docopt_subcommands as dsc
-import yaml
 
 import cosmic_ray.commands
+from cosmic_ray.config import ConfigError, get_db_name, load_config
 import cosmic_ray.counting
 import cosmic_ray.modules
 import cosmic_ray.worker
@@ -27,18 +27,9 @@ from cosmic_ray.work_db import use_db, WorkDB
 LOG = logging.getLogger()
 
 
-def _load_config(filename):
-    with open(filename, mode='rt') as f:
-        return yaml.load(f)
-
-
-class ConfigError(Exception):
-    pass
-
-
 @dsc.command()
 def handle_baseline(args):
-    """usage: cosmic-ray baseline <config-file>
+    """usage: cosmic-ray baseline [<config-file>]
 
 Run an un-mutated baseline of a module using the tests specified in the config.
 This is largely like running a "worker" process, with the difference that a
@@ -46,11 +37,11 @@ baseline run doesn't mutate the code.
     """
     sys.path.insert(0, '')
 
-    config = _load_config(args['<config-file>'])
+    config = load_config(args.get('<config-file>'))
 
     test_runner = cosmic_ray.plugins.get_test_runner(
-        config['test_runner']['name'],
-        config['test_runner']['args'])
+        config['test-runner']['name'],
+        config['test-runner']['args'])
 
     work_record = test_runner()
     # note: test_runner() results are meant to represent
@@ -67,16 +58,10 @@ baseline run doesn't mutate the code.
         sys.exit(2)
 
 
-def _get_db_name(session_name):
-    if session_name.endswith('.json'):
-        return session_name
-    else:
-        return '{}.json'.format(session_name)
-
 
 @dsc.command()
 def handle_init(args):
-    """usage: cosmic-ray init <config-file>
+    """usage: cosmic-ray init [<config-file>]
 
 Initialize a mutation testing run. The primarily creates a database of "work to
 be done" which describes all of the mutations and test runs that need to be
@@ -92,7 +77,7 @@ important role is that it's used to name the database file.
     # be optional, and needs to also be applied to workers!
     sys.path.insert(0, '')
 
-    config = _load_config(args['<config-file>'])
+    config = load_config(args.get('<config-file>'))
 
     if 'timeout' in config:
         timeout = float(config['timeout'])
@@ -121,42 +106,37 @@ important role is that it's used to name the database file.
 
     LOG.info('Modules discovered: %s', [m.__name__ for m in modules])
 
-    db_name = _get_db_name(config['session'])
+    db_name = get_db_name(config['session'])
 
     with use_db(db_name) as db:
         cosmic_ray.commands.init(
             modules,
             db,
-            config['test_runner']['name'],
-            config['test_runner']['args'],
+            config['test-runner']['name'],
+            config['test-runner']['args'],
             timeout)
 
 
 @dsc.command()
 def handle_exec(args):
-    """usage: cosmic-ray exec <config-file>
+    """usage: cosmic-ray exec [<config-file>]
 
 Perform the remaining work to be done in the specified session. This requires
 that the rest of your mutation testing infrastructure (e.g. worker processes)
 are already running.
     """
 
-    config = _load_config(args['<config-file>'])
-
-    db_name = _get_db_name(config['session'])
-
-    with use_db(db_name, mode=WorkDB.Mode.open) as db:
-        cosmic_ray.commands.execute(db, config['execution_engine'])
+    config = load_config(args.get('<config-file>'))
+    cosmic_ray.commands.execute(config)
 
 
 @dsc.command()
 def handle_dump(args):
-    """usage: cosmic-ray dump <config-file>
+    """usage: cosmic-ray dump <session-file>
 
 JSON dump of session data.
     """
-    config = _load_config(args['<config-file>'])
-    db_name = _get_db_name(config['session'])
+    db_name = get_db_name(args['<session-file>'])
 
     with use_db(db_name, WorkDB.Mode.open) as db:
         for record in db.work_records:
@@ -214,8 +194,8 @@ List the available operator plugins.
 
 
 @dsc.command()
-def handle_worker(config):
-    """usage: {program} worker [options] <module> <operator> <occurrence> <test-runner> [-- <test-args> ...]
+def handle_worker(args):
+    """usage: {program} worker [options] <module> <operator> <occurrence> [<config-file>]
 
 Run a worker process which performs a single mutation and test run. Each
 worker does a minimal, isolated chunk of work: it mutates the <occurence>-th
@@ -226,23 +206,25 @@ Normally you won't run this directly. Rather, it will be launched by celery
 worker tasks.
 
 options:
-  --no-local-import   Disallow importing module from the current directory
   --keep-stdout       Do not squelch stdout
 """
-    if not config['--no-local-import']:
+    config = load_config(args.get('<config-file>'))
+    print(config)
+
+    if config.get('local-imports', True):
         sys.path.insert(0, '')
 
-    operator = cosmic_ray.plugins.get_operator(config['<operator>'])
+    operator = cosmic_ray.plugins.get_operator(args['<operator>'])
     test_runner = cosmic_ray.plugins.get_test_runner(
-        config['<test-runner>'],
-        config['<test-args>'])
+        config['test-runner']['name'],
+        config['test-runner']['args'])
 
     with open(os.devnull, 'w') as devnull,\
-        redirect_stdout(sys.stdout if config['--keep-stdout'] else devnull):
+        redirect_stdout(sys.stdout if args['--keep-stdout'] else devnull):
         work_record = cosmic_ray.worker.worker(
-            config['<module>'],
+            args['<module>'],
             operator,
-            int(config['<occurrence>']),
+            int(args['<occurrence>']),
             test_runner)
 
     sys.stdout.write(
