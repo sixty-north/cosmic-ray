@@ -132,8 +132,8 @@ Note that all of the other Cosmic Ray commands --- ``init``, ``report``,
 etc. --- don't need the ``--dist`` flag; only ``exec`` and ``run`` use
 it.
 
-**`Further documentation is available at
-readthedocs <http://cosmic-ray.readthedocs.org/en/latest/>`__.**
+`Further documentation is available at readthedocs
+<http://cosmic-ray.readthedocs.org/en/latest/>`__.
 
 .. |Python version| image:: https://img.shields.io/badge/Python_version-3.4+-blue.svg
    :target: https://www.python.org/
