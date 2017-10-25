@@ -1,10 +1,10 @@
 """Celery specific details for routing work requests to Cosmic Ray workers."""
 import celery
 from celery.utils.log import get_logger
-import itertools
 import json
 import subprocess
 
+import cosmic_ray.config
 from .celery import app
 from ..worker import WorkerOutcome
 from ..work_record import WorkRecord
@@ -14,9 +14,8 @@ LOG = get_logger(__name__)
 
 @app.task(name='cosmic_ray.tasks.worker')
 def worker_task(work_record,
-                test_runner,
-                test_args,
-                timeout):
+                timeout,
+                config):
     """The celery task which performs a single mutation and runs a test suite.
 
     This runs `cosmic-ray worker` in a subprocess and returns the results.
@@ -27,23 +26,18 @@ def worker_task(work_record,
     # celery), so we reconstruct a WorkRecord to make it easier to work with.
     work_record = WorkRecord(work_record)
 
-    command = list(itertools.chain(
-        ('cosmic-ray',
-         'worker',
-         work_record.module,
-         work_record.operator,
-         str(work_record.occurrence),
-         test_runner,
-         '--',),
-        test_args))
+    command = 'cosmic-ray worker {module} {operator} {occurrence}'.format(
+        **work_record)
 
     LOG.info('executing: %s', command)
 
-    proc = subprocess.Popen(command,
+    proc = subprocess.Popen(command.split(),
+                            stdin=subprocess.PIPE,
                             stdout=subprocess.PIPE,
                             universal_newlines=True)
+    config_string = cosmic_ray.config.serialize_config(config)
     try:
-        outs, _ = proc.communicate(input=None, timeout=timeout)
+        outs, _ = proc.communicate(input=config_string, timeout=timeout)
         result = json.loads(outs)
         work_record.update({
             k: v
@@ -63,10 +57,9 @@ def worker_task(work_record,
     return work_record
 
 
-def execute_work_records(test_runner,
-                         test_args,
-                         timeout,
-                         work_records):
+def execute_work_records(timeout,
+                         work_records,
+                         config):
     """Execute a suite of tests for a given set of work items.
 
     Args:
@@ -79,7 +72,6 @@ def execute_work_records(test_runner,
     """
     return celery.group(
         worker_task.delay(work_record,
-                          test_runner,
-                          test_args,
-                          timeout)
+                          timeout,
+                          config)
         for work_record in work_records)

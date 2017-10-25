@@ -8,26 +8,24 @@ from cosmic_ray.work_record import WorkRecord
 # executor.
 
 
-def local_executor(test_runner, test_args, timeout, pending_work):
+def local_executor(timeout, pending_work, config):
     for work_record in pending_work:
         yield cosmic_ray.tasks.worker.worker_task(
             work_record,
-            test_runner,
-            test_args,
-            timeout)
+            timeout,
+            config)
 
 
 class CeleryExecutor:
     def __init__(self, purge_queue=True):
         self.purge_queue = purge_queue
 
-    def __call__(self, test_runner, test_args, timeout, pending_work):
+    def __call__(self, timeout, pending_work, config):
         try:
             results = cosmic_ray.tasks.worker.execute_work_records(
-                test_runner,
-                test_args,
                 timeout,
-                pending_work)
+                pending_work,
+                config)
 
             for r in results:
                 yield WorkRecord(r.get())
@@ -42,7 +40,7 @@ ENGINES = {
 }
 
 
-def execute(config, work_db, engine_config):
+def execute(config):
     """Execute any pending work in `work_db`, recording the results.
 
     This looks for any work in `work_db` which has no results, schedules to be
@@ -58,12 +56,11 @@ def execute(config, work_db, engine_config):
     engine_config = config['execution-engine']
     executor = ENGINES[engine_config['name']]
 
-    with use_db(db_name, mode=WorkDB.Mode.open) as db:
-        test_runner, test_args, timeout = db.get_work_parameters()
-        work_records = executor(test_runner,
-                                test_args,
-                                timeout,
-                                work_db.pending_work)
+    with use_db(db_name, mode=WorkDB.Mode.open) as work_db:
+        test_runner, test_args, timeout = work_db.get_work_parameters()
+        work_records = executor(timeout,
+                                work_db.pending_work,
+                                config)
 
         for work_record in work_records:
-            db.update_work_record(work_record)
+            work_db.update_work_record(work_record)

@@ -6,7 +6,11 @@
 * TODO Update unittest runner to use new "args" protocol
 * TODO Update nosetest runner to use new "args" protocol
 * TODO create plugins for execution engines
-* TODO Update exec to use config file
+* IN-PROGRESS Update exec to use config file
+  This is going along nicely. Local seems to work, and celery is close (if not
+  working). I need to test it out.
+
+** TODO Test celery with config
 * TODO Get rid of load?
 * DONE Get rid of run?
   CLOSED: [2017-09-21 Thu 22:04]
@@ -21,11 +25,33 @@
   and send it in that way? We wold probably want two modes: one where we send in
   the config as a string and another where the worker reads a config file (so
   that it's easy to run the worker manually).
-** TODO Workers should accept a config file on the command line
+** DONE Workers should accept a config file on the command line
+   CLOSED: [2017-10-25 Wed 16:56]
    They'll take the config file along with the parameters telling them what mutation to run.
    This will make it easier to run workers locally/manually when necessary.
-** TODO Workers should be able to read their config via stdin
+** DONE Workers should be able to read their config via stdin
+   CLOSED: [2017-10-25 Wed 16:56]
    This is how they'll get config under normal operation.
 * No-local-import
   This should probably be part of the config file. Does it only apply to
   workers? Or does it apply to baseline as well?
+
+* TODO Data duplication
+  Right now we store things like test-runner and args in both the session config
+  and the work-db. We should avoid storing data in two places...or if we do we
+  should provide a way to detect when they're out of sync. For example if
+  someone creates a work-db from a session and then changes the session, CR
+  should notice this and refuse to run.
+
+  Or maybe it's best to simply avoid the duplication and not store things in the
+  workdb. Then work-db and session are intimately bound. And we're still stuck
+  with the fact that a workdb and sesssion might have different values.
+
+  Maybe it's best to keep the duplication and let the work-db be the source of
+  truth for execution (i.e. any time after init).
+
+  Or...maybe the entire config should be stored in the work-db. After init and
+  work-db creation, we won't reference the config YAML file. So `cr init
+  config.yml session` would be followed by `cr exec session` with no need to
+  reference the config in exec. I like this...config.yml becomes a template for
+  creating session.

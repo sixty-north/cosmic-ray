@@ -209,7 +209,6 @@ options:
   --keep-stdout       Do not squelch stdout
 """
     config = load_config(args.get('<config-file>'))
-    print(config)
 
     if config.get('local-imports', True):
         sys.path.insert(0, '')

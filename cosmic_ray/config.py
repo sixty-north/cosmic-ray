@@ -10,6 +10,10 @@ def load_config(filename=None):
         return yaml.load(f)
 
 
+def serialize_config(config):
+    return yaml.dump(config)
+
+
 def get_db_name(session_name):
     if session_name.endswith('.json'):
         return session_name
