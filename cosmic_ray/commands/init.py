@@ -17,6 +17,11 @@ def init(modules,
     new work orders. In particular, this means that any results in the db are
     removed.
 
+    Args:
+      modules: iterable of module names to be mutated.
+      work_db: A `WorkDB` instance into which the work orders will be saved.
+      config: The configuration for the new session.
+      timeout: The timeout to apply to the work in the session.
     """
     operators = cosmic_ray.plugins.operator_names()
     counts = cosmic_ray.counting.count_mutants(modules, operators)

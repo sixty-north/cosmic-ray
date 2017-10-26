@@ -2,6 +2,7 @@ try:
     from contextlib import redirect_stdout
 except ImportError:
     import sys
+
     # redirect_stdout was introduced in Python 3.4
     class _RedirectStream:
         """
@@ -22,7 +23,6 @@ except ImportError:
 
         def __exit__(self, exctype, excinst, exctb):
             setattr(sys, self._stream, self._old_targets.pop())
-
 
     class redirect_stdout(_RedirectStream):
         """Context manager for temporarily redirecting stdout to another file."""
@@ -51,6 +51,7 @@ def get_line_number(node):
         return node.lineno
     else:
         return '<UNKNOWN>'
+
 
 def build_mutations(ops, to_ops):
     """The sequence of `(idx, to-op)` tuples describing the mutations for `ops`.

@@ -29,15 +29,16 @@ LOG = logging.getLogger()
 
 @dsc.command()
 def handle_baseline(args):
-    """usage: cosmic-ray baseline [<config-file>]
+    """usage: cosmic-ray baseline <config-file>
 
-Run an un-mutated baseline of a module using the tests specified in the config.
-This is largely like running a "worker" process, with the difference that a
-baseline run doesn't mutate the code.
+Run an un-mutated baseline of the specific configuration. This is largely like
+running a "worker" process, with the difference that a baseline run doesn't
+mutate the code.
+
     """
     sys.path.insert(0, '')
 
-    config = load_config(args.get('<config-file>'))
+    config = load_config(args['<config-file>'])
 
     test_runner = cosmic_ray.plugins.get_test_runner(
         config['test-runner']['name'],
@@ -58,20 +59,22 @@ baseline run doesn't mutate the code.
         sys.exit(2)
 
 
-
 @dsc.command()
 def handle_init(args):
     """usage: cosmic-ray init <config-file> <session-file>
 
-Initialize a mutation testing run. The primarily creates a database of "work to
-be done" which describes all of the mutations and test runs that need to be
-executed for a full mutation testing run. The testing run will mutate
-<top-module> (and submodules) using the tests in <test-dir>. This doesn't
-actually run any tests. Instead, it scans the modules-under-test and simply
-generates the work order which can be executed with other commands.
+Initialize a mutation testing session from a configuration. This primarily
+creates a session - a database of "work to be done" - which describes all of
+the mutations and test runs that need to be executed for a full mutation
+testing run. The configuration specifies the top-level module to mutate, the
+tests to run, and how to run them.
 
-The session-name argument identifies the run you're creating. Its most
-important role is that it's used to name the database file.
+This command doesn't actually run any tests. Instead, it scans the
+modules-under-test and simply generates the work order which can be executed
+with other commands.
+
+The `session-file` is the filename for the database in which the work order
+will be stored.
     """
     # This lets us import modules from the current directory. Should probably
     # be optional, and needs to also be applied to workers!
@@ -122,7 +125,8 @@ def handle_config(args):
 
 Show the configuration for in a session.
     """
-    with use_db(args['<session-file>']) as db:
+    session_file = get_db_name(args['<session-file>'])
+    with use_db(session_file) as db:
         config, timeout = db.get_config()
         print(json.dumps(config))
 
@@ -136,19 +140,21 @@ that the rest of your mutation testing infrastructure (e.g. worker processes)
 are already running.
     """
 
-    cosmic_ray.commands.execute(
+    session_file = get_db_name(
         args.get('<session-file>'))
+    cosmic_ray.commands.execute(session_file)
 
 
 @dsc.command()
 def handle_dump(args):
     """usage: cosmic-ray dump <session-file>
 
-JSON dump of session data.
+JSON dump of session data. This output is typically run through other programs
+to produce reports.
     """
-    db_name = get_db_name(args['<session-file>'])
+    session_file = get_db_name(args['<session-file>'])
 
-    with use_db(db_name, WorkDB.Mode.open) as db:
+    with use_db(session_file, WorkDB.Mode.open) as db:
         for record in db.work_records:
             print(json.dumps(record))
 
@@ -204,17 +210,19 @@ List the available operator plugins.
 def handle_worker(args):
     """usage: {program} worker [options] <module> <operator> <occurrence> [<config-file>]
 
-Run a worker process which performs a single mutation and test run. Each
-worker does a minimal, isolated chunk of work: it mutates the <occurence>-th
-instance of <operator> in <module>, runs the test suite defined by
-<test-runner> and <test-args>, prints the results, and exits.
+Run a worker process which performs a single mutation and test run. Each worker
+does a minimal, isolated chunk of work: it mutates the <occurence>-th instance
+of <operator> in <module>, runs the test suite defined in the configuration,
+prints the results, and exits.
 
-Normally you won't run this directly. Rather, it will be launched by celery
-worker tasks.
+Normally you won't run this directly. Rather, it will be launched by an
+execution engine. However, it can be useful to run this on its own for testing
+and debugging purposes.
 
 options:
   --keep-stdout       Do not squelch stdout
-"""
+
+    """
     config = load_config(args.get('<config-file>'))
 
     if config.get('local-imports', True):

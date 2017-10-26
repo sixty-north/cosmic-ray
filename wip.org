@@ -21,7 +21,7 @@
   CLOSED: [2017-10-26 Thu 13:47]
 * DONE Get rid of run?
   CLOSED: [2017-09-21 Thu 22:04]
-* TODO Update affected docstrings
+* IN-PROGRESS Update affected docstrings
 ** init
 ** baseline
 ** exec

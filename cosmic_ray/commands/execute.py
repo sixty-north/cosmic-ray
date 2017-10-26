@@ -1,4 +1,3 @@
-from cosmic_ray.config import get_db_name
 import cosmic_ray.tasks.celery
 import cosmic_ray.tasks.worker
 from cosmic_ray.work_db import use_db, WorkDB
