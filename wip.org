@@ -3,7 +3,8 @@
 * DONE Make report work
   CLOSED: [2017-09-21 Thu 22:09]
 * TODO counts command
-* TODO Update unittest runner to use new "args" protocol
+* DONE Update unittest runner to use new "args" protocol
+  CLOSED: [2017-10-26 Thu 14:01]
 * TODO Update nosetest runner to use new "args" protocol
 * TODO create plugins for execution engines
 * DONE Update exec to use config file
@@ -14,7 +15,8 @@
 ** DONE Test celery with config
    CLOSED: [2017-10-26 Thu 12:52]
    This seems to work!
-* TODO Get rid of load?
+* DONE Get rid of load?
+  CLOSED: [2017-10-26 Thu 13:47]
 * DONE Get rid of run?
   CLOSED: [2017-09-21 Thu 22:04]
 * TODO Update affected docstrings

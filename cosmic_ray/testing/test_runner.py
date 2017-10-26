@@ -25,7 +25,10 @@ class TestRunner(metaclass=abc.ABCMeta):
 
     @property
     def test_args(self):
-        """The sequence of arguments for the test runner.
+        """The arguments for the test runner.
+
+        This is typically just a string, but it's whatever was passed to the
+        `TestRunner` initializer.
         """
         return self._test_args
 

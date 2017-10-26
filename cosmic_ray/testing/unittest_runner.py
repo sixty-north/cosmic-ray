@@ -15,7 +15,7 @@ class UnittestRunner(TestRunner):  # pylint:disable=no-init, too-few-public-meth
     """
 
     def _run(self):
-        suite = unittest.TestLoader().discover(self.test_args[0])
+        suite = unittest.TestLoader().discover(self.test_args)
         result = unittest.TestResult()
         result.failfast = True
         suite.run(result)
