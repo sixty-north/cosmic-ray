@@ -40,16 +40,39 @@ python setup.py install
 We recommend installing Cosmic Ray into a virtual environment. Often it makes sense to
 install it into the virtual environment of the package you want to test.
 
+### Create a configuration
+
+A configuration specifies the modules you want to mutate, the test scripts to
+use, and so forth. You use a configuration to create a session. A configuration
+is simply a YAML file. Here's a simple example using `unittest` for testing:
+
+```
+module: <the top-level module you want to test>
+
+baseline: 10
+
+exclude-modules:
+
+test-runner:
+  name: unittest
+  args: <the directory containing your tests>
+
+execution-engine:
+  name: local
+```
+
+Save this into a file named "config.yml".
+
 ### Create a session and run tests
 
-Now you're ready to start killing mutants. Cosmic Ray uses a notion of
+Now you're ready to start killing mutants! Cosmic Ray uses a notion of
 *sessions* to encompass a full mutation testing suite. Since mutation testing
 runs can take a long time, and since you might need to stop and start them,
 sessions store data about the progress of a run. The first step in a full
 testing run, then, is to initialize a session:
 
 ```
-cosmic-ray init --baseline=10 <session name> <top module name> -- <test directory>
+cosmic-ray init config.yml <session name>
 ```
 
 This will create a database file called `<session name>.json`. Once this is
@@ -76,12 +99,14 @@ including what kinds of mutants were created, which were killed, and
 
 ## Distributed testing with Celery
 
-By default Cosmic Ray does all of its testing locally and serially, running only
-one test suite at a time. This can be too slow for many real-world testing
-scenarios. To help speed things up, Cosmic Ray supports distributed mutation
-testing using [Celery](http://www.celeryproject.org/) to send work to more than
-one machine. This is more complex to set up, but it makes mutation testing
-practical for a wider range of projects.
+Cosmic Ray has a notion of *execution engines* which control the context in
+which tests are executed. The simplest execution engine performs all of the
+testing locally and serially, running only one test suite at a time. This can be
+too slow for many real-world testing scenarios. To help speed things up, Cosmic
+Ray supports distributed mutation testing using an engine based on
+[Celery](http://www.celeryproject.org/). This can send work to more than one
+machine. This is more complex to set up, but it makes mutation testing practical
+for a wider range of projects.
 
 To run Cosmic Ray in distributed mode, you first need to
 install [RabbitMQ](https://www.rabbitmq.com/). Cosmic Ray uses this message
@@ -102,18 +127,29 @@ As a result, you generally want to start them in the virtual environment into
 which you've installed Cosmic Ray.
 
 Also remember that the workers need to be able to find and execute the tests as
-expressed to the `init` command. In other words, if you used `cosmic-ray init .
-. . -- tests` to initialize a session, the test loader (whether local or
-distributed) will look for tests in the `test` directory. So you need to make
-sure that the worker processes are running in directory where this makes sense.
+expressed to the `init` command. In other words, if you specified your test
+runner configuration like this:
 
-Finally, once the worker(s) are running you need to use the `--dist` flag when
-you run `cosmic-ray exec`:
 ```
-cosmic-ray exec --dist
+test-runner:
+  name: unittest
+  args: tests
 ```
 
-Note that all of the other Cosmic Ray commands --- `init`, `report`, etc. ---
-don't need the `--dist` flag; only `exec` and `run` use it.
+then the test loader (whether local or distributed) will look for tests in the
+`test` directory. So you need to make sure that the worker processes are running
+in directory where this makes sense.
 
-**[Further documentation is available at readthedocs](http://cosmic-ray.readthedocs.org/en/latest/).**
+Finally, you need to make sure you're using the `celery` execution engine rather
+than `local`. You can specify this in your configuration like this:
+
+```
+execution-engine:
+  name: celery
+```
+
+Use `cosmic-ray init` to create a new session from this configuration, and
+subsequent `cosmic-ray exec` calls for that session will use the celery engine.
+
+**[Further documentation is available at
+readthedocs](http://cosmic-ray.readthedocs.org/en/latest/).**
