@@ -60,48 +60,45 @@ class WorkDB:
         self._db.close()
 
     @property
-    def _work_parameters(self):
+    def _config(self):
         """The table of work parameters."""
-        return self._db.table('work-parameters')
+        return self._db.table('config')
 
     @property
     def _work_items(self):
         """The table of work items."""
         return self._db.table('work-items')
 
-    def set_work_parameters(self, test_runner, test_args, timeout):
-        """Set (replace) the work parameters for the session.
+    def set_config(self, config, timeout):
+        """Set (replace) the configuration for the session.
 
         Args:
-          test_runner: The name of the test runner plugin to use.
-          test_args: The arguments to pass to the test runner.
+          config: Configuration object
           timeout: The timeout for tests.
         """
-        table = self._work_parameters
+        table = self._config
         table.purge()
         table.insert({
-            'test-runner': test_runner,
-            'test-args': test_args,
+            'config': config,
             'timeout': timeout,
         })
 
-    def get_work_parameters(self):
+    def get_config(self):
         """Get the work parameters (if set) for the session.
 
-        Returns: a tuple of `(test-runner, test-args, timeout)`.
+        Returns: a tuple of `(config, timeout)`.
 
         Raises:
-          ValueError: If there are no work parameters set for the session.
+          ValueError: If is no config set for the session.
         """
-        table = self._work_parameters
+        table = self._config
 
         try:
             record = table.all()[0]
         except IndexError:
-            raise ValueError('work-db has no work parameters')
+            raise ValueError('work-db has no config')
 
-        return (record['test-runner'],
-                record['test-args'],
+        return (record['config'],
                 record['timeout'])
 
     def add_work_records(self, records):

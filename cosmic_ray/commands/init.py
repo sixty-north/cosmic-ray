@@ -9,8 +9,7 @@ LOG = logging.getLogger()
 
 def init(modules,
          work_db,
-         test_runner,
-         test_args,
+         config,
          timeout):
     """Clear and initialize a work-db with work items.
 
@@ -21,9 +20,8 @@ def init(modules,
     """
     operators = cosmic_ray.plugins.operator_names()
     counts = cosmic_ray.counting.count_mutants(modules, operators)
-    work_db.set_work_parameters(
-        test_runner=test_runner,
-        test_args=test_args,
+    work_db.set_config(
+        config=config,
         timeout=timeout)
 
     work_db.clear_work_records()

@@ -61,7 +61,7 @@ baseline run doesn't mutate the code.
 
 @dsc.command()
 def handle_init(args):
-    """usage: cosmic-ray init [<config-file>]
+    """usage: cosmic-ray init <config-file> <session-file>
 
 Initialize a mutation testing run. The primarily creates a database of "work to
 be done" which describes all of the mutations and test runs that need to be
@@ -77,7 +77,7 @@ important role is that it's used to name the database file.
     # be optional, and needs to also be applied to workers!
     sys.path.insert(0, '')
 
-    config = load_config(args.get('<config-file>'))
+    config = load_config(args['<config-file>'])
 
     if 'timeout' in config:
         timeout = float(config['timeout'])
@@ -106,28 +106,38 @@ important role is that it's used to name the database file.
 
     LOG.info('Modules discovered: %s', [m.__name__ for m in modules])
 
-    db_name = get_db_name(config['session'])
+    db_name = get_db_name(args['<session-file>'])
 
     with use_db(db_name) as db:
         cosmic_ray.commands.init(
             modules,
             db,
-            config['test-runner']['name'],
-            config['test-runner']['args'],
+            config,
             timeout)
 
 
 @dsc.command()
+def handle_config(args):
+    """usage: cosmic-ray config <session-file>
+
+Show the configuration for in a session.
+    """
+    with use_db(args['<session-file>']) as db:
+        config, timeout = db.get_config()
+        print(json.dumps(config))
+
+
+@dsc.command()
 def handle_exec(args):
-    """usage: cosmic-ray exec [<config-file>]
+    """usage: cosmic-ray exec <session-file>
 
 Perform the remaining work to be done in the specified session. This requires
 that the rest of your mutation testing infrastructure (e.g. worker processes)
 are already running.
     """
 
-    config = load_config(args.get('<config-file>'))
-    cosmic_ray.commands.execute(config)
+    cosmic_ray.commands.execute(
+        args.get('<session-file>'))
 
 
 @dsc.command()
@@ -144,7 +154,7 @@ JSON dump of session data.
 
 
 @dsc.command()
-def handle_counts(configuration):
+def handle_counts(args):
     """usage: {program} counts [options] [--exclude-modules=P ...] <top-module>
 
 Count the number of tests that would be run for a given testing configuration.
@@ -159,8 +169,8 @@ options:
     sys.path.insert(0, '')
 
     modules = cosmic_ray.modules.find_modules(
-        cosmic_ray.modules.fixup_module_name(configuration['<top-module>']),
-        configuration['--exclude-modules'])
+        cosmic_ray.modules.fixup_module_name(args['<top-module>']),
+        args['--exclude-modules'])
 
     operators = cosmic_ray.plugins.operator_names()
 

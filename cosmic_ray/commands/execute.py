@@ -40,24 +40,18 @@ ENGINES = {
 }
 
 
-def execute(config):
-    """Execute any pending work in `work_db`, recording the results.
+def execute(db_name):
+    """Execute any pending work in the database stored in `db_name`, recording the
+results.
 
-    This looks for any work in `work_db` which has no results, schedules to be
-    executed, and records any results that arrive.
-
-    If `dist` is `True` then this uses Celery to distribute tasks to remote
-    workers; of course you need to make sure that these are running if you want
-    tests to actually run! If `dist` is `False` then all tests will be run
-    locally.
+    This looks for any work in `db_name` which has no results, schedules it to
+    be executed, and records any results that arrive.
     """
 
-    db_name = get_db_name(config['session'])
-    engine_config = config['execution-engine']
-    executor = ENGINES[engine_config['name']]
-
     with use_db(db_name, mode=WorkDB.Mode.open) as work_db:
-        test_runner, test_args, timeout = work_db.get_work_parameters()
+        config, timeout = work_db.get_config()
+        engine_config = config['execution-engine']
+        executor = ENGINES[engine_config['name']]
         work_records = executor(timeout,
                                 work_db.pending_work,
                                 config)

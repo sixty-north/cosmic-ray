@@ -6,11 +6,14 @@
 * TODO Update unittest runner to use new "args" protocol
 * TODO Update nosetest runner to use new "args" protocol
 * TODO create plugins for execution engines
-* IN-PROGRESS Update exec to use config file
+* DONE Update exec to use config file
+  CLOSED: [2017-10-26 Thu 12:52]
   This is going along nicely. Local seems to work, and celery is close (if not
   working). I need to test it out.
 
-** TODO Test celery with config
+** DONE Test celery with config
+   CLOSED: [2017-10-26 Thu 12:52]
+   This seems to work!
 * TODO Get rid of load?
 * DONE Get rid of run?
   CLOSED: [2017-09-21 Thu 22:04]
@@ -36,7 +39,8 @@
   This should probably be part of the config file. Does it only apply to
   workers? Or does it apply to baseline as well?
 
-* TODO Data duplication
+* DONE Data duplication
+  CLOSED: [2017-10-26 Thu 13:46]
   Right now we store things like test-runner and args in both the session config
   and the work-db. We should avoid storing data in two places...or if we do we
   should provide a way to detect when they're out of sync. For example if
