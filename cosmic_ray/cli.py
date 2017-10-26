@@ -155,22 +155,19 @@ JSON dump of session data.
 
 @dsc.command()
 def handle_counts(args):
-    """usage: {program} counts [options] [--exclude-modules=P ...] <top-module>
+    """usage: {program} counts <config-file>
 
 Count the number of tests that would be run for a given testing configuration.
 This is mostly useful for estimating run times and keeping track of testing
 statistics.
-
-options:
-  --no-local-import   Allow importing module from the current directory
-  --test-runner=R     Test-runner plugin to use [default: unittest]
-  --exclude-modules=P Pattern of module names to exclude from mutation
 """
+    config = load_config(args['<config-file>'])
+
     sys.path.insert(0, '')
 
     modules = cosmic_ray.modules.find_modules(
-        cosmic_ray.modules.fixup_module_name(args['<top-module>']),
-        args['--exclude-modules'])
+        cosmic_ray.modules.fixup_module_name(config['module']),
+        config.get('exclude-modules', []))
 
     operators = cosmic_ray.plugins.operator_names()
 

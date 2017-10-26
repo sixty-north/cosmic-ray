@@ -2,7 +2,8 @@
   CLOSED: [2017-09-21 Thu 22:10]
 * DONE Make report work
   CLOSED: [2017-09-21 Thu 22:09]
-* TODO counts command
+* DONE counts command
+  CLOSED: [2017-10-26 Thu 15:39]
 * DONE Update unittest runner to use new "args" protocol
   CLOSED: [2017-10-26 Thu 14:01]
 * DONE Update nosetest runner to use new "args" protocol
