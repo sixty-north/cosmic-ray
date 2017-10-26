@@ -29,7 +29,7 @@ class NoseRunner(TestRunner):
 
     def _run(self):
         argv = ['', '--with-cosmic_ray']
-        argv += list(self.test_args)
+        argv += self.test_args.split()
         collector = NoseResultsCollector()
 
         with open(os.devnull, 'w') as devnull, \

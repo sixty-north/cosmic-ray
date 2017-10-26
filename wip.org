@@ -5,7 +5,8 @@
 * TODO counts command
 * DONE Update unittest runner to use new "args" protocol
   CLOSED: [2017-10-26 Thu 14:01]
-* TODO Update nosetest runner to use new "args" protocol
+* DONE Update nosetest runner to use new "args" protocol
+  CLOSED: [2017-10-26 Thu 14:08]
 * TODO create plugins for execution engines
 * DONE Update exec to use config file
   CLOSED: [2017-10-26 Thu 12:52]
