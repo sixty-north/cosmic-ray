@@ -5,8 +5,10 @@
 
 import operator
 
+
 def constant_number():
     return 42
+
 
 def constant_true():
     return True

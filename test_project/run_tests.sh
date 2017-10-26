@@ -8,16 +8,18 @@ set -e
 TEST_CONFIGS="unittest.dist unittest.local pytest.dist pytest.local nosetest.dist nosetest.dist"
 for CONFIG in $TEST_CONFIGS; do
     echo "$CONFIG"
-    cosmic-ray load "cosmic-ray.$CONFIG.conf"
-    RESULT="$(cosmic-ray dump "adam_tests.$CONFIG" | cr-rate)"
+    SESSION=adam_tests.$CONFIG
+    cosmic-ray init cosmic-ray.$CONFIG.conf $SESSION
+    cosmic-ray exec $SESSION
+    RESULT="$(cosmic-ray dump "$SESSION" | cr-rate)"
     if [ "$RESULT" != 0.00 ]; then
-        cosmic-ray dump "adam_tests.$CONFIG" | cr-format
+        cosmic-ray dump "$SESSION" | cr-format
         exit 1
     fi
 done
 
 # Run import tests
-cosmic-ray load cosmic-ray.import.conf
+cosmic-ray init cosmic-ray.import.conf import_tests
 RESULT="$(cosmic-ray dump import_tests | cr-rate)"
 if [ "$RESULT" != 0.00 ]; then
     cosmic-ray dump import_tests | cr-format
@@ -25,7 +27,7 @@ if [ "$RESULT" != 0.00 ]; then
 fi
 
 # Run tests for empty __init__.py
-cosmic-ray load cosmic-ray.empty.conf
+cosmic-ray init cosmic-ray.empty.conf empty.unittest
 RESULT="$(cosmic-ray dump empty.unittest | cr-rate)"
 if [ "$RESULT" != 0.00 ]; then
     cosmic-ray dump empty.unittest | cr-format
@@ -33,7 +35,7 @@ if [ "$RESULT" != 0.00 ]; then
 fi
 
 # Run failing baseline tests
-if cosmic-ray load cosmic-ray.baseline_fail.conf; then
+if cosmic-ray init cosmic-ray.baseline_fail.conf baseline_fail; then
     echo "baseline didn't fail"
     exit 1
 fi
