@@ -4,10 +4,10 @@ import yaml
 
 def load_config(filename=None):
     if filename is None:
-        return yaml.load(sys.stdin)
+        return yaml.safe_load(sys.stdin)
 
     with open(filename, mode='rt') as f:
-        return yaml.load(f)
+        return yaml.safe_load(f)
 
 
 def serialize_config(config):
