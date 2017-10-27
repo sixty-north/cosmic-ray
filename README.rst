@@ -21,8 +21,7 @@ rapidly.
 
 And, of course, patches and ideas are welcome.
 
-** `Read the full documentation at
-readthedocs <http://cosmic-ray.readthedocs.org/en/latest/>`__. **
+|full_documentation|_.
 
 .. |Python version| image:: https://img.shields.io/badge/Python_version-3.4+-blue.svg
    :target: https://www.python.org/
@@ -32,3 +31,5 @@ readthedocs <http://cosmic-ray.readthedocs.org/en/latest/>`__. **
    :target: https://landscape.io/github/sixty-north/cosmic-ray/master
 .. |Documentation| image:: https://readthedocs.org/projects/cosmic-ray/badge/?version=latest
    :target: http://cosmic-ray.readthedocs.org/en/latest/
+.. |full_documentation| replace:: ``full_documentation`` `Read the full documentation at
+readthedocs <http://cosmic-ray.readthedocs.org/en/latest/>`__.
