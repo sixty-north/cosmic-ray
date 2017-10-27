@@ -110,7 +110,8 @@ setup(
     # You can install these using the following syntax, for example:
     # $ pip install -e .[dev,test]
     extras_require={
-        'test': ['hypothesis', 'pytest']
+        'test': ['hypothesis', 'pytest'],
+        'docs': ['sphinx', 'sphinx_rtd_theme']
     },
     entry_points={
         'console_scripts': [
