@@ -7,3 +7,4 @@ justify a separate module.
 
 from .execute import execute
 from .init import init
+from .new_config import new_config

@@ -71,6 +71,7 @@ INSTALL_REQUIRES = [
     'pathlib',
     'pytest>=3.0',
     'pyyaml',
+    'qprompt',
     'stevedore',
     'tinydb>=3.2.1',
     'celery<4',

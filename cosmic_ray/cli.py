@@ -17,6 +17,7 @@ import cosmic_ray.commands
 from cosmic_ray.config import ConfigError, get_db_name, load_config
 import cosmic_ray.counting
 import cosmic_ray.modules
+import cosmic_ray.plugins
 import cosmic_ray.worker
 from cosmic_ray.testing.test_runner import TestOutcome
 from cosmic_ray.timing import Timer
@@ -57,6 +58,16 @@ mutate the code.
         LOG.error('baseline failed')
         print(''.join(work_record.data))
         sys.exit(2)
+
+
+@dsc.command()
+def handle_new_config(args):
+    """usage: cosmic-ray new-config <config-file>
+
+Create a new config file.
+    """
+    with open(args['<config-file>'], mode='wt') as f:
+        f.write(cosmic_ray.commands.new_config())
 
 
 @dsc.command()

@@ -26,7 +26,8 @@
 ** baseline
 ** exec
 * TODO Document the config file format
-* TODO new command for creating default config file
+* DONE new command for creating default config file
+  CLOSED: [2017-10-27 Fri 14:00]
 * Workers
   How can workers use the new config system? Can we just serialize the config
   and send it in that way? We wold probably want two modes: one where we send in
