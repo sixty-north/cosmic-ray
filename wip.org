@@ -21,7 +21,8 @@
   CLOSED: [2017-10-26 Thu 13:47]
 * DONE Get rid of run?
   CLOSED: [2017-09-21 Thu 22:04]
-* IN-PROGRESS Update affected docstrings
+* DONE Update affected docstrings
+  CLOSED: [2017-10-27 Fri 14:02]
 ** init
 ** baseline
 ** exec
@@ -40,7 +41,7 @@
 ** DONE Workers should be able to read their config via stdin
    CLOSED: [2017-10-25 Wed 16:56]
    This is how they'll get config under normal operation.
-* No-local-import
+* TODO No-local-import
   This should probably be part of the config file. Does it only apply to
   workers? Or does it apply to baseline as well?
 
