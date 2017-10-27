@@ -17,7 +17,9 @@ fairly rapidly.
 
 And, of course, patches and ideas are welcome.
 
-**Contents**
+**This documentation is a bit out of date, but we're working to get it in good order!**
+
+## Contents
 
 * [Installation](installation.md)
 * [Quickstart](quickstart.md)
