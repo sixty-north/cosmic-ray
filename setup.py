@@ -109,7 +109,7 @@ setup(
     # You can install these using the following syntax, for example:
     # $ pip install -e .[dev,test]
     extras_require={
-        'test': ['hypothesis']
+        'test': ['hypothesis', 'pytest']
     },
     entry_points={
         'console_scripts': [
