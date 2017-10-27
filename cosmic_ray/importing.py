@@ -3,7 +3,6 @@
 import contextlib
 from importlib.abc import MetaPathFinder
 from importlib.machinery import ModuleSpec
-from itertools import accumulate
 import sys
 
 
