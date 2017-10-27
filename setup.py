@@ -22,7 +22,7 @@ def find_version(*file_paths):
     raise RuntimeError("Unable to find version string.")
 
 
-long_description = read('README.md', mode='rt')
+long_description = read('README.rst', mode='rt')
 
 
 operators = [
@@ -99,6 +99,7 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Topic :: Software Development :: Testing',
     ],
@@ -116,6 +117,7 @@ setup(
             'cosmic-ray = cosmic_ray.cli:main',
             'cr-report = cosmic_ray.commands.format:report',
             'cr-rate = cosmic_ray.commands.format:survival_rate',
+            'cr-xml = cosmic_ray.commands.format:report_xml',
         ],
         'cosmic_ray.test_runners': [
             'nose = cosmic_ray.testing.nose_runner:NoseRunner',
