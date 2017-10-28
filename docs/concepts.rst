@@ -11,8 +11,46 @@ documentation.
 Operators
 =========
 
+An *operator* in Cosmic Ray is a class that represents a specific type of
+mutation. The first role of an operator is to identify points in the code where
+a specific mutation can be applied. The second role of an operator is to
+actually perform the mutation when requested.
+
+An example of an operator is
+`cosmic_ray.operators.break_continue.ReplaceBreakWithContinue`. As its name
+implies, this operator mutates code by replacing `break` with `continue`. During
+the initialization of a session, this operator identifies all of the locations
+in the code where this mutation can be applied. Then, during execution of a
+session, it actually mutates the AST by replacing `break` nodes with `continue`
+nodes.
+
+Operators are exposed to Cosmic Ray via plugins, and if they want users can
+extend the available operator set by providing their own operators. Operators
+are implemented as subclasses of `cosmic_ray.operators.operator.Operator`.
+
 Execution engines
 =================
+
+*Execution engines* determine the context in which tests are executed. The
+primary examples of execution engines are the *local* and *celery* engines. The
+local engine executes tests serially on the local machine; the celery engine
+distributes tests to remote workers using the Celery system. Other kinds of
+engines might run tests on a cloud service or using other task distribution
+technology.
+
+Execution engines have broad control over how they execute tests. During the
+execution phase they are given a sequence of pending mutations to execute, and
+it's their job to execute the tests in the appropriate context and return a
+result. Cosmic Ray doesn't impose any real constraints on how engines accomplish
+this.
+
+Engines can require arbitrarily complex infrastructure and configuration. For
+example, the celery engine requires you to run rabbitmq and to attach one or
+more worker tasks to that queue.
+
+Right now there are only two execution engines - local and celery - and they are
+baked into Cosmic Ray. There are plans to turn execution engines into plugins,
+however, and that will make it easier to add new execution engines.
 
 Configurations
 ==============
