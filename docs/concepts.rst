@@ -1,11 +1,24 @@
-Concepts
-========
+==========
+ Concepts
+==========
 
-TODO: Document the various key concepts in CR, e.g. configurations,
-session, operators, execution engines, etc.
+Cosmic Ray comprises a number of important and potentially confusing concepts.
+In this section we'll look at each of these concepts, explaining their role in
+Cosmic Ray and how they relate to other concepts. We'll also use this section to
+establish the terminology that we'll use throughout the rest of the
+documentation.
+
+Operators
+=========
+
+Execution engines
+=================
+
+Configurations
+==============
 
 Sessions
---------
+========
 
 Cosmic Ray has a notion of *sessions* which encompass an entire mutation
 testing run. Essentially, a session is a database which records the work
@@ -90,7 +103,7 @@ This will give you detailed information about what work was done,
 followed by a summary of the entire session.
 
 Test runners
-------------
+============
 
 Cosmic Ray supports multiple *test runners*. A test runner is simply a
 plugin that supports a particular way of running tests. For example,
@@ -134,8 +147,8 @@ in this case, it means "exit on first failure, only running tests under
 different arguments, so see their documentation for details on how to
 use them.
 
-Specifying test timeouts
-------------------------
+Baselines and timeouts
+======================
 
 One difficulty mutation testing tools have to face is how to deal with
 mutations that result in infinite loops (or other pathological runtime
@@ -169,45 +182,3 @@ timeout tests when they take 3 times longer than a baseline run, use:
 
 This baseline technique is particularly useful if your testsuite runtime
 is in flux.
-
-Running with a config file
---------------------------
-
-For many projects you'll probably be running the same ``cosmic-ray``
-command over and over. Instead of having to remember and retype
-potentially complex commands each time, you can store ``cosmic-ray``
-commands in a config file. You can then execute these commands by
-passing the ``load`` command to ``cosmic-ray``.
-
-Each line in the config file is treated as a separate command-line
-argument to ``cosmic-ray``. Empty lines in the file are skipped, and you
-can have comments in config files that start with ``#``.
-
-So, for example, if you need to invoke this command for your project:
-
-::
-
-    cosmic-ray run --verbose --timeout=30 --no-local-import --baseline=2 allele -- allele/tests/unittests
-
-you could instead create a config file, ``cr-allele.conf``, with these
-contents:
-
-::
-
-    init
-    --verbose     # this can be useful for debugging
-    --timeout=30  # this is plenty of time
-    --no-local-import
-    --baseline=2
-    test_session
-    allele
-    --
-    allele/tests/unittests
-
-Then to run the command in that config file:
-
-::
-
-    cosmic-ray load cr-allele.conf
-
-and it will have the same effect as running the original command.
