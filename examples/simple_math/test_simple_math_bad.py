@@ -1,4 +1,4 @@
-from .simple_math import square, cube
+from simple_math import square, cube
 
 
 def test_square():
