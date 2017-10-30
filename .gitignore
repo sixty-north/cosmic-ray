@@ -12,3 +12,6 @@ test_project/*.json
 .cache
 .hypothesis
 .csearchindex
+
+.idea
+.tox
