@@ -2,6 +2,7 @@ import cosmic_ray.tasks.worker
 from .execution_engine import ExecutionEngine
 
 
+# pylint: disable=too-few-public-methods
 class LocalExecutionEngine(ExecutionEngine):
     def __call__(self, timeout, pending_work, config):
         for work_record in pending_work:

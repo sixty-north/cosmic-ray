@@ -3,6 +3,7 @@ from cosmic_ray.work_record import WorkRecord
 from .execution_engine import ExecutionEngine
 
 
+# pylint: disable=too-few-public-methods
 class CeleryExecutionEngine(ExecutionEngine):
     def __call__(self, timeout, pending_work, config):
         # TODO: Configure purge-queue via the config.
@@ -14,8 +15,8 @@ class CeleryExecutionEngine(ExecutionEngine):
                 pending_work,
                 config)
 
-            for r in results:
-                yield WorkRecord(r.get())
+            for result in results:
+                yield WorkRecord(result.get())
         finally:
             if purge_queue:
                 cosmic_ray.tasks.celery.app.control.purge()
