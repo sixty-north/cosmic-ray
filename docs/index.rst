@@ -40,6 +40,7 @@ And, of course, patches and ideas are welcome.
    distributed
    implementation
    tests
+   examples
 
 
 

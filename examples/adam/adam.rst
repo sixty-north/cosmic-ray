@@ -1,8 +1,8 @@
-Cosmic Ray example: Adam
-------------------------
+Improving the testing suite for Adam
+------------------------------------
 
 This example demonstrates how to use cosmic-ray to improve the testing suite
-for a simple module called `adam`.
+for a simple module called ``adam``.
 
 First run cosmic-ray on the so called 'bad' testing suite.
 
@@ -14,9 +14,9 @@ First run cosmic-ray on the so called 'bad' testing suite.
 
 
 You should end up with a series of mutants that have survived. This is because in
-`test_adam_bad_tests.py` there are not enough tests to cover `adam.py`.
+``test_adam_bad_tests.py`` there are not enough tests to cover ``adam.py``.
 
-We add a couple of tests in `test_adam_good_tests.py` to ensure full coverage. Run
+We add a couple of tests in ``test_adam_good_tests.py`` to ensure full coverage. Run
 cosmic-ray again on the new testing suite.
 
 ::
