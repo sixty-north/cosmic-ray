@@ -5,8 +5,7 @@ from .execution_engine import ExecutionEngine
 
 class CeleryExecutionEngine(ExecutionEngine):
     def __call__(self, timeout, pending_work, config):
-        # TODO: Configure purge-queue via the config.
-        purge_queue = True
+        purge_queue = config['execution-engine'].get('purge-queue', True)
 
         try:
             results = cosmic_ray.tasks.worker.execute_work_records(
