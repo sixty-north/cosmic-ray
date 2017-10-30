@@ -86,4 +86,4 @@ In this case we're passing the ``--verbose`` flag to the ``exec``
 command so that you can see what Cosmic Ray is doing. If everything goes
 as expected, the ``cr-report`` command will report a 0% survival rate.
 
-For an example which has a non-zero survival rate, see :ref:`examples-adam`
+For a simple example which has a non-zero survival rate, see :ref:`examples-simple_math`
