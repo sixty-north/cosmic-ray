@@ -149,7 +149,9 @@ class WorkDB:
         """The sequence of pending `WorkItem`s in the session."""
         table = self._work_items
         work_item = tinydb.Query()
-        pending = table.search(work_item.worker_outcome is None)
+        out = work_item.worker_outcome
+        query = out == None  # noqa # pylint: disable=singleton-comparison
+        pending = table.search(query)
         return (WorkRecord(r) for r in pending)
 
 
