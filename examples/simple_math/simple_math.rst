@@ -7,6 +7,9 @@ This example demonstrates how to use cosmic-ray to improve the testing
 suite for a module called ``simple_math``.
 
 ::
+
+    # examples/simple_math/simple_math.py
+
     def mult_by_2(x):
         return x + x
 
@@ -28,11 +31,23 @@ First run cosmic-ray on the so called 'bad' testing suite.
     cosmic-ray --verbose exec bad_session
     cosmic-ray dump bad_session | cr-report
 
-You should end up with a series of mutants that have survived. This is because in
-``test_simple_math_bad.py`` there are not enough tests to cover ``simple_math.py``.
+You should end up with at least one mutant that survives. This is because
+``test_mult_by_2`` from ``test_simple_math_bad.py`` still passes when we replace
+``x + x`` with ``x * x`` or ``x ** x``, as they all return the same answer, 4, when 'x'
+is 2.
 
-We add a couple of tests in ``test_simple_good_tests.py`` to ensure full coverage. Run
-cosmic-ray again on the new testing suite.
+To fix this bad test script, we modify ``test_mult_by_2`` so that it checks the
+answer for a range of values of x.
+
+::
+
+    @pytest.mark.parametrize('x', range(-5, 5))
+    def test_mult_by_2(x):
+        assert mult_by_2(x) == x * 2
+
+Now this test should fail for all the mutations to the underlying
+function ``mult_by_2``, which is what we want it to do.
+Run cosmic-ray again on the new testing suite, ``test_simple_math_good.py``
 
 ::
 
@@ -40,5 +55,5 @@ cosmic-ray again on the new testing suite.
     cosmic-ray --verbose exec good_session
     cosmic-ray dump good_session | cr-report
 
-You should now get 0% survival rate for the mutants (yay!). This means that you
-have a robust testing suite.
+You should now get 0% survival rate for the mutants (yay!). This means your
+testing suite is now more robust.
