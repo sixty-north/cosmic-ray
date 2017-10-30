@@ -59,7 +59,8 @@ mutate the code.
         print(''.join(work_record.data))
         sys.exit(2)
 
-
+        
+@dsc.command()
 def handle_new_config(args):
     """usage: cosmic-ray new-config <config-file>
 
