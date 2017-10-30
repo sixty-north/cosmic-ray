@@ -12,6 +12,7 @@ matrix:
     - python: nightly
 
 install:
+  - pip install tox
   - python setup.py install
   - pip install -e ".[test]"
 
@@ -23,6 +24,6 @@ before_script:
   - popd
 
 script:
-  - pytest
+  - if [[ "$python" == "3.6" ]]; then tox; fi
   - cd test_project
   - bash run_tests.sh
