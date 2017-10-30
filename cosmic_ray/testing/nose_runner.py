@@ -1,8 +1,9 @@
 import os
+
 import nose
 
-from .test_runner import TestRunner
 from cosmic_ray.util import redirect_stdout, redirect_stderr
+from .test_runner import TestRunner
 
 
 class NoseResultsCollector(nose.plugins.Plugin):
@@ -10,14 +11,14 @@ class NoseResultsCollector(nose.plugins.Plugin):
     enabled = True
 
     def __init__(self):
-        super(self.__class__, self).__init__()
+        super().__init__()
         self.result = None
 
     def finalize(self, result):
         self.result = result
 
 
-class NoseRunner(TestRunner):
+class NoseRunner(TestRunner):  # pylint: disable=too-few-public-methods
     """A TestRunner using nosetest.
 
     This treats `test_args` as a list of arguments to `nose.run()`. The args

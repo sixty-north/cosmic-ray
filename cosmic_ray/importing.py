@@ -1,9 +1,9 @@
 """Functionality related to Python's import mechanisms."""
 
 import contextlib
+import sys
 from importlib.abc import MetaPathFinder
 from importlib.machinery import ModuleSpec
-import sys
 
 
 class ASTLoader:  # pylint:disable=old-style-class,too-few-public-methods
@@ -22,7 +22,8 @@ class ASTLoader:  # pylint:disable=old-style-class,too-few-public-methods
         self._ast = ast
         self._name = name
 
-    def create_module(self, spec):
+    def create_module(self,  # pylint: disable=no-self-use
+                      spec):  # pylint: disable=unused-argument
         return None
 
     def exec_module(self, mod):
@@ -47,13 +48,11 @@ class ASTFinder(MetaPathFinder):  # pylint:disable=too-few-public-methods
         self._fullname = fullname
         self._ast = ast
 
-    def find_spec(self, fullname, path,
-                  target=None):  # pylint:disable=unused-argument
+    def find_spec(self, fullname,
+                  path, target=None):  # pylint:disable=unused-argument
         if fullname == self._fullname:
             return ModuleSpec(fullname,
                               ASTLoader(self._ast, fullname))
-        else:
-            return None
 
 
 @contextlib.contextmanager
@@ -65,8 +64,8 @@ def preserve_modules():
         yield
     finally:
         del_mods = {m for m in sys.modules if m not in original_mods}
-        for m in del_mods:
-            del sys.modules[m]
+        for mod in del_mods:
+            del sys.modules[mod]
 
 
 @contextlib.contextmanager

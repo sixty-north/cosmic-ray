@@ -2,7 +2,6 @@ import ast
 
 
 class Operator(ast.NodeTransformer):
-
     """
     A base class for all mutation operators.
 

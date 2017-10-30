@@ -20,12 +20,13 @@ def make_record(name, fields=(), docstring=""):
     Returns: A new class derived from dict with the specified fields.
 
     """
+
     def __init__(self, vals=None, **kwargs):
         dict.__init__(self, dict.fromkeys(fields))
-        vals = vals or dict()
-        kwargs.update(vals)
-        for k, v in kwargs.items():
-            self[k] = v
+        values = vals or dict()
+        kwargs.update(values)
+        for key, value in kwargs.items():
+            self[key] = value
 
     def __getattr__(self, name):
         try:
@@ -49,13 +50,13 @@ def make_record(name, fields=(), docstring=""):
             raise KeyError('no field {} in record'.format(name))
         dict.__setitem__(self, name, value)
 
-    def __delitem__(self, name):
+    def __delitem__(self, name):  # pylint: disable=unused-argument
         msg = 'record does not support deleting fields: {}'.format(name)
         raise KeyError(msg)
 
-    def update(self, d):
-        for k, v in d.items():
-            self[k] = v
+    def update(self, container):
+        for key, values in container.items():
+            self[key] = values
 
     attrs = {
         '__init__': __init__,
@@ -72,7 +73,7 @@ def make_record(name, fields=(), docstring=""):
     return rec
 
 
-WorkRecord = make_record(
+WorkRecord = make_record(  # pylint: disable=invalid-name
     'WorkRecord',
 
     [
@@ -105,4 +106,4 @@ WorkRecord = make_record(
         'job_id'
     ],
     docstring=" The details of a specific mutation and test run in CosmicRay."
-    )
+)

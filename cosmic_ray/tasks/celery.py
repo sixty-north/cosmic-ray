@@ -2,7 +2,7 @@
 
 from celery import Celery
 
-app = Celery(
+app = Celery(  # pylint: disable=invalid-name
     'cosmic-ray',
     broker='amqp://',
     backend='amqp://')

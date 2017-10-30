@@ -4,13 +4,14 @@ A worker is intended to run as a process that imports a module, mutates it in
 one location with one operator, runs the tests, reports the results, and dies.
 """
 
-import astunparse
 import difflib
 import importlib
 import inspect
 import logging
 import sys
 import traceback
+
+import astunparse
 
 from .importing import preserve_modules, using_ast
 from .mutating import MutatingCore
@@ -21,7 +22,7 @@ from .work_record import WorkRecord
 LOG = logging.getLogger()
 
 
-class WorkerOutcome:
+class WorkerOutcome:  # pylint: disable=too-few-public-methods
     """Possible outcomes for a worker.
     """
     NORMAL = 'normal'
@@ -82,12 +83,11 @@ def worker(module_name,
             # generate a source diff to visualize how the mutation
             # operator has changed the code
             module_diff = ["--- mutation diff ---"]
-            for line in difflib.unified_diff(
-                            module_source.split('\n'),
-                            modified_source.split('\n'),
-                            fromfile="a" + module_source_file,
-                            tofile="b" + module_source_file,
-                            lineterm=""):
+            for line in difflib.unified_diff(module_source.split('\n'),
+                                             modified_source.split('\n'),
+                                             fromfile="a" + module_source_file,
+                                             tofile="b" + module_source_file,
+                                             lineterm=""):
                 module_diff.append(line)
 
         with using_ast(module_name, module_ast):
@@ -100,7 +100,7 @@ def worker(module_name,
         rec.update(core.activation_record)
         return rec
 
-    except Exception:  # noqa
+    except Exception:  # noqa # pylint: disable=broad-except
         return WorkRecord(
             data=traceback.format_exception(*sys.exc_info()),
             test_outcome=TestOutcome.INCOMPETENT,

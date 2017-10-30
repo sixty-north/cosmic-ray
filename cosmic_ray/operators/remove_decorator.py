@@ -18,7 +18,7 @@ class RemoveDecorator(Operator):
         return [i for (i, d) in enumerate(node.decorator_list)
                 if not skip(d)]
 
-    def visit_FunctionDef(self, node):  # noqa
+    def visit_FunctionDef(self, node):  # noqa # pylint: disable=invalid-name
         decorator_candidates = self._candidates(node)
 
         if decorator_candidates:

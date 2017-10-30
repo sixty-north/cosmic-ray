@@ -5,7 +5,7 @@ import traceback
 from cosmic_ray.work_record import WorkRecord
 
 
-class TestOutcome:
+class TestOutcome:  # pylint: disable=too-few-public-methods
     """A enum of the possible outcomes for any mutant test run.
     """
     SURVIVED = 'survived'
@@ -13,6 +13,7 @@ class TestOutcome:
     INCOMPETENT = 'incompetent'
 
 
+# pylint: disable=too-few-public-methods
 class TestRunner(metaclass=abc.ABCMeta):
     """Specifies the interface for test runners in the system.
 
@@ -20,6 +21,7 @@ class TestRunner(metaclass=abc.ABCMeta):
     supported by Cosmic Ray should be provided by a TestRunner
     implementation.
     """
+
     def __init__(self, test_args):
         self._test_args = test_args
 
@@ -41,7 +43,7 @@ class TestRunner(metaclass=abc.ABCMeta):
         passed. `result` is any object that is appropriate to provide
         more information about the success/failure of the tests.
         """
-        raise NotImplemented()
+        raise NotImplementedError()
 
     def __call__(self):
         """Call `_run()` and return a `WorkRecord` with the results.
@@ -55,11 +57,10 @@ class TestRunner(metaclass=abc.ABCMeta):
                 return WorkRecord(
                     test_outcome=TestOutcome.SURVIVED,
                     data=test_result[1])
-            else:
-                return WorkRecord(
-                    test_outcome=TestOutcome.KILLED,
-                    data=test_result[1])
-        except Exception:
+            return WorkRecord(
+                test_outcome=TestOutcome.KILLED,
+                data=test_result[1])
+        except Exception:  # pylint: disable=broad-except
             return WorkRecord(
                 test_outcome=TestOutcome.INCOMPETENT,
                 data=traceback.format_exception(*sys.exc_info()))

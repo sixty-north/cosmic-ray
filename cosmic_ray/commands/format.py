@@ -1,10 +1,12 @@
-from cosmic_ray.testing.test_runner import TestOutcome
-from cosmic_ray.work_record import WorkRecord
-from cosmic_ray.worker import WorkerOutcome
-import docopt
 import json
 import sys
 import xml.etree.ElementTree
+
+import docopt
+
+from cosmic_ray.testing.test_runner import TestOutcome
+from cosmic_ray.work_record import WorkRecord
+from cosmic_ray.worker import WorkerOutcome
 
 
 def _print_item(work_record, full_report):

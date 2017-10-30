@@ -4,7 +4,6 @@ import logging
 
 import cosmic_ray.util
 
-
 LOG = logging.getLogger()
 
 # TODO: Can this be removed?
@@ -23,7 +22,6 @@ def _full_module_name(obj):
 
 
 class MutatingCore:
-
     """
     An `Operator` core which performs mutation of ASTs.
 
@@ -49,7 +47,8 @@ class MutatingCore:
         """
         return self._activation_record
 
-    def visit_mutation_site(self, node, op, num_mutations):
+    def visit_mutation_site(self, node, op,  # pylint: disable=invalid-name
+                            num_mutations):
         """Potentially mutate `node`, returning the mutated version.
 
         `Operator` calls this when AST iteration reaches a

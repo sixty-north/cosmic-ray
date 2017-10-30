@@ -1,13 +1,14 @@
 """Celery specific details for routing work requests to Cosmic Ray workers."""
-import celery
-from celery.utils.log import get_logger
 import json
 import subprocess
 
+import celery
+from celery.utils.log import get_logger
+
 import cosmic_ray.config
 from .celery import app
-from ..worker import WorkerOutcome
 from ..work_record import WorkRecord
+from ..worker import WorkerOutcome
 
 LOG = get_logger(__name__)
 
@@ -47,13 +48,13 @@ def worker_task(work_record,
             in result.items()
             if v is not None
         })
-    except subprocess.TimeoutExpired as e:
+    except subprocess.TimeoutExpired as exception:
         work_record.worker_outcome = WorkerOutcome.TIMEOUT
-        work_record.data = e.timeout
+        work_record.data = exception.timeout
         proc.kill()
-    except json.JSONDecodeError as e:
+    except json.JSONDecodeError as exception:
         work_record.worker_outcome = WorkerOutcome.EXCEPTION
-        work_record.data = e
+        work_record.data = exception
 
     work_record.command_line = command
     return work_record

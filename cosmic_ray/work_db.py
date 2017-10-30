@@ -20,8 +20,8 @@
 #    test_runner.TestResult.
 
 import contextlib
-from enum import Enum
 import os
+from enum import Enum
 
 # This db may well not scale very well. We need to be ready to switch it out
 # for something quicker if not. But for now it's *very* convenient.
@@ -33,7 +33,7 @@ from .work_record import WorkRecord
 class WorkDB:
     class Mode(Enum):
         # Open existing files, creating if necessary
-        create = 1,
+        create = 1
 
         # Open only existing files, failing if it doesn't exist
         open = 2
@@ -169,9 +169,9 @@ def use_db(path, mode=WorkDB.Mode.create):
       FileNotFoundError: If `mode` is `Mode.open` and `path` does not
         exist.
     """
-    db = WorkDB(path, mode)
+    database = WorkDB(path, mode)
     try:
-        yield db
+        yield database
+        database.close()
     except Exception:
-        db.close()
         raise

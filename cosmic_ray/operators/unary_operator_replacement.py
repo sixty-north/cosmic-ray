@@ -27,7 +27,7 @@ def _to_ops(from_op):
 class MutateUnaryOperator(Operator):
     """An operator that modifies unary operators."""
 
-    def visit_UnaryOp(self, node):
+    def visit_UnaryOp(self, node):  # pylint: disable=invalid-name
         """
             http://greentreesnakes.readthedocs.io/en/latest/nodes.html#UnaryOp
         """
@@ -40,5 +40,4 @@ class MutateUnaryOperator(Operator):
         if to_op:
             node.op = to_op()
             return node
-        else:
-            return node.operand
+        return node.operand

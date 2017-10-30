@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# pylint: disable=invalid-name
 #
 # Cosmic Ray documentation documentation build configuration file, created by
 # sphinx-quickstart on Fri Oct 27 12:29:41 2017.

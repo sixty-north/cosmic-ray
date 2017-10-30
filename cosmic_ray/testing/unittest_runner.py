@@ -1,10 +1,10 @@
-from itertools import chain
 import unittest
+from itertools import chain
 
 from .test_runner import TestRunner
 
 
-class UnittestRunner(TestRunner):  # pylint: too-few-public-methods
+class UnittestRunner(TestRunner):  # pylint: disable=too-few-public-methods
     """A TestRunner using `unittest`'s discovery mechanisms.
 
     This treats the `test_args` as a directory name. This discovers
@@ -14,7 +14,7 @@ class UnittestRunner(TestRunner):  # pylint: too-few-public-methods
 
     """
 
-    def __init__(self, test_args):
+    def __init__(self, test_args):  # pylint: disable=useless-super-delegation
         super().__init__(test_args)
 
     def _run(self):

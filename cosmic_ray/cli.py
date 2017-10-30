@@ -14,11 +14,11 @@ import sys
 import docopt_subcommands as dsc
 
 import cosmic_ray.commands
-from cosmic_ray.config import ConfigError, get_db_name, load_config
 import cosmic_ray.counting
 import cosmic_ray.modules
 import cosmic_ray.plugins
 import cosmic_ray.worker
+from cosmic_ray.config import ConfigError, get_db_name, load_config
 from cosmic_ray.testing.test_runner import TestOutcome
 from cosmic_ray.timing import Timer
 from cosmic_ray.util import redirect_stdout
@@ -65,8 +65,8 @@ def handle_new_config(args):
 
 Create a new config file.
     """
-    with open(args['<config-file>'], mode='wt') as f:
-        f.write(cosmic_ray.commands.new_config())
+    with open(args['<config-file>'], mode='wt') as handler:
+        handler.write(cosmic_ray.commands.new_config())
 
 
 @dsc.command()
@@ -108,10 +108,10 @@ will be stored.
 
         # We run the baseline in a subprocess to more closely emulate the
         # runtime of a worker subprocess.
-        with Timer() as t:
+        with Timer() as timer:
             subprocess.check_call(command.split())
 
-        timeout = baseline_mult * t.elapsed.total_seconds()
+        timeout = baseline_mult * timer.elapsed.total_seconds()
     else:
         raise ConfigError(
             "Config must specify either baseline or timeout")
@@ -127,10 +127,10 @@ will be stored.
 
     db_name = get_db_name(args['<session-file>'])
 
-    with use_db(db_name) as db:
+    with use_db(db_name) as database:
         cosmic_ray.commands.init(
             modules,
-            db,
+            database,
             config,
             timeout)
 
@@ -142,8 +142,8 @@ def handle_config(args):
 Show the configuration for in a session.
     """
     session_file = get_db_name(args['<session-file>'])
-    with use_db(session_file) as db:
-        config, timeout = db.get_config()
+    with use_db(session_file) as database:
+        config, _ = database.get_config()
         print(json.dumps(config))
 
 
@@ -170,8 +170,8 @@ to produce reports.
     """
     session_file = get_db_name(args['<session-file>'])
 
-    with use_db(session_file, WorkDB.Mode.open) as db:
-        for record in db.work_records:
+    with use_db(session_file, WorkDB.Mode.open) as database:
+        for record in database.work_records:
             print(json.dumps(record))
 
 
@@ -203,7 +203,7 @@ statistics.
 
 
 @dsc.command()
-def handle_test_runners(config):
+def handle_test_runners(config):  # pylint: disable=unused-argument
     """usage: {program} test-runners
 
 List the available test-runner plugins.
@@ -213,7 +213,7 @@ List the available test-runner plugins.
 
 
 @dsc.command()
-def handle_operators(config):
+def handle_operators(config):  # pylint: disable=unused-argument
     """usage: {program} operators
 
 List the available operator plugins.
@@ -277,11 +277,19 @@ See '{program} help <command>' for help on specific commands.
 
 
 def common_option_handler(config):
+    """Add verbose mode.
+
+    :param config: holds the configuration values
+    """
     if config['--verbose']:
         logging.basicConfig(level=logging.INFO)
 
 
 def main(argv=None):
+    """ Invoke the cosmic ray evaluation.
+
+    :param argv: the command line arguments
+    """
     dsc.main(
         'cosmic-ray',
         'cosmic-ray v.2',

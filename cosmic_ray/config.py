@@ -1,4 +1,6 @@
+"""Configuration module."""
 import sys
+
 import yaml
 
 
@@ -12,8 +14,8 @@ def load_config(filename=None):
     if filename is None:
         return yaml.safe_load(sys.stdin)
 
-    with open(filename, mode='rt') as f:
-        return yaml.safe_load(f)
+    with open(filename, mode='rt') as handler:
+        return yaml.safe_load(handler)
 
 
 def serialize_config(config):
@@ -33,9 +35,9 @@ def get_db_name(session_name):
     """
     if session_name.endswith('.json'):
         return session_name
-    else:
-        return '{}.json'.format(session_name)
+    return '{}.json'.format(session_name)
 
 
 class ConfigError(Exception):
+    """An error occurred while creating configuration."""
     pass

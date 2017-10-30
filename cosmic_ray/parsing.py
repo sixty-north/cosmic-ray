@@ -6,6 +6,7 @@ import logging
 
 LOG = logging.getLogger()
 
+
 # TODO: This is where we can do different things for different kinds of
 # modules. Right now we only really handle normal source-code, text-file
 # modules.
@@ -37,7 +38,7 @@ def get_ast(module):
             LOG.info('inspect.getsource() failed.'
                      'Attempting to read source directly: %s',
                      module)
-            with open(source_file, mode='rt') as f:
-                source = f.read()
+            with open(source_file, mode='rt') as handle:
+                source = handle.read()
 
     return ast.parse(source, source_file, 'exec')

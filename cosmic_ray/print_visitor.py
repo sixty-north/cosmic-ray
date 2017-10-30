@@ -16,12 +16,13 @@ class PrintVisitor(ast.NodeVisitor):
         super().generic_visit(node)  # pylint:disable=missing-super-argument
         self.indent = self.indent[:-4]
 
-    def visit_Num(self, node):  # noqa
+    def visit_Num(self,  # noqa # pylint:disable=invalid-name,no-self-use
+                  node):
         print('a number:', node)
 
 
 def dump_mod():
-    import mod
+    import mod  # pylint:disable=import-error
     with open(mod.__file__, 'rt') as module_file:
         nodes = ast.parse(module_file.read())
     PrintVisitor().visit(nodes)

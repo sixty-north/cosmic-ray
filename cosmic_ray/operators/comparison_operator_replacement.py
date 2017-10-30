@@ -3,9 +3,9 @@ comparison operator with another.
 """
 
 import ast
+
 from .operator import Operator
 from ..util import build_mutations
-
 
 OPERATORS = (ast.Eq, ast.NotEq, ast.Lt, ast.LtE, ast.Gt, ast.GtE,
              ast.Is, ast.IsNot, ast.In, ast.NotIn)
@@ -41,7 +41,7 @@ def _to_ops(from_op):
 class MutateComparisonOperator(Operator):
     """An operator that modifies comparisons."""
 
-    def visit_Compare(self, node):
+    def visit_Compare(self, node):  # pylint: disable=invalid-name
         """
             http://greentreesnakes.readthedocs.io/en/latest/nodes.html#Compare
         """

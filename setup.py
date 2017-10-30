@@ -10,8 +10,8 @@ def read(*names, **kwargs):
     with io.open(
         os.path.join(os.path.dirname(__file__), *names),
         encoding=kwargs.get("encoding", "utf8")
-    ) as fp:
-        return fp.read()
+    ) as handler:
+        return handler.read()
 
 
 def find_version(*file_paths):
@@ -23,9 +23,9 @@ def find_version(*file_paths):
     raise RuntimeError("Unable to find version string.")
 
 
-long_description = read('README.rst', mode='rt')
+LONG_DESCRIPTION = read('README.rst', mode='rt')
 
-operators = [
+OPERATORS = [
     'number_replacer = '
     'cosmic_ray.operators.number_replacer:NumberReplacer',
 
@@ -128,11 +128,11 @@ setup(
             'unittest = cosmic_ray.testing.unittest_runner:UnittestRunner',
             'pytest = cosmic_ray.testing.pytest_runner:PytestRunner',
         ],
-        'cosmic_ray.operators': operators,
+        'cosmic_ray.operators': OPERATORS,
         'cosmic_ray.execution_engines': [
             'local = cosmic_ray.execution.local:LocalExecutionEngine',
             'celery = cosmic_ray.execution.celery:CeleryExecutionEngine',
         ]
     },
-    long_description=long_description,
+    long_description=LONG_DESCRIPTION,
 )
