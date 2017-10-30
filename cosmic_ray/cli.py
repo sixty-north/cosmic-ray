@@ -60,7 +60,6 @@ mutate the code.
         sys.exit(2)
 
 
-@dsc.command()
 def handle_new_config(args):
     """usage: cosmic-ray new-config <config-file>
 
@@ -91,7 +90,12 @@ will be stored.
     # be optional, and needs to also be applied to workers!
     sys.path.insert(0, '')
 
-    config = load_config(args['<config-file>'])
+    config_file = args['<config-file>']
+
+    if not os.path.exists(config_file):
+        handle_new_config(args)
+
+    config = load_config(config_file)
 
     if 'timeout' in config:
         timeout = float(config['timeout'])
