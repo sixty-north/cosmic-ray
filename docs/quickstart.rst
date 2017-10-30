@@ -85,3 +85,6 @@ Ray, you can run these tests, too, like this:
 In this case we're passing the ``--verbose`` flag to the ``exec``
 command so that you can see what Cosmic Ray is doing. If everything goes
 as expected, the ``cr-report`` command will report a 0% survival rate.
+
+See :ref:`examples-simple_math` for a step-by-step guide for
+dealing with tests that have a non-zero mutation survival rate.
