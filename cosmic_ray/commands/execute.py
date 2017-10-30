@@ -13,7 +13,7 @@ results.
     with use_db(db_name, mode=WorkDB.Mode.open) as work_db:
         config, timeout = work_db.get_config()
         engine_config = config['execution-engine']
-        executor = get_execution_engine[engine_config['name']]
+        executor = get_execution_engine(engine_config['name'])
         work_records = executor(timeout,
                                 work_db.pending_work,
                                 config)
