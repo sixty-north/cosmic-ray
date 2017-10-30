@@ -4,12 +4,39 @@ Quickstart
 If you just want to get down to the business of finding and killing
 mutants, you still need to set a few things up.
 
-Create a configuration
-----------------------
+Create a session and run tests
+------------------------------
 
-A configuration is YAML file that specifies the modules you want to
-mutate, the test scripts to use, and so forth. You use a configuration
-to create a session. Here's a simple example using ``unittest`` for
+Cosmic Ray uses a notion of *sessions* to encompass a full mutation testing
+suite. Since mutation testing runs can take a long time, and since you might
+need to stop and start them, sessions store data about the progress of a run.
+The first step in a full testing run, then, is to initialize a session:
+
+::
+
+    cosmic-ray init config.yml my_session
+
+If ``config.yml`` doesn't exist (which it won't initially) this will ask you a
+series of questions to help create it.
+
+This will also create a database file called ``my_session.json``. Once this is
+created, you can start executing tests with the ``exec`` command:
+
+::
+
+    cosmic-ray exec my_session
+
+Unless there are errors, this won't print anything.
+
+Configuration file
+~~~~~~~~~~~~~~~~~~
+
+In the step above the call to ``cosmic-ray init`` helped you create a
+*configuration file*. A configuration is YAML file that specifies the modules
+you want to mutate, the test scripts to use, and so forth. As you did above, you
+use a configuration to create a session.
+
+Here's a simple example of a configuration file which uses ``unittest`` for
 testing:
 
 .. code:: yaml
@@ -29,29 +56,12 @@ testing:
     execution-engine:
       name: local
 
-Save this into a file named "config.yml".
-
-Create a session and run tests
-------------------------------
-
-Now you're ready to start killing mutants! Cosmic Ray uses a notion of
-*sessions* to encompass a full mutation testing suite. Since mutation
-testing runs can take a long time, and since you might need to stop and
-start them, sessions store data about the progress of a run. The first
-step in a full testing run, then, is to initialize a session:
-
-::
-
-    cosmic-ray init config.yml my_session
-
-This will create a database file called ``my_session.json``. Once this
-is created, you can start executing tests with the ``exec`` command:
-
-::
-
-    cosmic-ray exec my_session
-
-Unless there are errors, this won't print anything.
+You can specify a great deal of information in a configuration file, controlling
+things like the test runner, execution engine, test paths, and so forth. It's
+entirely likely that the configuration created by ``cosmic-ray init`` won't be
+sufficient for your needs. As you make changes to your configuration, you can
+generate new sessions from it by rerunning ``cosmic-ray init``; if this command
+sees an existing configuration, it will use that instead of creating a new one.
 
 View the results
 ----------------
