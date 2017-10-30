@@ -1,5 +1,7 @@
-Improving the testing suite for Adam
-------------------------------------
+.. _examples-adam:
+
+Improving the tests for a simple module
+---------------------------------------
 
 This example demonstrates how to use cosmic-ray to improve the testing suite
 for a simple module called ``adam``.
