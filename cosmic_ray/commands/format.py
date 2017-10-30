@@ -17,9 +17,7 @@ def _print_item(work_record, full_report):
             work_record.job_id,
             outcome,
             work_record.module),
-        'command: {}'.format(
-            ' '.join(work_record.command_line)
-            if work_record.command_line is not None else ''),
+        'command: {}'.format(work_record.command_line or '')
     ]
     if outcome == TestOutcome.KILLED and not full_report:
         ret_val = []
