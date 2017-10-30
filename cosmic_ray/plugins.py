@@ -33,3 +33,17 @@ def get_test_runner(name, test_args):
 def test_runner_names():
     """Get iterable of test-runner plugin names."""
     return ExtensionManager('cosmic_ray.test_runners').names()
+
+
+def get_execution_engine(name):
+    manager = driver.DriverManager(
+        namespace='cosmic_ray.execution_engines',
+        name=name,
+        invoke_on_load=True)
+
+    return manager.driver
+
+
+def execution_engine_names():
+    """Get iterable of execution-enginer plugin names."""
+    return ExtensionManager('cosmic_ray.execution_engines').names()

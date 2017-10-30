@@ -127,6 +127,10 @@ setup(
             'pytest = cosmic_ray.testing.pytest_runner:PytestRunner',
         ],
         'cosmic_ray.operators': operators,
+        'cosmic_ray.execution_engines': [
+            'local = cosmic_ray.execution.local:LocalExecutionEngine',
+            'celery = cosmic_ray.execution.celery:CeleryExecutionEngine',
+        ]
     },
     long_description=long_description,
 )
