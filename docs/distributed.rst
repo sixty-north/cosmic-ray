@@ -56,7 +56,7 @@ Starting distributed worker processes
 -------------------------------------
 
 Once RabbitMQ is running, you need to start some worker processes which
-will do the actualy mutation testing. Start one or more worker processes
+will do the actually mutation testing. Start one or more worker processes
 like this:
 
 ::
@@ -64,7 +64,7 @@ like this:
     celery -A cosmic_ray.tasks.worker worker
 
 You should do this, of course, from the virtual environment into which
-you've installed Cosmic Ray. Similary, you need to make sure that the
+you've installed Cosmic Ray. Similarly, you need to make sure that the
 worker is in an environment in which it can import the modules under
 test. Generally speaking, you can meet both of these criteria if you
 install Cosmic Ray into and run workers from a virtual environment into
@@ -74,7 +74,7 @@ Running distributed mutation testing
 ------------------------------------
 
 After you've started your workers, the only different between local and
-distributed tesing is that you need to pass ``--dist`` to the
+distributed testing is that you need to pass ``--dist`` to the
 ``cosmic-ray exec`` command to do distributed testing. So a full
 distributed testing run would look something like this:
 
