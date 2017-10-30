@@ -33,11 +33,18 @@ First run cosmic-ray on the so called 'bad' testing suite.
 
 You should end up with at least one mutant that survives. This is because
 ``test_mult_by_2`` from ``test_simple_math_bad.py`` still passes when we replace
-``x + x`` with ``x * x`` or ``x ** x``, as they all return the same answer, 4, when 'x'
-is 2.
+``x + x`` with ``x * x`` or ``x ** x``, as they all return the same answer, ``4``,
+when ``x = 2``.
 
-To fix this bad test script, we modify ``test_mult_by_2`` so that it checks the
-answer for a range of values of x.
+Here is the bad test that lets the mutant(s) survive:
+
+::
+
+    def test_mult_by_2():
+        assert mult_by_2(2) == 4
+
+To fix this bad test, we decorate it so that a range
+of values of x are tested:
 
 ::
 
