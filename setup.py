@@ -1,8 +1,9 @@
 import io
 import os
 import re
-from setuptools import setup, find_packages
 import sys
+
+from setuptools import setup, find_packages
 
 
 def read(*names, **kwargs):
@@ -24,13 +25,13 @@ def find_version(*file_paths):
 
 long_description = read('README.rst', mode='rt')
 
-
 operators = [
     'number_replacer = '
     'cosmic_ray.operators.number_replacer:NumberReplacer',
 
     'mutate_comparison_operator = '
-    'cosmic_ray.operators.comparison_operator_replacement:MutateComparisonOperator',
+    'cosmic_ray.operators.comparison_operator_replacement:'
+    'MutateComparisonOperator',
 
     'replace_true_false = '
     'cosmic_ray.operators.boolean_replacer:ReplaceTrueFalse',
@@ -107,8 +108,9 @@ setup(
     platforms='any',
     include_package_data=True,
     install_requires=INSTALL_REQUIRES,
-    # List additional groups of dependencies here (e.g. development dependencies).
-    # You can install these using the following syntax, for example:
+    # List additional groups of dependencies here (e.g. development
+    # dependencies). You can install these using the following syntax,
+    # for example:
     # $ pip install -e .[dev,test]
     extras_require={
         'test': ['hypothesis', 'pytest'],

@@ -1,9 +1,11 @@
 try:
     from contextlib import redirect_stdout
 except ImportError:
+
     import sys
 
-    # redirect_stdout was introduced in Python 3.4
+
+    # noqa # redirect_stdout was introduced in Python 3.4
     class _RedirectStream:
         """
             Copied from Python 3.5's implementation. See:
@@ -24,10 +26,11 @@ except ImportError:
         def __exit__(self, exctype, excinst, exctb):
             setattr(sys, self._stream, self._old_targets.pop())
 
-    class redirect_stdout(_RedirectStream):
-        """Context manager for temporarily redirecting stdout to another file."""
-        _stream = "stdout"
 
+    class redirect_stdout(_RedirectStream):  # noqa
+        """Context manager for temporarily redirecting stdout to another
+        file."""
+        _stream = "stdout"
 
 try:
     from contextlib import redirect_stderr
@@ -70,13 +73,19 @@ def build_mutations(ops, to_ops):
         # 1) when to_op is None isinstance(from_op, None) will blow up because
         #    the second parameter needs to be a class
         # 2) when to_op != None we do the isinstance() check to figure out
-        #    whether or not to include the operator in the list of possible mutations
+        #    whether or not to include the operator in the list of possible
+        #    mutations
         #
-        # The `if to_op is None or isinstance(from_op, to_op)` expression handles both
-        # scenarios very elegantly. First we handle 1) and if this is True the rest of
-        # the expression is not evaluated and None is returned. Else we're in scenario 2)
-        # where the left part of the expression is False so the right part is evaluated.
-        # Since the left part of the expression has confirmed that to_op != None then
+        # The `if to_op is None or isinstance(from_op, to_op)` expression
+        # handles both scenarios very elegantly. First we handle 1) and if
+        # this is True the rest of the expression is not evaluated and None is
+        # returned. Else we're in scenario 2) where the left part of the
+        # expression is False so the right part is evaluated. Since the left
+        # part of the expression has confirmed that to_op != None then
         # we're confident that the isinstance() method will always work.
-        for to_op in to_ops(from_op) if to_op is None or not isinstance(from_op, to_op)
+        for to_op in to_ops(from_op) if _check(from_op, to_op)
     ]
+
+
+def _check(to_op, from_op):
+    return to_op is None or not isinstance(from_op, to_op)

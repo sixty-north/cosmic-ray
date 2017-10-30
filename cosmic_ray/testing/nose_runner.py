@@ -32,9 +32,10 @@ class NoseRunner(TestRunner):
         argv += self.test_args.split()
         collector = NoseResultsCollector()
 
-        with open(os.devnull, 'w') as devnull, \
-            redirect_stdout(devnull), redirect_stderr(devnull):
-            nose.run(argv=argv, plugins=[collector])
+        with open(os.devnull, 'w') as devnull:
+            with redirect_stdout(devnull):
+                with redirect_stderr(devnull):
+                    nose.run(argv=argv, plugins=[collector])
         return (collector.result.wasSuccessful(),
                 [r[1] for r in collector.result.errors +
-                               collector.result.failures])
+                 collector.result.failures])

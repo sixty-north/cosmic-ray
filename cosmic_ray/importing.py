@@ -26,8 +26,8 @@ class ASTLoader:  # pylint:disable=old-style-class,too-few-public-methods
         return None
 
     def exec_module(self, mod):
-        exec(compile(self._ast, self._name, 'exec'),  # pylint:disable=exec-used
-             mod.__dict__)
+        compiled = compile(self._ast, self._name, 'exec')
+        exec(compiled, mod.__dict__)  # pylint:disable=exec-used
 
 
 class ASTFinder(MetaPathFinder):  # pylint:disable=too-few-public-methods
@@ -47,7 +47,8 @@ class ASTFinder(MetaPathFinder):  # pylint:disable=too-few-public-methods
         self._fullname = fullname
         self._ast = ast
 
-    def find_spec(self, fullname, path, target=None):  # pylint:disable=unused-argument
+    def find_spec(self, fullname, path,
+                  target=None):  # pylint:disable=unused-argument
         if fullname == self._fullname:
             return ModuleSpec(fullname,
                               ASTLoader(self._ast, fullname))

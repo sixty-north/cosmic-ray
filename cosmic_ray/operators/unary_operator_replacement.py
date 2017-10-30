@@ -4,7 +4,8 @@ from .operator import Operator
 from ..util import build_mutations
 
 # None indicates we want to delete the operator
-OPERATORS = (ast.UAdd, ast.USub, ast.Invert, ast.Not,  None)
+OPERATORS = (ast.UAdd, ast.USub, ast.Invert, ast.Not, None)
+
 
 def _to_ops(from_op):
     """

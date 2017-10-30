@@ -26,7 +26,8 @@ def _print_item(work_record, full_report):
             ret_val.append("timeout: {:.3f} sec".format(data))
         else:
             ret_val = []
-    elif work_record.worker_outcome in [WorkerOutcome.NORMAL, WorkerOutcome.EXCEPTION]:
+    elif work_record.worker_outcome in [WorkerOutcome.NORMAL,
+                                        WorkerOutcome.EXCEPTION]:
         ret_val += data
         ret_val += work_record.diff
 
@@ -140,13 +141,18 @@ def _create_element_from_item(work_record):
         error_elem = xml.etree.ElementTree.SubElement(sub_elem, 'error')
         error_elem.set('message', "Worker has encountered exception")
         error_elem.text = str(data) + "\n".join(work_record.diff)
-    elif (outcome == WorkerOutcome.NORMAL and
-          work_record.test_outcome in [TestOutcome.SURVIVED, TestOutcome.INCOMPETENT]):
+    elif _evaluation_success(outcome, work_record):
         failure_elem = xml.etree.ElementTree.SubElement(sub_elem, 'failure')
         failure_elem.set('message', "Mutant has survived your unit tests")
         failure_elem.text = str(data) + "\n".join(work_record.diff)
 
     return sub_elem
+
+
+def _evaluation_success(outcome, work_record):
+    return outcome == WorkerOutcome.NORMAL and \
+           work_record.test_outcome in [TestOutcome.SURVIVED,
+                                        TestOutcome.INCOMPETENT]
 
 
 def _create_xml_report(records):

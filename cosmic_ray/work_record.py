@@ -50,7 +50,8 @@ def make_record(name, fields=(), docstring=""):
         dict.__setitem__(self, name, value)
 
     def __delitem__(self, name):
-        raise KeyError('record does not support deleting fields: {}'.format(name))
+        msg = 'record does not support deleting fields: {}'.format(name)
+        raise KeyError(msg)
 
     def update(self, d):
         for k, v in d.items():

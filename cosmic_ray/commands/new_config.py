@@ -24,9 +24,7 @@ def new_config():
 
     Returns: A new configuration as a single string.
     """
-    conf = {}
-
-    conf['module'] = qprompt.ask_str("Top-level module")
+    conf = {'module': qprompt.ask_str("Top-level module")}
 
     menu = qprompt.Menu()
     for i, r in enumerate(cosmic_ray.plugins.test_runner_names()):

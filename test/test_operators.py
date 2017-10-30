@@ -34,6 +34,7 @@ class Linearizer(ast.NodeVisitor):
     After using this to visit an AST, the `nodes` attribute holds the list of
     nodes.
     """
+
     def __init__(self):
         self.nodes = []
 
@@ -67,7 +68,8 @@ OPERATOR_SAMPLES = [
     (MutateBinaryOperator, 'x - y'),
     (ExceptionReplacer, 'try: raise OSError \nexcept OSError: pass'),
     (ZeroIterationLoop, 'for i in range(1,2): pass'),
-    (RemoveDecorator, 'def wrapper(f): f.cosmic_ray=1; return f\n@wrapper\ndef foo(): pass')
+    (RemoveDecorator, 'def wrapper(f): f.cosmic_ray=1; '
+                      'return f\n@wrapper\ndef foo(): pass')
 ]
 
 
@@ -96,12 +98,12 @@ def test_mutation_changes_ast(operator, code):
     core = MutatingCore(0)
     mutant = operator(core).visit(copy.deepcopy(node))
 
-    orig_nodes = linearize_tree(node)
-    mutant_nodes = linearize_tree(mutant)
+    orig_nodes = linearize_tree(node)  # noqa
+    mutant_nodes = linearize_tree(mutant)  # noqa
 
-#todo: disabled b/c adding/removing the not keyword
-# changes the number of nodes in the tree.
-#    assert len(orig_nodes) == len(mutant_nodes)
+    # todo: disabled b/c adding/removing the not keyword
+    # changes the number of nodes in the tree.
+    #    assert len(orig_nodes) == len(mutant_nodes)
 
     assert ast.dump(node) != ast.dump(mutant)
 

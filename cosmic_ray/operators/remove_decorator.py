@@ -8,9 +8,10 @@ class RemoveDecorator(Operator):
 
     @classmethod
     def _candidates(cls, node):
-        """Get a list of indices into `node.decorator_list` of decorators of `node`
-        which can be removed via mutation.
+        """Get a list of indices into `node.decorator_list` of decorators of
+        `node` which can be removed via mutation.
         """
+
         def skip(dec):
             return hasattr(dec, 'id') and dec.id in cls.REGULAR_DECORATORS
 
@@ -26,7 +27,8 @@ class RemoveDecorator(Operator):
         return node
 
     def mutate(self, node, idx):
-        """Modify the decorator list to remove one decorator at each mutation"""
+        """Modify the decorator list to remove one decorator at each
+         mutation"""
         candidates = self._candidates(node)
         del node.decorator_list[candidates[idx]]
         return node

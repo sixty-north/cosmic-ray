@@ -105,7 +105,7 @@ class WorkDB:
         """Add a sequence of WorkRecords.
 
         Args:
-          items: An iterable of tuples of the form `(module-name,
+          records: An iterable of tuples of the form `(module-name,
             operator-name, occurrence)`.
 
         """
@@ -149,7 +149,7 @@ class WorkDB:
         """The sequence of pending `WorkItem`s in the session."""
         table = self._work_items
         work_item = tinydb.Query()
-        pending = table.search(work_item.worker_outcome == None)
+        pending = table.search(work_item.worker_outcome is None)
         return (WorkRecord(r) for r in pending)
 
 

@@ -5,10 +5,11 @@ from .operator import Operator
 
 class ReplaceTrueFalse(Operator):
     """An operator that modifies True/False constants."""
+
     def visit_NameConstant(self, node):  # noqa
-        """
-            New in version 3.4: Previously, these constants were instances of ``Name``.
-            http://greentreesnakes.readthedocs.io/en/latest/nodes.html#NameConstant
+        """New in version 3.4: Previously, these constants were instances of
+        ``Name``:
+        http://greentreesnakes.readthedocs.io/en/latest/nodes.html#NameConstant
         """
         if node.value in [True, False]:
             return self.visit_mutation_site(node)
@@ -32,6 +33,7 @@ class ReplaceTrueFalse(Operator):
 
 class ReplaceAndWithOr(Operator):
     """An operator that swaps 'and' with 'or'."""
+
     def visit_BoolOp(self, node):  # noqa
         """
             http://greentreesnakes.readthedocs.io/en/latest/nodes.html#BoolOp
@@ -67,6 +69,7 @@ class ReplaceAndWithOr(Operator):
 
 class ReplaceOrWithAnd(Operator):
     """An operator that swaps 'or' with 'and'."""
+
     def visit_BoolOp(self, node):  # noqa
         """
             http://greentreesnakes.readthedocs.io/en/latest/nodes.html#BoolOp
@@ -79,9 +82,9 @@ class ReplaceOrWithAnd(Operator):
     def mutate(self, node, idx):
         """Replace OR with AND."""
         if idx and len(node.values) > 2:
-            left_list = node.values[:idx-1]
-            right_list = node.values[idx+1:]
-            left = node.values[idx-1]
+            left_list = node.values[:idx - 1]
+            right_list = node.values[idx + 1:]
+            left = node.values[idx - 1]
             right = node.values[idx]
 
             new_node = ast.BoolOp(op=ast.And(), values=[left, right])
@@ -97,12 +100,12 @@ class ReplaceOrWithAnd(Operator):
 
 
 class AddNot(Operator):
-
     """
         An operator that adds the 'not' keyword to boolean expressions.
 
-        NOTE: 'not' as unary operator is mutated in `unary_operator_replacement.py`,
-        including deletion of the same operator.
+        NOTE: 'not' as unary operator is mutated in
+         `unary_operator_replacement.py`, including deletion of the same
+         operator.
     """
 
     def visit_If(self, node):  # noqa

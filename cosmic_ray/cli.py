@@ -24,7 +24,6 @@ from cosmic_ray.timing import Timer
 from cosmic_ray.util import redirect_stdout
 from cosmic_ray.work_db import use_db, WorkDB
 
-
 LOG = logging.getLogger()
 
 
@@ -102,7 +101,8 @@ will be stored.
         timeout = float(config['timeout'])
     elif 'baseline' in config:
         baseline_mult = float(config['baseline'])
-        assert baseline_mult is not None # TODO: Should not be assertion
+        # TODO: Should not be assertion
+        assert baseline_mult is not None
         command = 'cosmic-ray baseline {}'.format(
             args['<config-file>'])
 
@@ -224,7 +224,8 @@ List the available operator plugins.
 
 @dsc.command()
 def handle_worker(args):
-    """usage: {program} worker [options] <module> <operator> <occurrence> [<config-file>]
+    """usage: {program} worker \
+    [options] <module> <operator> <occurrence> [<config-file>]
 
 Run a worker process which performs a single mutation and test run. Each worker
 does a minimal, isolated chunk of work: it mutates the <occurence>-th instance
@@ -249,16 +250,15 @@ options:
         config['test-runner']['name'],
         config['test-runner']['args'])
 
-    with open(os.devnull, 'w') as devnull,\
-        redirect_stdout(sys.stdout if args['--keep-stdout'] else devnull):
-        work_record = cosmic_ray.worker.worker(
-            args['<module>'],
-            operator,
-            int(args['<occurrence>']),
-            test_runner)
+    with open(os.devnull, 'w') as devnull:
+        with redirect_stdout(sys.stdout if args['--keep-stdout'] else devnull):
+            work_record = cosmic_ray.worker.worker(
+                args['<module>'],
+                operator,
+                int(args['<occurrence>']),
+                test_runner)
 
-    sys.stdout.write(
-        json.dumps(work_record))
+    sys.stdout.write(json.dumps(work_record))
 
 
 DOC_TEMPLATE = """{program}
