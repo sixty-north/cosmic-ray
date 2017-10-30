@@ -174,6 +174,7 @@ def use_db(path, mode=WorkDB.Mode.create):
     database = WorkDB(path, mode)
     try:
         yield database
-        database.close()
     except Exception:
         raise
+    finally:
+        database.close()

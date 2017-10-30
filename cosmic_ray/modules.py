@@ -26,7 +26,7 @@ def fixup_module_name(name):
     return name
 
 
-def find_modules(_name, excludes=None):
+def find_modules(name, excludes=None):
     """Generate sequence of all submodules of NAME, including NAME itself.
 
     `excludes` is a sequence of regular expression. If a full module name
@@ -52,7 +52,7 @@ def find_modules(_name, excludes=None):
 
     """
     excludes = excludes or []
-    module_names = [_name]
+    module_names = [name]
     exclude_patterns = [re.compile(ex) for ex in excludes]
     while module_names:
         module_name = module_names.pop()
@@ -69,8 +69,7 @@ def find_modules(_name, excludes=None):
             if hasattr(module, '__path__'):
                 for _, _name, _ in pkgutil.iter_modules(module.__path__):
                     module_names.append(
-                        '{}.{}'.format(
-                            module_name, _name))
+                        '{}.{}'.format(module_name, _name))
         except Exception:  # pylint:disable=broad-except
             LOG.exception(
                 'Unable to import %s',

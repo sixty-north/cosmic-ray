@@ -14,8 +14,8 @@ def load_config(filename=None):
     if filename is None:
         return yaml.safe_load(sys.stdin)
 
-    with open(filename, mode='rt') as handler:
-        return yaml.safe_load(handler)
+    with open(filename, mode='rt') as handle:
+        return yaml.safe_load(handle)
 
 
 def serialize_config(config):

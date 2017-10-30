@@ -10,8 +10,8 @@ def read(*names, **kwargs):
     with io.open(
         os.path.join(os.path.dirname(__file__), *names),
         encoding=kwargs.get("encoding", "utf8")
-    ) as handler:
-        return handler.read()
+    ) as handle:
+        return handle.read()
 
 
 def find_version(*file_paths):

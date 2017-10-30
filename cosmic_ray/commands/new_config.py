@@ -27,16 +27,17 @@ def new_config():
     conf = {'module': qprompt.ask_str("Top-level module")}
 
     menu = qprompt.Menu()
-    for at_pos, test_name in enumerate(cosmic_ray.plugins.test_runner_names()):
-        menu.add(str(at_pos), test_name)
+    test_runners = cosmic_ray.plugins.test_runner_names()
+    for at_pos, test_runner in enumerate(test_runners):
+        menu.add(str(at_pos), test_runner)
     conf['test_runner'] = menu.show(header="Test runner",
                                     returns="desc")
 
     conf['test_args'] = qprompt.ask_str('Test args')
 
     menu = qprompt.Menu()
-    for at_pos, env in enumerate(['local', 'celery']):
-        menu.add(str(at_pos), env)
+    for at_pos, engine_name in enumerate(['local', 'celery']):
+        menu.add(str(at_pos), engine_name)
     conf['engine'] = menu.show(header="Execution engine",
                                returns="desc")
     return TEMPLATE.format(**conf)
