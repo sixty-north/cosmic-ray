@@ -41,7 +41,7 @@ class TestRunner(metaclass=abc.ABCMeta):
         passed. `result` is any object that is appropriate to provide
         more information about the success/failure of the tests.
         """
-        raise NotImplemented()
+        pass
 
     def __call__(self):
         """Call `_run()` and return a `WorkRecord` with the results.
