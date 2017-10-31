@@ -14,12 +14,15 @@ matrix:
 install:
   - python setup.py install
   - pip install -e ".[test]"
+  - pushd plugins/execution-engines/celery3
+  - python setup.py install
+  - popd
 
 services: rabbitmq
 
 before_script:
   - pushd test_project
-  - celery -A cosmic_ray.tasks.worker worker &
+  - celery -A cosmic_ray_celery3_engine.worker worker &
   - popd
 
 script:

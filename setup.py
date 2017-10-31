@@ -74,7 +74,6 @@ INSTALL_REQUIRES = [
     'qprompt',
     'stevedore',
     'tinydb>=3.2.1',
-    'celery<4',
 ]
 
 if sys.version_info < (3, 4):
@@ -129,7 +128,6 @@ setup(
         'cosmic_ray.operators': operators,
         'cosmic_ray.execution_engines': [
             'local = cosmic_ray.execution.local:LocalExecutionEngine',
-            'celery = cosmic_ray.execution.celery:CeleryExecutionEngine',
         ]
     },
     long_description=long_description,

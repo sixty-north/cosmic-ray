@@ -29,8 +29,8 @@ there's a problem.
 
 We have "adam" configurations for each of the
 test-runner/execution-engine combinations. For example, the
-configuration which uses ``unittest`` and the ``celery`` execution
-engine is in ``test_project/cosmic-ray.unittest.dist.conf``.
+configuration which uses ``unittest`` and the ``celery3`` execution
+engine is in ``test_project/cosmic-ray.unittest.celery3.conf``.
 
 To run an "adam" test, first switch to the ``test_project`` directory:
 
@@ -45,7 +45,7 @@ example using the ``pytest``/``local`` configuration:
 
     cosmic-ray init cosmic-ray.pytest.local.conf pytest-local
 
-(Note that if you were going to use the ``celery`` engine instead, you
+(Note that if you were going to use the ``celery3`` engine instead, you
 need to make sure that celery workers were running.)
 
 Execute the session like this:

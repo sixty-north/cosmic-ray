@@ -1,6 +1,8 @@
-import cosmic_ray.tasks.worker
+from cosmic_ray.execution.execution_engine import ExecutionEngine
 from cosmic_ray.work_record import WorkRecord
-from .execution_engine import ExecutionEngine
+
+from .app import app
+from .worker import execute_work_records
 
 
 class CeleryExecutionEngine(ExecutionEngine):
@@ -8,7 +10,7 @@ class CeleryExecutionEngine(ExecutionEngine):
         purge_queue = config['execution-engine'].get('purge-queue', True)
 
         try:
-            results = cosmic_ray.tasks.worker.execute_work_records(
+            results = execute_work_records(
                 timeout,
                 pending_work,
                 config)
@@ -17,4 +19,4 @@ class CeleryExecutionEngine(ExecutionEngine):
                 yield WorkRecord(r.get())
         finally:
             if purge_queue:
-                cosmic_ray.tasks.celery.app.control.purge()
+                app.control.purge()

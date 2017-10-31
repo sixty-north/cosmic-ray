@@ -1,22 +1,31 @@
-Distributed testing with Celery
-===============================
-
-TODO: This needs to be reworked in light of the "execution engine"
-concept, esp. once we make those into plugins.
+==============================
+ Distributed mutation testing
+==============================
 
 One of the main practical challenges to mutation testing is that it can
 take a long time. Even on moderately sized projects, you might need
 millions of individual mutations and test runs. This can be prohibitive
 to run on a single system.
 
-One way to cope with these long runtimes is to parallelize the mutation
-and testing procedures. Fortunately, mutation testing is `embarassingly
-parallel in
-nature <https://en.wikipedia.org/wiki/Embarrassingly_parallel>`__, so we
-can apply some relatively simple techniques to get really nice scaling
-up of the work. We've chosen to use the `Celery distributed task
-queue <http://www.celeryproject.org/>`__ to spread work across multiple
-nodes.
+One way to cope with these long runtimes is to parallelize the mutation and
+testing procedures. Fortunately, mutation testing is `embarassingly parallel in
+nature <https://en.wikipedia.org/wiki/Embarrassingly_parallel>`__, so we can
+apply some relatively simple techniques to get really nice scaling up of the
+work. To support parallel execution of mutation testing runs, Cosmic Ray has the
+notion of *execution engines* which can control where and how tests are run.
+Different engines can run tests in different contexts: in parallel on a single
+machine, by distributing them across a message bus, or perhaps by spawning test
+runs on cloud systems.
+
+The Celery execution engine
+===========================
+
+The Cosmic Ray repository includes the `celery3` execution engine. This is
+provided as a plugin via the `cosmic_ray_celery3_engine` package in the
+`plugins/execution_engines/celery3` directory. This engine uses the `Celery
+distributed task queue <http://www.celeryproject.org/>`__ to spread work across
+multiple nodes. (It's called "celery3" since it uses version 3 of Celery;
+version 4 will be available at some point as well).
 
 The basic idea is very simple. Celery lets you start multiple *workers*
 which listen for commands from a task queue. A central process creates
@@ -41,6 +50,21 @@ day be able to work with machines on commodity cloud providers, meaning
 that highly-scaled mutation testing for Python will be available to
 anyone who wants it.
 
+Installing the `celery3` worker
+-------------------------------
+
+The `cosmic_ray_celery3_engine` package is installed separately from
+`cosmic_ray` itself. This is primarily so that `cosmic_ray` doesn't have a
+direct dependency on any version of `celery`.
+
+To install the plugin, you need to run this command from `plugins/execution-engines/celery3`:
+
+::
+
+    python setup.py install
+
+This will install and register the plugin.
+
 Installing RabbitMQ
 -------------------
 
@@ -61,7 +85,7 @@ like this:
 
 ::
 
-    celery -A cosmic_ray.tasks.worker worker
+    celery -A cosmic_ray_celery3_engine.worker worker
 
 You should do this, of course, from the virtual environment into which
 you've installed Cosmic Ray. Similary, you need to make sure that the
@@ -73,13 +97,27 @@ which you've installed the modules under test.
 Running distributed mutation testing
 ------------------------------------
 
-After you've started your workers, the only different between local and
-distributed tesing is that you need to pass ``--dist`` to the
-``cosmic-ray exec`` command to do distributed testing. So a full
-distributed testing run would look something like this:
+Aside from starting workers, you also need to specify `celery3` in your
+configuration. For example, instead of a "local" configuration like this:
 
 ::
 
-    cosmic-ray init --baseline=3 session-name my_module -- tests
-    cosmic-ray exec --dist session-name
-    cosmic-ray report session-name
+    execution-engine:
+      name: local
+
+You would use the name "celery3" like this:
+
+::
+
+    execution-engine:
+      name: celery3
+
+With this configuration in place, you then need to do an `init` to create a
+session followed by `exec` to run the tests:
+
+::
+
+    cosmic-ray init my_config my_session
+    cosmic-ray exec my_session
+
+This `exec` will distribute testing runs to your celery workers.

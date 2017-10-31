@@ -37,7 +37,7 @@ def new_config():
     conf['test_args'] = qprompt.ask_str('Test args')
 
     menu = qprompt.Menu()
-    for i, e in enumerate(['local', 'celery']):
+    for i, e in enumerate(cosmic_ray.plugins.execution_engine_names()):
         menu.add(str(i), e)
     conf['engine'] = menu.show(header="Execution engine",
                                returns="desc")
