@@ -4,7 +4,7 @@ from .operator import Operator
 
 
 class ReplaceBreakWithContinue(Operator):
-    def visit_Break(self, node):
+    def visit_Break(self, node):  # pylint: disable=invalid-name
         return self.visit_mutation_site(node)
 
     def mutate(self, node, _):
@@ -14,7 +14,7 @@ class ReplaceBreakWithContinue(Operator):
 
 
 class ReplaceContinueWithBreak(Operator):
-    def visit_Continue(self, node):
+    def visit_Continue(self, node):  # pylint: disable=invalid-name
         return self.visit_mutation_site(node)
 
     def mutate(self, node, _):

@@ -4,7 +4,6 @@ matrix:
   include:
     - python: 3.4
     - python: 3.5
-    - python: 3.5-dev
     - python: 3.6
     - python: nightly
   fast_finish: true
@@ -12,6 +11,7 @@ matrix:
     - python: nightly
 
 install:
+  - if [[ "$TRAVIS_PYTHON_VERSION" == '3.6' ]]; then pip install tox; fi
   - python setup.py install
   - pip install -e ".[test]"
   - pushd plugins/execution-engines/celery3
@@ -21,11 +21,13 @@ install:
 services: rabbitmq
 
 before_script:
+   # work around https://github.com/travis-ci/travis-ci/issues/8363
+  - pyenv global system 3.5
   - pushd test_project
   - celery -A cosmic_ray_celery3_engine.worker worker &
   - popd
 
 script:
-  - pytest
+  - if [[ "$TRAVIS_PYTHON_VERSION" == '3.6' ]]; then tox; fi
   - cd test_project
   - bash run_tests.sh

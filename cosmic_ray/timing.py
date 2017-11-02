@@ -18,6 +18,7 @@ class Timer:
     """
 
     def __init__(self):
+        self._start = None
         self.reset()
 
     def reset(self):

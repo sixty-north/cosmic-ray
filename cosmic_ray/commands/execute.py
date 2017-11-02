@@ -5,7 +5,6 @@ from cosmic_ray.plugins import get_execution_engine
 def execute(db_name):
     """Execute any pending work in the database stored in `db_name`, recording the
 results.
-
     This looks for any work in `db_name` which has no results, schedules it to
     be executed, and records any results that arrive.
     """
