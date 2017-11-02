@@ -2,8 +2,8 @@ import os
 
 import pytest
 
+from cosmic_ray.testing.test_runner import TestRunner
 from cosmic_ray.util import redirect_stdout
-from .test_runner import TestRunner
 
 
 class ResultCollector:  # pylint: disable=too-few-public-methods
