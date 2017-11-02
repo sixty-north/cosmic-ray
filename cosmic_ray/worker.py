@@ -142,13 +142,13 @@ def worker_process(work_record,
             in result.items()
             if v is not None
         })
-    except subprocess.TimeoutExpired as e:
+    except subprocess.TimeoutExpired as exc:
         work_record.worker_outcome = WorkerOutcome.TIMEOUT
-        work_record.data = e.timeout
+        work_record.data = exc.timeout
         proc.kill()
-    except json.JSONDecodeError as e:
+    except json.JSONDecodeError as exc:
         work_record.worker_outcome = WorkerOutcome.EXCEPTION
-        work_record.data = e
+        work_record.data = exc
 
     work_record.command_line = command
     return work_record
