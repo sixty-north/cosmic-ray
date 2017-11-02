@@ -18,6 +18,8 @@ install:
   - python setup.py install
   - cd ../../test-runners/pytest
   - python setup.py install
+  - cd ../nose
+  - python setup.py install
   - popd
 
 services: rabbitmq

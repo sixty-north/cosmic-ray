@@ -68,7 +68,6 @@ INSTALL_REQUIRES = [
     'astunparse',
     'decorator',
     'docopt_subcommands>=2.3.0',
-    'nose',
     'pathlib',
     'pyyaml',
     'qprompt',
@@ -122,7 +121,6 @@ setup(
             'cr-xml = cosmic_ray.commands.format:report_xml',
         ],
         'cosmic_ray.test_runners': [
-            'nose = cosmic_ray.testing.nose_runner:NoseRunner',
             'unittest = cosmic_ray.testing.unittest_runner:UnittestRunner',
         ],
         'cosmic_ray.operators': OPERATORS,
