@@ -67,10 +67,9 @@ def find_modules(name, excludes=None):
             yield module
 
             if hasattr(module, '__path__'):
-                for _, name, _ in pkgutil.iter_modules(module.__path__):
+                for _, _name, _ in pkgutil.iter_modules(module.__path__):
                     module_names.append(
-                        '{}.{}'.format(
-                            module_name, name))
+                        '{}.{}'.format(module_name, _name))
         except Exception:  # pylint:disable=broad-except
             LOG.exception(
                 'Unable to import %s',

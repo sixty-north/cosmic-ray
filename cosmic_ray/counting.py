@@ -8,7 +8,6 @@ from .plugins import get_operator
 
 
 class _CountingCore:
-
     """
     An operator core which simply counts how many times an operator finds a
     mutation site in a module.
@@ -21,15 +20,16 @@ class _CountingCore:
         self.count += count
         return node
 
-    def repr_args(self):
+    @staticmethod
+    def repr_args():
         return []
 
 
 def _count(module_ast, op_name):
     """Count mutants for a single module-operator pair."""
     core = _CountingCore()
-    op = get_operator(op_name)(core)
-    op.visit(module_ast)
+    operator = get_operator(op_name)(core)
+    operator.visit(module_ast)
     return core.count
 
 

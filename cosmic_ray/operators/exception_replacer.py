@@ -16,7 +16,7 @@ setattr(builtins,
 class ExceptionReplacer(Operator):
     """An operator that modifies exception handlers."""
 
-    def visit_ExceptHandler(self, node):  # noqa
+    def visit_ExceptHandler(self, node):  # noqa # pylint: disable=invalid-name
         return self.visit_mutation_site(node)
 
     def mutate(self, node, _):

@@ -1,16 +1,17 @@
 import io
 import os
 import re
-from setuptools import setup, find_packages
 import sys
+
+from setuptools import setup, find_packages
 
 
 def read(*names, **kwargs):
     with io.open(
         os.path.join(os.path.dirname(__file__), *names),
         encoding=kwargs.get("encoding", "utf8")
-    ) as fp:
-        return fp.read()
+    ) as handle:
+        return handle.read()
 
 
 def find_version(*file_paths):
@@ -22,15 +23,15 @@ def find_version(*file_paths):
     raise RuntimeError("Unable to find version string.")
 
 
-long_description = read('README.rst', mode='rt')
+LONG_DESCRIPTION = read('README.rst', mode='rt')
 
-
-operators = [
+OPERATORS = [
     'number_replacer = '
     'cosmic_ray.operators.number_replacer:NumberReplacer',
 
     'mutate_comparison_operator = '
-    'cosmic_ray.operators.comparison_operator_replacement:MutateComparisonOperator',
+    'cosmic_ray.operators.comparison_operator_replacement:'
+    'MutateComparisonOperator',
 
     'replace_true_false = '
     'cosmic_ray.operators.boolean_replacer:ReplaceTrueFalse',
@@ -106,8 +107,9 @@ setup(
     platforms='any',
     include_package_data=True,
     install_requires=INSTALL_REQUIRES,
-    # List additional groups of dependencies here (e.g. development dependencies).
-    # You can install these using the following syntax, for example:
+    # List additional groups of dependencies here (e.g. development
+    # dependencies). You can install these using the following syntax,
+    # for example:
     # $ pip install -e .[dev,test]
     extras_require={
         'test': ['hypothesis', 'pytest'],
@@ -125,10 +127,10 @@ setup(
             'unittest = cosmic_ray.testing.unittest_runner:UnittestRunner',
             'pytest = cosmic_ray.testing.pytest_runner:PytestRunner',
         ],
-        'cosmic_ray.operators': operators,
+        'cosmic_ray.operators': OPERATORS,
         'cosmic_ray.execution_engines': [
             'local = cosmic_ray.execution.local:LocalExecutionEngine',
         ]
     },
-    long_description=long_description,
+    long_description=LONG_DESCRIPTION,
 )

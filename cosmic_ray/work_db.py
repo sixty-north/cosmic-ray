@@ -20,8 +20,8 @@
 #    test_runner.TestResult.
 
 import contextlib
-from enum import Enum
 import os
+from enum import Enum
 
 # This db may well not scale very well. We need to be ready to switch it out
 # for something quicker if not. But for now it's *very* convenient.
@@ -33,7 +33,7 @@ from .work_record import WorkRecord
 class WorkDB:
     class Mode(Enum):
         # Open existing files, creating if necessary
-        create = 1,
+        create = 1
 
         # Open only existing files, failing if it doesn't exist
         open = 2
@@ -105,7 +105,7 @@ class WorkDB:
         """Add a sequence of WorkRecords.
 
         Args:
-          items: An iterable of tuples of the form `(module-name,
+          records: An iterable of tuples of the form `(module-name,
             operator-name, occurrence)`.
 
         """
@@ -149,7 +149,9 @@ class WorkDB:
         """The sequence of pending `WorkItem`s in the session."""
         table = self._work_items
         work_item = tinydb.Query()
-        pending = table.search(work_item.worker_outcome == None)
+        out = work_item.worker_outcome
+        query = out == None  # noqa # pylint: disable=singleton-comparison
+        pending = table.search(query)
         return (WorkRecord(r) for r in pending)
 
 
@@ -169,9 +171,10 @@ def use_db(path, mode=WorkDB.Mode.create):
       FileNotFoundError: If `mode` is `Mode.open` and `path` does not
         exist.
     """
-    db = WorkDB(path, mode)
+    database = WorkDB(path, mode)
     try:
-        yield db
+        yield database
     except Exception:
-        db.close()
         raise
+    finally:
+        database.close()

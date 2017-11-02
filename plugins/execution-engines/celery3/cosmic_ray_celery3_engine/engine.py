@@ -5,6 +5,7 @@ from .app import app
 from .worker import execute_work_records
 
 
+# pylint: disable=too-few-public-methods
 class CeleryExecutionEngine(ExecutionEngine):
     def __call__(self, timeout, pending_work, config):
         purge_queue = config['execution-engine'].get('purge-queue', True)
@@ -15,8 +16,8 @@ class CeleryExecutionEngine(ExecutionEngine):
                 pending_work,
                 config)
 
-            for r in results:
-                yield WorkRecord(r.get())
+            for result in results:
+                yield WorkRecord(result.get())
         finally:
             if purge_queue:
                 app.control.purge()
