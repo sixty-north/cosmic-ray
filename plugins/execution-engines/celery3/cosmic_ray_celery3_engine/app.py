@@ -3,7 +3,7 @@
 from celery import Celery
 
 app = Celery(
-    'cosmic-ray',
+    'cosmic-ray-celery-executor',
     broker='amqp://',
     backend='amqp://')
 

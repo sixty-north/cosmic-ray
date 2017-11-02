@@ -5,7 +5,7 @@ set -e
 
 # This runs the "adam" tests, returning 0 if all mutants are killed, or 1 if
 # there's a survivor.
-TEST_CONFIGS="unittest.dist unittest.local pytest.dist pytest.local nosetest.dist nosetest.dist"
+TEST_CONFIGS="unittest.celery3 unittest.local pytest.celery3 pytest.local nosetest.celery3 nosetest.celery3"
 for CONFIG in $TEST_CONFIGS; do
     echo "$CONFIG"
     SESSION=adam_tests.$CONFIG

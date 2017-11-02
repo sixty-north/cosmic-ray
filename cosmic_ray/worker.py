@@ -8,10 +8,13 @@ import astunparse
 import difflib
 import importlib
 import inspect
+import json
 import logging
+import subprocess
 import sys
 import traceback
 
+from .config import serialize_config
 from .importing import preserve_modules, using_ast
 from .mutating import MutatingCore
 from .parsing import get_ast
@@ -105,3 +108,47 @@ def worker(module_name,
             data=traceback.format_exception(*sys.exc_info()),
             test_outcome=TestOutcome.INCOMPETENT,
             worker_outcome=WorkerOutcome.EXCEPTION)
+
+
+def worker_process(work_record,
+                   timeout,
+                   config):
+    """Run `cosmic-ray worker` in a subprocess and return the results,
+    passing `config` to it via stdin.
+
+    Returns: An updated WorkRecord
+
+    """
+    # The work_record param may come as just a dict (e.g. if it arrives over
+    # celery), so we reconstruct a WorkRecord to make it easier to work with.
+    work_record = WorkRecord(work_record)
+
+    command = 'cosmic-ray worker {module} {operator} {occurrence}'.format(
+        **work_record)
+
+    LOG.info('executing: %s', command)
+
+    proc = subprocess.Popen(command.split(),
+                            stdin=subprocess.PIPE,
+                            stdout=subprocess.PIPE,
+                            universal_newlines=True)
+    config_string = serialize_config(config)
+    try:
+        outs, _ = proc.communicate(input=config_string, timeout=timeout)
+        result = json.loads(outs)
+        work_record.update({
+            k: v
+            for k, v
+            in result.items()
+            if v is not None
+        })
+    except subprocess.TimeoutExpired as e:
+        work_record.worker_outcome = WorkerOutcome.TIMEOUT
+        work_record.data = e.timeout
+        proc.kill()
+    except json.JSONDecodeError as e:
+        work_record.worker_outcome = WorkerOutcome.EXCEPTION
+        work_record.data = e
+
+    work_record.command_line = command
+    return work_record

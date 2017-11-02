@@ -32,9 +32,9 @@ Execution engines
 =================
 
 *Execution engines* determine the context in which tests are executed. The
-primary examples of execution engines are the *local* and *celery* engines. The
-local engine executes tests serially on the local machine; the celery engine
-distributes tests to remote workers using the Celery system. Other kinds of
+primary examples of execution engines are the *local* and *celery3* engines. The
+local engine executes tests serially on the local machine; the celery3 engine
+distributes tests to remote workers using the Celery (v3) system. Other kinds of
 engines might run tests on a cloud service or using other task distribution
 technology.
 
@@ -45,12 +45,12 @@ result. Cosmic Ray doesn't impose any real constraints on how engines accomplish
 this.
 
 Engines can require arbitrarily complex infrastructure and configuration. For
-example, the celery engine requires you to run rabbitmq and to attach one or
+example, the celery3 engine requires you to run rabbitmq and to attach one or
 more worker tasks to that queue.
 
-Right now there are only two execution engines - local and celery - and they are
-baked into Cosmic Ray. There are plans to turn execution engines into plugins,
-however, and that will make it easier to add new execution engines.
+Execution engines are implemented as plugins to Cosmic Ray. They are dynamically
+discovered, and users can create their own execution engines if they want.
+Cosmic Ray includes two execution engines plugins, local and celery3.
 
 Configurations
 ==============
