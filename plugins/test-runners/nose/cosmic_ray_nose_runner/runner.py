@@ -2,8 +2,8 @@ import os
 
 import nose
 
+from cosmic_ray.testing.test_runner import TestRunner
 from cosmic_ray.util import redirect_stdout, redirect_stderr
-from .test_runner import TestRunner
 
 
 class NoseResultsCollector(nose.plugins.Plugin):
