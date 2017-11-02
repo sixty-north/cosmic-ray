@@ -16,6 +16,8 @@ install:
   - pip install -e ".[test]"
   - pushd plugins/execution-engines/celery3
   - python setup.py install
+  - cd ../../test-runners/pytest
+  - python setup.py install
   - popd
 
 services: rabbitmq
