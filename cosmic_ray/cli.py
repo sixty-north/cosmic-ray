@@ -11,6 +11,7 @@ import pprint
 import subprocess
 import sys
 
+import docopt
 import docopt_subcommands as dsc
 
 import cosmic_ray.commands
@@ -291,12 +292,16 @@ def main(argv=None):
 
     :param argv: the command line arguments
     """
-    dsc.main(
-        'cosmic-ray',
-        'cosmic-ray v.2',
-        argv=argv,
-        doc_template=DOC_TEMPLATE,
-        common_option_handler=common_option_handler)
+    try:
+        dsc.main(
+            'cosmic-ray',
+            'cosmic-ray v.2',
+            argv=argv,
+            doc_template=DOC_TEMPLATE,
+            common_option_handler=common_option_handler)
+    except docopt.DocoptExit as exc:
+        exc.code = os.EX_USAGE
+        raise
 
 
 if __name__ == '__main__':
