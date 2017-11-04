@@ -65,8 +65,9 @@ def handle_new_config(args):
 
 Create a new config file.
     """
+    config = cosmic_ray.commands.new_config()
     with open(args['<config-file>'], mode='wt') as handle:
-        handle.write(cosmic_ray.commands.new_config())
+        handle.write(config)
 
 
 @dsc.command()
