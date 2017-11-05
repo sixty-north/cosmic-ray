@@ -42,14 +42,16 @@ when ``x = 2``.
 Here is the bad test that lets the mutant(s) survive:
 
 ::
+    # examples/simple_math/test_simple_math_bad.py
 
     def test_mult_by_2():
         assert mult_by_2(2) == 4
 
 To fix this bad test, we decorate it so that a range
-of values of x are tested:
+of values of `x` are tested:
 
 ::
+    # examples/simple_math/test_simple_math_good.py
 
     @pytest.mark.parametrize('x', range(-5, 5))
     def test_mult_by_2(x):
