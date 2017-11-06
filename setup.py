@@ -110,7 +110,7 @@ setup(
     # for example:
     # $ pip install -e .[dev,test]
     extras_require={
-        'test': ['hypothesis', 'pytest'],
+        'test': ['hypothesis', 'pytest', 'tox'],
         'docs': ['sphinx', 'sphinx_rtd_theme']
     },
     entry_points={
