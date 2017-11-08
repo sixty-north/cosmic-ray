@@ -8,6 +8,7 @@ import json
 import logging
 import os
 import pprint
+import signal
 import subprocess
 import sys
 
@@ -292,6 +293,9 @@ def main(argv=None):
 
     :param argv: the command line arguments
     """
+    signal.signal(signal.SIGINT,
+                  lambda *args: sys.exit(0))
+
     try:
         dsc.main(
             'cosmic-ray',
