@@ -2,35 +2,48 @@ language: python
 
 matrix:
   include:
-    - python: 3.4
-    - python: 3.5
-    - python: 3.6
-    - python: nightly
+  - python: 3.4
+  - python: 3.5
+  - python: 3.6
+  - python: nightly
   fast_finish: true
   allow_failures:
-    - python: nightly
+  - python: nightly
 
 install:
-  - python setup.py install
-  - pip install -e ".[test]"
-  - pushd plugins/execution-engines/celery3
-  - python setup.py install
-  - cd ../../test-runners/pytest
-  - python setup.py install
-  - cd ../nose
-  - python setup.py install
-  - popd
-  - cosmic-ray test-runners
+- python setup.py install
+- pip install -e ".[test]"
+- pushd plugins/execution-engines/celery3
+- python setup.py install
+- cd ../../test-runners/pytest
+- python setup.py install
+- cd ../nose
+- python setup.py install
+- popd
+- cosmic-ray test-runners
 
 services: rabbitmq
 
 before_script:
-   # work around https://github.com/travis-ci/travis-ci/issues/8363
-  - pyenv global system 3.5
-  - pushd test/test_project
-  - celery -A cosmic_ray_celery3_engine.worker worker &
-  - popd
+- pyenv global system 3.5
+- pushd test/test_project
+- celery -A cosmic_ray_celery3_engine.worker worker &
+- popd
 
 script:
-  - tox -e py
-  - if [[ "$TRAVIS_PYTHON_VERSION" == '3.6' ]]; then tox -e lint,docs; fi
+- tox -e py
+- if [[ "$TRAVIS_PYTHON_VERSION" == '3.6' ]]; then tox -e lint,docs; fi
+
+deploy:
+  provider: pypi
+  user: abingham
+  password:
+    secure: ckgurny6GwdI4Ya7FtyP536v11ynyc3uUgjUjQPANtXf8duyB57dKN28UJQ2CcpDHNRCaJPVsZZBgIARwnbSozEgDKiZk7Ng13dU/tHZ9bkMcFPvQMLwCv5JTG33M0dn9SEzoV5YZT0ro35zC+VDJFOO7yvX1cb2WiMLTcudV9A=
+  distributions: bdist_wheel sdist
+  on:
+    branch: release
+  before_deploy: python scripts/make_release_tag.py
+
+before_install:
+- openssl aes-256-cbc -K $encrypted_6ad9c4041ffc_key -iv $encrypted_6ad9c4041ffc_iv
+  -in deploy_key.enc -out deploy_key -d

@@ -15,3 +15,5 @@ test_project/*.json
 
 .idea
 .tox
+
+deploy_key
