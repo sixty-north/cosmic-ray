@@ -17,7 +17,8 @@ The first step in a full testing run, then, is to initialize a session:
     cosmic-ray init config.yml my_session
 
 If ``config.yml`` doesn't exist (which it won't initially) this will ask you a
-series of questions to help create it.
+series of questions to help create it. (Note that you don't have to use the
+names "config.yml" and "my_session". Any names will do.)
 
 This will also create a database file called ``my_session.json``. Once this is
 created, you can start executing tests with the ``exec`` command:
