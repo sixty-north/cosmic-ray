@@ -1,18 +1,12 @@
+"""Implementation of the mutating operator core.
+"""
+
 import ast
-import collections
 import logging
 
 import cosmic_ray.util
 
 LOG = logging.getLogger()
-
-# TODO: Can this be removed?
-MutationRecord = collections.namedtuple('MutationRecord',
-                                        ['module_name',
-                                         'module_file',
-                                         'operator',
-                                         'activation_record',
-                                         'mutant'])
 
 
 def _full_module_name(obj):
@@ -77,4 +71,5 @@ class MutatingCore:
         return node
 
     def repr_args(self):
+        "Extra arguments to display in operator reprs."
         return [('target', self._target)]

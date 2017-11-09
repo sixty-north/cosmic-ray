@@ -1,3 +1,5 @@
+"Implementation of test-runner for nose tests."
+
 import os
 
 import nose
@@ -7,6 +9,7 @@ from cosmic_ray.util import redirect_stdout, redirect_stderr
 
 
 class NoseResultsCollector(nose.plugins.Plugin):
+    "Nose plugin that collects results for later analysis."
     name = 'cosmic_ray'
     enabled = True
 
@@ -15,6 +18,7 @@ class NoseResultsCollector(nose.plugins.Plugin):
         self.result = None
 
     def finalize(self, result):
+        "Store result."
         self.result = result
 
 

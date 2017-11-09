@@ -1,3 +1,6 @@
+"""Implementation of the binary-operator-replacement operator.
+"""
+
 import ast
 import sys
 

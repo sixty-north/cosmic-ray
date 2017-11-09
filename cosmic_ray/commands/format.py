@@ -1,3 +1,5 @@
+"Implementation of various formatting commands."
+
 import json
 import sys
 import xml.etree.ElementTree

@@ -105,8 +105,8 @@ def handle_init(args):
         timeout = float(config['timeout'])
     elif 'baseline' in config:
         baseline_mult = float(config['baseline'])
-        # TODO: Should not be assertion
-        assert baseline_mult is not None
+        if baseline_mult is None:
+            raise ValueError('Baseline multiplier must be a positive number.')
         command = 'cosmic-ray baseline {}'.format(
             args['<config-file>'])
 

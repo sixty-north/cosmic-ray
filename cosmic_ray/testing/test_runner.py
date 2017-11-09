@@ -1,3 +1,5 @@
+"Base test-runner implementation details."
+
 import abc
 import sys
 import traceback
@@ -5,7 +7,7 @@ import traceback
 from cosmic_ray.work_record import WorkRecord
 
 
-class TestOutcome:  # pylint: disable=too-few-public-methods
+class TestOutcome:
     """A enum of the possible outcomes for any mutant test run.
     """
     SURVIVED = 'survived'
@@ -13,7 +15,6 @@ class TestOutcome:  # pylint: disable=too-few-public-methods
     INCOMPETENT = 'incompetent'
 
 
-# pylint: disable=too-few-public-methods
 class TestRunner(metaclass=abc.ABCMeta):
     """Specifies the interface for test runners in the system.
 

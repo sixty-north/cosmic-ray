@@ -1,4 +1,4 @@
-# Generate a new configuration string.
+"Implementation of the 'new-config' command."
 
 import qprompt
 
