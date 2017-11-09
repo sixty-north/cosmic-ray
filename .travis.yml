@@ -10,30 +10,29 @@ matrix:
   allow_failures:
   - python: nightly
 
-# install:
-# - python setup.py install
-# - pip install -e ".[test]"
-# - pushd plugins/execution-engines/celery3
-# - python setup.py install
-# - cd ../../test-runners/pytest
-# - python setup.py install
-# - cd ../nose
-# - python setup.py install
-# - popd
-# - cosmic-ray test-runners
+install:
+- python setup.py install
+- pip install -e ".[test]"
+- pushd plugins/execution-engines/celery3
+- python setup.py install
+- cd ../../test-runners/pytest
+- python setup.py install
+- cd ../nose
+- python setup.py install
+- popd
+- cosmic-ray test-runners
 
-# services: rabbitmq
+services: rabbitmq
 
-# before_script:
-# - pyenv global system 3.5
-# - pushd test/test_project
-# - celery -A cosmic_ray_celery3_engine.worker worker &
-# - popd
+before_script:
+- pyenv global system 3.5
+- pushd test/test_project
+- celery -A cosmic_ray_celery3_engine.worker worker &
+- popd
 
 script:
-  - echo "REENABLE TESTS!"
-#- tox -e py
-#- if [[ "$TRAVIS_PYTHON_VERSION" == '3.6' ]]; then tox -e lint,docs; fi
+- tox -e py
+- if [[ "$TRAVIS_PYTHON_VERSION" == '3.6' ]]; then tox -e lint,docs; fi
 
 # When we push to 'release', the python-3.6 travis run should do a deployment.
 deploy:
@@ -47,5 +46,5 @@ deploy:
     python: 3.6
 
 before_deploy:
-  - openssl aes-256-cbc -K $encrypted_6ad9c4041ffc_key -iv $encrypted_6ad9c4041ffc_iv -in deploy_key.enc -out deploy_key -d
-  - python scripts/make_release_tag.py
+- openssl aes-256-cbc -K $encrypted_6ad9c4041ffc_key -iv $encrypted_6ad9c4041ffc_iv -in deploy_key.enc -out deploy_key -d
+- python scripts/make_release_tag.py
