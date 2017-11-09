@@ -1,3 +1,6 @@
+"""Various utility functions with no better place to live.
+"""
+
 try:
     from contextlib import redirect_stdout
 except ImportError:
@@ -6,7 +9,7 @@ except ImportError:
 
 
     # noqa # redirect_stdout was introduced in Python 3.4
-    class _RedirectStream:  # pylint: disable=too-few-public-methods
+    class _RedirectStream:
         """
             Copied from Python 3.5's implementation. See:
             https://github.com/python/cpython/commit/83935e76e35cf8d2fb9fe2599420f8adf421b884#diff-edbcdd20abc32f8b018deb2353ae925a
@@ -27,7 +30,7 @@ except ImportError:
             setattr(sys, self._stream, self._old_targets.pop())
 
 
-    # noqa # pylint: disable=invalid-name,too-few-public-methods
+    # noqa # pylint: disable=invalid-name
     class redirect_stdout(_RedirectStream):  # noqa
         """Context manager for temporarily redirecting stdout to another
         file."""
@@ -38,7 +41,7 @@ try:
     from contextlib import redirect_stderr
 except ImportError:
     # redirect_stderr was introduced in Python 3.5
-    # pylint: disable=invalid-name,too-few-public-methods
+    # pylint: disable=invalid-name
     class redirect_stderr(redirect_stdout):
         """
             Copied from Python 3.5's implementation. See:

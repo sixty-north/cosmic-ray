@@ -1,3 +1,5 @@
+"Implementation of operator base class."
+
 import ast
 
 
@@ -19,6 +21,7 @@ class Operator(ast.NodeTransformer):
         return self._core
 
     def repr_args(self):
+        "Extra arguments to display in operator reprs."
         return self.core.repr_args()
 
     def visit_mutation_site(self, node, num_mutations=1):

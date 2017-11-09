@@ -1,3 +1,5 @@
+"Implementation of the remove-decorator operator."
+
 from .operator import Operator
 
 
@@ -12,13 +14,15 @@ class RemoveDecorator(Operator):
         `node` which can be removed via mutation.
         """
 
-        def skip(dec):
+        def is_regular(dec):
+            "Determine if decorator `dec` is a 'regular' decorator."
             return hasattr(dec, 'id') and dec.id in cls.REGULAR_DECORATORS
 
         return [i for (i, d) in enumerate(node.decorator_list)
-                if not skip(d)]
+                if not is_regular(d)]
 
     def visit_FunctionDef(self, node):  # noqa # pylint: disable=invalid-name
+        "Visit a function definitio node."
         decorator_candidates = self._candidates(node)
 
         if decorator_candidates:

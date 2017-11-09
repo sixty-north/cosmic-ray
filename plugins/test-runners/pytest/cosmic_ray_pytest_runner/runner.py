@@ -1,3 +1,5 @@
+"Implementation of a test-runner for pytest-based tests."
+
 import os
 
 import pytest
@@ -6,15 +8,17 @@ from cosmic_ray.testing.test_runner import TestRunner
 from cosmic_ray.util import redirect_stdout
 
 
-class ResultCollector:  # pylint: disable=too-few-public-methods
+class ResultCollector:
+    "Pytest plugin that collects results for later analysis."
     def __init__(self):
         self.reports = []
 
     def pytest_runtest_logreport(self, report):
+        "Collect logreports into a list."
         self.reports.append(report)
 
 
-class PytestRunner(TestRunner):  # pylint: disable=too-few-public-methods
+class PytestRunner(TestRunner):
     """A TestRunner using pytest.
 
     This treats `test_args` as a single string. It splits this string and

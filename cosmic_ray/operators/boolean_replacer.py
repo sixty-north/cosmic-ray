@@ -1,3 +1,5 @@
+"Implementation of the boolean replacement operators."
+
 import ast
 import sys
 
@@ -105,15 +107,19 @@ class AddNot(Operator):
     """
 
     def visit_If(self, node):  # noqa # pylint: disable=invalid-name
+        "Visit an 'if' node."
         return self.visit_mutation_site(node)
 
     def visit_IfExp(self, node):  # noqa # pylint: disable=invalid-name
+        "Visit an 'if' expression node."
         return self.visit_mutation_site(node)
 
     def visit_Assert(self, node):  # noqa # pylint: disable=invalid-name
+        "Visit an 'assert' node."
         return self.visit_mutation_site(node)
 
     def visit_While(self, node):  # noqa # pylint: disable=invalid-name
+        "Visit a 'while' node."
         return self.visit_mutation_site(node)
 
     def mutate(self, node, _):

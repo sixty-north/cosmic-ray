@@ -1,3 +1,6 @@
+"""Implementation of the NumberReplacer operator.
+"""
+
 import ast
 
 from .operator import Operator
@@ -7,6 +10,7 @@ class NumberReplacer(Operator):
     """An operator that modifies numeric constants."""
 
     def visit_Num(self, node):  # noqa # pylint: disable=invalid-name
+        "Visit a number node."
         return self.visit_mutation_site(node)
 
     def mutate(self, node, _):

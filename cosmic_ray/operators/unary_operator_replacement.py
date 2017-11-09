@@ -1,3 +1,6 @@
+"""Implementation of the unary-operator-replacement operator.
+"""
+
 import ast
 
 from .operator import Operator
@@ -36,6 +39,7 @@ class MutateUnaryOperator(Operator):
             len(build_mutations([node.op], _to_ops)))
 
     def mutate(self, node, idx):
+        "Perform the `idx`th mutation on node."
         _, to_op = build_mutations([node.op], _to_ops)[idx]
         if to_op:
             node.op = to_op()

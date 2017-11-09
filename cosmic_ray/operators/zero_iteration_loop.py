@@ -1,3 +1,5 @@
+"Implementation of the zero-iteration-loop operator."
+
 import ast
 
 from .operator import Operator
@@ -7,6 +9,7 @@ class ZeroIterationLoop(Operator):
     """An operator that modified for-loops to have zero iterations."""
 
     def visit_For(self, node):  # noqa # pylint: disable=invalid-name
+        "Visit a 'for' node."
         return self.visit_mutation_site(node)
 
     def mutate(self, node, _):

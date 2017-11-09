@@ -32,7 +32,7 @@ before_script:
 
 script:
 - tox -e py
-- if [[ "$TRAVIS_PYTHON_VERSION" == '3.6' ]]; then tox -e lint,docs; fi
+- if [[ "$TRAVIS_PYTHON_VERSION" == '3.6' ]]; then tox -e lint,style,docs; fi
 
 # When we push to 'release', the python-3.6 travis run should do a deployment.
 deploy:

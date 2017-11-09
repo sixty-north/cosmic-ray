@@ -6,7 +6,7 @@ from importlib.abc import MetaPathFinder
 from importlib.machinery import ModuleSpec
 
 
-class ASTLoader:  # pylint:disable=old-style-class,too-few-public-methods
+class ASTLoader:
 
     """
     An `importlib.abc.Loader` which loads an AST for a particular name.
@@ -24,14 +24,16 @@ class ASTLoader:  # pylint:disable=old-style-class,too-few-public-methods
 
     def create_module(self,  # pylint: disable=no-self-use
                       spec):  # pylint: disable=unused-argument
+        "Default module creation semantics."
         return None
 
     def exec_module(self, mod):
+        "Compile mutated AST and execute it into `mod`."
         compiled = compile(self._ast, self._name, 'exec')
         exec(compiled, mod.__dict__)  # pylint:disable=exec-used
 
 
-class ASTFinder(MetaPathFinder):  # pylint:disable=too-few-public-methods
+class ASTFinder(MetaPathFinder):
 
     """
     An `importlib.ast.MetaPathFinder` that associates a module name
@@ -50,6 +52,7 @@ class ASTFinder(MetaPathFinder):  # pylint:disable=too-few-public-methods
 
     def find_spec(self, fullname,
                   path, target=None):  # pylint:disable=unused-argument
+        "Find modules matching `self._fullname`."
         if fullname == self._fullname:
             return ModuleSpec(fullname,
                               ASTLoader(self._ast, fullname))

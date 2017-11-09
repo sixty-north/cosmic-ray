@@ -22,6 +22,8 @@ class Timer:
         self.reset()
 
     def reset(self):
+        """Set the elapsed time back to 0.
+        """
         self._start = datetime.datetime.now()
 
     @property

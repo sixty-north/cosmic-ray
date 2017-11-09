@@ -25,7 +25,7 @@ from .work_record import WorkRecord
 LOG = logging.getLogger()
 
 
-class WorkerOutcome:  # pylint: disable=too-few-public-methods
+class WorkerOutcome:
     """Possible outcomes for a worker.
     """
     NORMAL = 'normal'

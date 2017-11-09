@@ -2,14 +2,14 @@
 
 from celery import Celery
 
-app = Celery(
+APP = Celery(
     'cosmic-ray-celery-executor',
     broker='amqp://',
     backend='amqp://')
 
-app.conf.CELERY_ACCEPT_CONTENT = ['json']
-app.conf.CELERY_TASK_SERIALIZER = 'json'
-app.conf.CELERY_RESULT_SERIALIZER = 'json'
+APP.conf.CELERY_ACCEPT_CONTENT = ['json']
+APP.conf.CELERY_TASK_SERIALIZER = 'json'
+APP.conf.CELERY_RESULT_SERIALIZER = 'json'
 
 # This will remove all pending work from the queue. We need to do this when we
 # shut down during exec:

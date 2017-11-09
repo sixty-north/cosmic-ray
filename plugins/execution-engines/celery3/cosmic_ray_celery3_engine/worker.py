@@ -4,12 +4,12 @@ from celery.utils.log import get_logger
 
 from cosmic_ray.worker import worker_process
 
-from .app import app
+from .app import APP
 
 LOG = get_logger(__name__)
 
 
-@app.task(name='cosmic_ray_celery3_engine.worker')
+@APP.task(name='cosmic_ray_celery3_engine.worker')
 def worker_task(work_record,
                 timeout,
                 config):

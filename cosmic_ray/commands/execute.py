@@ -1,3 +1,5 @@
+"Implementation of the 'execute' command."
+
 from cosmic_ray.work_db import use_db, WorkDB
 from cosmic_ray.plugins import get_execution_engine
 

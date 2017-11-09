@@ -48,6 +48,13 @@ def is_killed(record):
 
 
 def create_report(records, show_pending, full_report=False):
+    """Generate the lines of a simple report.
+
+    Args:
+      records: An iterable of `WorkRecord`s.
+      show_pending: Show output for records which are pending.
+      full_report: Whether to report on mutants that were killed.
+    """
     total_jobs = 0
     pending_jobs = 0
     kills = 0

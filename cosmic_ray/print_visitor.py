@@ -1,3 +1,8 @@
+"""A NodeVisitor that prints information.
+
+Primarily useful for debugging and diagnostics.
+"""
+
 import ast
 
 
@@ -18,10 +23,13 @@ class PrintVisitor(ast.NodeVisitor):
 
     def visit_Num(self,  # noqa # pylint:disable=invalid-name,no-self-use
                   node):
+        "Special print handling for numbers."
         print('a number:', node)
 
 
 def dump_mod():
+    """Print an entire module with the PrintVisitor.
+    """
     import mod  # pylint:disable=import-error
     with open(mod.__file__, 'rt') as module_file:
         nodes = ast.parse(module_file.read())
