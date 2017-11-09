@@ -33,9 +33,9 @@ LOG = logging.getLogger()
 def handle_baseline(args):
     """usage: cosmic-ray baseline <config-file>
 
-    Run an un-mutated baseline of the specific configuration. This is largely like
-    running a "worker" process, with the difference that a baseline run doesn't
-    mutate the code.
+    Run an un-mutated baseline of the specific configuration. This is
+    largely like running a "worker" process, with the difference that
+    a baseline run doesn't mutate the code.
 
     """
     sys.path.insert(0, '')
@@ -76,21 +76,22 @@ def handle_new_config(args):
 def handle_init(args):
     """usage: cosmic-ray init <config-file> <session-file>
 
-    Initialize a mutation testing session from a configuration. This primarily
-    creates a session - a database of "work to be done" - which describes all of
-    the mutations and test runs that need to be executed for a full mutation
-    testing run. The configuration specifies the top-level module to mutate, the
-    tests to run, and how to run them.
+    Initialize a mutation testing session from a configuration. This
+    primarily creates a session - a database of "work to be done" -
+    which describes all of the mutations and test runs that need to be
+    executed for a full mutation testing run. The configuration
+    specifies the top-level module to mutate, the tests to run, and how
+    to run them.
 
     This command doesn't actually run any tests. Instead, it scans the
-    modules-under-test and simply generates the work order which can be executed
-    with other commands.
+    modules-under-test and simply generates the work order which can be
+    executed with other commands.
 
-    The `session-file` is the filename for the database in which the work order
-    will be stored.
+    The `session-file` is the filename for the database in which the
+    work order will be stored.
     """
-    # This lets us import modules from the current directory. Should probably
-    # be optional, and needs to also be applied to workers!
+    # This lets us import modules from the current directory. Should
+    # probably be optional, and needs to also be applied to workers!
     sys.path.insert(0, '')
 
     config_file = args['<config-file>']
@@ -154,9 +155,9 @@ def handle_config(args):
 def handle_exec(args):
     """usage: cosmic-ray exec <session-file>
 
-    Perform the remaining work to be done in the specified session. This requires
-    that the rest of your mutation testing infrastructure (e.g. worker processes)
-    are already running.
+    Perform the remaining work to be done in the specified session.
+    This requires that the rest of your mutation testing
+    infrastructure (e.g. worker processes) are already running.
     """
 
     session_file = get_db_name(
@@ -168,8 +169,8 @@ def handle_exec(args):
 def handle_dump(args):
     """usage: cosmic-ray dump <session-file>
 
-    JSON dump of session data. This output is typically run through other programs
-    to produce reports.
+    JSON dump of session data. This output is typically run through
+    other programs to produce reports.
     """
     session_file = get_db_name(args['<session-file>'])
 
@@ -182,9 +183,9 @@ def handle_dump(args):
 def handle_counts(args):
     """usage: {program} counts <config-file>
 
-    Count the number of tests that would be run for a given testing configuration.
-    This is mostly useful for estimating run times and keeping track of testing
-    statistics.
+    Count the number of tests that would be run for a given testing
+    configuration. This is mostly useful for estimating run times and
+    keeping track of testing statistics.
     """
     config = load_config(args['<config-file>'])
 
@@ -230,14 +231,14 @@ def handle_worker(args):
     """usage: {program} worker \
     [options] <module> <operator> <occurrence> [<config-file>]
 
-    Run a worker process which performs a single mutation and test run. Each worker
-    does a minimal, isolated chunk of work: it mutates the <occurence>-th instance
-    of <operator> in <module>, runs the test suite defined in the configuration,
-    prints the results, and exits.
+    Run a worker process which performs a single mutation and test run.
+    Each worker does a minimal, isolated chunk of work: it mutates the
+    <occurence>-th instance of <operator> in <module>, runs the test
+    suite defined in the configuration, prints the results, and exits.
 
-    Normally you won't run this directly. Rather, it will be launched by an
-    execution engine. However, it can be useful to run this on its own for testing
-    and debugging purposes.
+    Normally you won't run this directly. Rather, it will be launched
+    by an execution engine. However, it can be useful to run this on
+    its own for testing and debugging purposes.
 
     options:
       --keep-stdout       Do not squelch stdout
