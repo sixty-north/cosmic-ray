@@ -304,6 +304,7 @@ def main(argv=None):
             doc_template=DOC_TEMPLATE,
             common_option_handler=common_option_handler)
     except docopt.DocoptExit as exc:
+        print(exc.code, file=sys.stderr)
         exc.code = os.EX_USAGE
         raise
 
