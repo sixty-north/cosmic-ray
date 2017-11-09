@@ -1,25 +1,37 @@
 import io
 import os
-import re
 import sys
 
 from setuptools import setup, find_packages
 
-THIS_DIR = os.path.dirname(__file__)
-sys.path.append(os.path.join(THIS_DIR, 'scripts'))
 
-import cosmic_ray_tooling as tooling
+def local_file(*name):
+    return os.path.join(
+        os.path.dirname(__file__),
+        *name)
 
 
-def read(*names, **kwargs):
+def read(name, **kwargs):
     with io.open(
-        os.path.join(THIS_DIR, *names),
+        name,
         encoding=kwargs.get("encoding", "utf8")
     ) as handle:
         return handle.read()
 
 
-LONG_DESCRIPTION = read('README.rst', mode='rt')
+# This is unfortunately duplicated from scripts/cosmic_ray_tooling.py. I
+# couldn't find a way to use the original version and still have tox
+# work...hmmm...
+def read_version():
+    "Read the `(version-string, version-info)` from `cosmic_ray/version.py`."
+    version_file = local_file('cosmic_ray', 'version.py')
+    vars = {}
+    with open(version_file) as f:
+        exec(f.read(), {}, vars)
+    return (vars['__version__'], vars['__version_info__'])
+
+
+LONG_DESCRIPTION = read(local_file('README.rst'), mode='rt')
 
 OPERATORS = [
     'number_replacer = '
@@ -76,7 +88,7 @@ if sys.version_info < (3, 4):
 
 setup(
     name='cosmic_ray',
-    version=tooling.read_version(tooling.VERSION_FILE)[0],
+    version=read_version()[0],
     packages=find_packages(),
 
     author='Sixty North AS',
