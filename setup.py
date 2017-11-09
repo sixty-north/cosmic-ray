@@ -25,10 +25,10 @@ def read(name, **kwargs):
 def read_version():
     "Read the `(version-string, version-info)` from `cosmic_ray/version.py`."
     version_file = local_file('cosmic_ray', 'version.py')
-    vars = {}
+    local_vars = {}
     with open(version_file) as handle:
-        exec(handle.read(), {}, vars)
-    return (vars['__version__'], vars['__version_info__'])
+        exec(handle.read(), {}, local_vars)  # pylint: disable=exec-used
+    return (local_vars['__version__'], local_vars['__version_info__'])
 
 
 LONG_DESCRIPTION = read(local_file('README.rst'), mode='rt')
