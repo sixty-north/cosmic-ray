@@ -9,10 +9,12 @@ VERSION_FILE = os.path.join(ROOT, 'cosmic_ray', 'version.py')
 
 
 def git(*args):
+    "Run a git command."
     subprocess.check_call(('git',) + args)
 
 
 def tags():
+    "Get a set of tags for the current git repo."
     result = [t.decode('ascii') for t in subprocess.check_output([
         'git', 'tag'
     ]).split(b"\n")]
@@ -21,6 +23,7 @@ def tags():
 
 
 def create_tag_and_push(version):
+    "Create a git tag for `version` and push it to origin."
     assert version not in tags()
     git('config', 'user.name', 'Travis CI on behalf of Austin Bingham')
     git('config', 'user.email', 'austin@sixty-north.com')
@@ -41,6 +44,7 @@ def create_tag_and_push(version):
 
 
 def read_version(version_file):
+    "Read the `(version-string, version-info)` from `version_file`."
     vars = {}
     with open(version_file) as f:
         exec(f.read(), {}, vars)
