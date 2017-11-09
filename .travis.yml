@@ -35,6 +35,7 @@ script:
 #- tox -e py
 #- if [[ "$TRAVIS_PYTHON_VERSION" == '3.6' ]]; then tox -e lint,docs; fi
 
+# When we push to 'release', the python-3.6 travis run should do a deployment.
 deploy:
   provider: pypi
   user: abingham
@@ -43,6 +44,7 @@ deploy:
   distributions: bdist_wheel sdist
   on:
     branch: release
+    python: 3.6
 
 before_deploy:
   - openssl aes-256-cbc -K $encrypted_6ad9c4041ffc_key -iv $encrypted_6ad9c4041ffc_iv -in deploy_key.enc -out deploy_key -d
