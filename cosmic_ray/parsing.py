@@ -7,9 +7,8 @@ import logging
 LOG = logging.getLogger()
 
 
-# TODO: This is where we can do different things for different kinds of
-# modules. Right now we only really handle normal source-code, text-file
-# modules.
+# This is where we can do different things for different kinds of modules.
+# Right now we only really handle normal source-code, text-file modules.
 
 
 def get_ast(module):

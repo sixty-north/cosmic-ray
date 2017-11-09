@@ -17,11 +17,13 @@ class _CountingCore:
         self.count = 0
 
     def visit_mutation_site(self, node, _, count):
+        "Called when a mutation site is reached."
         self.count += count
         return node
 
     @staticmethod
     def repr_args():
+        "Extra arguments to display in operator reprs."
         return []
 
 

@@ -1,3 +1,12 @@
+"""A `WorkRecord` carries information about potential and completed work in the
+Cosmic Ray system.
+
+`WorkRecord` is one of the central structures in CR. It can describe both work
+to be done and work that has been done, and it indicates how test sessions have
+completed.
+"""
+
+
 def make_record(name, fields=(), docstring=""):
     """Create a new record class.
 
@@ -55,6 +64,11 @@ def make_record(name, fields=(), docstring=""):
         raise KeyError(msg)
 
     def update(self, container):
+        """Add all key-value pairs from `container` into this record.
+
+        If there are duplicate keys, those in `container` will overwrite those
+        here.
+        """
         for key, values in container.items():
             self[key] = values
 

@@ -1,3 +1,6 @@
+"""Various utility functions with no better place to live.
+"""
+
 try:
     from contextlib import redirect_stdout
 except ImportError:

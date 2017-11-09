@@ -1,3 +1,6 @@
+"""Query and retrieve the various plugins in Cosmic Ray.
+"""
+
 from stevedore import driver, ExtensionManager
 
 
@@ -36,6 +39,7 @@ def test_runner_names():
 
 
 def get_execution_engine(name):
+    """Get the execution engine by name."""
     manager = driver.DriverManager(
         namespace='cosmic_ray.execution_engines',
         name=name,

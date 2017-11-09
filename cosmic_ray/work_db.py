@@ -1,23 +1,4 @@
-# Database that keeps track of mutation testing work progress.
-#
-# Essentially, there's a row in the DB for each mutation that needs to be
-# executed in some run. These initially start off with no results, and results
-# are added as they're completed.
-#
-# What describes a work-item?
-#  - module name
-#  - operator name
-#  - occurrence
-#  - test runner name
-#  - test args
-#  - timeout
-#
-# What describes results?
-#  - one of the strings 'exception', 'no-test', or 'normal'
-#  - for 'exception', the sys.exc_info() of the exception
-#  - for 'no-test', there are no other results
-#  - for 'normal', there is an *activation-record* (a dict) and a
-#    test_runner.TestResult.
+"""Implementation of the WorkDB."""
 
 import contextlib
 import os
@@ -31,7 +12,15 @@ from .work_record import WorkRecord
 
 
 class WorkDB:
+    """WorkDB is the database that keeps track of mutation testing work progress.
+
+    Essentially, there's a row in the DB for each mutation that needs to be
+    executed in some run. These initially start off with no results, and
+    results are added as they're completed.
+    """
     class Mode(Enum):
+        "Modes in which a WorkDB may be opened."
+
         # Open existing files, creating if necessary
         create = 1
 
@@ -57,6 +46,7 @@ class WorkDB:
         self._db = tinydb.TinyDB(path)
 
     def close(self):
+        """Close the database."""
         self._db.close()
 
     @property
