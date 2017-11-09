@@ -207,21 +207,23 @@ def handle_counts(args):
 
 
 @dsc.command()
-def handle_test_runners(config):  # pylint: disable=unused-argument
+def handle_test_runners(args):
     """usage: {program} test-runners
 
     List the available test-runner plugins.
     """
+    assert args
     print('\n'.join(cosmic_ray.plugins.test_runner_names()))
     return 0
 
 
 @dsc.command()
-def handle_operators(config):  # pylint: disable=unused-argument
+def handle_operators(args):
     """usage: {program} operators
 
     List the available operator plugins.
     """
+    assert args
     print('\n'.join(cosmic_ray.plugins.operator_names()))
     return 0
 
