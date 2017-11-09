@@ -5,22 +5,18 @@ import sys
 
 from setuptools import setup, find_packages
 
+THIS_DIR = os.path.dirname(__file__)
+sys.path.append(os.path.join(THIS_DIR, 'scripts'))
+
+import cosmic_ray_tooling as tooling
+
 
 def read(*names, **kwargs):
     with io.open(
-        os.path.join(os.path.dirname(__file__), *names),
+        os.path.join(THIS_DIR, *names),
         encoding=kwargs.get("encoding", "utf8")
     ) as handle:
         return handle.read()
-
-
-def find_version(*file_paths):
-    version_file = read(*file_paths)
-    version_match = re.search(r"^__version_info__ = \((.*), (.*), (.*)\)",
-                              version_file, re.M)
-    if version_match:
-        return '.'.join(version_match.group(i) for i in range(1, 4))
-    raise RuntimeError("Unable to find version string.")
 
 
 LONG_DESCRIPTION = read('README.rst', mode='rt')
@@ -80,7 +76,7 @@ if sys.version_info < (3, 4):
 
 setup(
     name='cosmic_ray',
-    version=find_version('cosmic_ray/version.py'),
+    version=tooling.read_version(tooling.VERSION_FILE)[0],
     packages=find_packages(),
 
     author='Sixty North AS',
