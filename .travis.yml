@@ -43,6 +43,6 @@ deploy:
   distributions: bdist_wheel sdist
   on:
     branch: release
-  before_deploy:
+  after_deploy:
   - openssl aes-256-cbc -K $encrypted_6ad9c4041ffc_key -iv $encrypted_6ad9c4041ffc_iv -in deploy_key.enc -out deploy_key -d
   - python scripts/make_release_tag.py
