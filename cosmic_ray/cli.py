@@ -290,6 +290,7 @@ def common_option_handler(config):
     if config['--verbose']:
         logging.basicConfig(level=logging.INFO)
 
+
 _SIGNAL_EXIT_CODE_BASE = 128
 
 

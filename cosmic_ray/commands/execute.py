@@ -22,6 +22,6 @@ results.
 
             for work_record in work_records:
                 work_db.update_work_record(work_record)
-    except FileNotFoundError as e:
-        raise FileNotFoundError(str(e).replace(
-            'Requested file', 'Corresponding database', 1)) from e
+    except FileNotFoundError as exc:
+        raise FileNotFoundError(str(exc).replace(
+            'Requested file', 'Corresponding database', 1)) from exc
