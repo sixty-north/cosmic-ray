@@ -38,7 +38,7 @@ def test_e2e(project_root, test_runner, engine):
 
     session_path = project_root / session
     with use_db(str(session_path), WorkDB.Mode.open) as work_db:
-        rate = survival_rate(work_db.work_records)
+        rate = survival_rate(work_db.work_items)
         assert rate == 0.0
 
 
@@ -51,7 +51,7 @@ def test_importing(project_root):
 
     session_path = project_root / session
     with use_db(str(session_path), WorkDB.Mode.open) as work_db:
-        rate = survival_rate(work_db.work_records)
+        rate = survival_rate(work_db.work_items)
         assert rate == 0.0
 
 
@@ -64,7 +64,7 @@ def test_empty___init__(project_root):
 
     session_path = project_root / session
     with use_db(str(session_path), WorkDB.Mode.open) as work_db:
-        rate = survival_rate(work_db.work_records)
+        rate = survival_rate(work_db.work_items)
         assert rate == 0.0
 
 

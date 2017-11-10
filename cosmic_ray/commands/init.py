@@ -3,7 +3,7 @@ import logging
 import uuid
 
 import cosmic_ray.modules
-from cosmic_ray.work_record import WorkRecord
+from cosmic_ray.work_item import WorkItem
 
 LOG = logging.getLogger()
 
@@ -30,10 +30,10 @@ def init(modules,
         config=config,
         timeout=timeout)
 
-    work_db.clear_work_records()
+    work_db.clear_work_items()
 
-    work_db.add_work_records(
-        WorkRecord(
+    work_db.add_work_items(
+        WorkItem(
             job_id=uuid.uuid4().hex,
             module=module.__name__,
             operator=opname,

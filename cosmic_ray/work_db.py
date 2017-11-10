@@ -8,7 +8,7 @@ from enum import Enum
 # for something quicker if not. But for now it's *very* convenient.
 import tinydb
 
-from .work_record import WorkRecord
+from .work_item import WorkItem
 
 
 class WorkDB:
@@ -91,17 +91,15 @@ class WorkDB:
         return (record['config'],
                 record['timeout'])
 
-    def add_work_records(self, records):
-        """Add a sequence of WorkRecords.
+    def add_work_items(self, work_items):
+        """Add a sequence of WorkItems.
 
         Args:
-          records: An iterable of tuples of the form `(module-name,
-            operator-name, occurrence)`.
-
+          work_items: An iterable of WorkItems.
         """
-        self._work_items.insert_multiple(records)
+        self._work_items.insert_multiple(work_items)
 
-    def clear_work_records(self):
+    def clear_work_items(self):
         """Clear all work items from the session.
 
         This removes any associated results as well.
@@ -109,34 +107,33 @@ class WorkDB:
         self._work_items.purge()
 
     @property
-    def work_records(self):
-        """The sequence of `WorkItem`s in the session.
+    def work_items(self):
+        """The sequence of WorkItems in the session.
 
         This include both complete and incomplete items.
 
         Each work item is a dict with the keys `module-name`, `op-name`, and
         `occurrence`. Items with results will also have the keys `results-type`
         and `results-data`.
-
         """
-        return (WorkRecord(r) for r in self._work_items.all())
+        return (WorkItem(r) for r in self._work_items.all())
 
-    def update_work_record(self, work_record):
-        """Updates an existing WorkRecord by job_id.
+    def update_work_item(self, work_item):
+        """Updates an existing WorkItem by job_id.
 
         Args:
-            work_record: A WorkRecord representing the new state of a job.
+            work_item: A WorkItem representing the new state of a job.
 
         Raises:
           KeyError: If there is no existing record with the same job_id.
         """
         self._work_items.update(
-            work_record,
-            tinydb.Query().job_id == work_record.job_id)
+            work_item,
+            tinydb.Query().job_id == work_item.job_id)
 
     @property
-    def pending_work(self):
-        """The sequence of pending `WorkItem`s in the session."""
+    def pending_work_items(self):
+        """The sequence of pending WorkItems in the session."""
         table = self._work_items
         work_item = tinydb.Query()
 
@@ -147,7 +144,7 @@ class WorkDB:
             work_item.worker_outcome.test(
                 lambda val: val is None))
 
-        return (WorkRecord(r) for r in pending)
+        return (WorkItem(r) for r in pending)
 
 
 @contextlib.contextmanager

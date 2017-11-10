@@ -5,29 +5,29 @@ from cosmic_ray.testing.test_runner import TestOutcome
 from cosmic_ray.worker import WorkerOutcome
 
 
-def _print_item(work_record, full_report):
-    data = work_record.data
-    outcome = work_record.worker_outcome
+def _print_item(work_item, full_report):
+    data = work_item.data
+    outcome = work_item.worker_outcome
     if outcome in [WorkerOutcome.NORMAL, WorkerOutcome.EXCEPTION]:
-        outcome = work_record.test_outcome
+        outcome = work_item.test_outcome
     ret_val = [
         'job ID {}:{}:{}'.format(
-            work_record.job_id,
+            work_item.job_id,
             outcome,
-            work_record.module),
-        'command: {}'.format(work_record.command_line or '')
+            work_item.module),
+        'command: {}'.format(work_item.command_line or '')
     ]
     if outcome == TestOutcome.KILLED and not full_report:
         ret_val = []
-    elif work_record.worker_outcome == WorkerOutcome.TIMEOUT:
+    elif work_item.worker_outcome == WorkerOutcome.TIMEOUT:
         if full_report:
             ret_val.append("timeout: {:.3f} sec".format(data))
         else:
             ret_val = []
-    elif work_record.worker_outcome in [WorkerOutcome.NORMAL,
-                                        WorkerOutcome.EXCEPTION]:
+    elif work_item.worker_outcome in [WorkerOutcome.NORMAL,
+                                      WorkerOutcome.EXCEPTION]:
         ret_val += data
-        ret_val += work_record.diff
+        ret_val += work_item.diff
 
     # for presentation purposes only
     if ret_val:
@@ -37,7 +37,7 @@ def _print_item(work_record, full_report):
 
 
 def is_killed(record):
-    """Determines if a WorkRecord should be considered "killed".
+    """Determines if a WorkItem should be considered "killed".
     """
     if record.worker_outcome == WorkerOutcome.TIMEOUT:
         return True
@@ -51,7 +51,7 @@ def create_report(records, show_pending, full_report=False):
     """Generate the lines of a simple report.
 
     Args:
-      records: An iterable of `WorkRecord`s.
+      records: An iterable of `WorkItem`s.
       show_pending: Show output for records which are pending.
       full_report: Whether to report on mutants that were killed.
     """
@@ -81,7 +81,7 @@ def create_report(records, show_pending, full_report=False):
 
 
 def survival_rate(records):
-    """Calcuate the survival rate for a sequence of WorkRecords.
+    """Calcuate the survival rate for a series of WorkItems.
     """
     total_jobs = 0
     pending_jobs = 0

@@ -1,4 +1,4 @@
-from cosmic_ray.work_record import make_record
+from cosmic_ray.work_item import make_record
 from hypothesis import given, assume
 import hypothesis.strategies as ST
 import pytest
