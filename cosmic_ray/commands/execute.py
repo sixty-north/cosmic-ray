@@ -11,13 +11,17 @@ results.
     be executed, and records any results that arrive.
     """
 
-    with use_db(db_name, mode=WorkDB.Mode.open) as work_db:
-        config, timeout = work_db.get_config()
-        engine_config = config['execution-engine']
-        executor = get_execution_engine(engine_config['name'])
-        work_records = executor(timeout,
-                                work_db.pending_work,
-                                config)
+    try:
+        with use_db(db_name, mode=WorkDB.Mode.open) as work_db:
+            config, timeout = work_db.get_config()
+            engine_config = config['execution-engine']
+            executor = get_execution_engine(engine_config['name'])
+            work_records = executor(timeout,
+                                    work_db.pending_work,
+                                    config)
 
-        for work_record in work_records:
-            work_db.update_work_record(work_record)
+            for work_record in work_records:
+                work_db.update_work_record(work_record)
+    except FileNotFoundError as exc:
+        raise FileNotFoundError(str(exc).replace(
+            'Requested file', 'Corresponding database', 1)) from exc
