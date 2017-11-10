@@ -290,6 +290,8 @@ def common_option_handler(config):
     if config['--verbose']:
         logging.basicConfig(level=logging.INFO)
 
+_SIGNAL_EXIT_CODE_BASE = 128
+
 
 def main(argv=None):
     """ Invoke the cosmic ray evaluation.
@@ -297,7 +299,7 @@ def main(argv=None):
     :param argv: the command line arguments
     """
     signal.signal(signal.SIGINT,
-                  lambda *args: sys.exit(0))
+                  lambda *args: sys.exit(_SIGNAL_EXIT_CODE_BASE + signal.SIGINT))
 
     try:
         return dsc.main(
@@ -310,6 +312,15 @@ def main(argv=None):
     except docopt.DocoptExit as exc:
         print(exc, file=sys.stderr)
         return os.EX_USAGE
+    except FileNotFoundError as exc:
+        print(exc, file=sys.stderr)
+        return os.EX_NOINPUT
+    except PermissionError as exc:
+        print(exc, file=sys.stderr)
+        return os.EX_NOPERM
+    except ConfigError as exc:
+        print(exc, file=sys.stderr)
+        return os.EX_CONFIG
 
 
 if __name__ == '__main__':
