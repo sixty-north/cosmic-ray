@@ -45,7 +45,6 @@ def handle_baseline(args):
     test_runner = cosmic_ray.plugins.get_test_runner(
         config['test-runner']['name'],
         config['test-runner']['args'])
-
     work_record = test_runner()
     # note: test_runner() results are meant to represent
     # status codes when executed against mutants.
@@ -58,7 +57,9 @@ def handle_baseline(args):
         # from the test runner and exit
         LOG.error('baseline failed')
         print(''.join(work_record.data))
-        sys.exit(2)
+        return 2
+
+    return os.EX_OK
 
 
 @dsc.command()
@@ -70,6 +71,8 @@ def handle_new_config(args):
     config = cosmic_ray.commands.new_config()
     with open(args['<config-file>'], mode='wt') as handle:
         handle.write(config)
+
+    return os.EX_OK
 
 
 @dsc.command()
@@ -104,9 +107,15 @@ def handle_init(args):
     if 'timeout' in config:
         timeout = float(config['timeout'])
     elif 'baseline' in config:
-        baseline_mult = float(config['baseline'])
-        if baseline_mult is None:
-            raise ValueError('Baseline multiplier must be a positive number.')
+        try:
+            baseline_mult = float(config['baseline'])
+            if baseline_mult <= 0:
+                raise ValueError()
+        except (ValueError, TypeError):
+            raise ConfigError(
+                'Baseline multiplier must be a positive number, not {}'.format(
+                    config['baseline']))
+
         command = 'cosmic-ray baseline {}'.format(
             args['<config-file>'])
 
@@ -138,6 +147,8 @@ def handle_init(args):
             config,
             timeout)
 
+    return os.EX_OK
+
 
 @dsc.command()
 def handle_config(args):
@@ -149,6 +160,8 @@ def handle_config(args):
     with use_db(session_file) as database:
         config, _ = database.get_config()
         print(json.dumps(config))
+
+    return os.EX_OK
 
 
 @dsc.command()
@@ -164,6 +177,8 @@ def handle_exec(args):
         args.get('<session-file>'))
     cosmic_ray.commands.execute(session_file)
 
+    return os.EX_OK
+
 
 @dsc.command()
 def handle_dump(args):
@@ -177,6 +192,8 @@ def handle_dump(args):
     with use_db(session_file, WorkDB.Mode.open) as database:
         for record in database.work_records:
             print(json.dumps(record))
+
+    return os.EX_OK
 
 
 @dsc.command()
@@ -205,6 +222,8 @@ def handle_counts(args):
           sum(itertools.chain(
               *(d.values() for d in counts.values()))))
 
+    return os.EX_OK
+
 
 @dsc.command()
 def handle_test_runners(args):
@@ -214,7 +233,8 @@ def handle_test_runners(args):
     """
     assert args
     print('\n'.join(cosmic_ray.plugins.test_runner_names()))
-    return 0
+
+    return os.EX_OK
 
 
 @dsc.command()
@@ -225,7 +245,8 @@ def handle_operators(args):
     """
     assert args
     print('\n'.join(cosmic_ray.plugins.operator_names()))
-    return 0
+
+    return os.EX_OK
 
 
 @dsc.command()
@@ -265,6 +286,8 @@ def handle_worker(args):
                 test_runner)
 
     sys.stdout.write(json.dumps(work_record))
+
+    return os.EX_OK
 
 
 DOC_TEMPLATE = """{program}
