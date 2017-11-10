@@ -135,7 +135,7 @@ class WorkDB:
             tinydb.Query().job_id == work_record.job_id)
 
     @property
-    def pending_work(self):
+    def pending_work_items(self):
         """The sequence of pending `WorkItem`s in the session."""
         table = self._work_items
         work_item = tinydb.Query()

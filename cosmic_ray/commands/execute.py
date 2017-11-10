@@ -17,7 +17,7 @@ results.
             engine_config = config['execution-engine']
             executor = get_execution_engine(engine_config['name'])
             work_records = executor(timeout,
-                                    work_db.pending_work,
+                                    work_db.pending_work_items,
                                     config)
 
             for work_record in work_records:
