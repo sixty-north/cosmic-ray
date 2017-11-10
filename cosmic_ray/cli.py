@@ -300,17 +300,17 @@ def main(argv=None):
                   lambda *args: sys.exit(0))
 
     try:
-        dsc.main(
+        return dsc.main(
             'cosmic-ray',
             'cosmic-ray v.2',
             argv=argv,
             doc_template=DOC_TEMPLATE,
-            common_option_handler=common_option_handler)
+            common_option_handler=common_option_handler,
+            exit_at_end=False)
     except docopt.DocoptExit as exc:
-        print(exc.code, file=sys.stderr)
-        exc.code = os.EX_USAGE
-        raise
+        print(exc, file=sys.stderr)
+        return os.EX_USAGE
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())
