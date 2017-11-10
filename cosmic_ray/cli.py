@@ -25,6 +25,7 @@ from cosmic_ray.testing.test_runner import TestOutcome
 from cosmic_ray.timing import Timer
 from cosmic_ray.util import redirect_stdout
 from cosmic_ray.work_db import use_db, WorkDB
+from cosmic_ray.version import __version__
 
 LOG = logging.getLogger()
 
@@ -328,7 +329,7 @@ def main(argv=None):
     try:
         return dsc.main(
             'cosmic-ray',
-            'cosmic-ray v.2',
+            'Cosmic Ray {}'.format(__version__),
             argv=argv,
             doc_template=DOC_TEMPLATE,
             common_option_handler=common_option_handler,
