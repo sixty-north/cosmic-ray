@@ -304,7 +304,6 @@ def main(argv=None):
                   lambda *args: sys.exit(_SIGNAL_EXIT_CODE_BASE + signal.SIGINT))
 
     try:
-        print(__version__)
         return dsc.main(
             'cosmic-ray',
             'Cosmic Ray {}'.format(__version__),
