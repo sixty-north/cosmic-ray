@@ -21,6 +21,7 @@ import cosmic_ray.modules
 import cosmic_ray.plugins
 import cosmic_ray.worker
 from cosmic_ray.config import ConfigError, get_db_name, load_config
+from cosmic_ray.progress import report_progress
 from cosmic_ray.testing.test_runner import TestOutcome
 from cosmic_ray.timing import Timer
 from cosmic_ray.util import redirect_stdout
@@ -325,6 +326,10 @@ def main(argv=None):
     """
     signal.signal(signal.SIGINT,
                   lambda *args: sys.exit(_SIGNAL_EXIT_CODE_BASE + signal.SIGINT))
+
+    if hasattr(signal, 'SIGINFO'):
+        signal.signal(getattr(signal, 'SIGINFO'),
+                      lambda *args: report_progress(sys.stderr))
 
     try:
         return dsc.main(
