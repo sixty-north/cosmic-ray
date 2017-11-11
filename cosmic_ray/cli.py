@@ -46,18 +46,18 @@ def handle_baseline(args):
     test_runner = cosmic_ray.plugins.get_test_runner(
         config['test-runner']['name'],
         config['test-runner']['args'])
-    work_record = test_runner()
+    work_item = test_runner()
     # note: test_runner() results are meant to represent
     # status codes when executed against mutants.
     # SURVIVED means that the test suite executed without any error
     # hence CR thinks the mutant survived. However when running the
     # baseline execution we don't have mutations and really want the
     # test suite to report PASS, hence the comparison below!
-    if work_record.test_outcome != TestOutcome.SURVIVED:
+    if work_item.test_outcome != TestOutcome.SURVIVED:
         # baseline failed, print whatever was returned
         # from the test runner and exit
         LOG.error('baseline failed')
-        print(''.join(work_record.data))
+        print(''.join(work_item.data))
         return 2
 
     return os.EX_OK
@@ -191,7 +191,7 @@ def handle_dump(args):
     session_file = get_db_name(args['<session-file>'])
 
     with use_db(session_file, WorkDB.Mode.open) as database:
-        for record in database.work_records:
+        for record in database.work_items:
             print(json.dumps(record))
 
     return os.EX_OK
@@ -280,13 +280,13 @@ def handle_worker(args):
 
     with open(os.devnull, 'w') as devnull:
         with redirect_stdout(sys.stdout if args['--keep-stdout'] else devnull):
-            work_record = cosmic_ray.worker.worker(
+            work_item = cosmic_ray.worker.worker(
                 args['<module>'],
                 operator,
                 int(args['<occurrence>']),
                 test_runner)
 
-    sys.stdout.write(json.dumps(work_record))
+    sys.stdout.write(json.dumps(work_item))
 
     return os.EX_OK
 

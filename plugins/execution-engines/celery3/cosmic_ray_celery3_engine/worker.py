@@ -10,7 +10,7 @@ LOG = get_logger(__name__)
 
 
 @APP.task(name='cosmic_ray_celery3_engine.worker')
-def worker_task(work_record,
+def worker_task(work_item,
                 timeout,
                 config):
     """The celery task which performs a single mutation and runs a test suite.
@@ -18,26 +18,26 @@ def worker_task(work_record,
     This runs `cosmic-ray worker` in a subprocess and returns the results,
     passing `config` to it via stdin.
 
-    Returns: An updated WorkRecord
+    Returns: An updated WorkItem
 
     """
-    return worker_process(work_record, timeout, config)
+    return worker_process(work_item, timeout, config)
 
 
-def execute_work_records(timeout,
-                         work_records,
-                         config):
+def execute_work_items(timeout,
+                       work_items,
+                       config):
     """Execute a suite of tests for a given set of work items.
 
     Args:
       timeout: The max length of time to let a test run before it's killed.
-      work_records: An iterable of `work_db.WorkItem`s.
+      work_items: An iterable of `work_db.WorkItem`s.
       config: The configuration to use for the test execution.
 
-    Returns: An iterable of WorkRecords.
+    Returns: An iterable of WorkItems.
     """
     return celery.group(
-        worker_task.delay(work_record,
+        worker_task.delay(work_item,
                           timeout,
                           config)
-        for work_record in work_records)
+        for work_item in work_items)

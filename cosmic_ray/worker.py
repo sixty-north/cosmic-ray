@@ -20,7 +20,7 @@ from .importing import preserve_modules, using_ast
 from .mutating import MutatingCore
 from .parsing import get_ast
 from .testing.test_runner import TestOutcome
-from .work_record import WorkRecord
+from .work_item import WorkItem
 
 LOG = logging.getLogger()
 
@@ -59,7 +59,7 @@ def worker(module_name,
     test. It will do so and report back the result - killed, survived, or
     incompetent - in a structured way.
 
-    Returns: a WorkRecord
+    Returns: a WorkItem
 
     Raises: This will generally not raise any exceptions. Rather, exceptions
         will be reported using the 'exception' result-type in the return value.
@@ -80,7 +80,7 @@ def worker(module_name,
             modified_source = astunparse.unparse(modified_ast)
 
             if not core.activation_record:
-                return WorkRecord(
+                return WorkItem(
                     worker_outcome=WorkerOutcome.NO_TEST)
 
             # generate a source diff to visualize how the mutation
@@ -104,27 +104,27 @@ def worker(module_name,
         return rec
 
     except Exception:  # noqa # pylint: disable=broad-except
-        return WorkRecord(
+        return WorkItem(
             data=traceback.format_exception(*sys.exc_info()),
             test_outcome=TestOutcome.INCOMPETENT,
             worker_outcome=WorkerOutcome.EXCEPTION)
 
 
-def worker_process(work_record,
+def worker_process(work_item,
                    timeout,
                    config):
     """Run `cosmic-ray worker` in a subprocess and return the results,
     passing `config` to it via stdin.
 
-    Returns: An updated WorkRecord
+    Returns: An updated WorkItem
 
     """
-    # The work_record param may come as just a dict (e.g. if it arrives over
-    # celery), so we reconstruct a WorkRecord to make it easier to work with.
-    work_record = WorkRecord(work_record)
+    # The work_item param may come as just a dict (e.g. if it arrives over
+    # celery), so we reconstruct a WorkItem to make it easier to work with.
+    work_item = WorkItem(work_item)
 
     command = 'cosmic-ray worker {module} {operator} {occurrence}'.format(
-        **work_record)
+        **work_item)
 
     LOG.info('executing: %s', command)
 
@@ -136,19 +136,19 @@ def worker_process(work_record,
     try:
         outs, _ = proc.communicate(input=config_string, timeout=timeout)
         result = json.loads(outs)
-        work_record.update({
+        work_item.update({
             k: v
             for k, v
             in result.items()
             if v is not None
         })
     except subprocess.TimeoutExpired as exc:
-        work_record.worker_outcome = WorkerOutcome.TIMEOUT
-        work_record.data = exc.timeout
+        work_item.worker_outcome = WorkerOutcome.TIMEOUT
+        work_item.data = exc.timeout
         proc.kill()
     except json.JSONDecodeError as exc:
-        work_record.worker_outcome = WorkerOutcome.EXCEPTION
-        work_record.data = exc
+        work_item.worker_outcome = WorkerOutcome.EXCEPTION
+        work_item.data = exc
 
-    work_record.command_line = command
-    return work_record
+    work_item.command_line = command
+    return work_item

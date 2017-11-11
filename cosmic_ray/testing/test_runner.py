@@ -4,7 +4,7 @@ import abc
 import sys
 import traceback
 
-from cosmic_ray.work_record import WorkRecord
+from cosmic_ray.work_item import WorkItem
 
 
 class TestOutcome:
@@ -47,21 +47,21 @@ class TestRunner(metaclass=abc.ABCMeta):
         pass
 
     def __call__(self):
-        """Call `_run()` and return a `WorkRecord` with the results.
+        """Call `_run()` and return a `WorkItem` with the results.
 
-        Returns: A `WorkRecord` with the `test_outcome` and `data` fields
+        Returns: A `WorkItem` with the `test_outcome` and `data` fields
             filled in.
         """
         try:
             test_result = self._run()
             if test_result[0]:
-                return WorkRecord(
+                return WorkItem(
                     test_outcome=TestOutcome.SURVIVED,
                     data=test_result[1])
-            return WorkRecord(
+            return WorkItem(
                 test_outcome=TestOutcome.KILLED,
                 data=test_result[1])
         except Exception:  # pylint: disable=broad-except
-            return WorkRecord(
+            return WorkItem(
                 test_outcome=TestOutcome.INCOMPETENT,
                 data=traceback.format_exception(*sys.exc_info()))

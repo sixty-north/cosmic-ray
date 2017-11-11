@@ -8,7 +8,7 @@ import docopt
 
 from cosmic_ray.reporting import create_report, is_killed, survival_rate
 from cosmic_ray.testing.test_runner import TestOutcome
-from cosmic_ray.work_record import WorkRecord
+from cosmic_ray.work_item import WorkItem
 from cosmic_ray.worker import WorkerOutcome
 
 
@@ -19,7 +19,7 @@ Usage: cr-rate
 
 Read JSON work-records from stdin and print the survival rate.
 """
-    records = (WorkRecord(json.loads(line)) for line in sys.stdin)
+    records = (WorkItem(json.loads(line)) for line in sys.stdin)
     print('{:.2f}'.format(survival_rate(records)))
 
 
@@ -38,22 +38,22 @@ options:
     arguments = docopt.docopt(report.__doc__, version='cr-format 0.1')
     full_report = arguments['--full-report']
     show_pending = arguments['--show-pending']
-    records = (WorkRecord(json.loads(line)) for line in sys.stdin)
+    records = (WorkItem(json.loads(line)) for line in sys.stdin)
     for line in create_report(records, show_pending, full_report):
         print(line)
 
 
-def _create_element_from_item(work_record):
-    data = work_record.data
+def _create_element_from_item(work_item):
+    data = work_item.data
     sub_elem = xml.etree.ElementTree.Element('testcase')
 
-    sub_elem.set('classname', work_record.job_id)
-    sub_elem.set('line', str(work_record.line_number))
-    sub_elem.set('file', work_record.module)
-    if work_record.command_line:
-        sub_elem.set('name', str(work_record.command_line))
+    sub_elem.set('classname', work_item.job_id)
+    sub_elem.set('line', str(work_item.line_number))
+    sub_elem.set('file', work_item.module)
+    if work_item.command_line:
+        sub_elem.set('name', str(work_item.command_line))
 
-    outcome = work_record.worker_outcome
+    outcome = work_item.worker_outcome
 
     if outcome == WorkerOutcome.TIMEOUT:
         error_elem = xml.etree.ElementTree.SubElement(sub_elem, 'error')
@@ -61,19 +61,19 @@ def _create_element_from_item(work_record):
     elif outcome == WorkerOutcome.EXCEPTION:
         error_elem = xml.etree.ElementTree.SubElement(sub_elem, 'error')
         error_elem.set('message', "Worker has encountered exception")
-        error_elem.text = str(data) + "\n".join(work_record.diff)
-    elif _evaluation_success(outcome, work_record):
+        error_elem.text = str(data) + "\n".join(work_item.diff)
+    elif _evaluation_success(outcome, work_item):
         failure_elem = xml.etree.ElementTree.SubElement(sub_elem, 'failure')
         failure_elem.set('message', "Mutant has survived your unit tests")
-        failure_elem.text = str(data) + "\n".join(work_record.diff)
+        failure_elem.text = str(data) + "\n".join(work_item.diff)
 
     return sub_elem
 
 
-def _evaluation_success(outcome, work_record):
+def _evaluation_success(outcome, work_item):
     return outcome == WorkerOutcome.NORMAL and \
-           work_record.test_outcome in [TestOutcome.SURVIVED,
-                                        TestOutcome.INCOMPETENT]
+           work_item.test_outcome in [TestOutcome.SURVIVED,
+                                      TestOutcome.INCOMPETENT]
 
 
 def _create_xml_report(records):
@@ -105,6 +105,6 @@ Usage: cr-xml
 
 Print an XML formatted report of test results for continuos integration systems
 """
-    records = (WorkRecord(json.loads(line)) for line in sys.stdin)
+    records = (WorkItem(json.loads(line)) for line in sys.stdin)
     xml_elem = _create_xml_report(records)
     xml_elem.write(sys.stdout.buffer, encoding='utf-8', xml_declaration=True)

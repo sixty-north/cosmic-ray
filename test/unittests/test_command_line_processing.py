@@ -13,7 +13,7 @@ import cosmic_ray.plugins
 import cosmic_ray.util
 import cosmic_ray.worker
 from cosmic_ray.testing.test_runner import TestOutcome
-from cosmic_ray.work_record import WorkRecord
+from cosmic_ray.work_item import WorkItem
 
 
 @pytest.fixture
@@ -96,8 +96,8 @@ def test_baseline_failure_returns_2(monkeypatch, local_unittest_config, session_
     def killed_mutant(*args):
         "Simulates a test run where a the tests fails."
         def inner():
-            return WorkRecord(test_outcome=TestOutcome.KILLED,
-                              data=[])
+            return WorkItem(test_outcome=TestOutcome.KILLED,
+                            data=[])
         return inner
 
     monkeypatch.setattr(cosmic_ray.plugins, 'get_test_runner', killed_mutant)
@@ -110,8 +110,8 @@ def test_baseline_success_returns_EX_OK(monkeypatch, local_unittest_config, sess
     def surviving_mutant(*args):
         "Simulates a test run where a the tests succeed."
         def inner():
-            return WorkRecord(test_outcome=TestOutcome.SURVIVED,
-                              data=[])
+            return WorkItem(test_outcome=TestOutcome.SURVIVED,
+                            data=[])
         return inner
 
     monkeypatch.setattr(cosmic_ray.plugins, 'get_test_runner', surviving_mutant)

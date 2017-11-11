@@ -16,12 +16,12 @@ results.
             config, timeout = work_db.get_config()
             engine_config = config['execution-engine']
             executor = get_execution_engine(engine_config['name'])
-            work_records = executor(timeout,
-                                    work_db.pending_work,
-                                    config)
+            work_items = executor(timeout,
+                                  work_db.pending_work_items,
+                                  config)
 
-            for work_record in work_records:
-                work_db.update_work_record(work_record)
+            for work_item in work_items:
+                work_db.update_work_item(work_item)
     except FileNotFoundError as exc:
         raise FileNotFoundError(str(exc).replace(
             'Requested file', 'Corresponding database', 1)) from exc

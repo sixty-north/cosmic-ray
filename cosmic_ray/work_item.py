@@ -1,7 +1,7 @@
-"""A `WorkRecord` carries information about potential and completed work in the
+"""A `WorkItem` carries information about potential and completed work in the
 Cosmic Ray system.
 
-`WorkRecord` is one of the central structures in CR. It can describe both work
+`WorkItem` is one of the central structures in CR. It can describe both work
 to be done and work that has been done, and it indicates how test sessions have
 completed.
 """
@@ -87,8 +87,8 @@ def make_record(name, fields=(), docstring=""):
     return rec
 
 
-WorkRecord = make_record(  # pylint: disable=invalid-name
-    'WorkRecord',
+WorkItem = make_record(  # pylint: disable=invalid-name
+    'WorkItem',
 
     [
         # Arbitrary data returned by the concrete TestRunner to provide more

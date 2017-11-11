@@ -6,6 +6,6 @@ from ..worker import worker_process
 
 class LocalExecutionEngine(ExecutionEngine):
     "Execution engine that runs jobs on the local machine."
-    def __call__(self, timeout, pending_work, config):
-        for work_record in pending_work:
-            yield worker_process(work_record, timeout, config)
+    def __call__(self, timeout, pending_work_items, config):
+        for work_item in pending_work_items:
+            yield worker_process(work_item, timeout, config)
