@@ -328,7 +328,7 @@ def main(argv=None):
                   lambda *args: sys.exit(_SIGNAL_EXIT_CODE_BASE + signal.SIGINT))
 
     if hasattr(signal, 'SIGINFO'):
-        signal.signal(signal.SIGINFO,
+        signal.signal(getattr(signal, 'SIGINFO'),
                       lambda *args: report_progress(sys.stderr))
 
     try:
