@@ -43,11 +43,20 @@ class WorkDB:
             raise FileNotFoundError(
                 'Requested file {} not found'.format(path))
 
+        self._path = path
         self._db = tinydb.TinyDB(path)
 
     def close(self):
         """Close the database."""
         self._db.close()
+
+    @property
+    def name(self):
+        """A name for this database.
+
+        Derived from the constructor arguments.
+        """
+        return self._path
 
     @property
     def _config(self):
@@ -58,6 +67,18 @@ class WorkDB:
     def _work_items(self):
         """The table of work items."""
         return self._db.table('work-items')
+
+    @property
+    def _pending(self):
+        table = self._work_items
+        work_item = tinydb.Query()
+        # This somewhat tortured invocation is intended to appease linters.
+        # They *hate* seeing "x == None" which is the natural expression of
+        # this query, so we use this custom test instead.
+        pending = table.search(
+            work_item.worker_outcome.test(
+                lambda val: val is None))
+        return pending
 
     def set_config(self, config, timeout):
         """Set (replace) the configuration for the session.
@@ -116,7 +137,12 @@ class WorkDB:
         `occurrence`. Items with results will also have the keys `results-type`
         and `results-data`.
         """
-        return (WorkItem(r) for r in self._work_items.all())
+        return (WorkItem(r) for r in self._work_items)
+
+    @property
+    def num_work_items(self):
+        """The number of WorkItems."""
+        return len(self._work_items)
 
     def update_work_item(self, work_item):
         """Updates an existing WorkItem by job_id.
@@ -134,17 +160,12 @@ class WorkDB:
     @property
     def pending_work_items(self):
         """The sequence of pending WorkItems in the session."""
-        table = self._work_items
-        work_item = tinydb.Query()
+        return (WorkItem(r) for r in self._pending)
 
-        # This somewhat tortured invocation is intended to appease linters.
-        # They *hate* seeing "x == None" which is the natural expression of
-        # this query, so we use this custom test instead.
-        pending = table.search(
-            work_item.worker_outcome.test(
-                lambda val: val is None))
-
-        return (WorkItem(r) for r in pending)
+    @property
+    def num_pending_work_items(self):
+        """The number of pending WorkItems in the session."""
+        return len(self._pending)
 
 
 @contextlib.contextmanager
