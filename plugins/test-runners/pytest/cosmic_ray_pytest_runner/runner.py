@@ -31,9 +31,13 @@ class PytestRunner(TestRunner):
     def _run(self):
         collector = ResultCollector()
 
+        args = self.test_args
+        if args:
+            args = args.split()
+        else:
+            args = []
         with open(os.devnull, 'w') as devnull, redirect_stdout(devnull):
-            pytest.main(self.test_args.split(),
-                        plugins=[collector])
+            pytest.main(args, plugins=[collector])
 
         return (
             all(not r.failed for r in collector.reports),
