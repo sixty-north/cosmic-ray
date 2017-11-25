@@ -1,7 +1,5 @@
 "Implementation of a test-runner for pytest-based tests."
 
-import os
-
 import pytest
 
 from cosmic_ray.testing.test_runner import TestRunner
@@ -29,16 +27,32 @@ class PytestRunner(TestRunner):
     """
 
     def _run(self):
+        from io import StringIO
         collector = ResultCollector()
+
+        class TestRunnerFailure(Exception):
+            def __init__(self, msg, exit_code, output):
+                self.msg = msg
+                self.exit_code = exit_code
+                self.output = output
 
         args = self.test_args
         if args:
             args = args.split()
         else:
             args = []
-        with open(os.devnull, 'w') as devnull, redirect_stdout(devnull):
-            pytest.main(args, plugins=[collector])
 
-        return (
-            all(not r.failed for r in collector.reports),
-            [(repr(r), r.longreprtext) for r in collector.reports if r.failed])
+        with StringIO() as stdout:
+            with redirect_stdout(stdout):
+                exit_code = pytest.main(args, plugins=[collector])
+
+            if exit_code == 0:
+                return (True, ())
+
+            if exit_code == 1:
+                return (False, [(repr(r), r.longreprtext)
+                                for r in collector.reports if r.failed])
+
+            stdout.seek(0)
+            output = stdout.read()
+            raise TestRunnerFailure('pytest exited non-zero', exit_code, output)
