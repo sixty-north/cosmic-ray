@@ -21,10 +21,10 @@ def engine(request):
     return request.param
 
 
-@pytest.fixture
+@pytest.fixture(scope='session')
 def project_root():
     root = pathlib.Path(str(pytest.config.rootdir))
-    return root / 'test_project'
+    return root / 'test' / 'test_project'
 
 
 def test_e2e(project_root, test_runner, engine):
