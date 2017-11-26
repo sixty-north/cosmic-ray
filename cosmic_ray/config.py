@@ -1,20 +1,25 @@
 """Configuration module."""
+import logging
 import sys
 
 import yaml
+
+LOG = logging.getLogger()
 
 
 def load_config(filename=None):
     """Load a configuration from a file or stdin.
 
-    If `filename` is `None`, then this reads its configuration from stdin.
+    If `filename` is `None`, then configuration gets read from stdin.
 
     Returns: A configuration dict.
     """
-    if filename is None:
+    if filename is None or filename == '-':
+        LOG.info('Reading config from stdin')
         return yaml.safe_load(sys.stdin)
 
     with open(filename, mode='rt') as handle:
+        LOG.info('Reading config from %r', filename)
         return yaml.safe_load(handle)
 
 
