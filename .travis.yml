@@ -25,7 +25,6 @@ install:
 services: rabbitmq
 
 before_script:
-- pyenv global system 3.5
 - pushd test/test_project
 - celery -A cosmic_ray_celery3_engine.worker worker &
 - popd
