@@ -1,4 +1,4 @@
-|Python version| |Build Status| |Code Health| |Documentation|
+|Python version| |Build Status| |Code Health| |Code Coverage| |Documentation|
 
 Cosmic Ray: mutation testing for Python
 =======================================
@@ -29,6 +29,8 @@ And, of course, patches and ideas are welcome.
    :target: https://travis-ci.org/sixty-north/cosmic-ray
 .. |Code Health| image:: https://landscape.io/github/sixty-north/cosmic-ray/master/landscape.svg?style=flat
    :target: https://landscape.io/github/sixty-north/cosmic-ray/master
+.. |Code Coverage| image:: https://codecov.io/gh/sixty-north/cosmic-ray/branch/master/graph/badge.svg
+   :target: https://codecov.io/gh/Vimjas/covimerage/branch/master
 .. |Documentation| image:: https://readthedocs.org/projects/cosmic-ray/badge/?version=latest
    :target: http://cosmic-ray.readthedocs.org/en/latest/
 .. |full_documentation| replace:: **Read the full documentation at readthedocs.**
