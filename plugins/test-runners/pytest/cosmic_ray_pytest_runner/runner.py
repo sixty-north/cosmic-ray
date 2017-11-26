@@ -1,8 +1,10 @@
 "Implementation of a test-runner for pytest-based tests."
 
+from io import StringIO
+
 import pytest
 
-from cosmic_ray.testing.test_runner import TestRunner
+from cosmic_ray.testing.test_runner import TestRunner, TestRunnerFailure
 from cosmic_ray.util import redirect_stdout
 
 
@@ -27,14 +29,7 @@ class PytestRunner(TestRunner):
     """
 
     def _run(self):
-        from io import StringIO
         collector = ResultCollector()
-
-        class TestRunnerFailure(Exception):
-            def __init__(self, msg, exit_code, output):
-                self.msg = msg
-                self.exit_code = exit_code
-                self.output = output
 
         args = self.test_args
         if args:

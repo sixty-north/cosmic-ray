@@ -15,6 +15,16 @@ class TestOutcome:
     INCOMPETENT = 'incompetent'
 
 
+class TestRunnerFailure(Exception):
+    """Failure reported from a test runner.
+    """
+    def __init__(self, msg, exit_code=None, output=None):
+        self.msg = msg
+        self.exit_code = exit_code
+        self.output = output
+        Exception.__init__(self, msg)
+
+
 class TestRunner(metaclass=abc.ABCMeta):
     """Specifies the interface for test runners in the system.
 
