@@ -16,9 +16,6 @@ class UnittestRunner(TestRunner):
 
     """
 
-    def __init__(self, test_args):  # pylint: disable=useless-super-delegation
-        super().__init__(test_args)
-
     def _run(self):
         suite = unittest.TestLoader().discover(self.test_args)
         result = unittest.TestResult()
