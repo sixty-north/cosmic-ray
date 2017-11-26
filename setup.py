@@ -2,7 +2,7 @@ import io
 import os
 import sys
 
-from setuptools import setup, find_packages
+from setuptools import setup
 
 
 def local_file(*name):
@@ -83,58 +83,66 @@ INSTALL_REQUIRES = [
     'tinydb>=3.2.1',
 ]
 
+PACKAGES = [
+    'cosmic_ray',
+    'cosmic_ray.commands',
+    'cosmic_ray.execution',
+    'cosmic_ray.operators',
+    'cosmic_ray.testing',
+]
+
 if sys.version_info < (3, 4):
     INSTALL_REQUIRES.append('enum34')
 
-setup(
-    name='cosmic_ray',
-    version=read_version()[0],
-    packages=find_packages(),
-
-    author='Sixty North AS',
-    author_email='austin@sixty-north.com',
-    description='Mutation testing',
-    license='MIT License',
-    keywords='testing',
-    url='http://github.com/sixty-north/cosmic-ray',
-    classifiers=[
-        'Development Status :: 4 - Beta',
-        'Environment :: Console',
-        'Intended Audience :: Developers',
-        'License :: OSI Approved :: MIT License',
-        'Operating System :: OS Independent',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
-        'Topic :: Software Development :: Libraries :: Python Modules',
-        'Topic :: Software Development :: Testing',
-    ],
-    platforms='any',
-    include_package_data=True,
-    install_requires=INSTALL_REQUIRES,
-    # List additional groups of dependencies here (e.g. development
-    # dependencies). You can install these using the following syntax,
-    # for example:
-    # $ pip install -e .[dev,test]
-    extras_require={
-        'test': ['hypothesis', 'pytest', 'tox'],
-        'docs': ['sphinx', 'sphinx_rtd_theme']
-    },
-    entry_points={
-        'console_scripts': [
-            'cosmic-ray = cosmic_ray.cli:main',
-            'cr-report = cosmic_ray.commands.format:report',
-            'cr-rate = cosmic_ray.commands.format:format_survival_rate',
-            'cr-xml = cosmic_ray.commands.format:report_xml',
+if __name__ == '__main__':
+    setup(
+        name='cosmic_ray',
+        version=read_version()[0],
+        packages=PACKAGES,
+        author='Sixty North AS',
+        author_email='austin@sixty-north.com',
+        description='Mutation testing',
+        license='MIT License',
+        keywords='testing',
+        url='http://github.com/sixty-north/cosmic-ray',
+        classifiers=[
+            'Development Status :: 4 - Beta',
+            'Environment :: Console',
+            'Intended Audience :: Developers',
+            'License :: OSI Approved :: MIT License',
+            'Operating System :: OS Independent',
+            'Programming Language :: Python',
+            'Programming Language :: Python :: 3.4',
+            'Programming Language :: Python :: 3.5',
+            'Programming Language :: Python :: 3.6',
+            'Topic :: Software Development :: Libraries :: Python Modules',
+            'Topic :: Software Development :: Testing',
         ],
-        'cosmic_ray.test_runners': [
-            'unittest = cosmic_ray.testing.unittest_runner:UnittestRunner',
-        ],
-        'cosmic_ray.operators': OPERATORS,
-        'cosmic_ray.execution_engines': [
-            'local = cosmic_ray.execution.local:LocalExecutionEngine',
-        ]
-    },
-    long_description=LONG_DESCRIPTION,
-)
+        platforms='any',
+        include_package_data=True,
+        install_requires=INSTALL_REQUIRES,
+        # List additional groups of dependencies here (e.g. development
+        # dependencies). You can install these using the following syntax,
+        # for example:
+        # $ pip install -e .[dev,test]
+        extras_require={
+            'test': ['hypothesis', 'pytest', 'pytest-mock', 'tox'],
+            'docs': ['sphinx', 'sphinx_rtd_theme']
+        },
+        entry_points={
+            'console_scripts': [
+                'cosmic-ray = cosmic_ray.cli:main',
+                'cr-report = cosmic_ray.commands.format:report',
+                'cr-rate = cosmic_ray.commands.format:format_survival_rate',
+                'cr-xml = cosmic_ray.commands.format:report_xml',
+            ],
+            'cosmic_ray.test_runners': [
+                'unittest = cosmic_ray.testing.unittest_runner:UnittestRunner',
+            ],
+            'cosmic_ray.operators': OPERATORS,
+            'cosmic_ray.execution_engines': [
+                'local = cosmic_ray.execution.local:LocalExecutionEngine',
+            ]
+        },
+        long_description=LONG_DESCRIPTION,
+    )
