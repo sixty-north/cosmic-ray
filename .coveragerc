@@ -1,0 +1,12 @@
+[run]
+branch = True
+include = cosmic_ray/*,test/*
+
+[report]
+exclude_lines =
+    raise NotImplementedError
+    pragma: no cover
+# Branch coverage: ignore default and assert statements.
+partial_branches =
+    \s+#\s*(pragma|PRAGMA)[:\s]?\s*(no|NO)\s*(branch|BRANCH)
+    ^\s*assert\s

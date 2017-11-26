@@ -10,6 +10,10 @@ matrix:
   allow_failures:
   - python: nightly
 
+env:
+  global:
+  - TOXENV=py-coverage
+
 install:
 - python setup.py install
 - pip install -e ".[test]"
@@ -31,8 +35,15 @@ before_script:
 - popd
 
 script:
-- tox -e py
+- tox
 - if [[ "$TRAVIS_PYTHON_VERSION" == '3.6' ]]; then tox -e lint,style,docs; fi
+
+after_success:
+- |
+  pip install codecov
+  coverage xml
+  codecov_flags=py${TRAVIS_PYTHON_VERSION//./}
+  codecov --required -X search gcov pycov -f coverage.xml --flags $codecov_flags
 
 # When we push to 'release', the python-3.6 travis run should do a deployment.
 deploy:
