@@ -5,10 +5,15 @@ matrix:
   - python: 3.4
   - python: 3.5
   - python: 3.6
+  - python: 3.6
+    env: TOXENV=lint,style,docs
   - python: nightly
   fast_finish: true
   allow_failures:
   - python: nightly
+env:
+  global:
+    - TOXENV: py
 
 env:
   global:
@@ -26,7 +31,6 @@ before_script:
 
 script:
 - tox
-- if [[ "$TRAVIS_PYTHON_VERSION" == '3.6' ]]; then tox -e lint,style,docs; fi
 
 after_success:
 - |
