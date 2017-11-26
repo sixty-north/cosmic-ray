@@ -11,16 +11,7 @@ matrix:
   - python: nightly
 
 install:
-- python setup.py install
-- pip install -e ".[test]"
-- pushd plugins/execution-engines/celery3
-- python setup.py install
-- cd ../../test-runners/pytest
-- python setup.py install
-- cd ../nose
-- python setup.py install
-- popd
-- cosmic-ray test-runners
+- pip install tox
 
 services: rabbitmq
 
