@@ -6,9 +6,26 @@ import string
 
 attributes = ST.text(alphabet=string.ascii_letters, min_size=1, max_size=10)
 
+# These are the attributes that even an empty record will have.
+EXPECTED_RECORD_ATTRIBUTES = {
+    'clear',
+    'copy',
+    'fromkeys',
+    'get',
+    'items',
+    'keys',
+    'pop',
+    'popitem',
+    'setdefault',
+    'update',
+    'values'
+}
+
 
 @given(attributes)
 def test_empty_constructor_has_no_attributes(attr):
+    assume(attr not in EXPECTED_RECORD_ATTRIBUTES)
+
     r = make_record('Rec')()
     with pytest.raises(AttributeError):
         getattr(r, attr)
@@ -39,7 +56,7 @@ def test_cannot_assign_to_non_field_attributes(attr, nonattr):
     assume(attr != nonattr)
     r = make_record('Rec', [attr])()
     with pytest.raises(AttributeError):
-        r.bar = 'llama'
+        setattr(r, nonattr, 'llama')
 
 
 @given(attributes)
