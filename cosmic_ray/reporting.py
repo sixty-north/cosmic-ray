@@ -44,6 +44,8 @@ def is_killed(record):
     elif record.worker_outcome == WorkerOutcome.NORMAL:
         if record.test_outcome == TestOutcome.KILLED:
             return True
+        if record.test_outcome == TestOutcome.INCOMPETENT:
+            return True
     return False
 
 
