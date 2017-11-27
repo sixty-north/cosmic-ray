@@ -5,13 +5,13 @@ comparison operator with another.
 import ast
 
 from .operator import Operator
-from ..util import build_mutations
+from ..util import build_mutations, compare_ast
 
 OPERATORS = (ast.Eq, ast.NotEq, ast.Lt, ast.LtE, ast.Gt, ast.GtE,
              ast.Is, ast.IsNot, ast.In, ast.NotIn)
 
 
-def _to_ops(from_op):
+def _all_ops(from_op):
     """The sequence of operators which `from_op` could be mutated to.
 
     There are a number of potential replacements which we avoid because they
@@ -38,18 +38,60 @@ def _to_ops(from_op):
             yield to_op
 
 
+_RHS_IS_NONE_OPS = {
+    ast.Eq: [ast.IsNot],
+    ast.NotEq: [ast.Is],
+    ast.Is: [ast.IsNot],
+    ast.IsNot: [ast.Is],
+}
+
+
+def _rhs_is_none_ops(from_op):
+    for key, value in _RHS_IS_NONE_OPS.items():
+        if isinstance(from_op, key):
+            yield from value
+            return
+
+
+def _comparison_rhs_is_none(node):
+    return ((len(node.comparators) == 1)
+            and
+            (compare_ast(node.comparators[0], ast.NameConstant(None))))
+
+
+def _build_mutations(node):
+    """Given a Compare node, produce the list of mutated operations.
+
+    Depending on the details of the Compare node, different tactics
+    may be used to generate the list of mutations, in order to avoid
+    generating mutants which we know will be incompetent.
+
+    Args:
+        node: A Compare node.
+
+    Returns:
+        A sequence of (idx, to-op) tuples describing the mutations for `ops`.
+    """
+    assert isinstance(node, ast.Compare)
+    if _comparison_rhs_is_none(node):
+        ops = _rhs_is_none_ops
+    else:
+        ops = _all_ops
+    return build_mutations(node.ops, ops)
+
+
 class MutateComparisonOperator(Operator):
     """An operator that modifies comparisons."""
 
-    def visit_Compare(self, node):  # pylint: disable=invalid-name
+    def visit_Compare(self, node):
         """
             http://greentreesnakes.readthedocs.io/en/latest/nodes.html#Compare
         """
         return self.visit_mutation_site(
             node,
-            len(build_mutations(node.ops, _to_ops)))
+            len(_build_mutations(node)))
 
     def mutate(self, node, idx):
-        from_idx, to_op = build_mutations(node.ops, _to_ops)[idx]
+        from_idx, to_op = _build_mutations(node)[idx]
         node.ops[from_idx] = to_op()
         return node
