@@ -13,14 +13,23 @@ def load_config(filename=None):
     If `filename` is `None`, then configuration gets read from stdin.
 
     Returns: A configuration dict.
+
+    Raises:
+      ConfigError: If there is an error loading the config.
     """
     if filename is None or filename == '-':
         LOG.info('Reading config from stdin')
-        return yaml.safe_load(sys.stdin)
+        try:
+            return yaml.safe_load(sys.stdin)
+        except yaml.parser.ParserError as exc:
+            raise ConfigError() from exc
 
-    with open(filename, mode='rt') as handle:
-        LOG.info('Reading config from %r', filename)
-        return yaml.safe_load(handle)
+    try:
+        with open(filename, mode='rt') as handle:
+            LOG.info('Reading config from %r', filename)
+            return yaml.safe_load(handle)
+    except (OSError, yaml.parser.ParserError) as exc:
+        raise ConfigError() from exc
 
 
 def serialize_config(config):
@@ -44,5 +53,5 @@ def get_db_name(session_name):
 
 
 class ConfigError(Exception):
-    """An error occurred while creating configuration."""
+    """Errors loading configs or with values in a config."""
     pass

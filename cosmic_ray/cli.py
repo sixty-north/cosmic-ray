@@ -101,9 +101,6 @@ def handle_init(args):
 
     config_file = args['<config-file>']
 
-    if not os.path.exists(config_file):
-        handle_new_config(args)
-
     config = load_config(config_file)
 
     if 'timeout' in config:
