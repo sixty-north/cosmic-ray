@@ -41,7 +41,8 @@ when ``x = 2``.
 
 Here is the bad test that lets the mutant(s) survive:
 
-::
+.. code-block:: python
+
     # examples/simple_math/test_simple_math_bad.py
 
     def test_mult_by_2():
@@ -50,7 +51,8 @@ Here is the bad test that lets the mutant(s) survive:
 To fix this bad test, we decorate it so that a range
 of values of `x` are tested:
 
-::
+.. code-block:: python
+
     # examples/simple_math/test_simple_math_good.py
 
     @pytest.mark.parametrize('x', range(-5, 5))
