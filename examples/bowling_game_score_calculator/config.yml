@@ -1,4 +1,3 @@
-# Run the adam tests with unittest
 module: score_calculator
 
 baseline: 10
