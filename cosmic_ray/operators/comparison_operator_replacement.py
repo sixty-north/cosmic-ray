@@ -10,6 +10,7 @@ from ..util import build_mutations, compare_ast
 OPERATORS = (ast.Eq, ast.NotEq, ast.Lt, ast.LtE, ast.Gt, ast.GtE,
              ast.Is, ast.IsNot, ast.In, ast.NotIn)
 
+
 def _all_ops(from_op):
     """The sequence of operators which `from_op` could be mutated to.
 
@@ -36,6 +37,7 @@ def _all_ops(from_op):
         else:
             yield to_op
 
+
 _RHS_IS_NONE_OPS = {
     ast.Eq: [ast.IsNot],
     ast.NotEq: [ast.Is],
@@ -43,16 +45,19 @@ _RHS_IS_NONE_OPS = {
     ast.IsNot: [ast.Is],
 }
 
+
 def _rhs_is_none_ops(from_op):
     for key, value in _RHS_IS_NONE_OPS.items():
         if isinstance(from_op, key):
             yield from value
             return
 
+
 def _comparison_rhs_is_none(node):
     return ((len(node.comparators) == 1)
             and
             (compare_ast(node.comparators[0], ast.NameConstant(None))))
+
 
 def _build_mutations(node):
     """Given a Compare node, produce the list of mutated operations.
