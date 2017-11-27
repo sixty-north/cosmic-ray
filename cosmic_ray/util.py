@@ -1,5 +1,7 @@
 """Various utility functions with no better place to live.
 """
+import ast
+import itertools
 
 try:
     from contextlib import redirect_stdout
@@ -89,3 +91,30 @@ def build_mutations(ops, to_ops):
             for idx, from_op in enumerate(ops)
             for to_op in to_ops(from_op)
             if to_op is None or not isinstance(from_op, to_op)]
+
+
+def compare_ast(node1, node2):
+    """Compares two AST nodes for equality.
+
+    Ignores the lineno, col_offset and ctx attributes.
+
+    Args:
+        node1: An AST node.
+        node2: Another AST node.
+
+    Returns:
+        True if the nodes are equivalent, otherwise False.
+    """
+    if type(node1) is not type(node2):
+        return False
+    if isinstance(node1, ast.AST):
+        for k, v in vars(node1).items():
+            if k in ('lineno', 'col_offset', 'ctx'):
+                continue
+            if not compare_ast(v, getattr(node2, k)):
+                return False
+        return True
+    elif isinstance(node1, list):
+        return all(itertools.starmap(compare_ast, zip(node1, node2)))
+    else:
+        return node1 == node2
