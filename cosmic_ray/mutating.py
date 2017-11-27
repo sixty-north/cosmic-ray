@@ -6,7 +6,7 @@ import logging
 
 import cosmic_ray.util
 
-LOG = logging.getLogger()
+log = logging.getLogger()
 
 
 def _full_module_name(obj):

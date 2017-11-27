@@ -4,7 +4,7 @@ import ast
 import inspect
 import logging
 
-LOG = logging.getLogger()
+log = logging.getLogger()
 
 
 # This is where we can do different things for different kinds of modules.
@@ -23,7 +23,7 @@ def get_ast(module):
     try:
         source_file = inspect.getsourcefile(module)
     except TypeError:
-        LOG.error("Unable to get source file for object %s", module)
+        log.error("Unable to get source file for object %s", module)
         raise
 
     try:
@@ -34,7 +34,7 @@ def get_ast(module):
         if source_file.endswith('__init__.py'):
             source = ''
         else:
-            LOG.info('inspect.getsource() failed.'
+            log.info('inspect.getsource() failed.'
                      'Attempting to read source directly: %s',
                      module)
             with open(source_file, mode='rt') as handle:

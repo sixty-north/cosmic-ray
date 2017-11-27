@@ -5,7 +5,7 @@ import uuid
 import cosmic_ray.modules
 from cosmic_ray.work_item import WorkItem
 
-LOG = logging.getLogger()
+log = logging.getLogger()
 
 
 def init(modules,

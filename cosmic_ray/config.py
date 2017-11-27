@@ -4,7 +4,7 @@ import sys
 
 import yaml
 
-LOG = logging.getLogger()
+log = logging.getLogger()
 
 
 def load_config(filename=None):
@@ -15,11 +15,11 @@ def load_config(filename=None):
     Returns: A configuration dict.
     """
     if filename is None or filename == '-':
-        LOG.info('Reading config from stdin')
+        log.info('Reading config from stdin')
         return yaml.safe_load(sys.stdin)
 
     with open(filename, mode='rt') as handle:
-        LOG.info('Reading config from %r', filename)
+        log.info('Reading config from %r', filename)
         return yaml.safe_load(handle)
 
 

@@ -6,7 +6,7 @@ import os
 import pkgutil
 import re
 
-LOG = logging.getLogger()
+log = logging.getLogger()
 
 
 def fixup_module_name(name):
@@ -71,6 +71,6 @@ def find_modules(name, excludes=None):
                     module_names.append(
                         '{}.{}'.format(module_name, _name))
         except Exception:  # pylint:disable=broad-except
-            LOG.exception(
+            log.exception(
                 'Unable to import %s',
                 module_name)

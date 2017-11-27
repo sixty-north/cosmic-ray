@@ -22,7 +22,7 @@ from .parsing import get_ast
 from .testing.test_runner import TestOutcome
 from .work_item import WorkItem
 
-LOG = logging.getLogger()
+log = logging.getLogger()
 
 
 class WorkerOutcome:
@@ -126,7 +126,7 @@ def worker_process(work_item,
     command = 'cosmic-ray worker {module} {operator} {occurrence}'.format(
         **work_item)
 
-    LOG.info('executing: %s', command)
+    log.info('executing: %s', command)
 
     proc = subprocess.Popen(command.split(),
                             stdin=subprocess.PIPE,
