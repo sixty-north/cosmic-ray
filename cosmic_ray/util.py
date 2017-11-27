@@ -116,5 +116,4 @@ def compare_ast(node1, node2):
         return True
     elif isinstance(node1, list):
         return all(itertools.starmap(compare_ast, zip(node1, node2)))
-    else:
-        return node1 == node2
+    return node1 == node2
