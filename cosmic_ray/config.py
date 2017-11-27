@@ -4,7 +4,7 @@ import sys
 
 import yaml
 
-LOG = logging.getLogger()
+log = logging.getLogger()
 
 
 def load_config(filename=None):
@@ -18,7 +18,7 @@ def load_config(filename=None):
       ConfigError: If there is an error loading the config.
     """
     if filename is None or filename == '-':
-        LOG.info('Reading config from stdin')
+        log.info('Reading config from stdin')
         try:
             return yaml.safe_load(sys.stdin)
         except yaml.parser.ParserError as exc:
@@ -26,7 +26,7 @@ def load_config(filename=None):
 
     try:
         with open(filename, mode='rt') as handle:
-            LOG.info('Reading config from %r', filename)
+            log.info('Reading config from %r', filename)
             return yaml.safe_load(handle)
     except (OSError, UnicodeDecodeError, yaml.parser.ParserError) as exc:
         raise ConfigError() from exc

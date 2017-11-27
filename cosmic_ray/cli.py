@@ -28,7 +28,7 @@ from cosmic_ray.util import redirect_stdout
 from cosmic_ray.work_db import use_db, WorkDB
 from cosmic_ray.version import __version__
 
-LOG = logging.getLogger()
+log = logging.getLogger()
 
 
 @dsc.command()
@@ -57,7 +57,7 @@ def handle_baseline(args):
     if work_item.test_outcome != TestOutcome.SURVIVED:
         # baseline failed, print whatever was returned
         # from the test runner and exit
-        LOG.error('baseline failed')
+        log.error('baseline failed')
         print(''.join(work_item.data))
         return 2
 
@@ -128,14 +128,14 @@ def handle_init(args):
         raise ConfigError(
             "Config must specify either baseline or timeout")
 
-    LOG.info('timeout = %f seconds', timeout)
+    log.info('timeout = %f seconds', timeout)
 
     modules = set(
         cosmic_ray.modules.find_modules(
             cosmic_ray.modules.fixup_module_name(config['module']),
             config.get('exclude-modules', None)))
 
-    LOG.info('Modules discovered: %s', [m.__name__ for m in modules])
+    log.info('Modules discovered: %s', [m.__name__ for m in modules])
 
     db_name = get_db_name(args['<session-file>'])
 
