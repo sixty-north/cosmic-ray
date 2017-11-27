@@ -28,7 +28,7 @@ def load_config(filename=None):
         with open(filename, mode='rt') as handle:
             LOG.info('Reading config from %r', filename)
             return yaml.safe_load(handle)
-    except (OSError, yaml.parser.ParserError) as exc:
+    except (OSError, UnicodeDecodeError, yaml.parser.ParserError) as exc:
         raise ConfigError() from exc
 
 

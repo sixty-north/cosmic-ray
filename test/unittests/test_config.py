@@ -28,7 +28,7 @@ def test_load_invalid_stdin_raises_ConfigError(mocker):
 
 def test_load_from_valid_config_file(tmpdir):
     config_path = tmpdir / 'config.yml'
-    with config_path.open(mode='wt') as handle:
+    with config_path.open(mode='wt', encoding='utf-8') as handle:
         handle.write('{key: value}')
     assert load_config(str(config_path)) == {'key': 'value'}
 
@@ -40,7 +40,15 @@ def test_load_non_existent_file_raises_ConfigError():
 
 def test_load_from_invalid_config_file_raises_ConfigError(tmpdir):
     config_path = tmpdir / 'config.yml'
-    with config_path.open(mode='wt') as handle:
+    with config_path.open(mode='wt', encoding='utf-8') as handle:
         handle.write('{asdf')
+    with pytest.raises(ConfigError):
+        load_config(str(config_path))
+
+
+def test_load_from_non_utf8_file_raises_ConfigError(tmpdir):
+    config_path = tmpdir / 'config.yml'
+    with config_path.open(mode='wb') as handle:
+        handle.write('{key: value}'.encode('utf-16'))
     with pytest.raises(ConfigError):
         load_config(str(config_path))
