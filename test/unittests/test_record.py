@@ -21,6 +21,7 @@ EXPECTED_RECORD_ATTRIBUTES = {
     'values'
 }
 
+
 @given(attributes)
 def test_empty_constructor_has_no_attributes(attr):
     assume(attr not in EXPECTED_RECORD_ATTRIBUTES)
