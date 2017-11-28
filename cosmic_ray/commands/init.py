@@ -41,3 +41,6 @@ def init(modules,
         for module, ops in counts.items()
         for opname, count in ops.items()
         for occurrence in range(count))
+
+    msg = "Created {} mutations to test."
+    print(msg.format(len(list(work_db.work_items))))
