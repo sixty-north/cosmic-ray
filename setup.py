@@ -119,7 +119,10 @@ setup(
     # $ pip install -e .[dev,test]
     extras_require={
         'test': ['hypothesis', 'pytest', 'pytest-mock', 'tox'],
-        'docs': ['sphinx', 'sphinx_rtd_theme']
+        'docs': ['sphinx', 'sphinx_rtd_theme'],
+        'pytest_runner': ['cosmic_ray_pytest_runner'],
+        'nose_runner': ['cosmic_ray_nose_runner'],
+        'celery3_engine': ['cosmic_ray_celery3_engine'],
     },
     entry_points={
         'console_scripts': [
@@ -134,7 +137,7 @@ setup(
         'cosmic_ray.operators': OPERATORS,
         'cosmic_ray.execution_engines': [
             'local = cosmic_ray.execution.local:LocalExecutionEngine',
-        ]
+        ],
     },
     long_description=LONG_DESCRIPTION,
 )
