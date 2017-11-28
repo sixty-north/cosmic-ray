@@ -32,27 +32,26 @@ setup(
     author_email='austin@sixty-north.com',
     description='Cosmic Ray execution engine that distributes execution via Celery 3.',
     license='MIT',
-    keywords='',
-    url='github.com/sixty-north/cosmic-ray',
+    keywords='testing',
+    url='http://github.com/sixty-north/cosmic-ray',
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
+        'Environment :: Console',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 3 :: Only',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Topic :: Software Development :: Libraries :: Python Modules',
+        'Topic :: Software Development :: Testing',
     ],
     platforms='any',
     include_package_data=True,
     install_requires=[
         'celery<4',
     ],
-    # List additional groups of dependencies here (e.g. development
-    # dependencies). You can install these using the following syntax, for
-    # example: $ pip install -e .[dev,test]
-    extras_require={
-        # 'dev': ['check-manifest', 'wheel'],
-        # 'doc': ['sphinx', 'cartouche'],
-        # 'test': ['hypothesis', 'pytest'],
-    },
     entry_points={
         'cosmic_ray.execution_engines': [
             'celery3 = cosmic_ray_celery3_engine.engine:CeleryExecutionEngine',

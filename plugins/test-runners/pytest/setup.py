@@ -32,25 +32,24 @@ setup(
     author_email='austin@sixty-north.com',
     description='Pytest test-runner plugin for Cosmic Ray',
     license='MIT',
-    keywords='',
-    url='github.com/sixty-north/cosmic-ray',
+    keywords='testing',
+    url='https://github.com/sixty-north/cosmic-ray',
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
+        'Environment :: Console',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 3 :: Only',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Topic :: Software Development :: Libraries :: Python Modules',
+        'Topic :: Software Development :: Testing',
     ],
     platforms='any',
     include_package_data=True,
     install_requires=['pytest>=3.0'],
-    # List additional groups of dependencies here (e.g. development
-    # dependencies). You can install these using the following syntax, for
-    # example: $ pip install -e .[dev,test]
-    extras_require={
-        # 'dev': ['check-manifest', 'wheel'],
-        # 'doc': ['sphinx', 'cartouche'],
-        # 'test': ['hypothesis', 'pytest'],
-    },
     entry_points={
         'cosmic_ray.test_runners': [
             'pytest = cosmic_ray_pytest_runner.runner:PytestRunner',
