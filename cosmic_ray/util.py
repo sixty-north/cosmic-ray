@@ -56,11 +56,23 @@ except ImportError:
 def get_line_number(node):
     """Try to get the line number for `node`.
 
-    If no line number is available, this returns "<UNKNOWN>".
+    If no line number is available, this returns -1.
     """
-    if hasattr(node, 'lineno'):
+    try:
         return node.lineno
-    return '<UNKNOWN>'
+    except AttributeError:
+        return -1
+
+
+def get_col_offset(node):
+    """Try to get the column offset for `node`.
+
+    If no column offset is available, this returns -1.
+    """
+    try:
+        return node.col_offset
+    except AttributeError:
+        return -1
 
 
 def build_mutations(ops, to_ops):

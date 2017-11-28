@@ -8,7 +8,7 @@ def test_basic():
            '    return 3'
     tree = ast.parse(code)
 
-    assert get_line_number(tree) == '<UNKNOWN>'
+    assert get_line_number(tree) == -1
     assert get_line_number(tree.body[0]) == 1
     assert get_line_number(tree.body[0].test) == 1
-    assert get_line_number(tree.body[0].test.ops[0]) == '<UNKNOWN>'
+    assert get_line_number(tree.body[0].test.ops[0]) == -1

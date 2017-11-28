@@ -38,6 +38,22 @@ def test_runner_names():
     return ExtensionManager('cosmic_ray.test_runners').names()
 
 
+def get_interceptor(name):
+    """Get an interceptor by name.
+
+    Attrs:
+        name: The name of the plugin containing the interceptor.
+
+    Returns: A callable object which must accept a single `WorkDB` argument.
+    """
+    return ExtensionManager('cosmic_ray.interceptors')[name].plugin
+
+
+def interceptor_names():
+    """Get an iterable of all interceptor plugin names."""
+    return ExtensionManager('cosmic_ray.interceptors').names()
+
+
 def get_execution_engine(name):
     """Get the execution engine by name."""
     manager = driver.DriverManager(

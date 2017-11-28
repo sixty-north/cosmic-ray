@@ -1,0 +1,17 @@
+!spor_anchor
+columns: null
+context: !spor_context
+  after: !!python/tuple []
+  before: !!python/tuple ['
+
+      ', '
+
+      ', 'if __name__ == ''__main__'':
+
+      ']
+  line: '    x = 3
+
+    '
+file_path: adam.py
+line_number: 133
+metadata: {mutate: false}

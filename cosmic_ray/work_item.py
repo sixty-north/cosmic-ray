@@ -113,8 +113,14 @@ WorkItem = make_record(  # pylint: disable=invalid-name
         # The occurrence on which the operator was applied.
         'occurrence',
 
+        # The name of the mutated source file
+        'filename',
+
         # The line number at which the operator was applied.
         'line_number',
+
+        # The column offset at which the operator was applied
+        'col_offset',
 
         'command_line',
         'job_id'

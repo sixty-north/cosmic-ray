@@ -79,6 +79,7 @@ INSTALL_REQUIRES = [
     'pathlib',
     'pyyaml',
     'qprompt',
+    'spor',
     'stevedore',
     'tinydb>=3.2.1',
 ]
@@ -134,6 +135,9 @@ setup(
         'cosmic_ray.operators': OPERATORS,
         'cosmic_ray.execution_engines': [
             'local = cosmic_ray.execution.local:LocalExecutionEngine',
+        ],
+        'cosmic_ray.interceptors': [
+            'spor = cosmic_ray.interceptors.spor:intercept'
         ]
     },
     long_description=LONG_DESCRIPTION,

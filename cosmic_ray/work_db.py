@@ -151,7 +151,7 @@ class WorkDB:
             work_item: A WorkItem representing the new state of a job.
 
         Raises:
-          KeyError: If there is no existing record with the same job_id.
+            KeyError: If there is no existing record with the same job_id.
         """
         self._work_items.update(
             work_item,

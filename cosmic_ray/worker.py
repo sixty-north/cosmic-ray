@@ -32,6 +32,7 @@ class WorkerOutcome:
     EXCEPTION = 'exception'
     NO_TEST = 'no-test'
     TIMEOUT = 'timeout'
+    SKIPPED = 'skipped'
 
 
 def worker(module_name,
