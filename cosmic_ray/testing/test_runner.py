@@ -19,10 +19,19 @@ class TestRunnerFailure(Exception):
     """Failure reported from a test runner.
     """
     def __init__(self, msg, exit_code=None, output=None):
-        self.msg = msg
-        self.exit_code = exit_code
-        self.output = output
-        Exception.__init__(self, msg)
+        super().__init__(msg, exit_code, output)
+
+    @property
+    def msg(self):
+        return self.args[0]
+
+    @property
+    def exit_code(self):
+        return self.args[1]
+
+    @property
+    def output(self):
+        return self.args[2]
 
 
 class TestRunner(metaclass=abc.ABCMeta):
