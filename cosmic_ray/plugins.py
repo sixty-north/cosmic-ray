@@ -1,24 +1,48 @@
 """Query and retrieve the various plugins in Cosmic Ray.
 """
 
+import logging
+
 from stevedore import driver, ExtensionManager
+
+log = logging.getLogger()
+
+
+def _log_extension_loading_failure(_mgr, ep, err):
+    log.info('Operator provider load failure: extension-point="%s", err="%s"', ep, err)
+
+
+OPERATOR_PROVIDERS = {
+    extension.name: extension.plugin()
+    for extension in
+    ExtensionManager(
+        'cosmic_ray.operator_providers',
+        on_load_failure_callback=_log_extension_loading_failure)
+}
 
 
 def get_operator(name):
-    """Get an operator class from a plugin.
+    """Get an operator class from a provider plugin.
 
     Attrs:
-        name: The name of the plugin containing the operator class.
+        name: The name of the operator class.
 
-    Returns: The operator *class object* (i.e. not an instance) provided by the
-        plugin named `name`.
+    Returns: The operator *class object* (i.e. not an instance).
     """
-    return ExtensionManager('cosmic_ray.operators')[name].plugin
+    sep = name.index('/')
+    provider_name = name[:sep]
+    operator_name = name[sep + 1:]
+
+    provider = OPERATOR_PROVIDERS[provider_name]
+    return provider[operator_name]
 
 
 def operator_names():
-    """Get an iterable of all operator plugin names."""
-    return ExtensionManager('cosmic_ray.operators').names()
+    """Get an iterable of all operator names."""
+    return (
+        '{}/{}'.format(provider_name, operator_name)
+        for provider_name, provider in OPERATOR_PROVIDERS.items()
+        for operator_name in provider)
 
 
 def get_test_runner(name, test_args):

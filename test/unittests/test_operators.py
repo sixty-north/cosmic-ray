@@ -5,11 +5,15 @@ import copy
 import pytest
 
 from cosmic_ray.operators.comparison_operator_replacement import \
-    MutateComparisonOperator
+    (ReplaceComparisonOperator_Gt_Lt,
+     ReplaceComparisonOperator_Is_IsNot,
+     ReplaceComparisonOperator_Gt_Eq)
 from cosmic_ray.operators.unary_operator_replacement import \
-    MutateUnaryOperator
+    (ReplaceUnaryOperator_Not_None,
+     ReplaceUnaryOperator_USub_UAdd)
 from cosmic_ray.operators.binary_operator_replacement import \
-    MutateBinaryOperator
+    (ReplaceBinaryOperator_Mult_Add,
+     ReplaceBinaryOperator_Sub_Mod)
 from cosmic_ray.counting import _CountingCore
 from cosmic_ray.operators.boolean_replacer import (ReplaceTrueFalse,
                                                    ReplaceAndWithOr,
@@ -61,13 +65,13 @@ OPERATOR_SAMPLES = [
     (ReplaceBreakWithContinue, 'while True: break'),
     (ReplaceContinueWithBreak, 'while False: continue'),
     (NumberReplacer, 'x = 1'),
-    (MutateComparisonOperator, 'if x > y: pass'),
-    (MutateComparisonOperator, 'if x is None: pass'),
-    (MutateComparisonOperator, 'if x > 42: pass'),
-    (MutateUnaryOperator, 'return not X'),
-    (MutateUnaryOperator, 'x = -1'),
-    (MutateBinaryOperator, 'x * y'),
-    (MutateBinaryOperator, 'x - y'),
+    (ReplaceComparisonOperator_Gt_Lt, 'if x > y: pass'),
+    (ReplaceComparisonOperator_Is_IsNot, 'if x is None: pass'),
+    (ReplaceComparisonOperator_Gt_Eq, 'if x > 42: pass'),
+    (ReplaceUnaryOperator_Not_None, 'return not X'),
+    (ReplaceUnaryOperator_USub_UAdd, 'x = -1'),
+    (ReplaceBinaryOperator_Mult_Add, 'x * y'),
+    (ReplaceBinaryOperator_Sub_Mod, 'x - y'),
     (ExceptionReplacer, 'try: raise OSError \nexcept OSError: pass'),
     (ZeroIterationLoop, 'for i in range(1,2): pass'),
     (RemoveDecorator, 'def wrapper(f): f.cosmic_ray=1; '
