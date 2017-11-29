@@ -18,7 +18,7 @@ class WorkDBInitCore:
     The idea is to walk the AST looking for nodes that the operator can mutate.
     As they're found, `visit_mutation_site` is called and this core adds new
     WorkItems to the WorkDB. Use this core to populate a WorkDB by creating one
-    for each operartor-module pair and running it over the module's AST.
+    for each operator-module pair and running it over the module's AST.
     """
     def __init__(self, module, op_name, work_db):
         self.module = module
