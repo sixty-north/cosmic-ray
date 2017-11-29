@@ -63,6 +63,7 @@ OPERATOR_SAMPLES = [
     (NumberReplacer, 'x = 1'),
     (MutateComparisonOperator, 'if x > y: pass'),
     (MutateComparisonOperator, 'if x is None: pass'),
+    (MutateComparisonOperator, 'if x > 42: pass'),
     (MutateUnaryOperator, 'return not X'),
     (MutateUnaryOperator, 'x = -1'),
     (MutateBinaryOperator, 'x * y'),
