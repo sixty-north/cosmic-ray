@@ -39,7 +39,7 @@ def _print_item(work_item, full_report):
 def is_killed(record):
     """Determines if a WorkItem should be considered "killed".
     """
-    if record.worker_outcome == WorkerOutcome.TIMEOUT:
+    if record.worker_outcome in {WorkerOutcome.TIMEOUT, WorkerOutcome.SKIPPED}:
         return True
     elif record.worker_outcome == WorkerOutcome.NORMAL:
         if record.test_outcome == TestOutcome.KILLED:

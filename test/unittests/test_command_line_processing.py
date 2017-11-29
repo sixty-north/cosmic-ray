@@ -148,7 +148,8 @@ def test_config_success_returns_EX_OK(lobotomize, local_unittest_config, session
 
 
 def test_dump_success_returns_EX_OK(lobotomize, local_unittest_config, session_file):
-    cosmic_ray.cli.main(['init', local_unittest_config, session_file])
+    errcode = cosmic_ray.cli.main(['init', local_unittest_config, session_file])
+    assert errcode == os.EX_OK
 
     errcode = cosmic_ray.cli.main(['dump', session_file])
     assert errcode == os.EX_OK
