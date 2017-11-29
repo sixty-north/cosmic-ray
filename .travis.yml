@@ -35,6 +35,7 @@ script:
 after_success:
 - |
   pip install codecov
+  coverage combine
   coverage xml
   codecov_flags=py${TRAVIS_PYTHON_VERSION//./}
   codecov --required -X search gcov pycov -f coverage.xml --flags $codecov_flags
