@@ -169,5 +169,6 @@ super useful for seeing how far along a your mutation testing is:
     (.venv-pyerf) ~/PyErf$ cosmic-ray exec test_session &
     (.venv-pyerf) ~/PyErf$ cosmic-ray dump test_session | cr-report
     total jobs: 682
-    complete: 18 (2.64%)
+    completed: 18 (2.64%)
+    incompetent: 0 (0.00%)
     survival rate: 0.00%
