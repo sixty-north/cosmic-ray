@@ -15,6 +15,28 @@ class TestOutcome:
     INCOMPETENT = 'incompetent'
 
 
+class TestRunnerFailure(Exception):
+    """Failure reported from a test runner.
+    """
+    def __init__(self, msg, exit_code=None, output=None):  # pylint: disable=useless-super-delegation
+        super().__init__(msg, exit_code, output)
+
+    @property
+    def msg(self):
+        "A message describing the failure."
+        return self.args[0]
+
+    @property
+    def exit_code(self):
+        "The exit code of the test runner (if applicable)."
+        return self.args[1]
+
+    @property
+    def output(self):
+        "The output of the test runner (if applicable)."
+        return self.args[2]
+
+
 class TestRunner(metaclass=abc.ABCMeta):
     """Specifies the interface for test runners in the system.
 
