@@ -1,15 +1,17 @@
 !spor_anchor
 columns: null
 context: !spor_context
-  after: !!python/tuple []
+  after: !!python/tuple ['    x = 3
+
+      ']
   before: !!python/tuple ['
 
       ', '
 
-      ', 'if __name__ == ''__main__'':
+      ', '# This exists to give us some code to "skip" with spor anchors.
 
       ']
-  line: '    x = 3
+  line: 'if __name__ == ''__main__'':
 
     '
 file_path: adam.py
