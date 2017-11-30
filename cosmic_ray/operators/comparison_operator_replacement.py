@@ -55,6 +55,7 @@ def _rhs_is_none_ops(from_op):
             yield from value
             return
 
+
 def _rhs_is_integer_ops(from_op):
     assert isinstance(from_op, ast.AST)
     yield from _RHS_IS_INTEGER_OPS
