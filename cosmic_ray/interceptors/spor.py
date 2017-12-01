@@ -17,16 +17,16 @@ def intercept(work_db):
     anchor exists with metadata containing `{mutate: False}` then the WorkItem
     is marked as SKIPPED.
     """
-    for rec in work_db.work_items:
+    for item in work_db.work_items:
         try:
-            anchors = tuple(find_anchors(rec.filename))
+            anchors = tuple(find_anchors(item.filename))
         except ValueError:
-            log.info('No spor repository for %s', rec.filename)
+            log.info('No spor repository for %s', item.filename)
             continue
 
         for anchor in anchors:
             metadata = anchor.metadata
-            if rec.line_number == anchor.line_number and not metadata.get('mutate', True):
-                rec.worker_outcome = WorkerOutcome.SKIPPED
-                log.info('skipping %s', rec)
-                work_db.update_work_item(rec)
+            if item.line_number == anchor.line_number and not metadata.get('mutate', True):
+                item.worker_outcome = WorkerOutcome.SKIPPED
+                log.info('skipping %s', item)
+                work_db.update_work_item(item)
