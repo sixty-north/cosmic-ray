@@ -6,11 +6,13 @@ matrix:
   - python: 3.5
   - python: 3.6
   - python: 3.6
-    env: TOXENV=lint,style,docs
+    env: TOXENV=docs
   - python: nightly
   fast_finish: true
   allow_failures:
   - python: nightly
+  - python: 3.6
+    env: TOXENV=lint,style
 env:
   global:
     - TOXENV: py
