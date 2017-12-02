@@ -2,8 +2,8 @@
 
 import os
 
-import nose2
 import traceback
+import nose2
 
 from cosmic_ray.testing.test_runner import TestRunner
 from cosmic_ray.util import redirect_stdout, redirect_stderr
@@ -13,10 +13,9 @@ class Nose2ResultsCollector(object):
     "Nose plugin that collects results for later analysis."
 
     def __init__(self):
-        super().__init__()
         self.events = []
 
-    def testOutcome(self, event):
+    def testOutcome(self, event): # pylint: disable=invalid-name
         "Store result."
         self.events.append(event)
 
@@ -42,4 +41,4 @@ class Nose2Runner(TestRunner):  # pylint: disable=too-few-public-methods
                     nose2.discover(argv=argv, extraHooks=[('testOutcome', collector)], exit=False)
         failures = [x for x in collector.events if x.outcome != 'passed']
 
-        return (not failures,  [(str(r.test), traceback.format_exception(*r.exc_info)) for r in failures])
+        return (not failures, [(str(r.test), traceback.format_exception(*r.exc_info)) for r in failures])
