@@ -31,9 +31,9 @@ class MutateBinaryOperator(Operator):
         """
         return self.visit_mutation_site(
             node,
-            len(build_mutations([node.op], _to_ops)))
+            len(build_mutations([type(node.op)], _to_ops)))
 
     def mutate(self, node, idx):
-        _, to_op = build_mutations([node.op], _to_ops)[idx]
+        _, to_op = build_mutations([type(node.op)], _to_ops)[idx]
         node.op = to_op()
         return node

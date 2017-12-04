@@ -77,7 +77,7 @@ def _build_mutations(node):
         ops = _rhs_is_none_ops
     else:
         ops = _all_ops
-    return build_mutations(node.ops, ops)
+    return build_mutations(map(type, node.ops), ops)
 
 
 class MutateComparisonOperator(Operator):
