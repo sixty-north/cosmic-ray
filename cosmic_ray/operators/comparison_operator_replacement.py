@@ -48,7 +48,7 @@ _RHS_IS_NONE_OPS = {
 
 def _rhs_is_none_ops(from_op):
     for key, value in _RHS_IS_NONE_OPS.items():
-        if isinstance(from_op, key):
+        if from_op is key:
             yield from value
             return
 
