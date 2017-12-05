@@ -25,8 +25,8 @@ to run all tests for this specific mutant.
 Implementing a test runner
 --------------------------
 
-To implement a new test runner you need to create a new plugin in the
-directory plugins/test-runners/. An example is provided at the end.
+To implement a new test runner you need to create a new package.
+An example is provided at the end.
 
 The test runner must inherit TestRunner.
 Test Runner has 3 methods:
