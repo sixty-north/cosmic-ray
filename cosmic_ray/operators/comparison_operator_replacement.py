@@ -4,8 +4,8 @@ comparison operator with another.
 
 import ast
 
-from .operator import Operator
-from ..util import build_mutations, compare_ast
+from cosmic_ray.util import build_mutations, compare_ast
+from cosmic_ray.operators.operator import Operator
 
 OPERATORS = (ast.Eq, ast.NotEq, ast.Lt, ast.LtE, ast.Gt, ast.GtE,
              ast.Is, ast.IsNot, ast.In, ast.NotIn)
@@ -46,6 +46,9 @@ _RHS_IS_NONE_OPS = {
 }
 
 
+_RHS_IS_INTEGER_OPS = (ast.Eq, ast.NotEq, ast.Lt, ast.LtE, ast.Gt, ast.GtE)
+
+
 def _rhs_is_none_ops(from_op):
     for key, value in _RHS_IS_NONE_OPS.items():
         if isinstance(from_op, key):
@@ -53,10 +56,21 @@ def _rhs_is_none_ops(from_op):
             return
 
 
+def _rhs_is_integer_ops(from_op):
+    assert isinstance(from_op, ast.AST)
+    return _RHS_IS_INTEGER_OPS
+
+
 def _comparison_rhs_is_none(node):
     return ((len(node.comparators) == 1)
             and
             (compare_ast(node.comparators[0], ast.NameConstant(None))))
+
+
+def _comparison_rhs_is_integer(node):
+    return ((len(node.comparators) == 1)
+            and
+            isinstance(node.comparators[0], ast.Num))
 
 
 def _build_mutations(node):
@@ -71,10 +85,15 @@ def _build_mutations(node):
 
     Returns:
         A sequence of (idx, to-op) tuples describing the mutations for `ops`.
+        The idx is the index into the list of ops for the Compare node
+        (A single Compare node can contain multiple operators in order to
+        represent expressions like 5 <= x < 10).
     """
     assert isinstance(node, ast.Compare)
     if _comparison_rhs_is_none(node):
         ops = _rhs_is_none_ops
+    elif _comparison_rhs_is_integer(node):
+        ops = _rhs_is_integer_ops
     else:
         ops = _all_ops
     return build_mutations(node.ops, ops)
