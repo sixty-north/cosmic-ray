@@ -15,7 +15,7 @@ class Nose2ResultsCollector(object):
     def __init__(self):
         self.events = []
 
-    def testOutcome(self, event): # pylint: disable=invalid-name
+    def testOutcome(self, event):  # pylint: disable=invalid-name
         "Store result."
         self.events.append(event)
 

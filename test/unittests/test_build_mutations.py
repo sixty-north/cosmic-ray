@@ -19,7 +19,7 @@ def test_build_mutations_avoids_self_mutations():
 
 
 def test_build_mutations_returns_valid_indices():
-    for idx, to_op in build_mutations(OPERATORS, to_ops):
+    for idx, _to_op in build_mutations(OPERATORS, to_ops):
         assert idx < len(OPERATORS)
 
 

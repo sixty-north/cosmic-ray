@@ -57,7 +57,7 @@ def _rhs_is_none_ops(from_op):
 
 
 def _rhs_is_integer_ops(from_op):
-    assert isinstance(from_op, ast.AST)
+    assert issubclass(from_op, ast.AST)
     return _RHS_IS_INTEGER_OPS
 
 
