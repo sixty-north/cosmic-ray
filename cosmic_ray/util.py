@@ -81,28 +81,20 @@ def build_mutations(ops, to_ops):
     Each `idx` is an index into `ops` indicating the operator to be mutated
     from. Each `to-op` is the operator class to be mutated to.
 
-    @ops - a list of operations we want to mutate
-    @to_ops - callable - yields all possible values to mutate to
+    This will never produce mutations from an operator to itself.
+
+    If `to_ops` includes `None` in its output, that means to delete the
+    from-operator.
+
+    Args:
+      ops: A sequence of AST operator classes
+      to_ops: A unary callable which takes a from-operator class and returns an
+        iterable of operator classes (or `None`) to mutate to.
     """
-    # note: mutations to self are excluded.
-    # None is a special mutation meaning to delete the operator!
-    # 1) when to_op is None isinstance(from_op, None) will blow up because
-    #    the second parameter needs to be a class
-    # 2) when to_op != None we do the isinstance() check to figure out
-    #    whether or not to include the operator in the list of possible
-    #    mutations
-    #
-    # The `if to_op is None or isinstance(from_op, to_op)` expression handles
-    # both scenarios very elegantly. First we handle 1) and if this is True
-    # the rest of the expression is not evaluated and None is returned. Else
-    # we're in scenario 2) where the left part of the expression is False so
-    # the right part is evaluated. Since the left part of the expression has
-    # confirmed that to_op != None then we're confident that the isinstance()
-    # method will always work.
     return [(idx, to_op)
             for idx, from_op in enumerate(ops)
             for to_op in to_ops(from_op)
-            if to_op is None or not isinstance(from_op, to_op)]
+            if from_op is not to_op]
 
 
 def compare_ast(node1, node2):

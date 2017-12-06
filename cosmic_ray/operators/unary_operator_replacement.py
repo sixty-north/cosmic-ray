@@ -16,11 +16,11 @@ def _to_ops(from_op):
     """
 
     for to_op in OPERATORS:
-        if to_op and isinstance(from_op, ast.Not):
+        if to_op and from_op is ast.Not:
             # 'not' can only be removed but not replaced with
             # '+', '-' or '~' b/c that may lead to strange results
             pass
-        elif isinstance(from_op, ast.UAdd) and (to_op is None):
+        elif from_op is ast.UAdd and to_op is None:
             # '+1' => '1' yields equivalent mutations
             pass
         else:
@@ -36,11 +36,11 @@ class MutateUnaryOperator(Operator):
         """
         return self.visit_mutation_site(
             node,
-            len(build_mutations([node.op], _to_ops)))
+            len(build_mutations([type(node.op)], _to_ops)))
 
     def mutate(self, node, idx):
         "Perform the `idx`th mutation on node."
-        _, to_op = build_mutations([node.op], _to_ops)[idx]
+        _, to_op = build_mutations([type(node.op)], _to_ops)[idx]
         if to_op:
             node.op = to_op()
             return node

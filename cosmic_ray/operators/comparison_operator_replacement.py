@@ -51,7 +51,7 @@ _RHS_IS_INTEGER_OPS = (ast.Eq, ast.NotEq, ast.Lt, ast.LtE, ast.Gt, ast.GtE)
 
 def _rhs_is_none_ops(from_op):
     for key, value in _RHS_IS_NONE_OPS.items():
-        if isinstance(from_op, key):
+        if from_op is key:
             yield from value
             return
 
@@ -96,7 +96,7 @@ def _build_mutations(node):
         ops = _rhs_is_integer_ops
     else:
         ops = _all_ops
-    return build_mutations(node.ops, ops)
+    return build_mutations(map(type, node.ops), ops)
 
 
 class MutateComparisonOperator(Operator):
