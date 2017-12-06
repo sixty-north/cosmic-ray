@@ -58,7 +58,7 @@ def _rhs_is_none_ops(from_op):
 
 def _rhs_is_integer_ops(from_op):
     assert isinstance(from_op, ast.AST)
-    yield from _RHS_IS_INTEGER_OPS
+    return _RHS_IS_INTEGER_OPS
 
 
 def _comparison_rhs_is_none(node):
