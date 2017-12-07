@@ -48,7 +48,7 @@ Test Runners are provided as plugins
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Cosmic Ray is designed to be extended with arbitrary test runners provided
-by users. It dynamically discovers tets runners at runtime using the
+by users. It dynamically discovers tests runners at runtime using the
 ``stevedore`` plugin system which relies on the ``setuptools``
 ``entry_points`` concept. To make a new plugin available to Cosmic Ray
 you need to create a ``cosmic_ray.test_runners`` entry point; this is
@@ -75,7 +75,6 @@ The initial layout for our package is like this:
     setup.py
     cosmic_ray_another_runner/
       __init__.py
-      version.py
 
 ``__init__.py`` is empty and ``setup.py`` has very minimal content:
 
