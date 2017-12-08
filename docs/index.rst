@@ -36,6 +36,7 @@ And, of course, patches and ideas are welcome.
    concepts
    commands
    operators
+   testrunners
    distributed
    implementation
    tests
