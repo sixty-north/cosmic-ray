@@ -5,6 +5,7 @@
 
 import operator
 
+# Add mutation points for comparison operators.
 
 def constant_number():
     return 42
@@ -56,6 +57,7 @@ def unary_add():
 
 def binary_add():
     return 5 + 6
+
 
 def equals(vals):
     def constraint(x, y):

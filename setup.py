@@ -135,7 +135,9 @@ setup(
         'cosmic_ray.test_runners': [
             'unittest = cosmic_ray.testing.unittest_runner:UnittestRunner',
         ],
-        'cosmic_ray.operators': OPERATORS,
+        'cosmic_ray.operator_providers': [
+            'core = cosmic_ray.operators.provider:OperatorProvider'
+        ],
         'cosmic_ray.execution_engines': [
             'local = cosmic_ray.execution.local:LocalExecutionEngine',
         ],
