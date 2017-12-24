@@ -9,6 +9,7 @@ from cosmic_ray.config import ConfigError, load_config
 
 def test_load_valid_stdin(mocker):
     temp_stdin = io.StringIO()
+    temp_stdin.name = 'stringio'
     temp_stdin.write('{key: value}')
     temp_stdin.seek(0)
     mocker.patch('sys.stdin', temp_stdin)
@@ -18,6 +19,7 @@ def test_load_valid_stdin(mocker):
 
 def test_load_invalid_stdin_raises_ConfigError(mocker):
     temp_stdin = io.StringIO()
+    temp_stdin.name = 'stringio'
     temp_stdin.write('{invalid')
     temp_stdin.seek(0)
     mocker.patch('sys.stdin', temp_stdin)

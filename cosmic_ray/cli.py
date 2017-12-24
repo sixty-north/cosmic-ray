@@ -347,6 +347,8 @@ def main(argv=None):
         return os.EX_NOPERM
     except ConfigError as exc:
         print(exc, file=sys.stderr)
+        if exc.__cause__ is not None:
+            print(exc.__cause__, file=sys.stderr)
         return os.EX_CONFIG
 
 
