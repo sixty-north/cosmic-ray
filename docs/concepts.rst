@@ -65,11 +65,7 @@ file>`. This will ask you a series of questions and create a config from the
 answers. Note that this config will generally be incomplete and require you to
 edit it for completeness.
 
-Another way to create a skeleton config is to run `cosmic-ray exec`. If you
-specify a non-existent config file for this command, Cosmic Ray will ask you the
-same questions as in `cosmic-ray new-config` to create one.
-
-In many Cosmic Ray example we'll use the name "config.yml" for configurations.
+In many Cosmic Ray examples we'll use the name "config.yml" for configurations.
 You are not required to use this name, however. You can use any file name you
 want for your configurations.
 
@@ -128,7 +124,7 @@ You would run ``cosmic-ray init`` like this:
 
     cosmic-ray init allele_config.yml allele_session
 
-You'll notice that this creates a new file called "allele\_session.json".
+You'll notice that this creates a new file called "allele_session.json".
 This the database for your session.
 
 An important note on separating tests and production code
@@ -144,12 +140,12 @@ The best way to avoid this problem is to keep your test code in separate
 modules from your production code. This way you can tell Cosmic Ray
 precisely what to mutate.
 
-Ideally, your test code will be in a different package from your
-production code. This way you can tell Cosmic Ray to mutate an entire
-package without needing to filter anything out. However, if your test
-code is in the same package as your production code (a common
-configuration), you can use the ``--exclude-modules`` flag of
-``cosmic-ray init`` to prevent mutation of your tests.
+Ideally, your test code will be in a different package from your production
+code. This way you can tell Cosmic Ray to mutate an entire package without
+needing to filter anything out. However, if your test code is in the same
+package as your production code (a common configuration), you can use the
+``exclude-modules`` setting in your configuration to prevent mutation of your
+tests.
 
 Given the choice, though, we recommend keeping your tests outside of the
 package for your code under test.

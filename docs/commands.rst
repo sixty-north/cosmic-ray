@@ -17,6 +17,7 @@ Possible verbs are:
 -  help
 -  `init <#init>`__
 -  load
+-  new-config
 -  operators
 -  `dump <#dump>`__
 -  run
