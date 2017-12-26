@@ -4,7 +4,7 @@
 import ast
 import sys
 
-from .operator import ReplacementOperator
+from .operator import ReplacementOperatorMeta
 from ..util import build_mutations
 
 _AST_OPERATORS = (ast.Add, ast.Sub, ast.Mult, ast.Div, ast.FloorDiv, ast.Mod,
@@ -22,25 +22,22 @@ def _to_ops(from_op):  # pylint: disable=unused-argument
         yield to_op
 
 
-class ReplaceBinaryOperator(ReplacementOperator):  # pylint: disable=abstract-method
-    """Base class for all binary operator replacement mutation operators."""
-    def visit_BinOp(self, node):  # pylint: disable=invalid-name, missing-docstring
-        if isinstance(node.op, self.from_op):
-            return self.visit_mutation_site(node)
-        return node
-
-    def mutate(self, node, _):
-        node.op = self.to_op()
-        return node
-
-
 def _create_replace_binary_operator(from_op, to_op):
-    return type(
-        'ReplaceBinaryOperator_{}_{}'.format(
-            from_op.__name__, to_op.__name__),
-        (ReplaceBinaryOperator,),
-        {'from_op': property(lambda self: from_op),
-         'to_op': property(lambda self: to_op)})
+    class ReplaceBinaryOperator(
+            metaclass=ReplacementOperatorMeta,
+            from_op=from_op,
+            to_op=to_op):
+        """An operator that replaces binary operators."""
+        def visit_BinOp(self, node):  # pylint: disable=invalid-name, missing-docstring
+            if isinstance(node.op, self.from_op):
+                return self.visit_mutation_site(node)
+            return node
+
+        def mutate(self, node, _):
+            node.op = self.to_op()
+            return node
+
+    return ReplaceBinaryOperator
 
 
 _MUTATION_OPERATORS = tuple(
