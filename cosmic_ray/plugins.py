@@ -55,6 +55,7 @@ def get_test_runner(name, test_args):
         name=name,
         invoke_on_load=True,
         invoke_args=(test_args,),
+        on_load_failure_callback=_log_extension_loading_failure,
     )
 
     return test_runner_manager.driver
@@ -62,7 +63,10 @@ def get_test_runner(name, test_args):
 
 def test_runner_names():
     """Get iterable of test-runner plugin names."""
-    return ExtensionManager('cosmic_ray.test_runners').names()
+    return ExtensionManager(
+        'cosmic_ray.test_runners',
+        on_load_failure_callback=_log_extension_loading_failure,
+    ).names()
 
 
 def get_interceptor(name):
@@ -73,12 +77,18 @@ def get_interceptor(name):
 
     Returns: A callable object which must accept a single `WorkDB` argument.
     """
-    return ExtensionManager('cosmic_ray.interceptors')[name].plugin
+    return ExtensionManager(
+        'cosmic_ray.interceptors',
+        on_load_failure_callback=_log_extension_loading_failure,
+    )[name].plugin
 
 
 def interceptor_names():
     """Get an iterable of all interceptor plugin names."""
-    return ExtensionManager('cosmic_ray.interceptors').names()
+    return ExtensionManager(
+        'cosmic_ray.interceptors',
+        on_load_failure_callback=_log_extension_loading_failure,
+    ).names()
 
 
 def get_execution_engine(name):
@@ -86,11 +96,16 @@ def get_execution_engine(name):
     manager = driver.DriverManager(
         namespace='cosmic_ray.execution_engines',
         name=name,
-        invoke_on_load=True)
+        invoke_on_load=True,
+        on_load_failure_callback=_log_extension_loading_failure,
+    )
 
     return manager.driver
 
 
 def execution_engine_names():
     """Get iterable of execution-enginer plugin names."""
-    return ExtensionManager('cosmic_ray.execution_engines').names()
+    return ExtensionManager(
+        'cosmic_ray.execution_engines',
+        on_load_failure_callback=_log_extension_loading_failure,
+    ).names()
