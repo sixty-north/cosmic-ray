@@ -9,7 +9,10 @@ log = logging.getLogger()
 
 
 def _log_extension_loading_failure(_mgr, ep, err):
-    log.info('Operator provider load failure: extension-point="%s", err="%s"', ep, err)
+    # We have to log at the `error` level here as opposed to, say, `info`
+    # because logging isn't configure when we reach here. We need this infor to
+    # print with the default logging settings.
+    log.error('Operator provider load failure: extension-point="%s", err="%s"', ep, err)
 
 
 OPERATOR_PROVIDERS = {
