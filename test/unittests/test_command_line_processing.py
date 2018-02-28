@@ -79,17 +79,17 @@ def lobotomize(monkeypatch):
 
 
 def test_invalid_command_line_returns_EX_USAGE():
-    assert cosmic_ray.cli.main(['init', 'foo']) == os.EX_USAGE
+    assert cosmic_ray.cli.main(['init', 'foo']) == 64
 
 
 def test_non_existent_file_returns_EX_NOINPUT():
-    assert cosmic_ray.cli.main(['exec', 'foo.session']) == os.EX_NOINPUT
+    assert cosmic_ray.cli.main(['exec', 'foo.session']) == 66
 
 
 def test_unreadable_file_returns_EX_PERM(tmpdir):
     p = tmpdir.ensure('bogus.session.json')
     p.chmod(stat.S_IRUSR)
-    assert cosmic_ray.cli.main(['exec', str(p.realpath())]) == os.EX_NOPERM
+    assert cosmic_ray.cli.main(['exec', str(p.realpath())]) == 77
 
 
 def test_baseline_failure_returns_2(monkeypatch, local_unittest_config, session_file):
@@ -117,18 +117,18 @@ def test_baseline_success_returns_EX_OK(monkeypatch, local_unittest_config, sess
     monkeypatch.setattr(cosmic_ray.plugins, 'get_test_runner', surviving_mutant)
 
     errcode = cosmic_ray.cli.main(['baseline', local_unittest_config])
-    assert errcode == os.EX_OK
+    assert errcode == 0
 
 
 def test_new_config_success_returns_EX_OK(monkeypatch, config_file):
     monkeypatch.setattr(cosmic_ray.commands, 'new_config', lambda *args: '')
     errcode = cosmic_ray.cli.main(['new-config', config_file])
-    assert errcode == os.EX_OK
+    assert errcode == 0
 
 
 def test_init_with_invalid_baseline_returns_EX_CONFIG(invalid_baseline_config, session_file):
     errcode = cosmic_ray.cli.main(['init', invalid_baseline_config, session_file])
-    assert errcode == os.EX_CONFIG
+    assert errcode == 78
 
 # NOTE: We have integration tests for the happy-path for many commands, so we don't cover them explicitly here.
 
@@ -139,7 +139,7 @@ def test_config_success_returns_EX_OK(lobotomize, local_unittest_config, session
     cfg_stream = io.StringIO()
     with cosmic_ray.util.redirect_stdout(cfg_stream):
         errcode = cosmic_ray.cli.main(['config', session_file])
-    assert errcode == os.EX_OK
+    assert errcode == 0
 
     with open(local_unittest_config, mode='rt') as handle:
         orig_cfg = yaml.load(handle)
@@ -149,23 +149,23 @@ def test_config_success_returns_EX_OK(lobotomize, local_unittest_config, session
 
 def test_dump_success_returns_EX_OK(lobotomize, local_unittest_config, session_file):
     errcode = cosmic_ray.cli.main(['init', local_unittest_config, session_file])
-    assert errcode == os.EX_OK
+    assert errcode == 0
 
     errcode = cosmic_ray.cli.main(['dump', session_file])
-    assert errcode == os.EX_OK
+    assert errcode == 0
 
 
 def test_counts_success_returns_EX_OK(lobotomize, local_unittest_config):
-    assert cosmic_ray.cli.main(['counts', local_unittest_config]) == os.EX_OK
+    assert cosmic_ray.cli.main(['counts', local_unittest_config]) == 0
 
 
 def test_test_runners_success_returns_EX_OK():
-    assert cosmic_ray.cli.main(['test-runners']) == os.EX_OK
+    assert cosmic_ray.cli.main(['test-runners']) == 0
 
 
 def test_operators_success_returns_EX_OK():
-    assert cosmic_ray.cli.main(['operators']) == os.EX_OK
+    assert cosmic_ray.cli.main(['operators']) == 0
 
 
 def test_worker_success_returns_EX_OK(lobotomize, local_unittest_config):
-    assert cosmic_ray.cli.main(['worker', 'some_module', 'remove_decorator', '0', local_unittest_config]) == os.EX_OK
+    assert cosmic_ray.cli.main(['worker', 'some_module', 'remove_decorator', '0', local_unittest_config]) == 0

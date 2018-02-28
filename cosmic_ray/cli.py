@@ -61,7 +61,7 @@ def handle_baseline(args):
         print(''.join(work_item.data))
         return 2
 
-    return os.EX_OK
+    return 0
 
 
 @dsc.command()
@@ -74,7 +74,7 @@ def handle_new_config(args):
     with open(args['<config-file>'], mode='wt') as handle:
         handle.write(config)
 
-    return os.EX_OK
+    return 0
 
 
 @dsc.command()
@@ -146,7 +146,7 @@ def handle_init(args):
             config,
             timeout)
 
-    return os.EX_OK
+    return 0
 
 
 @dsc.command()
@@ -160,7 +160,7 @@ def handle_config(args):
         config, _ = database.get_config()
         print(json.dumps(config))
 
-    return os.EX_OK
+    return 0
 
 
 @dsc.command()
@@ -176,7 +176,7 @@ def handle_exec(args):
         args.get('<session-file>'))
     cosmic_ray.commands.execute(session_file)
 
-    return os.EX_OK
+    return 0
 
 
 @dsc.command()
@@ -192,7 +192,7 @@ def handle_dump(args):
         for record in database.work_items:
             print(json.dumps(record))
 
-    return os.EX_OK
+    return 0
 
 
 @dsc.command()
@@ -221,7 +221,7 @@ def handle_counts(args):
           sum(itertools.chain(
               *(d.values() for d in counts.values()))))
 
-    return os.EX_OK
+    return 0
 
 
 @dsc.command()
@@ -233,7 +233,7 @@ def handle_test_runners(args):
     assert args
     print('\n'.join(cosmic_ray.plugins.test_runner_names()))
 
-    return os.EX_OK
+    return 0
 
 
 @dsc.command()
@@ -245,7 +245,7 @@ def handle_operators(args):
     assert args
     print('\n'.join(cosmic_ray.plugins.operator_names()))
 
-    return os.EX_OK
+    return 0
 
 
 @dsc.command()
@@ -286,7 +286,7 @@ def handle_worker(args):
 
     sys.stdout.write(json.dumps(work_item))
 
-    return os.EX_OK
+    return 0
 
 
 DOC_TEMPLATE = """{program}
@@ -338,16 +338,16 @@ def main(argv=None):
             exit_at_end=False)
     except docopt.DocoptExit as exc:
         print(exc, file=sys.stderr)
-        return os.EX_USAGE
+        return 64
     except FileNotFoundError as exc:
         print(exc, file=sys.stderr)
-        return os.EX_NOINPUT
+        return 66
     except PermissionError as exc:
         print(exc, file=sys.stderr)
-        return os.EX_NOPERM
+        return 77
     except ConfigError as exc:
         print(exc, file=sys.stderr)
-        return os.EX_CONFIG
+        return 78
 
 
 if __name__ == '__main__':
