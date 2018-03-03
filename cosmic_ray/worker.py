@@ -21,6 +21,7 @@ from .mutating import MutatingCore
 from .parsing import get_ast
 from .testing.test_runner import TestOutcome
 from .work_item import WorkItem
+import ast
 
 log = logging.getLogger()
 
@@ -33,6 +34,25 @@ class WorkerOutcome:
     NO_TEST = 'no-test'
     TIMEOUT = 'timeout'
     SKIPPED = 'skipped'
+
+
+
+class TypeHintRemover(ast.NodeTransformer):
+    def visit_FunctionDef(self, node):
+        self.generic_visit(node)
+        node.returns = None
+        # remove all argument annotations
+        if node.args.args:
+            for arg in node.args.args:
+                arg.annotation = None
+        return node
+
+    def visit_Import(self, node):
+        node.names = [n for n in node.names if n.name != 'typing']
+        return node if node.names else None
+
+    def visit_ImportFrom(self, node):
+        return node if node.module != 'typing' else None
 
 
 def worker(module_name,
@@ -94,7 +114,7 @@ def worker(module_name,
                                              lineterm=""):
                 module_diff.append(line)
 
-        with using_ast(module_name, module_ast):
+        with using_ast(module_name, TypeHintRemover().visit(module_ast)):
             rec = test_runner()
 
         rec.update({
