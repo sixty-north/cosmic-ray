@@ -4,11 +4,11 @@ comparison operator with another.
 
 import ast
 
-from .operator import Operator
 from ..util import build_mutations, compare_ast
+from .operator import ReplacementOperator
 
-OPERATORS = (ast.Eq, ast.NotEq, ast.Lt, ast.LtE, ast.Gt, ast.GtE,
-             ast.Is, ast.IsNot, ast.In, ast.NotIn)
+_AST_OPERATORS = (ast.Eq, ast.NotEq, ast.Lt, ast.LtE, ast.Gt, ast.GtE,
+                  ast.Is, ast.IsNot, ast.In, ast.NotIn)
 
 
 def _all_ops(from_op):
@@ -29,15 +29,20 @@ def _all_ops(from_op):
 
     """
 
-    for to_op in OPERATORS:
-        if isinstance(from_op, ast.Eq) and to_op is ast.Is:
+    to_ops = set(to_op
+                 for idx, to_op
+                 in build_mutations([from_op],
+                                    lambda _: _AST_OPERATORS))
+    for to_op in to_ops:
+        if from_op is ast.Eq and to_op is ast.Is:
             pass
-        elif isinstance(from_op, ast.NotEq) and to_op is ast.IsNot:
+        elif from_op is ast.NotEq and to_op is ast.IsNot:
             pass
         else:
             yield to_op
 
 
+# Maps from-ops to to-ops when the RHS is `None`
 _RHS_IS_NONE_OPS = {
     ast.Eq: [ast.IsNot],
     ast.NotEq: [ast.Is],
@@ -45,18 +50,30 @@ _RHS_IS_NONE_OPS = {
     ast.IsNot: [ast.Is],
 }
 
+_RHS_IS_INTEGER_OPS = (ast.Eq, ast.NotEq, ast.Lt, ast.LtE, ast.Gt, ast.GtE)
+
 
 def _rhs_is_none_ops(from_op):
-    for key, value in _RHS_IS_NONE_OPS.items():
-        if isinstance(from_op, key):
-            yield from value
-            return
+    assert issubclass(from_op, ast.AST)
+    return _RHS_IS_NONE_OPS.get(from_op, ())
+
+
+def _rhs_is_integer_ops(from_op):
+    assert issubclass(from_op, ast.AST)
+    return _RHS_IS_INTEGER_OPS
 
 
 def _comparison_rhs_is_none(node):
+    "Determine if the node is a comparison with `None` on the RHS."
     return ((len(node.comparators) == 1)
             and
             (compare_ast(node.comparators[0], ast.NameConstant(None))))
+
+
+def _comparison_rhs_is_integer(node):
+    return ((len(node.comparators) == 1)
+            and
+            isinstance(node.comparators[0], ast.Num))
 
 
 def _build_mutations(node):
@@ -71,27 +88,83 @@ def _build_mutations(node):
 
     Returns:
         A sequence of (idx, to-op) tuples describing the mutations for `ops`.
+        The idx is the index into the list of ops for the Compare node
+        (A single Compare node can contain multiple operators in order to
+        represent expressions like 5 <= x < 10).
     """
     assert isinstance(node, ast.Compare)
+    ops = _find_to_ops(node)
+    return build_mutations(map(type, node.ops), ops)
+
+
+def _find_to_ops(node):
+    """Iterable of possible operators the node could be mutated to.
+    """
     if _comparison_rhs_is_none(node):
         ops = _rhs_is_none_ops
+    elif _comparison_rhs_is_integer(node):
+        ops = _rhs_is_integer_ops
     else:
         ops = _all_ops
-    return build_mutations(node.ops, ops)
+    return ops
 
 
-class MutateComparisonOperator(Operator):
+class ReplaceComparisonOperator(ReplacementOperator):  # pylint: disable=abstract-method
     """An operator that modifies comparisons."""
 
-    def visit_Compare(self, node):
+    def _mutations(self, node):
+        """List of all mutations for a node that this operator should perform.
+
+        Returns a list of `(idx, to_op)` where `idx` is an index into
+        `node.ops` and `to_op` is an operator node class.
+
+        This limits mutations to those from `from_op` to `to_op`.
         """
-            http://greentreesnakes.readthedocs.io/en/latest/nodes.html#Compare
-        """
-        return self.visit_mutation_site(
-            node,
-            len(_build_mutations(node)))
+        return [(idx, to_op)
+                for idx, to_op
+                in _build_mutations(node)
+                if isinstance(node.ops[idx], self.from_op)
+                if to_op is self.to_op]
+
+    def visit_Compare(self, node):  # pylint: disable=missing-docstring
+        muts = self._mutations(node)
+        if muts:
+            return self.visit_mutation_site(node, len(muts))
+
+        return node
 
     def mutate(self, node, idx):
-        from_idx, to_op = _build_mutations(node)[idx]
-        node.ops[from_idx] = to_op()
+        op_idx, to_op = self._mutations(node)[idx]
+        assert isinstance(node.ops[op_idx], self.from_op)
+        node.ops[op_idx] = to_op()
         return node
+
+
+def _create_replace_comparison_operator(from_op, to_op):
+    class_name = 'ReplaceComparisonOperator_{}_{}'.format(
+        from_op.__name__, to_op.__name__)
+
+    cls = type(
+        class_name,
+        (ReplaceComparisonOperator,),
+        {'from_op': property(lambda self: from_op),
+         'to_op': property(lambda self: to_op)})
+
+    return cls
+
+
+# Create the operator classes
+_MUTATION_OPERATORS = tuple(
+    _create_replace_comparison_operator(from_op, to_op)
+    for from_op in _AST_OPERATORS
+    for to_op in _all_ops(from_op))
+
+
+# Add them to the module namespace
+for op in _MUTATION_OPERATORS:
+    globals()[op.__name__] = op
+
+
+def operators():
+    "Iterable of all comparison operator replacement mutation operators."
+    return iter(_MUTATION_OPERATORS)

@@ -249,6 +249,30 @@ def handle_operators(args):
 
 
 @dsc.command()
+def handle_execution_engines(args):
+    """usage: {program} execution-engines
+
+    List the available execution-engine plugins.
+    """
+    assert args
+    print('\n'.join(cosmic_ray.plugins.execution_engine_names()))
+
+    return os.EX_OK
+
+
+@dsc.command()
+def handle_interceptors(args):
+    """usage: {program} interceptors
+
+    List the available interceptor plugins.
+    """
+    assert args
+    print('\n'.join(cosmic_ray.plugins.interceptor_names()))
+
+    return os.EX_OK
+
+
+@dsc.command()
 def handle_worker(args):
     """usage: {program} worker \
     [options] <module> <operator> <occurrence> [<config-file>]
@@ -347,6 +371,8 @@ def main(argv=None):
         return 77
     except ConfigError as exc:
         print(exc, file=sys.stderr)
+        if exc.__cause__ is not None:
+            print(exc.__cause__, file=sys.stderr)
         return 78
 
 

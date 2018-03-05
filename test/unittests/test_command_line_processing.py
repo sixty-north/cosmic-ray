@@ -168,4 +168,5 @@ def test_operators_success_returns_EX_OK():
 
 
 def test_worker_success_returns_EX_OK(lobotomize, local_unittest_config):
-    assert cosmic_ray.cli.main(['worker', 'some_module', 'remove_decorator', '0', local_unittest_config]) == 0
+    cmd = ['worker', 'some_module', 'core/RemoveDecorator', '0', local_unittest_config]
+    assert cosmic_ray.cli.main(cmd) == 0

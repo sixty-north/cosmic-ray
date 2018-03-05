@@ -1,5 +1,6 @@
 "Implementation of operator base class."
 
+from abc import ABCMeta, abstractmethod
 import ast
 
 
@@ -53,3 +54,23 @@ class Operator(ast.NodeTransformer):
         return '{}({})'.format(
             self.__class__.__name__,
             ', '.join(args))
+
+
+class ReplacementOperator(Operator, metaclass=ABCMeta):
+    """Base class for operators that have a "from-operator" and a "to-operator".
+
+    This is primarily a mechanism to tell linters that these properties exist.
+    Several of our operators build subclasses dynamically, and they primarily
+    just configure different to/from-ops.
+    """
+    @property
+    @abstractmethod
+    def from_op(self):
+        """The operator to mutate from."""
+        pass
+
+    @property
+    @abstractmethod
+    def to_op(self):
+        """The operator to mutate to."""
+        pass

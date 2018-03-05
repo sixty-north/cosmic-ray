@@ -1,24 +1,51 @@
 """Query and retrieve the various plugins in Cosmic Ray.
 """
 
+import logging
+
 from stevedore import driver, ExtensionManager
+
+log = logging.getLogger()
+
+
+def _log_extension_loading_failure(_mgr, ep, err):
+    # We have to log at the `error` level here as opposed to, say, `info`
+    # because logging isn't configure when we reach here. We need this infor to
+    # print with the default logging settings.
+    log.error('Operator provider load failure: extension-point="%s", err="%s"', ep, err)
+
+
+OPERATOR_PROVIDERS = {
+    extension.name: extension.plugin()
+    for extension in
+    ExtensionManager(
+        'cosmic_ray.operator_providers',
+        on_load_failure_callback=_log_extension_loading_failure)
+}
 
 
 def get_operator(name):
-    """Get an operator class from a plugin.
+    """Get an operator class from a provider plugin.
 
     Attrs:
-        name: The name of the plugin containing the operator class.
+        name: The name of the operator class.
 
-    Returns: The operator *class object* (i.e. not an instance) provided by the
-        plugin named `name`.
+    Returns: The operator *class object* (i.e. not an instance).
     """
-    return ExtensionManager('cosmic_ray.operators')[name].plugin
+    sep = name.index('/')
+    provider_name = name[:sep]
+    operator_name = name[sep + 1:]
+
+    provider = OPERATOR_PROVIDERS[provider_name]
+    return provider[operator_name]
 
 
 def operator_names():
-    """Get an iterable of all operator plugin names."""
-    return ExtensionManager('cosmic_ray.operators').names()
+    """Get an iterable of all operator names."""
+    return (
+        '{}/{}'.format(provider_name, operator_name)
+        for provider_name, provider in OPERATOR_PROVIDERS.items()
+        for operator_name in provider)
 
 
 def get_test_runner(name, test_args):
@@ -28,6 +55,7 @@ def get_test_runner(name, test_args):
         name=name,
         invoke_on_load=True,
         invoke_args=(test_args,),
+        on_load_failure_callback=_log_extension_loading_failure,
     )
 
     return test_runner_manager.driver
@@ -35,7 +63,10 @@ def get_test_runner(name, test_args):
 
 def test_runner_names():
     """Get iterable of test-runner plugin names."""
-    return ExtensionManager('cosmic_ray.test_runners').names()
+    return ExtensionManager(
+        'cosmic_ray.test_runners',
+        on_load_failure_callback=_log_extension_loading_failure,
+    ).names()
 
 
 def get_interceptor(name):
@@ -46,12 +77,18 @@ def get_interceptor(name):
 
     Returns: A callable object which must accept a single `WorkDB` argument.
     """
-    return ExtensionManager('cosmic_ray.interceptors')[name].plugin
+    return ExtensionManager(
+        'cosmic_ray.interceptors',
+        on_load_failure_callback=_log_extension_loading_failure,
+    )[name].plugin
 
 
 def interceptor_names():
     """Get an iterable of all interceptor plugin names."""
-    return ExtensionManager('cosmic_ray.interceptors').names()
+    return ExtensionManager(
+        'cosmic_ray.interceptors',
+        on_load_failure_callback=_log_extension_loading_failure,
+    ).names()
 
 
 def get_execution_engine(name):
@@ -59,11 +96,16 @@ def get_execution_engine(name):
     manager = driver.DriverManager(
         namespace='cosmic_ray.execution_engines',
         name=name,
-        invoke_on_load=True)
+        invoke_on_load=True,
+        on_load_failure_callback=_log_extension_loading_failure,
+    )
 
     return manager.driver
 
 
 def execution_engine_names():
     """Get iterable of execution-enginer plugin names."""
-    return ExtensionManager('cosmic_ray.execution_engines').names()
+    return ExtensionManager(
+        'cosmic_ray.execution_engines',
+        on_load_failure_callback=_log_extension_loading_failure,
+    ).names()
