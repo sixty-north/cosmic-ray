@@ -9,8 +9,7 @@ changes cause your code to simply crash, then we say the mutant is
 "incompetent". If your test suite passes, however, we say that the
 mutant has "survived".
 
-Needless to say, we want to `kill all of the
-mutants <http://www.troll.me/images/x-all-the-things/kill-all-the-mutants.jpg>`__.
+Needless to say, we want to kill all of the mutants.
 
 The goal of mutation testing is to verify that your test suite is
 actually testing all of the parts of your code that it needs to, and
