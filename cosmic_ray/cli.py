@@ -21,6 +21,7 @@ import cosmic_ray.modules
 import cosmic_ray.plugins
 import cosmic_ray.worker
 from cosmic_ray.config import ConfigError, get_db_name, load_config
+from cosmic_ray.exit_codes import ExitCode
 from cosmic_ray.progress import report_progress
 from cosmic_ray.testing.test_runner import TestOutcome
 from cosmic_ray.timing import Timer
@@ -61,7 +62,7 @@ def handle_baseline(args):
         print(''.join(work_item.data))
         return 2
 
-    return 0
+    return ExitCode.OK
 
 
 @dsc.command()
@@ -74,7 +75,7 @@ def handle_new_config(args):
     with open(args['<config-file>'], mode='wt') as handle:
         handle.write(config)
 
-    return 0
+    return ExitCode.OK
 
 
 @dsc.command()
@@ -146,7 +147,7 @@ def handle_init(args):
             config,
             timeout)
 
-    return 0
+    return ExitCode.OK
 
 
 @dsc.command()
@@ -160,7 +161,7 @@ def handle_config(args):
         config, _ = database.get_config()
         print(json.dumps(config))
 
-    return 0
+    return ExitCode.OK
 
 
 @dsc.command()
@@ -176,7 +177,7 @@ def handle_exec(args):
         args.get('<session-file>'))
     cosmic_ray.commands.execute(session_file)
 
-    return 0
+    return ExitCode.OK
 
 
 @dsc.command()
@@ -192,7 +193,7 @@ def handle_dump(args):
         for record in database.work_items:
             print(json.dumps(record))
 
-    return 0
+    return ExitCode.OK
 
 
 @dsc.command()
@@ -221,7 +222,7 @@ def handle_counts(args):
           sum(itertools.chain(
               *(d.values() for d in counts.values()))))
 
-    return 0
+    return ExitCode.OK
 
 
 @dsc.command()
@@ -233,7 +234,7 @@ def handle_test_runners(args):
     assert args
     print('\n'.join(cosmic_ray.plugins.test_runner_names()))
 
-    return 0
+    return ExitCode.OK
 
 
 @dsc.command()
@@ -245,7 +246,7 @@ def handle_operators(args):
     assert args
     print('\n'.join(cosmic_ray.plugins.operator_names()))
 
-    return 0
+    return ExitCode.OK
 
 
 @dsc.command()
@@ -257,7 +258,7 @@ def handle_execution_engines(args):
     assert args
     print('\n'.join(cosmic_ray.plugins.execution_engine_names()))
 
-    return os.EX_OK
+    return ExitCode.OK
 
 
 @dsc.command()
@@ -269,7 +270,7 @@ def handle_interceptors(args):
     assert args
     print('\n'.join(cosmic_ray.plugins.interceptor_names()))
 
-    return os.EX_OK
+    return ExitCode.OK
 
 
 @dsc.command()
@@ -310,7 +311,7 @@ def handle_worker(args):
 
     sys.stdout.write(json.dumps(work_item))
 
-    return 0
+    return ExitCode.OK
 
 
 DOC_TEMPLATE = """{program}
@@ -362,18 +363,18 @@ def main(argv=None):
             exit_at_end=False)
     except docopt.DocoptExit as exc:
         print(exc, file=sys.stderr)
-        return 64
+        return ExitCode.Usage
     except FileNotFoundError as exc:
         print(exc, file=sys.stderr)
-        return 66
+        return ExitCode.NoInput
     except PermissionError as exc:
         print(exc, file=sys.stderr)
-        return 77
+        return ExitCode.NoPerm
     except ConfigError as exc:
         print(exc, file=sys.stderr)
         if exc.__cause__ is not None:
             print(exc.__cause__, file=sys.stderr)
-        return 78
+        return ExitCode.Config
 
 
 if __name__ == '__main__':
