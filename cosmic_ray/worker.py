@@ -14,6 +14,13 @@ import sys
 import traceback
 
 import astunparse
+try:
+    import typing      # the typing module does some fancy stuff at import time
+                       # which we shall not do twice... by loading it here,
+                       # preserve_modules does not delete it and therefore
+                       # fancy stuff happens only once
+except ImportError:
+    pass
 
 from .config import serialize_config
 from .importing import preserve_modules, using_ast
