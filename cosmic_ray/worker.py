@@ -19,7 +19,7 @@ try:
                        # which we shall not do twice... by loading it here,
                        # preserve_modules does not delete it and therefore
                        # fancy stuff happens only once
-except:
+except ImportError:
     pass
 
 from .config import serialize_config
