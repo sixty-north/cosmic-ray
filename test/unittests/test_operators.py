@@ -9,7 +9,7 @@ from cosmic_ray.operators.comparison_operator_replacement import \
      ReplaceComparisonOperator_Is_IsNot,
      ReplaceComparisonOperator_Gt_Eq)
 from cosmic_ray.operators.unary_operator_replacement import \
-    (ReplaceUnaryOperator_Not_None,
+    (ReplaceUnaryOperator_Delete_Not,
      ReplaceUnaryOperator_USub_UAdd)
 from cosmic_ray.operators.binary_operator_replacement import \
     (ReplaceBinaryOperator_Mult_Add,
@@ -68,7 +68,7 @@ OPERATOR_SAMPLES = [
     (ReplaceComparisonOperator_Gt_Lt, 'if x > y: pass'),
     (ReplaceComparisonOperator_Is_IsNot, 'if x is None: pass'),
     (ReplaceComparisonOperator_Gt_Eq, 'if x > 42: pass'),
-    (ReplaceUnaryOperator_Not_None, 'return not X'),
+    (ReplaceUnaryOperator_Delete_Not, 'return not X'),
     (ReplaceUnaryOperator_USub_UAdd, 'x = -1'),
     (ReplaceBinaryOperator_Mult_Add, 'x * y'),
     (ReplaceBinaryOperator_Sub_Mod, 'x - y'),

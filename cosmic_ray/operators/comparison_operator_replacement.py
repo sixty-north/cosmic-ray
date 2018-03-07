@@ -5,7 +5,8 @@ comparison operator with another.
 import ast
 
 from ..util import build_mutations, compare_ast
-from .operator import ReplacementOperator
+from .operator import ReplacementOperatorMeta
+
 
 _AST_OPERATORS = (ast.Eq, ast.NotEq, ast.Lt, ast.LtE, ast.Gt, ast.GtE,
                   ast.Is, ast.IsNot, ast.In, ast.NotIn)
@@ -109,48 +110,41 @@ def _find_to_ops(node):
     return ops
 
 
-class ReplaceComparisonOperator(ReplacementOperator):  # pylint: disable=abstract-method
-    """An operator that modifies comparisons."""
-
-    def _mutations(self, node):
-        """List of all mutations for a node that this operator should perform.
-
-        Returns a list of `(idx, to_op)` where `idx` is an index into
-        `node.ops` and `to_op` is an operator node class.
-
-        This limits mutations to those from `from_op` to `to_op`.
-        """
-        return [(idx, to_op)
-                for idx, to_op
-                in _build_mutations(node)
-                if isinstance(node.ops[idx], self.from_op)
-                if to_op is self.to_op]
-
-    def visit_Compare(self, node):  # pylint: disable=missing-docstring
-        muts = self._mutations(node)
-        if muts:
-            return self.visit_mutation_site(node, len(muts))
-
-        return node
-
-    def mutate(self, node, idx):
-        op_idx, to_op = self._mutations(node)[idx]
-        assert isinstance(node.ops[op_idx], self.from_op)
-        node.ops[op_idx] = to_op()
-        return node
-
-
 def _create_replace_comparison_operator(from_op, to_op):
-    class_name = 'ReplaceComparisonOperator_{}_{}'.format(
-        from_op.__name__, to_op.__name__)
+    class ReplaceComparisonOperator(
+            metaclass=ReplacementOperatorMeta,
+            from_op=from_op,
+            to_op=to_op):  # pylint: disable=abstract-method
+        """An operator that modifies comparisons."""
 
-    cls = type(
-        class_name,
-        (ReplaceComparisonOperator,),
-        {'from_op': property(lambda self: from_op),
-         'to_op': property(lambda self: to_op)})
+        def _mutations(self, node):
+            """List of all mutations for a node that this operator should perform.
 
-    return cls
+            Returns a list of `(idx, to_op)` where `idx` is an index into
+            `node.ops` and `to_op` is an operator node class.
+
+            This limits mutations to those from `from_op` to `to_op`.
+            """
+            return [(idx, to_op)
+                    for idx, to_op
+                    in _build_mutations(node)
+                    if isinstance(node.ops[idx], self.from_op)
+                    if to_op is self.to_op]
+
+        def visit_Compare(self, node):  # pylint: disable=missing-docstring
+            muts = self._mutations(node)
+            if muts:
+                return self.visit_mutation_site(node, len(muts))
+
+            return node
+
+        def mutate(self, node, idx):
+            op_idx, to_op = self._mutations(node)[idx]
+            assert isinstance(node.ops[op_idx], self.from_op)
+            node.ops[op_idx] = to_op()
+            return node
+
+    return ReplaceComparisonOperator
 
 
 # Create the operator classes

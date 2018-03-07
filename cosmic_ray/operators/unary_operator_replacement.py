@@ -4,7 +4,7 @@
 import ast
 
 from ..util import build_mutations
-from .operator import ReplacementOperator
+from .operator import ReplacementOperatorMeta
 
 
 # None indicates we want to delete the operator
@@ -27,38 +27,30 @@ def _to_ops(from_op):
             yield to_op
 
 
-class ReplaceUnaryOperator(ReplacementOperator):  # pylint: disable=abstract-method
-    """An operator that modifies unary operators.
-
-    This is subclassed for each valid from/to unary operator pair, and each
-    subclass provides `from_op` and `to_op` class-level attributes. Each of
-    these is an `ast.Node` or `None`.
-    """
-
-    def visit_UnaryOp(self, node):  # pylint: disable=invalid-name, missing-docstring
-        if isinstance(node.op, self.from_op):
-            return self.visit_mutation_site(node)
-        return node
-
-    def mutate(self, node, _):
-        "Perform the `idx`th mutation on node."
-        if self.to_op is None:
-            return node.operand
-
-        node.op = self.to_op()
-        return node
-
-
 def _create_replace_unary_operator(from_op, to_op):
     """Create a ReplaceUnaryOperator subclasses that mutates `from_op` to `to_op`.
     """
-    return type(
-        'ReplaceUnaryOperator_{}_{}'.format(
-            from_op.__name__,
-            'None' if to_op is None else to_op.__name__),
-        (ReplaceUnaryOperator,),
-        {'from_op': property(lambda self: from_op),
-         'to_op': property(lambda self: to_op)})
+    class ReplaceUnaryOperator(
+            metaclass=ReplacementOperatorMeta,
+            from_op=from_op,
+            to_op=to_op):  # pylint: disable=abstract-method
+        """An operator that modifies unary operators.
+        """
+
+        def visit_UnaryOp(self, node):  # pylint: disable=invalid-name, missing-docstring
+            if isinstance(node.op, self.from_op):
+                return self.visit_mutation_site(node)
+            return node
+
+        def mutate(self, node, _):
+            "Perform the `idx`th mutation on node."
+            if self.to_op is None:
+                return node.operand
+
+            node.op = self.to_op()
+            return node
+
+    return ReplaceUnaryOperator
 
 
 # Create the mutation operator classes
