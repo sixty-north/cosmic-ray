@@ -30,11 +30,12 @@ def session_file(tmpdir):
 
 def _make_config(test_runner='unittest',
                  test_args='tests',
-                 baseline='10',
+                 baseline=None,
+                 timeout='100',
                  engine='local'):
     return '''module: foo
 
-baseline: {baseline}
+{timeout_type}: {timeout_val}
 
 exclude-modules:
 
@@ -46,7 +47,8 @@ execution-engine:
   name: {engine}
 '''.format(test_runner=test_runner,
            test_args=test_args,
-           baseline=baseline,
+           timeout_type='timeout' if baseline is None else 'baseline',
+           timeout_val=timeout if baseline is None else baseline,
            engine=engine)
 
 
