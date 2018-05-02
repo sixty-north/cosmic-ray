@@ -53,8 +53,8 @@ class Tests(unittest.TestCase):
         self.assertEqual(adam.binary_add(), 11)
 
     def test_equals(self):
-        vals = [uuid.uuid1(),
-                uuid.uuid1()]
+        vals = [uuid.uuid4(),
+                uuid.uuid4()]
         vals.append(copy.copy(vals[0]))
         self.assertTrue(
             adam.equals(vals))
