@@ -41,8 +41,11 @@ def get_operator(name):
 
 
 def operator_names():
-    """Get an iterable of all operator names."""
-    return (
+    """Get all operator names.
+
+    Returns: A sequence of operator names.
+    """
+    return tuple(
         '{}/{}'.format(provider_name, operator_name)
         for provider_name, provider in OPERATOR_PROVIDERS.items()
         for operator_name in provider)
@@ -62,7 +65,10 @@ def get_test_runner(name, test_args):
 
 
 def test_runner_names():
-    """Get iterable of test-runner plugin names."""
+    """Get all test-runner plugin names.
+
+    Returns: A sequence of test-runner plugin names.
+    """
     return ExtensionManager(
         'cosmic_ray.test_runners',
         on_load_failure_callback=_log_extension_loading_failure,
@@ -84,7 +90,10 @@ def get_interceptor(name):
 
 
 def interceptor_names():
-    """Get an iterable of all interceptor plugin names."""
+    """Get all interceptor plugin names.
+
+    Returns: A sequence of interceptor plugin names.
+    """
     return ExtensionManager(
         'cosmic_ray.interceptors',
         on_load_failure_callback=_log_extension_loading_failure,
@@ -104,7 +113,10 @@ def get_execution_engine(name):
 
 
 def execution_engine_names():
-    """Get iterable of execution-enginer plugin names."""
+    """Get all execution-engine plugin names.
+
+    Returns: A sequence of execution-engine names.
+    """
     return ExtensionManager(
         'cosmic_ray.execution_engines',
         on_load_failure_callback=_log_extension_loading_failure,
