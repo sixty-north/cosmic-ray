@@ -61,7 +61,7 @@ def init(modules,
       config: The configuration for the new session.
       timeout: The timeout to apply to the work in the session.
     """
-    operators = cosmic_ray.plugins.operator_names()
+    operators = tuple(cosmic_ray.plugins.operator_names())
     work_db.set_config(
         config=config,
         timeout=timeout)
