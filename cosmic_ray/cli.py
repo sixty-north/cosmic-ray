@@ -20,7 +20,7 @@ import cosmic_ray.counting
 import cosmic_ray.modules
 import cosmic_ray.plugins
 import cosmic_ray.worker
-from cosmic_ray.config import ConfigError, get_db_name, load_config
+from cosmic_ray.config import ConfigError, ConfigValueError, get_db_name, load_config
 from cosmic_ray.exit_codes import ExitCode
 from cosmic_ray.progress import report_progress
 from cosmic_ray.testing.test_runner import TestOutcome
@@ -46,8 +46,9 @@ def handle_baseline(args):
     config = load_config(args['<config-file>'])
 
     test_runner = cosmic_ray.plugins.get_test_runner(
-        config['test-runner']['name'],
-        config['test-runner']['args'])
+        config['test-runner', 'name'],
+        config['test-runner', 'args'])
+
     work_item = test_runner()
     # note: test_runner() results are meant to represent
     # status codes when executed against mutants.
@@ -71,9 +72,9 @@ def handle_new_config(args):
 
     Create a new config file.
     """
-    config = cosmic_ray.commands.new_config()
+    config_str = cosmic_ray.commands.new_config()
     with open(args['<config-file>'], mode='wt') as handle:
-        handle.write(config)
+        handle.write(config_str)
 
     return ExitCode.OK
 
@@ -104,15 +105,15 @@ def handle_init(args):
 
     config = load_config(config_file)
 
-    if 'timeout' in config:
+    if ('timeout',) in config:
         timeout = float(config['timeout'])
-    elif 'baseline' in config:
+    elif ('baseline',) in config:
         try:
             baseline_mult = float(config['baseline'])
             if baseline_mult <= 0:
                 raise ValueError()
         except (ValueError, TypeError):
-            raise ConfigError(
+            raise ConfigValueError(
                 'Baseline multiplier must be a positive number, not {}'.format(
                     config['baseline']))
 
@@ -126,7 +127,7 @@ def handle_init(args):
 
         timeout = baseline_mult * timer.elapsed.total_seconds()
     else:
-        raise ConfigError(
+        raise ConfigValueError(
             "Config must specify either baseline or timeout")
 
     log.info('timeout = %f seconds', timeout)
@@ -134,7 +135,7 @@ def handle_init(args):
     modules = set(
         cosmic_ray.modules.find_modules(
             cosmic_ray.modules.fixup_module_name(config['module']),
-            config.get('exclude-modules', None)))
+            config.get('exclude-modules', default=None)))
 
     log.info('Modules discovered: %s', [m.__name__ for m in modules])
 
@@ -159,7 +160,7 @@ def handle_config(args):
     session_file = get_db_name(args['<session-file>'])
     with use_db(session_file) as database:
         config, _ = database.get_config()
-        print(json.dumps(config))
+        pprint.pprint(config.as_dict())
 
     return ExitCode.OK
 
@@ -208,9 +209,11 @@ def handle_counts(args):
 
     sys.path.insert(0, '')
 
+    module = config['modules']
+
     modules = cosmic_ray.modules.find_modules(
-        cosmic_ray.modules.fixup_module_name(config['module']),
-        config.get('exclude-modules', []))
+        cosmic_ray.modules.fixup_module_name(module),
+        config.get('exclude-modules', default=[]))
 
     operators = cosmic_ray.plugins.operator_names()
 
@@ -293,13 +296,13 @@ def handle_worker(args):
     """
     config = load_config(args.get('<config-file>'))
 
-    if config.get('local-imports', True):
+    if config.get('local-imports', default=True):
         sys.path.insert(0, '')
 
     operator = cosmic_ray.plugins.get_operator(args['<operator>'])
     test_runner = cosmic_ray.plugins.get_test_runner(
-        config['test-runner']['name'],
-        config['test-runner']['args'])
+        config['test-runner', 'name'],
+        config['test-runner', 'args'])
 
     with open(os.devnull, 'w') as devnull:
         with redirect_stdout(sys.stdout if args['--keep-stdout'] else devnull):
@@ -379,6 +382,8 @@ def main(argv=None):
         print('Error in subprocess', file=sys.stderr)
         print(exc, file=sys.stderr)
         return exc.returncode
+    # TODO: It might be nice to show traceback at very high verbosity
+    # levels.
 
 
 if __name__ == '__main__':

@@ -22,7 +22,7 @@ try:
 except ImportError:
     pass
 
-from .config import serialize_config
+from .config import Config, serialize_config
 from .importing import preserve_modules, using_ast
 from .mutating import MutatingCore
 from .parsing import get_ast
@@ -120,7 +120,7 @@ def worker(module_name,
 
 def worker_process(work_item,
                    timeout,
-                   config):
+                   config: Config):
     """Run `cosmic-ray worker` in a subprocess and return the results,
     passing `config` to it via stdin.
 

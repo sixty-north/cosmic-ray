@@ -8,6 +8,7 @@ from enum import Enum
 # for something quicker if not. But for now it's *very* convenient.
 import tinydb
 
+from .config import Config
 from .work_item import WorkItem
 
 
@@ -90,7 +91,7 @@ class WorkDB:
         table = self._config
         table.purge()
         table.insert({
-            'config': config,
+            'config': config.as_dict(),
             'timeout': timeout,
         })
 
@@ -109,7 +110,7 @@ class WorkDB:
         except IndexError:
             raise ValueError('work-db has no config')
 
-        return (record['config'],
+        return (Config(record['config']),
                 record['timeout'])
 
     def add_work_items(self, work_items):
