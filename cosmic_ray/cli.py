@@ -375,6 +375,10 @@ def main(argv=None):
         if exc.__cause__ is not None:
             print(exc.__cause__, file=sys.stderr)
         return ExitCode.Config
+    except subprocess.CalledProcessError as exc:
+        print('Error in subprocess', file=sys.stderr)
+        print(exc, file=sys.stderr)
+        return exc.returncode
 
 
 if __name__ == '__main__':
