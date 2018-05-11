@@ -14,7 +14,7 @@ def test_load_valid_stdin(mocker):
     temp_stdin.seek(0)
     mocker.patch('sys.stdin', temp_stdin)
 
-    assert load_config() == {'key': 'value'}
+    assert load_config().as_dict() == {'key': 'value'}
 
 
 def test_load_invalid_stdin_raises_ConfigError(mocker):
@@ -32,7 +32,7 @@ def test_load_from_valid_config_file(tmpdir):
     config_path = tmpdir / 'config.yml'
     with config_path.open(mode='wt', encoding='utf-8') as handle:
         handle.write('{key: value}')
-    assert load_config(str(config_path)) == {'key': 'value'}
+    assert load_config(str(config_path)).as_dict() == {'key': 'value'}
 
 
 def test_load_non_existent_file_raises_ConfigError():
