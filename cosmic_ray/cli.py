@@ -209,7 +209,7 @@ def handle_counts(args):
 
     sys.path.insert(0, '')
 
-    module = config['modules']
+    module = config['module']
 
     modules = cosmic_ray.modules.find_modules(
         cosmic_ray.modules.fixup_module_name(module),
