@@ -160,7 +160,7 @@ def handle_config(args):
     session_file = get_db_name(args['<session-file>'])
     with use_db(session_file) as database:
         config, _ = database.get_config()
-        pprint.pprint(config.as_dict())
+        print(json.dumps(config.as_dict()))
 
     return ExitCode.OK
 
