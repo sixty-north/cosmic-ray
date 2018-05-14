@@ -5,6 +5,7 @@ import sys
 import xml.etree.ElementTree
 
 import docopt
+from yattag import Doc
 
 from cosmic_ray.reporting import create_report, is_killed, survival_rate
 from cosmic_ray.testing.test_runner import TestOutcome
@@ -108,3 +109,23 @@ Print an XML formatted report of test results for continuos integration systems
     records = (WorkItem(json.loads(line, cls=WorkItemJsonDecoder)) for line in sys.stdin)
     xml_elem = _create_xml_report(records)
     xml_elem.write(sys.stdout.buffer, encoding='utf-8', xml_declaration=True)
+
+
+def report_html():
+    doc, tag, text = Doc().tagtext()
+
+    with tag('html'):
+        with tag('body', id = 'hello'):
+            with tag('h1'):
+                text('Cosmic Ray Report')
+
+            work_items = (WorkItem(json.loads(line, cls=WorkItemJsonDecoder)) for line in sys.stdin)
+            with tag('table'):
+                for work_item in work_items:
+                    with tag('tr'):
+                        with tag('td'):
+                            text(str(work_item.job_id))
+                        with tag('td'):
+                            text(str(work_item.worker_outcome))
+
+    print(doc.getvalue())
