@@ -153,7 +153,10 @@ class WorkDB:
         Raises:
             KeyError: If there is no existing record with the same job_id.
         """
-        self._work_items.update(work_item.as_dict())
+        self._work_items.update(
+            work_item.as_dict(),
+            tinydb.Query().job_id == work_item.job_id
+        )
 
     @property
     def pending_work_items(self):
