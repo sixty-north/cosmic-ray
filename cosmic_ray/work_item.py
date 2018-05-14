@@ -5,92 +5,15 @@ Cosmic Ray system.
 to be done and work that has been done, and it indicates how test sessions have
 completed.
 """
+import json
+from collections import MutableMapping
 
 
-def make_record(name, fields=(), docstring=""):
-    """Create a new record class.
-
-    A Record is fundamentally a dict with a specified set of keys. These keys
-    will always have a value (defaulting to None), they can't be removed, and
-    new keys can not be added.
-
-    This may sound a lot like a class, and that's true. The main benefit of
-    records is that they can be treated directly like dicts for the most part,
-    and, critically, they are easy to JSON-ify. Also, like classes, they ensure
-    that they're only used in the correct way, i.e. users can only access the
-    specified fields. This prevents the confusion of using simple dicts where
-    people can use conflicting or confusing key names.
-
-    Args:
-        name: The name of the class to be created.
-        fields: The names of the fields in the record.
-        docstring: The docstring for the record class.
-
-    Returns: A new class derived from dict with the specified fields.
-
+class WorkItem(MutableMapping):
+    """The details of a specific mutation and test run in Cosmic Ray.
     """
 
-    def __init__(self, vals=None, **kwargs):
-        dict.__init__(self, dict.fromkeys(fields))
-        values = vals or dict()
-        kwargs.update(values)
-        for key, value in kwargs.items():
-            self[key] = value
-
-    def __getattr__(self, name):
-        try:
-            return self[name]
-        except KeyError:
-            raise AttributeError('no attribute {}'.format(name))
-
-    def __setattr__(self, name, value):
-        try:
-            self[name] = value
-        except KeyError:
-            raise AttributeError('no attribute {}'.format(name))
-
-    def __getitem__(self, name):
-        if name not in self:
-            raise KeyError('no field {} in record'.format(name))
-        return dict.__getitem__(self, name)
-
-    def __setitem__(self, name, value):
-        if name not in self:
-            raise KeyError('no field {} in record'.format(name))
-        dict.__setitem__(self, name, value)
-
-    def __delitem__(self, name):  # pylint: disable=unused-argument
-        msg = 'record does not support deleting fields: {}'.format(name)
-        raise KeyError(msg)
-
-    def update(self, container):
-        """Add all key-value pairs from `container` into this record.
-
-        If there are duplicate keys, those in `container` will overwrite those
-        here.
-        """
-        for key, values in container.items():
-            self[key] = values
-
-    attrs = {
-        '__init__': __init__,
-        '__getattr__': __getattr__,
-        '__setattr__': __setattr__,
-        '__getitem__': __getitem__,
-        '__setitem__': __setitem__,
-        '__delitem__': __delitem__,
-        'update': update
-    }
-
-    rec = type(name, (dict,), attrs)
-    rec.__doc__ = docstring
-    return rec
-
-
-WorkItem = make_record(  # pylint: disable=invalid-name
-    'WorkItem',
-
-    [
+    FIELDS = [
         # Arbitrary data returned by the concrete TestRunner to provide more
         # information about the test results.
         'data',
@@ -123,7 +46,85 @@ WorkItem = make_record(  # pylint: disable=invalid-name
         'col_offset',
 
         'command_line',
+
         'job_id'
-    ],
-    docstring=" The details of a specific mutation and test run in CosmicRay."
-)
+    ]
+
+    def __init__(self, vals=None, **kwargs):
+        super().__setattr__('_dict', dict.fromkeys(WorkItem.FIELDS))
+        values = vals or dict()
+        kwargs.update(values)
+        for key, value in kwargs.items():
+            self[key] = value
+
+    def __len__(self):
+        return len(self._dict)
+
+    def __iter__(self):
+        return iter(self._dict)
+
+    def __contains__(self, name):
+        return name in WorkItem.FIELDS
+
+    def __getattr__(self, name):
+        if name not in WorkItem.FIELDS:
+            raise AttributeError('No attribute {!r} in {}'.format(name, self.__class__.__name__))
+        return self._dict[name]
+
+    def __setattr__(self, name, value):
+        if name not in WorkItem.FIELDS:
+            raise AttributeError('No attribute {!r} in {}'.format(name, self.__class__.__name__))
+        self._dict[name] = value
+
+    def __getitem__(self, name):
+        if name not in WorkItem.FIELDS:
+            raise KeyError('No field {!r} in {}'.format(name, self.__class__.__name__))
+        return self._dict[name]
+
+    def __setitem__(self, name, value):
+        if name not in WorkItem.FIELDS:
+            raise KeyError('No field {!r} in {}'.format(name, self.__class__.__name__))
+        self._dict[name] = value
+
+    def __delitem__(self, name):  # pylint: disable=unused-argument
+        msg = '{} does not support deleting fields: {!r}'.format(self.__class__.__name__, name)
+        raise KeyError(msg)
+
+    def __getstate__(self):
+        return self.as_dict()
+
+    def __setstate__(self, state):
+        # Avoids __setitem__
+        super().__setattr__('_dict', dict())
+        self._dict.update(state)
+
+    def __repr__(self):
+        return "{}({})".format(
+            self.__class__.__name__,
+            ', '.join("{key!s}={value!r}".format(key=name, value=self[name]) for name in self.FIELDS))
+
+    def as_dict(self):
+        return self._dict.copy()
+
+
+class WorkItemJsonEncoder(json.JSONEncoder):
+
+    def default(self, obj):
+        if isinstance(obj, WorkItem):
+            return {
+                "_type": "WorkItem",
+                "values": obj.as_dict()
+            }
+        return super().default(obj)
+
+
+class WorkItemJsonDecoder(json.JSONDecoder):
+
+    def __init__(self):
+        json.JSONDecoder.__init__(self, object_hook=self.object_hook)
+
+    def object_hook(self, obj):
+        if ('_type' in obj) and (obj['_type'] == 'WorkItem') and ('values' in obj):
+            values = obj['values']
+            return WorkItem(vals=values)
+        return obj

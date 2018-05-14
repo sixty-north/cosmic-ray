@@ -45,6 +45,7 @@ def execute(db_name):
                                   config)
 
             for work_item in work_items:
+                print("Update db with", work_item.job_id)
                 work_db.update_work_item(work_item)
                 _update_progress(work_db)
     except FileNotFoundError as exc:

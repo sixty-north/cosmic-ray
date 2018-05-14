@@ -19,6 +19,7 @@ class CeleryExecutionEngine(ExecutionEngine):
                 config)
 
             for result in results:
+                print("result =", result)
                 yield WorkItem(result.get())
         finally:
             if purge_queue:
