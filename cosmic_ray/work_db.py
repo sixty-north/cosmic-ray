@@ -118,7 +118,7 @@ class WorkDB:
         Args:
           work_items: An iterable of WorkItems.
         """
-        self._work_items.insert_multiple(work_items)
+        self._work_items.insert_multiple(work_item.as_dict() for work_item in work_items)
 
     def clear_work_items(self):
         """Clear all work items from the session.
@@ -137,7 +137,7 @@ class WorkDB:
         `occurrence`. Items with results will also have the keys `results-type`
         and `results-data`.
         """
-        return (WorkItem(r) for r in self._work_items)
+        return (WorkItem(vals=r) for r in self._work_items)
 
     @property
     def num_work_items(self):
@@ -153,14 +153,12 @@ class WorkDB:
         Raises:
             KeyError: If there is no existing record with the same job_id.
         """
-        self._work_items.update(
-            work_item,
-            tinydb.Query().job_id == work_item.job_id)
+        self._work_items.update(work_item.as_dict())
 
     @property
     def pending_work_items(self):
         """The sequence of pending WorkItems in the session."""
-        return (WorkItem(r) for r in self._pending)
+        return (WorkItem(vals=r) for r in self._pending)
 
     @property
     def num_pending_work_items(self):

@@ -8,7 +8,7 @@ import docopt
 
 from cosmic_ray.reporting import create_report, is_killed, survival_rate
 from cosmic_ray.testing.test_runner import TestOutcome
-from cosmic_ray.work_item import WorkItem
+from cosmic_ray.work_item import WorkItem, WorkItemJsonDecoder
 from cosmic_ray.worker import WorkerOutcome
 
 
@@ -19,7 +19,7 @@ Usage: cr-rate
 
 Read JSON work-records from stdin and print the survival rate.
 """
-    records = (WorkItem(json.loads(line)) for line in sys.stdin)
+    records = (WorkItem(json.loads(line, cls=WorkItemJsonDecoder)) for line in sys.stdin)
     print('{:.2f}'.format(survival_rate(records)))
 
 
@@ -38,7 +38,7 @@ options:
     arguments = docopt.docopt(report.__doc__, version='cr-format 0.1')
     full_report = arguments['--full-report']
     show_pending = arguments['--show-pending']
-    records = (WorkItem(json.loads(line)) for line in sys.stdin)
+    records = (WorkItem(json.loads(line, cls=WorkItemJsonDecoder)) for line in sys.stdin)
     for line in create_report(records, show_pending, full_report):
         print(line)
 
@@ -105,6 +105,6 @@ Usage: cr-xml
 
 Print an XML formatted report of test results for continuos integration systems
 """
-    records = (WorkItem(json.loads(line)) for line in sys.stdin)
+    records = (WorkItem(json.loads(line, cls=WorkItemJsonDecoder)) for line in sys.stdin)
     xml_elem = _create_xml_report(records)
     xml_elem.write(sys.stdout.buffer, encoding='utf-8', xml_declaration=True)

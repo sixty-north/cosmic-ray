@@ -28,6 +28,7 @@ from cosmic_ray.timing import Timer
 from cosmic_ray.util import redirect_stdout
 from cosmic_ray.work_db import use_db, WorkDB
 from cosmic_ray.version import __version__
+from cosmic_ray.work_item import WorkItemJsonEncoder
 
 log = logging.getLogger()
 
@@ -191,7 +192,7 @@ def handle_dump(args):
 
     with use_db(session_file, WorkDB.Mode.open) as database:
         for record in database.work_items:
-            print(json.dumps(record))
+            print(json.dumps(record, cls=WorkItemJsonEncoder))
 
     return ExitCode.OK
 
@@ -309,7 +310,7 @@ def handle_worker(args):
                 int(args['<occurrence>']),
                 test_runner)
 
-    sys.stdout.write(json.dumps(work_item))
+    sys.stdout.write(json.dumps(work_item, cls=WorkItemJsonEncoder))
 
     return ExitCode.OK
 
