@@ -25,9 +25,7 @@ class CeleryExecutionEngine(ExecutionEngine):
                 config)
 
             result = job.apply_async()
-            print("Waiting!")
             result.get(callback=on_task_complete)
-            print("All done!")
         finally:
             if purge_queue:
                 APP.control.purge()

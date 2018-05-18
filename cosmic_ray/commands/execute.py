@@ -44,19 +44,17 @@ def execute(db_name):
             executor = get_execution_engine(engine_config['name'])
 
             def on_task_complete(task_id, work_item):
-                log.info("Job %s complete", work_item.job_id)
                 work_db.update_work_item(work_item)
                 _update_progress(work_db)
+                log.info("Job %s complete", work_item.job_id)
 
+            log.info("Beginning execution")
             work_items = executor(timeout,
                                   work_db.pending_work_items,
                                   config,
                                   on_task_complete=on_task_complete)
+            log.info("Execution finished")
 
-            # for work_item in work_items:
-            #     print("Update db with", work_item.job_id)
-            #     work_db.update_work_item(work_item)
-            #     _update_progress(work_db)
     except FileNotFoundError as exc:
         raise FileNotFoundError(str(exc).replace(
             'Requested file', 'Corresponding database', 1)) from exc
