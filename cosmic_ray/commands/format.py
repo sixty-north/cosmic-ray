@@ -9,8 +9,15 @@ from yattag import Doc
 
 from cosmic_ray.reporting import create_report, is_killed, survival_rate
 from cosmic_ray.testing.test_runner import TestOutcome
+from cosmic_ray.util import pairwise, index_of_first_difference
 from cosmic_ray.work_item import WorkItem, WorkItemJsonDecoder
 from cosmic_ray.worker import WorkerOutcome
+
+CHARACTER_DIFF_MARKER = '^'
+
+DIFF_ADDED_MARKER = '+'
+
+DIFF_REMOVED_MARKER = '-'
 
 
 def format_survival_rate():
@@ -111,21 +118,88 @@ Print an XML formatted report of test results for continuos integration systems
     xml_elem.write(sys.stdout.buffer, encoding='utf-8', xml_declaration=True)
 
 
+
+
+def markup_character_level_diff(diff):
+    if len(diff) == 0:
+        return diff
+    new_diff = [diff[0]]
+    for line_a, line_b in pairwise(diff):
+        new_diff.append(line_b)
+        if line_a.startswith(DIFF_REMOVED_MARKER) and line_b.startswith(DIFF_ADDED_MARKER):
+            diff_character_index = index_of_first_difference(
+                line_a[len(DIFF_REMOVED_MARKER):],
+                line_b[len(DIFF_ADDED_MARKER):])
+            diff_character_marker = (' ' * (len(DIFF_ADDED_MARKER)
+                                           + diff_character_index)
+                                     + CHARACTER_DIFF_MARKER)
+            new_diff.append(diff_character_marker)
+    return new_diff
+
+
+def diff_without_header(diff):
+    return diff[4:]
+
+
 def report_html():
     doc, tag, text = Doc().tagtext()
-
-    with tag('html'):
-        with tag('body', id = 'hello'):
+    doc.asis('<!DOCTYPE html>')
+    with tag('html', lang='en'):
+        with tag('head'):
+            doc.stag('meta', charset='utf-8')
+            doc.stag('meta', name='viewport', content='width=device-width, initial-scale=1, shrink-to-fit=no')
+            doc.stag('link',
+                     rel='stylesheet',
+                     href='https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css',
+                     integrity='sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB',
+                     crossorigin='anonymous')
+            with tag('title'):
+                text('Cosmic Ray Report')
+        with tag('body'):
             with tag('h1'):
                 text('Cosmic Ray Report')
 
             work_items = (WorkItem(json.loads(line, cls=WorkItemJsonDecoder)) for line in sys.stdin)
-            with tag('table'):
-                for work_item in work_items:
-                    with tag('tr'):
-                        with tag('td'):
-                            text(str(work_item.job_id))
-                        with tag('td'):
-                            text(str(work_item.worker_outcome))
+            with tag('div', klass='container work-item'):
+                for index, work_item in enumerate(work_items):
+                    with tag('h2', klass='job_id'):
+                        text('Job ID: {}'.format(work_item.job_id))
+                    if work_item.test_outcome == TestOutcome.SURVIVED:
+                        with tag('div', klass='alert alert-danger test-outcome', role='alert'):
+                            text('Survived!')
+                    elif work_item.test_outcome == TestOutcome.INCOMPETENT:
+                        with tag('div', klass='alert alert-info test-outcome', role='alert'):
+                            text('Incompetent.')
+                    elif work_item.test_outcome == TestOutcome.KILLED:
+                         with tag('div', klass='alert alert-success test-outcome', role='alert'):
+                            text('Killed.')
+
+                    if work_item.command_line:
+                        with tag('pre', klass='command-line'):
+                            text(work_item.command_line)
+
+                    with tag('pre', klass='location'):
+                        text('{}:{}:{}'.format(
+                            work_item.filename,
+                            work_item.line_number,
+                            work_item.col_offset
+                        ))
+                    if work_item.diff:
+                        diff = markup_character_level_diff(diff_without_header(work_item.diff))
+                        with tag('pre', klass='diff'):
+                            text('\n'.join(diff))
+
+            doc.stag('script',
+                     src='https://code.jquery.com/jquery-3.3.1.slim.min.js',
+                     integrity='sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo',
+                     crossorigin='anonymous')
+            doc.stag('script',
+                     src='https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js',
+                     integrity='sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49',
+                     crossorigin='anonymous')
+            doc.stag('script',
+                     src='https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js',
+                     integrity='sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T',
+                     crossorigin='anonymous')
 
     print(doc.getvalue())

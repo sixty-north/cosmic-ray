@@ -30,7 +30,7 @@ class WorkItem(MutableMapping):
         # the module to be mutated
         'module',
 
-        # The name of the operators
+        # The name of the operator
         'operator',
 
         # The occurrence on which the operator was applied.
