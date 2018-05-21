@@ -24,6 +24,8 @@ def _print_item(work_item, full_report):
             ret_val.append("timeout: {:.3f} sec".format(data))
         else:
             ret_val = []
+    elif work_item.worker_outcome == WorkerOutcome.SKIPPED and not full_report:
+        ret_val = []
     elif work_item.worker_outcome in [WorkerOutcome.NORMAL,
                                       WorkerOutcome.EXCEPTION]:
         ret_val += data
