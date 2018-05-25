@@ -49,7 +49,7 @@ setup(
     ],
     platforms='any',
     include_package_data=True,
-    install_requires=['pytest>=3.0'],
+    install_requires=['pytest>=3.0', 'pytest-xdist'],
     entry_points={
         'cosmic_ray.test_runners': [
             'pytest = cosmic_ray_pytest_runner.runner:PytestRunner',

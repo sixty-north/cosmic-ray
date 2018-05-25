@@ -37,7 +37,10 @@ class PytestRunner(TestRunner):
         else:
             args = []
 
+        args.append('-n1')
+
         with StringIO() as stdout:
+            exit_code = None
             with redirect_stdout(stdout):
                 exit_code = pytest.main(args, plugins=[collector])
 
@@ -59,7 +62,7 @@ class PytestRunner(TestRunner):
                                 for r in collector.reports if r.failed])
             if exit_code == 2:
                 return (False, [(repr(r), r.longreprtext)
-                                for r in collector.reports if r.failed])
+                                    for r in collector.reports if r.failed])
             stdout.seek(0)
             output = stdout.read()
             raise TestRunnerFailure('pytest exited non-zero', exit_code, output)
