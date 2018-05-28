@@ -156,7 +156,8 @@ def worker_process(work_item,
         proc.kill()
     except json.JSONDecodeError as exc:
         work_item.worker_outcome = WorkerOutcome.EXCEPTION
-        work_item.data = exc
+        work_item.data = str(exc)
+
 
     work_item.command_line = command
     return work_item
