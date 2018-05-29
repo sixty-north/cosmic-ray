@@ -12,12 +12,6 @@ class CeleryExecutionEngine(ExecutionEngine):
     def __call__(self, timeout, pending_work, config, on_task_complete):
         purge_queue = config['execution-engine'].get('purge-queue', True)
 
-        # def on_task_complete(*args, **kwargs):
-        #     print("on_task_complete")
-        #     print("  args   =", args)
-        #     print("  kwargs =", kwargs)
-        #     print()
-
         try:
             job = execute_work_items(
                 timeout,
