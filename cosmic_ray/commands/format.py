@@ -141,6 +141,10 @@ def diff_without_header(diff):
     return diff[4:]
 
 
+def pycharm_url(filename, line_number):
+    return 'pycharm://open?file={}&line={}'.format(filename, line_number)
+
+
 def report_html():
     doc, tag, text = Doc().tagtext()
     doc.asis('<!DOCTYPE html>')
@@ -160,10 +164,11 @@ def report_html():
                 text('Cosmic Ray Report')
 
             work_items = (WorkItem(json.loads(line, cls=WorkItemJsonDecoder)) for line in sys.stdin)
-            with tag('div', klass='container work-item'):
-                for index, work_item in enumerate(work_items):
-                    with tag('h2', klass='job_id'):
-                        text('Job ID: {}'.format(work_item.job_id))
+
+            for index, work_item in enumerate(work_items, start=1):
+                with tag('div', klass='container work-item'):
+                    with tag('h4', klass='job_id'):
+                        text('{} : job ID {}'.format(index, work_item.job_id))
                     if work_item.test_outcome == TestOutcome.SURVIVED:
                         with tag('div', klass='alert alert-danger test-outcome', role='alert'):
                             text('Survived!')
@@ -178,12 +183,15 @@ def report_html():
                         with tag('pre', klass='command-line'):
                             text(work_item.command_line)
 
-                    with tag('pre', klass='location'):
-                        text('{}:{}:{}'.format(
-                            work_item.filename,
-                            work_item.line_number,
-                            work_item.col_offset
-                        ))
+                    with tag('a', href=pycharm_url(
+                        work_item.filename,
+                        work_item.line_number)):
+                        with tag('pre', klass='location'):
+                            text('{}:{}:{}'.format(
+                                work_item.filename,
+                                work_item.line_number,
+                                work_item.col_offset
+                            ))
                     if work_item.diff:
                         diff = markup_character_level_diff(diff_without_header(work_item.diff))
                         with tag('pre', klass='diff'):
