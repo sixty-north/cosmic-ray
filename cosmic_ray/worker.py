@@ -7,7 +7,6 @@ one location with one operator, runs the tests, reports the results, and dies.
 import difflib
 import importlib
 import inspect
-import json
 import logging
 import subprocess
 import sys
@@ -28,6 +27,7 @@ from .mutating import MutatingCore
 from .parsing import get_ast
 from .testing.test_runner import TestOutcome
 from .work_item import WorkItem, WorkItemJsonDecoder
+import cosmic_ray.compat.json
 
 log = logging.getLogger()
 
@@ -144,7 +144,7 @@ def worker_process(work_item,
     config_string = serialize_config(config)
     try:
         outs, _ = proc.communicate(input=config_string, timeout=timeout)
-        result = json.loads(outs, cls=WorkItemJsonDecoder)
+        result = cosmic_ray.compat.json.loads(outs, cls=WorkItemJsonDecoder)
         work_item.update({
             k: v
             for k, v
@@ -155,7 +155,7 @@ def worker_process(work_item,
         work_item.worker_outcome = WorkerOutcome.TIMEOUT
         work_item.data = exc.timeout
         proc.kill()
-    except json.JSONDecodeError as exc:
+    except cosmic_ray.compat.json.JSONDecodeError as exc:
         work_item.test_outcome = TestOutcome.INCOMPETENT
         work_item.worker_outcome = WorkerOutcome.ABNORMAL
         work_item.data = traceback.format_exception(*sys.exc_info())

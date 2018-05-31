@@ -13,5 +13,5 @@ context: !spor_context
 
     '
 file_path: adam.py
-line_number: 151
+line_number: 152
 metadata: {mutate: false}

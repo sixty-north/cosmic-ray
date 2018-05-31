@@ -2,7 +2,6 @@
 """
 import ast
 import itertools
-from collections import Sequence
 
 try:
     from contextlib import redirect_stdout
