@@ -36,8 +36,9 @@ def execute_work_items(timeout,
 
     Returns: An iterable of WorkItems.
     """
+    print("execute_work_items")
     return celery.group(
-        worker_task.delay(work_item,
+        worker_task.s(work_item,
                           timeout,
                           config)
         for work_item in work_items)

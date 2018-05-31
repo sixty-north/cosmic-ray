@@ -27,7 +27,7 @@ from .importing import preserve_modules, using_ast
 from .mutating import MutatingCore
 from .parsing import get_ast
 from .testing.test_runner import TestOutcome
-from .work_item import WorkItem
+from .work_item import WorkItem, WorkItemJsonDecoder
 
 log = logging.getLogger()
 
@@ -143,7 +143,7 @@ def worker_process(work_item,
     config_string = serialize_config(config)
     try:
         outs, _ = proc.communicate(input=config_string, timeout=timeout)
-        result = json.loads(outs)
+        result = json.loads(outs, cls=WorkItemJsonDecoder)
         work_item.update({
             k: v
             for k, v
@@ -157,7 +157,6 @@ def worker_process(work_item,
     except json.JSONDecodeError as exc:
         work_item.worker_outcome = WorkerOutcome.EXCEPTION
         work_item.data = str(exc)
-
 
     work_item.command_line = command
     return work_item

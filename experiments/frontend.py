@@ -31,7 +31,8 @@ def main(argv=None):
         version='cosmic-ray v.3')
 
     if configuration['--verbose']:
-        logging.basicConfig(level=logging.INFO)
+        logging.basicConfig(level=logging.INFO,
+                            format='%(asctime)s %(name)s %(levelname)s %(message)s')
 
     # This lets us import modules from the current directory. Should probably
     # be optional, and needs to also be applied to workers!
