@@ -1,10 +1,12 @@
 "Implementation of the 'execute' command."
 import os
+import logging
 
 from cosmic_ray.progress import reports_progress
 from cosmic_ray.work_db import use_db, WorkDB
 from cosmic_ray.plugins import get_execution_engine
 
+log = logging.getLogger(__name__)
 
 _progress_messages = {}  # pylint: disable=invalid-name
 
@@ -40,13 +42,19 @@ def execute(db_name):
             config, timeout = work_db.get_config()
             engine_config = config['execution-engine']
             executor = get_execution_engine(engine_config['name'])
-            work_items = executor(timeout,
-                                  work_db.pending_work_items,
-                                  config)
 
-            for work_item in work_items:
+            def on_task_complete(task_id, work_item):
                 work_db.update_work_item(work_item)
                 _update_progress(work_db)
+                log.info("Job %s complete", work_item.job_id)
+
+            log.info("Beginning execution")
+            work_items = executor(timeout,
+                                  work_db.pending_work_items,
+                                  config,
+                                  on_task_complete=on_task_complete)
+            log.info("Execution finished")
+
     except FileNotFoundError as exc:
         raise FileNotFoundError(str(exc).replace(
             'Requested file', 'Corresponding database', 1)) from exc
