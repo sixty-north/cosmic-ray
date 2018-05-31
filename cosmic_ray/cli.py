@@ -336,7 +336,8 @@ def common_option_handler(config):
     :param config: holds the configuration values
     """
     if config['--verbose']:
-        logging.basicConfig(level=logging.INFO)
+        logging.basicConfig(level=logging.INFO,
+                            format='%(asctime)s %(name)s %(levelname)s %(message)s')
 
 
 _SIGNAL_EXIT_CODE_BASE = 128

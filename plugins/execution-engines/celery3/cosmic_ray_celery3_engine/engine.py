@@ -9,18 +9,17 @@ from .worker import execute_work_items
 
 class CeleryExecutionEngine(ExecutionEngine):
     "The celery3 execution engine."
-    def __call__(self, timeout, pending_work, config):
+    def __call__(self, timeout, pending_work, config, on_task_complete):
         purge_queue = config['execution-engine'].get('purge-queue', True)
 
         try:
-            results = execute_work_items(
+            job = execute_work_items(
                 timeout,
                 pending_work,
                 config)
 
-            for result in results:
-                print("result =", result)
-                yield WorkItem(result.get())
+            result = job.apply_async()
+            result.get(callback=on_task_complete)
         finally:
             if purge_queue:
                 APP.control.purge()
