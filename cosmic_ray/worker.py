@@ -35,11 +35,12 @@ log = logging.getLogger()
 class WorkerOutcome:
     """Possible outcomes for a worker.
     """
-    NORMAL = 'normal'
-    EXCEPTION = 'exception'
-    NO_TEST = 'no-test'
-    TIMEOUT = 'timeout'
-    SKIPPED = 'skipped'
+    NORMAL = 'normal'       # The worker exited normally, producing valid output
+    EXCEPTION = 'exception' # The worker exited with an exception
+    ABNORMAL = 'abnormal'   # The worker did not exit normally or with an exception (e.g. a segfault)
+    NO_TEST = 'no-test'     # The worker had no test to run
+    TIMEOUT = 'timeout'     # The worker timed out
+    SKIPPED = 'skipped'     # The job was skipped (worker was not executed)
 
 
 def worker(module_name,
@@ -155,8 +156,9 @@ def worker_process(work_item,
         work_item.data = exc.timeout
         proc.kill()
     except json.JSONDecodeError as exc:
-        work_item.worker_outcome = WorkerOutcome.EXCEPTION
-        work_item.data = str(exc)
+        work_item.test_outcome = TestOutcome.INCOMPETENT
+        work_item.worker_outcome = WorkerOutcome.ABNORMAL
+        work_item.data = traceback.format_exception(*sys.exc_info())
 
     work_item.command_line = command
     return work_item
