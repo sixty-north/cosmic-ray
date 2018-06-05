@@ -3,10 +3,12 @@ dist
 *egg-info
 venv
 docs/site
+.pytest_cache
 __pycache__
 *~
 site
 *pyc
+TAGS
 test_project/*.json
 .cache
 .hypothesis
