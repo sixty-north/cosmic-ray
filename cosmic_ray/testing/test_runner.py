@@ -4,10 +4,11 @@ import abc
 import sys
 import traceback
 
+from cosmic_ray.util import StrEnum
 from cosmic_ray.work_item import WorkItem
 
 
-class TestOutcome:
+class TestOutcome(StrEnum):
     """A enum of the possible outcomes for any mutant test run.
     """
     SURVIVED = 'survived'

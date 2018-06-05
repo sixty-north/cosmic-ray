@@ -1,6 +1,7 @@
 """Various utility functions with no better place to live.
 """
 import ast
+import enum
 import itertools
 
 try:
@@ -143,3 +144,7 @@ def index_of_first_difference(*iterables):
 
 def all_equal(iterable):
     return all(a == b for a, b in pairwise(iterable))
+
+
+class StrEnum(str, enum.Enum):
+    pass

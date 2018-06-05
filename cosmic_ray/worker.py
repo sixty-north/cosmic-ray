@@ -13,6 +13,17 @@ import sys
 import traceback
 
 import astunparse
+
+import cosmic_ray.compat.json
+from cosmic_ray.config import serialize_config
+from cosmic_ray.importing import preserve_modules, using_ast
+from cosmic_ray.mutating import MutatingCore
+from cosmic_ray.parsing import get_ast
+from cosmic_ray.testing.test_runner import TestOutcome
+from cosmic_ray.util import StrEnum
+from cosmic_ray.work_item import WorkItem, WorkItemJsonDecoder
+
+
 try:
     import typing      # the typing module does some fancy stuff at import time
                        # which we shall not do twice... by loading it here,
@@ -21,18 +32,10 @@ try:
 except ImportError:
     pass
 
-from cosmic_ray.config import serialize_config
-from cosmic_ray.importing import preserve_modules, using_ast
-from cosmic_ray.mutating import MutatingCore
-from cosmic_ray.parsing import get_ast
-from cosmic_ray.testing.test_runner import TestOutcome
-from cosmic_ray.work_item import WorkItem, WorkItemJsonDecoder
-import cosmic_ray.compat.json
-
 log = logging.getLogger()
 
 
-class WorkerOutcome:
+class WorkerOutcome(StrEnum):
     """Possible outcomes for a worker.
     """
     NORMAL = 'normal'       # The worker exited normally, producing valid output
