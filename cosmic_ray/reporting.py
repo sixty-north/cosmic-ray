@@ -8,7 +8,7 @@ from cosmic_ray.worker import WorkerOutcome
 def _print_item(work_item, full_report):
     data = work_item.data
     outcome = work_item.worker_outcome
-    if outcome in [WorkerOutcome.NORMAL, WorkerOutcome.EXCEPTION]:
+    if outcome in [WorkerOutcome.NORMAL, WorkerOutcome.ABNORMAL, WorkerOutcome.EXCEPTION]:
         outcome = work_item.test_outcome
     ret_val = [
         'job ID {}:{}:{}'.format(
@@ -17,7 +17,7 @@ def _print_item(work_item, full_report):
             work_item.module),
         'command: {}'.format(work_item.command_line or '')
     ]
-    if outcome == TestOutcome.KILLED and not full_report:
+    if outcome in (TestOutcome.KILLED, TestOutcome.INCOMPETENT) and not full_report:
         ret_val = []
     elif work_item.worker_outcome == WorkerOutcome.TIMEOUT:
         if full_report:
@@ -29,7 +29,9 @@ def _print_item(work_item, full_report):
     elif work_item.worker_outcome in [WorkerOutcome.NORMAL,
                                       WorkerOutcome.EXCEPTION]:
         ret_val += data
-        ret_val += work_item.diff
+
+        if work_item.diff is not None:
+            ret_val += work_item.diff
 
     # for presentation purposes only
     if ret_val:
@@ -43,7 +45,7 @@ def is_killed(record):
     """
     if record.worker_outcome in {WorkerOutcome.TIMEOUT, WorkerOutcome.SKIPPED}:
         return True
-    elif record.worker_outcome == WorkerOutcome.NORMAL:
+    elif record.worker_outcome in (WorkerOutcome.ABNORMAL, WorkerOutcome.NORMAL):
         if record.test_outcome == TestOutcome.KILLED:
             return True
         if record.test_outcome == TestOutcome.INCOMPETENT:
