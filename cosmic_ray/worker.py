@@ -21,12 +21,12 @@ try:
 except ImportError:
     pass
 
-from .config import serialize_config
-from .importing import preserve_modules, using_ast
-from .mutating import MutatingCore
-from .parsing import get_ast
-from .testing.test_runner import TestOutcome
-from .work_item import WorkItem, WorkItemJsonDecoder
+from cosmic_ray.config import serialize_config
+from cosmic_ray.importing import preserve_modules, using_ast
+from cosmic_ray.mutating import MutatingCore
+from cosmic_ray.parsing import get_ast
+from cosmic_ray.testing.test_runner import TestOutcome
+from cosmic_ray.work_item import WorkItem, WorkItemJsonDecoder
 import cosmic_ray.compat.json
 
 log = logging.getLogger()
