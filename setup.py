@@ -82,6 +82,7 @@ INSTALL_REQUIRES = [
     'spor',
     'stevedore',
     'tinydb>=3.2.1',
+    'yattag',
 ]
 
 if sys.version_info < (3, 4):
@@ -128,6 +129,7 @@ setup(
     entry_points={
         'console_scripts': [
             'cosmic-ray = cosmic_ray.cli:main',
+            'cr-html = cosmic_ray.commands.format:report_html',
             'cr-report = cosmic_ray.commands.format:report',
             'cr-rate = cosmic_ray.commands.format:format_survival_rate',
             'cr-xml = cosmic_ray.commands.format:report_xml',

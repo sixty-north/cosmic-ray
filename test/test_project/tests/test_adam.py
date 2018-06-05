@@ -80,3 +80,6 @@ class Tests(unittest.TestCase):
 
     def test_decorator(self):
         self.assertTrue(adam.decorated_func())
+
+    def test_use_cffi(self):
+        assert adam.use_ctypes(1000000) == b'b' * 1000000

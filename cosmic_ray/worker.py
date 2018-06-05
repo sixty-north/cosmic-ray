@@ -7,13 +7,23 @@ one location with one operator, runs the tests, reports the results, and dies.
 import difflib
 import importlib
 import inspect
-import json
 import logging
 import subprocess
 import sys
 import traceback
 
 import astunparse
+
+import cosmic_ray.compat.json
+from cosmic_ray.config import serialize_config
+from cosmic_ray.importing import preserve_modules, using_ast
+from cosmic_ray.mutating import MutatingCore
+from cosmic_ray.parsing import get_ast
+from cosmic_ray.testing.test_runner import TestOutcome
+from cosmic_ray.util import StrEnum
+from cosmic_ray.work_item import WorkItem, WorkItemJsonDecoder
+
+
 try:
     import typing      # the typing module does some fancy stuff at import time
                        # which we shall not do twice... by loading it here,
@@ -22,24 +32,18 @@ try:
 except ImportError:
     pass
 
-from .config import Config, serialize_config
-from .importing import preserve_modules, using_ast
-from .mutating import MutatingCore
-from .parsing import get_ast
-from .testing.test_runner import TestOutcome
-from .work_item import WorkItem
-
 log = logging.getLogger()
 
 
-class WorkerOutcome:
+class WorkerOutcome(StrEnum):
     """Possible outcomes for a worker.
     """
-    NORMAL = 'normal'
-    EXCEPTION = 'exception'
-    NO_TEST = 'no-test'
-    TIMEOUT = 'timeout'
-    SKIPPED = 'skipped'
+    NORMAL = 'normal'       # The worker exited normally, producing valid output
+    EXCEPTION = 'exception' # The worker exited with an exception
+    ABNORMAL = 'abnormal'   # The worker did not exit normally or with an exception (e.g. a segfault)
+    NO_TEST = 'no-test'     # The worker had no test to run
+    TIMEOUT = 'timeout'     # The worker timed out
+    SKIPPED = 'skipped'     # The job was skipped (worker was not executed)
 
 
 def worker(module_name,
@@ -143,7 +147,7 @@ def worker_process(work_item,
     config_string = serialize_config(config)
     try:
         outs, _ = proc.communicate(input=config_string, timeout=timeout)
-        result = json.loads(outs)
+        result = cosmic_ray.compat.json.loads(outs, cls=WorkItemJsonDecoder)
         work_item.update({
             k: v
             for k, v
@@ -154,9 +158,10 @@ def worker_process(work_item,
         work_item.worker_outcome = WorkerOutcome.TIMEOUT
         work_item.data = exc.timeout
         proc.kill()
-    except json.JSONDecodeError as exc:
-        work_item.worker_outcome = WorkerOutcome.EXCEPTION
-        work_item.data = exc
+    except cosmic_ray.compat.json.JSONDecodeError as exc:
+        work_item.test_outcome = TestOutcome.INCOMPETENT
+        work_item.worker_outcome = WorkerOutcome.ABNORMAL
+        work_item.data = traceback.format_exception(*sys.exc_info())
 
     work_item.command_line = command
     return work_item

@@ -1,6 +1,7 @@
 """Various utility functions with no better place to live.
 """
 import ast
+import enum
 import itertools
 
 try:
@@ -121,3 +122,29 @@ def compare_ast(node1, node2):
     elif isinstance(node1, list):
         return all(itertools.starmap(compare_ast, zip(node1, node2)))
     return node1 == node2
+
+
+def pairwise(iterable):
+    "s -> (s0,s1), (s1,s2), (s2, s3), ..."
+    a, b = itertools.tee(iterable)
+    next(b, None)
+    return zip(a, b)
+
+
+def index_of_first_difference(*iterables):
+    """The index of the first unequal elements in two iterable series.
+
+    Args:
+        *iterables: Iterable series.
+    """
+    for index, items in enumerate(zip(*iterables)):
+        if not all_equal(items):
+            return index
+    raise IndexError("Iterables have equal contents.")
+
+def all_equal(iterable):
+    return all(a == b for a, b in pairwise(iterable))
+
+
+class StrEnum(str, enum.Enum):
+    pass
