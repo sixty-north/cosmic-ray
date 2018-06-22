@@ -32,6 +32,7 @@ from cosmic_ray.work_item import WorkItemJsonEncoder
 
 log = logging.getLogger()
 
+foo = 'bar'
 
 @dsc.command()
 def handle_baseline(args):
