@@ -60,7 +60,7 @@ def load_config(filename=None):
             filename = handle.name
             return kfg.yaml.load_config(handle, config=Config())
     except (OSError, ValueError) as exc:
-        raise ConfigError(
+        raise kfg.config.ConfigError(
             'Error loading configuration from {}'.format(filename)) from exc
 
 

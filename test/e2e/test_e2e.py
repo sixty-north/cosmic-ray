@@ -75,3 +75,14 @@ def test_failing_baseline(project_root):
     with pytest.raises(subprocess.CalledProcessError):
         subprocess.check_call(['cosmic-ray', 'init', config, session],
                               cwd=str(project_root))
+
+
+def test_config_command(project_root):
+    config = 'cosmic-ray.import.conf'
+    session = 'import_tests.session.json'
+
+    subprocess.check_call(['cosmic-ray', 'init', config, session],
+                          cwd=str(project_root))
+
+    subprocess.check_call(['cosmic-ray', 'config', session],
+                          cwd=str(project_root))

@@ -21,7 +21,7 @@ import cosmic_ray.counting
 import cosmic_ray.modules
 import cosmic_ray.plugins
 import cosmic_ray.worker
-from cosmic_ray.config import get_db_name, load_config
+from cosmic_ray.config import get_db_name, load_config, serialize_config
 from cosmic_ray.exit_codes import ExitCode
 from cosmic_ray.progress import report_progress
 from cosmic_ray.testing.test_runner import TestOutcome
@@ -32,8 +32,6 @@ from cosmic_ray.version import __version__
 from cosmic_ray.work_item import WorkItemJsonEncoder
 
 log = logging.getLogger()
-
-foo = 'bar'
 
 @dsc.command()
 def handle_baseline(args):
@@ -156,7 +154,7 @@ def handle_config(args):
     session_file = get_db_name(args['<session-file>'])
     with use_db(session_file) as database:
         config, _ = database.get_config()
-        print(json.dumps(config.as_dict()))
+        print(serialize_config(config))
 
     return ExitCode.OK
 
