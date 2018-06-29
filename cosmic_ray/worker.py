@@ -124,7 +124,7 @@ def worker(module_name,
 
 def worker_process(work_item,
                    timeout,
-                   config: Config):
+                   config):
     """Run `cosmic-ray worker` in a subprocess and return the results,
     passing `config` to it via stdin.
 

@@ -14,13 +14,14 @@ import sys
 
 import docopt
 import docopt_subcommands as dsc
+from kfg.config import ConfigError, ConfigValueError
 
 import cosmic_ray.commands
 import cosmic_ray.counting
 import cosmic_ray.modules
 import cosmic_ray.plugins
 import cosmic_ray.worker
-from cosmic_ray.config import ConfigError, ConfigValueError, get_db_name, load_config
+from cosmic_ray.config import get_db_name, load_config
 from cosmic_ray.exit_codes import ExitCode
 from cosmic_ray.progress import report_progress
 from cosmic_ray.testing.test_runner import TestOutcome
@@ -107,17 +108,10 @@ def handle_init(args):
 
     config = load_config(config_file)
 
-    if ('timeout',) in config:
-        timeout = float(config['timeout'])
-    elif ('baseline',) in config:
-        try:
-            baseline_mult = float(config['baseline'])
-            if baseline_mult <= 0:
-                raise ValueError()
-        except (ValueError, TypeError):
-            raise ConfigValueError(
-                'Baseline multiplier must be a positive number, not {}'.format(
-                    config['baseline']))
+    if 'timeout' in config:
+        timeout = config['timeout']
+    elif 'baseline' in config:
+        baseline_mult = config['baseline']
 
         command = 'cosmic-ray baseline {}'.format(
             args['<config-file>'])
@@ -334,12 +328,12 @@ See '{program} help <command>' for help on specific commands.
 """
 
 
-def common_option_handler(config):
+def common_option_handler(args):
     """Add verbose mode.
 
     :param config: holds the configuration values
     """
-    if config['--verbose']:
+    if args['--verbose']:
         logging.basicConfig(level=logging.INFO,
                             format='%(asctime)s %(name)s %(levelname)s %(message)s')
 

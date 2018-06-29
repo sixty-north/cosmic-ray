@@ -1,12 +1,14 @@
 """Implementation of the WorkDB."""
 
 import contextlib
+from io import StringIO
 import os
 from enum import Enum
 
 # This db may well not scale very well. We need to be ready to switch it out
 # for something quicker if not. But for now it's *very* convenient.
 import tinydb
+import kfg.yaml
 
 from .config import Config
 from .work_item import WorkItem
@@ -91,7 +93,7 @@ class WorkDB:
         table = self._config
         table.purge()
         table.insert({
-            'config': config.as_dict(),
+            'config': kfg.yaml.serialize_config(config),
             'timeout': timeout,
         })
 
@@ -110,7 +112,7 @@ class WorkDB:
         except IndexError:
             raise ValueError('work-db has no config')
 
-        return (Config(record['config']),
+        return (kfg.yaml.load_config(StringIO(record['config']), config=Config()),
                 record['timeout'])
 
     def add_work_items(self, work_items):

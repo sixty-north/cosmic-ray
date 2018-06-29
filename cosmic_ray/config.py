@@ -3,63 +3,10 @@ from contextlib import contextmanager
 import logging
 import sys
 
-import yaml
+import kfg.config
+import kfg.yaml
 
 log = logging.getLogger()
-
-
-class Config:
-    "Simple interface to a Cosmic Ray configuration."
-
-    def __init__(self, cfg):
-        self._cfg = cfg
-
-    def __getitem__(self, path):
-        """Get a config item by its path.
-
-        Args:
-            path: An iterable of strings defining the path to the item to get.
-
-        Returns: The config element at `path`.
-
-        Raises:
-            ConfigError: The path is not in the config.
-
-        """
-        if not isinstance(path, tuple):
-            path = (path,)
-
-        try:
-            cfg = self._cfg
-            for step in path:
-                cfg = cfg[step]
-            return cfg 
-        except KeyError:
-            raise ConfigPathError(*path)
-
-    def get(self, *path, default=None):
-        """Get a config item by its path, or `default`.
-
-        Args:
-            path: An iterable of strings defining the path to the item to get.
-
-        Returns: The config element at `path`. If there is no item at that
-            path, this returns `default`.
-        """
-        try:
-            return self[path]
-        except ConfigError:
-            return default
-
-    def __contains__(self, path):
-        try:
-            _ = self.__getitem__(path)
-            return True
-        except ConfigError:
-            return False
-
-    def as_dict(self):
-        return self._cfg
 
 
 @contextmanager
@@ -78,6 +25,26 @@ def _config_stream(filename):
             yield handle
 
 
+class Config(kfg.config.Config):
+    """kfg.config.Config subclass for Cosmic Ray.
+
+    The primary job of this subclass is to configure the transforms for CR's
+    configuration.
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.set_transform('timeout', float)
+        self.set_transform('baseline', self._positive_float)
+
+    @staticmethod
+    def _positive_float(x):
+        x = float(x)
+        if x <= 0:
+            raise ValueError('positive float expected. value={}'.format(x))
+        return x
+
+
 def load_config(filename=None):
     """Load a configuration from a file or stdin.
 
@@ -86,23 +53,19 @@ def load_config(filename=None):
     Returns: A configuration dict.
 
     Raises:
-      ConfigError: If there is an error loading the config.
+      kfg.config.ConfigError: If there is an error loading the config.
     """
     try:
         with _config_stream(filename) as handle:
             filename = handle.name
-            return Config(yaml.safe_load(handle))
-    except (OSError, UnicodeDecodeError, yaml.parser.ParserError) as exc:
+            return kfg.yaml.load_config(handle, config=Config())
+    except (OSError, ValueError) as exc:
         raise ConfigError(
             'Error loading configuration from {}'.format(filename)) from exc
 
 
 def serialize_config(config):
-    """Convert a configuration dict into a string.
-
-    This is complementary with `load_config`.
-    """
-    return yaml.dump(config.as_dict())
+    return kfg.yaml.serialize_config(config)
 
 
 def get_db_name(session_name):
@@ -115,28 +78,3 @@ def get_db_name(session_name):
     if session_name.endswith('.json'):
         return session_name
     return '{}.json'.format(session_name)
-
-
-class ConfigError(Exception):
-    """Errors loading configs or with values in a config."""
-    pass
-
-
-class ConfigPathError(ConfigError):
-    """Indicates that path was not found in a config.
-    """
-    def __init__(self, *path):
-        self._path = tuple(path)
-        super().__init__('Missing config value: {}'.format(self.path))
-
-    @property
-    def path(self):
-        "The path that was not found."
-        return self._path
-
-
-class ConfigValueError(ConfigError):
-    """Indicates that the values found in a config have invalid values.
-    """
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
