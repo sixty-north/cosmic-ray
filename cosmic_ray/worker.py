@@ -46,10 +46,9 @@ class WorkerOutcome(StrEnum):
 
 
 def worker(module_name,
-           operator_name,
+           operator,
            occurrence,
-           test_runner_name,
-           test_runner_args):
+           test_runner):
     """Mutate the OCCURRENCE-th site for OPERATOR_CLASS in MODULE_NAME, run the
     tests, and report the results.
 
@@ -73,10 +72,9 @@ def worker(module_name,
 
     Args:
         module_name: The name of the module to be mutated
-        operator_name: The name of the operator plugin to be applied
+        operator: The operator be applied
         occurrence: The occurrence of the operator to apply
-        test_runner_name: The name of the test runner plugin to use
-        test_runner_args: Argument to pass to `get_test_runner()`
+        test_runner: The test runner plugin to use
 
     Returns: A WorkItem
 
@@ -88,12 +86,6 @@ def worker(module_name,
         # TODO: What should we be doing here? This feels too hacky.
         sys.path.insert(0, '')
 
-        operator_class = cosmic_ray.plugins.get_operator(operator_name)
-
-        test_runner = cosmic_ray.plugins.get_test_runner(
-            test_runner_name,
-            test_runner_args)
-
         with preserve_modules():
             module = importlib.import_module(module_name)
             module_source_file = inspect.getsourcefile(module)
@@ -101,7 +93,7 @@ def worker(module_name,
             module_source = astunparse.unparse(module_ast)
 
             core = MutatingCore(occurrence)
-            operator = operator_class(core)
+            operator = operator(core)
             # note: after this step module_ast and modified_ast
             # appear to be the same
             modified_ast = operator.visit(module_ast)
@@ -126,9 +118,10 @@ def worker(module_name,
 
         item.update({
             'diff': module_diff,
-            'worker_outcome': WorkerOutcome.NORMAL
+            'worker_outcome': WorkerOutcome.NORMAL,
+            'occurrence': core.activation_record['occurrence'],
+            'line_number': core.activation_record['line_number'],
         })
-        item.update(core.activation_record)
         return item
 
     except Exception:  # noqa # pylint: disable=broad-except
@@ -163,13 +156,15 @@ def worker_process(work_item,
     work_item = WorkItem(work_item)
 
     parent_conn, child_conn = multiprocessing.Pipe()
-    proc = multiprocessing.Process(target=worker_mp,
-                                   args=(child_conn,
-                                         work_item.module,
-                                         work_item.operator,
-                                         work_item.occurrence,
-                                         config['test-runner', 'name'],
-                                         config['test-runner', 'args']))
+    proc = multiprocessing.Process(
+        target=worker_mp,
+        args=(child_conn,
+              work_item.module,
+              cosmic_ray.plugins.get_operator(work_item.operator),
+              work_item.occurrence,
+              cosmic_ray.plugins.get_test_runner(
+                  config['test-runner', 'name'],
+                  config['test-runner', 'args'])))
 
     proc.start()
 

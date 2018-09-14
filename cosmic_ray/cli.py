@@ -296,10 +296,11 @@ def handle_worker(args):
         with redirect_stdout(sys.stdout if args['--keep-stdout'] else devnull):
             work_item = cosmic_ray.worker.worker(
                 args['<module>'],
-                args['<operator>'],
+                cosmic_ray.plugins.get_operator(args['<operator>']),
                 int(args['<occurrence>']),
-                config['test-runner', 'name'],
-                config['test-runner', 'args'])
+                cosmic_ray.plugins.get_test_runner(
+                    config['test-runner', 'name'],
+                    config['test-runner', 'args']))
 
     sys.stdout.write(json.dumps(work_item, cls=WorkItemJsonEncoder))
 
