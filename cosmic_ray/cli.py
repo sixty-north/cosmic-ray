@@ -167,7 +167,6 @@ def handle_exec(args):
     This requires that the rest of your mutation testing
     infrastructure (e.g. worker processes) are already running.
     """
-
     session_file = get_db_name(
         args.get('<session-file>'))
     cosmic_ray.commands.execute(session_file)
@@ -293,18 +292,14 @@ def handle_worker(args):
     if config.get('local-imports', default=True):
         sys.path.insert(0, '')
 
-    operator = cosmic_ray.plugins.get_operator(args['<operator>'])
-    test_runner = cosmic_ray.plugins.get_test_runner(
-        config['test-runner', 'name'],
-        config['test-runner', 'args'])
-
     with open(os.devnull, 'w') as devnull:
         with redirect_stdout(sys.stdout if args['--keep-stdout'] else devnull):
             work_item = cosmic_ray.worker.worker(
                 args['<module>'],
-                operator,
+                args['<operator>'],
                 int(args['<occurrence>']),
-                test_runner)
+                config['test-runner', 'name'],
+                config['test-runner', 'args'])
 
     sys.stdout.write(json.dumps(work_item, cls=WorkItemJsonEncoder))
 
