@@ -8,20 +8,19 @@ import difflib
 import importlib
 import inspect
 import logging
-import subprocess
+import multiprocessing.pool
 import sys
 import traceback
 
 import astunparse
 
 import cosmic_ray.compat.json
-from cosmic_ray.config import serialize_config
 from cosmic_ray.importing import preserve_modules, using_ast
 from cosmic_ray.mutating import MutatingCore
 from cosmic_ray.parsing import get_ast
 from cosmic_ray.testing.test_runner import TestOutcome
 from cosmic_ray.util import StrEnum
-from cosmic_ray.work_item import WorkItem, WorkItemJsonDecoder
+from cosmic_ray.work_item import WorkItem
 
 
 try:
@@ -47,7 +46,7 @@ class WorkerOutcome(StrEnum):
 
 
 def worker(module_name,
-           operator_class,
+           operator,
            occurrence,
            test_runner):
     """Mutate the OCCURRENCE-th site for OPERATOR_CLASS in MODULE_NAME, run the
@@ -71,13 +70,22 @@ def worker(module_name,
     test. It will do so and report back the result - killed, survived, or
     incompetent - in a structured way.
 
-    Returns: a WorkItem
+    Args:
+        module_name: The name of the module to be mutated
+        operator: The operator be applied
+        occurrence: The occurrence of the operator to apply
+        test_runner: The test runner plugin to use
+
+    Returns: A WorkItem
 
     Raises: This will generally not raise any exceptions. Rather, exceptions
         will be reported using the 'exception' result-type in the return value.
 
     """
     try:
+        # TODO: What should we be doing here? This feels too hacky.
+        sys.path.insert(0, '')
+
         with preserve_modules():
             module = importlib.import_module(module_name)
             module_source_file = inspect.getsourcefile(module)
@@ -85,7 +93,7 @@ def worker(module_name,
             module_source = astunparse.unparse(module_ast)
 
             core = MutatingCore(occurrence)
-            operator = operator_class(core)
+            operator = operator(core)
             # note: after this step module_ast and modified_ast
             # appear to be the same
             modified_ast = operator.visit(module_ast)
@@ -106,14 +114,15 @@ def worker(module_name,
                 module_diff.append(line)
 
         with using_ast(module_name, module_ast):
-            rec = test_runner()
+            item = test_runner()
 
-        rec.update({
+        item.update({
             'diff': module_diff,
-            'worker_outcome': WorkerOutcome.NORMAL
+            'worker_outcome': WorkerOutcome.NORMAL,
+            'occurrence': core.activation_record['occurrence'],
+            'line_number': core.activation_record['line_number'],
         })
-        rec.update(core.activation_record)
-        return rec
+        return item
 
     except Exception:  # noqa # pylint: disable=broad-except
         return WorkItem(
@@ -122,11 +131,22 @@ def worker(module_name,
             worker_outcome=WorkerOutcome.EXCEPTION)
 
 
+def worker_mp(pipe, *args, **kwargs):
+    item = worker(*args, **kwargs)
+    pipe.send(item)
+
+
 def worker_process(work_item,
                    timeout,
                    config):
     """Run `cosmic-ray worker` in a subprocess and return the results,
     passing `config` to it via stdin.
+
+    Args:
+        work_item: The WorkItem describing the work to do.
+        timeout: The maximum amount of time (seconds) to allow the subprocess
+            to run.
+        config: The configuration for the run.
 
     Returns: An updated WorkItem
 
@@ -135,33 +155,38 @@ def worker_process(work_item,
     # celery), so we reconstruct a WorkItem to make it easier to work with.
     work_item = WorkItem(work_item)
 
-    command = 'cosmic-ray worker {module} {operator} {occurrence}'.format(
-        **work_item)
+    parent_conn, child_conn = multiprocessing.Pipe()
+    proc = multiprocessing.Process(
+        target=worker_mp,
+        args=(child_conn,
+              work_item.module,
+              cosmic_ray.plugins.get_operator(work_item.operator),
+              work_item.occurrence,
+              cosmic_ray.plugins.get_test_runner(
+                  config['test-runner', 'name'],
+                  config['test-runner', 'args'])))
 
-    log.info('executing: %s', command)
+    proc.start()
 
-    proc = subprocess.Popen(command.split(),
-                            stdin=subprocess.PIPE,
-                            stdout=subprocess.PIPE,
-                            universal_newlines=True)
-    config_string = serialize_config(config)
-    try:
-        outs, _ = proc.communicate(input=config_string, timeout=timeout)
-        result = cosmic_ray.compat.json.loads(outs, cls=WorkItemJsonDecoder)
+    if parent_conn.poll(timeout):
+        result = parent_conn.recv()
         work_item.update({
             k: v
             for k, v
             in result.items()
             if v is not None
         })
-    except subprocess.TimeoutExpired as exc:
+    else:  # timeout
         work_item.worker_outcome = WorkerOutcome.TIMEOUT
-        work_item.data = exc.timeout
-        proc.kill()
-    except cosmic_ray.compat.json.JSONDecodeError as exc:
-        work_item.test_outcome = TestOutcome.INCOMPETENT
-        work_item.worker_outcome = WorkerOutcome.ABNORMAL
-        work_item.data = traceback.format_exception(*sys.exc_info())
+        work_item.data = timeout
+        proc.terminate()
 
+    proc.join()
+
+    # TODO: This is in an awkward place now...we don't use the command any
+    # more. Where would be a better place? Or should we generate this another
+    # way? This command line is useful for debugging, but meaningless here.
+    command = 'cosmic-ray worker {module} {operator} {occurrence}'.format(
+        **work_item)
     work_item.command_line = command
     return work_item
