@@ -131,16 +131,20 @@ def worker(module_name,
             worker_outcome=WorkerOutcome.EXCEPTION)
 
 
-def worker_mp(pipe, *args, **kwargs):
+def _worker_multiprocessing_wrapper(pipe, *args, **kwargs):
+    """Wrapper for launching workers with multiprocessing.
+
+    Args:
+        pipe: The `multiprocessing.Pipe` for sending results.
+    """
     item = worker(*args, **kwargs)
     pipe.send(item)
 
 
-def worker_process(work_item,
-                   timeout,
-                   config):
-    """Run `cosmic-ray worker` in a subprocess and return the results,
-    passing `config` to it via stdin.
+def execute_work_item(work_item,
+                      timeout,
+                      config):
+    """Execute the mutation and tests described in a `WorkItem`.
 
     Args:
         work_item: The WorkItem describing the work to do.
@@ -148,16 +152,12 @@ def worker_process(work_item,
             to run.
         config: The configuration for the run.
 
-    Returns: An updated WorkItem
+    Returns: An updated `WorkItem` with the results of the tests.
 
     """
-    # The work_item param may come as just a dict (e.g. if it arrives over
-    # celery), so we reconstruct a WorkItem to make it easier to work with.
-    work_item = WorkItem(work_item)
-
     parent_conn, child_conn = multiprocessing.Pipe()
     proc = multiprocessing.Process(
-        target=worker_mp,
+        target=_worker_multiprocessing_wrapper,
         args=(child_conn,
               work_item.module,
               cosmic_ray.plugins.get_operator(work_item.operator),
