@@ -5,7 +5,6 @@ Some parts of the standard json package aren't available on 3.4, so this smooths
 
 import json
 
-
 try:
     CatchType = json.JSONDecodeError
 except AttributeError:
@@ -16,6 +15,7 @@ class JSONDecodeError(ValueError):
     pass
 
 
+# TODO: Remove this? It doesn't seem used.
 def loads(*args, **kwargs):
     try:
         return json.loads(*args, **kwargs)

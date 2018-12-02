@@ -8,6 +8,11 @@ more than merely human."* *— The Fantastic Four*
 
 Cosmic Ray is a mutation testing tool for Python 3.
 
+It makes small changes to your source code, running your test suite for each
+one. Here's how the mutations look:
+
+.. image:: docs/cr-in-action.gif
+
 Cosmic Ray is still learning how to walk!
 -----------------------------------------
 
@@ -23,7 +28,7 @@ And, of course, patches and ideas are welcome.
 
 |full_documentation|_
 
-.. |Python version| image:: https://img.shields.io/badge/Python_version-3.4+-blue.svg
+.. |Python version| image:: https://img.shields.io/badge/Python_version-3.5+-blue.svg
    :target: https://www.python.org/
 .. |Build Status| image:: https://travis-ci.org/sixty-north/cosmic-ray.svg?branch=master
    :target: https://travis-ci.org/sixty-north/cosmic-ray

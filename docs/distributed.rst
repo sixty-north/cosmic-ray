@@ -17,14 +17,17 @@ Different engines can run tests in different contexts: in parallel on a single
 machine, by distributing them across a message bus, or perhaps by spawning test
 runs on cloud systems.
 
+**THIS SECTION SHOULD BE CONSIDERED OUT OF DATE UNTIL FURTHER NOTICE.** We will
+reimplement celery support, but right now it's probably broken.
+
 The Celery execution engine
 ===========================
 
-The Cosmic Ray repository includes the `celery3` execution engine. This is
-provided as a plugin via the `cosmic_ray_celery3_engine` package in the
+The Cosmic Ray repository includes the `celery4` execution engine. This is
+provided as a plugin via the `cosmic_ray_celery4_engine` package in the
 `plugins/execution_engines/celery3` directory. This engine uses the `Celery
 distributed task queue <http://www.celeryproject.org/>`__ to spread work across
-multiple nodes. (It's called "celery3" since it uses version 3 of Celery;
+multiple nodes. (It's called "celery4" since it uses version 4 of Celery;
 version 4 will be available at some point as well).
 
 The basic idea is very simple. Celery lets you start multiple *workers*
@@ -50,14 +53,14 @@ day be able to work with machines on commodity cloud providers, meaning
 that highly-scaled mutation testing for Python will be available to
 anyone who wants it.
 
-Installing the `celery3` worker
+Installing the `celery4` worker
 -------------------------------
 
-The `cosmic_ray_celery3_engine` package is installed separately from
+The `cosmic_ray_celery34engine` package is installed separately from
 `cosmic_ray` itself. This is primarily so that `cosmic_ray` doesn't have a
 direct dependency on any version of `celery`.
 
-To install the plugin, you need to run this command from `plugins/execution-engines/celery3`:
+To install the plugin, you need to run this command from `plugins/execution-engines/celery4`:
 
 ::
 
@@ -85,7 +88,7 @@ like this:
 
 ::
 
-    celery -A cosmic_ray_celery3_engine.worker worker
+    celery -A cosmic_ray_celery4_engine.worker worker
 
 You should do this, of course, from the virtual environment into which
 you've installed Cosmic Ray. Similarly, you need to make sure that the
@@ -97,20 +100,18 @@ which you've installed the modules under test.
 Running distributed mutation testing
 ------------------------------------
 
-Aside from starting workers, you also need to specify `celery3` in your
+Aside from starting workers, you also need to specify `celery4` in your
 configuration. For example, instead of a "local" configuration like this:
 
 ::
 
-    execution-engine:
-      name: local
+    execution-engine.name = "local"
 
-You would use the name "celery3" like this:
+You would use the name "celery4" like this:
 
 ::
 
-    execution-engine:
-      name: celery3
+    execution-engine.name = "celery4"
 
 With this configuration in place, you then need to do an `init` to create a
 session followed by `exec` to run the tests:

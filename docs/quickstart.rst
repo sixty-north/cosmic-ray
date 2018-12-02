@@ -8,7 +8,7 @@ Configurations
 --------------
 
 Before you do run any mutation tests, you need to create a *configuration file*.
-A configuration is YAML file that specifies the modules you want to mutate, the
+A configuration is TOML file that specifies the modules you want to mutate, the
 test scripts to use, and so forth. A configuration is used to create a session,
 something we'll look at in the next section.
 
@@ -29,29 +29,20 @@ Example configuration
 Here's a simple example of a configuration file which uses ``unittest`` for
 testing:
 
-.. code:: yaml
+.. code:: ini
 
-    # config.yml
-
-    module: <the top-level module you want to test>
-
-    baseline: 10
-
-    exclude-modules:
-
-    test-runner:
-      name: unittest
-      args: <the directory containing your tests>
-
-    execution-engine:
-      name: local
+    # config.toml
+    [cosmic-ray]
+    module-path = "adam.py"
+    baseline = 10
+    exclude-modules = []
+    test-command = "{python_executable} -m unittest discover tests"
+    execution-engine.name = "local"
 
 You can specify a great deal of information in a configuration file, controlling
-things like the test runner, execution engine, test paths, and so forth. It's
+things like the test execution, the execution engine, and so forth. It's
 entirely likely that the configuration created by ``cosmic-ray new-config`` won't be
-sufficient for your needs. As you make changes to your configuration, you can
-generate new sessions from it by running ``cosmic-ray init``; if this command
-sees an existing configuration, it will use that instead of creating a new one.
+sufficient for your needs. Simply edit the config file to match your needs. 
 
 Create a session and run tests
 ------------------------------
@@ -68,7 +59,7 @@ The first step in a full testing run, then, is to initialize a session:
 (Note that you don't have to use the names "config.yml" and "my_session". Any
 names will do.)
 
-This will also create a database file called ``my_session.json``. Once this is
+This will also create a database file called ``my_session.sqlite``. Once this is
 created, you can start executing tests with the ``exec`` command:
 
 ::
@@ -86,11 +77,17 @@ and tested), you can see the results of your session with the
 
 ::
 
-    cosmic-ray dump  my_session | cr-report
+    cr-report my_session.sqlite
 
 This will print out a bunch of information about the work that was
 performed, including what kinds of mutants were created, which were
 killed, and – chillingly – which survived.
+
+You can also generate a handy HTML report with `cr-html`:
+
+::
+
+    cr-html my_session.sqlite > my_session.html
 
 A concrete example: running the ``adam`` unittests
 --------------------------------------------------
@@ -104,7 +101,7 @@ Ray, you can run these tests, too, like this:
     cd test_project
     cosmic-ray init cosmic-ray.unittest.local.conf example-session
     cosmic-ray --verbose exec example-session
-    cosmic-ray dump example-session | cr-report
+    cr-report example-session.sqlite
 
 In this case we're passing the ``--verbose`` flag to the ``exec``
 command so that you can see what Cosmic Ray is doing. If everything goes

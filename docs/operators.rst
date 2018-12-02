@@ -10,53 +10,37 @@ code.
 Implementation details
 ----------------------
 
-Cosmic Ray uses abstract syntax tree (AST) modification to implement
-mutation. This means that we first compile the original source code into
-an AST and then make changes to copies of that AST. The modified ASTs
-are inserted into the module tables ``sys.modules`` so that they can be
-tested. We use the standard library's ``ast`` module to work with the
-ASTs.
+Cosmic Ray relies on `parso <https://github.com/davidhalter/parso>`_ to parse
+Python code into trees. Cosmic Ray operators work directly on this tree, and the
+results of modifying this tree are written to disk for each mutation.
 
 Each operator is ultimately a subclass of
-``cosmic_ray.operators.operator.Operator`` which is itself a subclass of
-``ast.NodeTransformer``. ``NodeTransformer`` is used to traverse and
-modify ASTs, so our operators work by hooking into the
-``NodeTransformer`` protocol to add and remove nodes from the AST. When
-an operator visits a potential mutation site (i.e., a node that it knows
-how to mutate), it informs the ``Operator`` machinery, which in turn
-decides if the mutation should be supplied.
-
-An operator always operates on a copy of the original AST. In this way
-we ensure that no mutation interferes with any other mutation. This is
-critical because we need to avoid a) misattributing test results and b)
-missing survivors due to interacting/interfering mutations.
+``cosmic_ray.operators.operator.Operator``. We pass operators to various
+parse-tree *visitors* that let the operator view and modify the tree. When an
+operator reports that it can potentially modify a part of the tree, Cosmic Ray
+notes this and, later, asks the operator to actually perform this mutation.
 
 Implementing an operator
 ------------------------
 
 To implement a new operator you need to create a subclass of
-``cosmic_ray.operators.operator.Operator``. This, again, is a subclass
-of ``ast.NodeTransformer``. The ``NodeTransformer`` class provides a
-number of ``visit_*`` functions which are called during AST traversal as
-different types of nodes are visited. Examples include ``visit_Num``
-which is called when a ``Number`` node is visited, or ``visit_UnaryOp``
-which is called when a unary operator is visited. Your operator class
-should override the ``visit_*`` functions that it needs in order to
-determine when it can apply its mutation. In any of these functions, if
-your operator can perform a mutation it should call
-``Operator.visit_mutation_site()``.
+``cosmic_ray.operators.operator.Operator``. The first method an operator must implement
+is ``Operator.mutation_positions()`` which tells Cosmic Ray how the operator could mutate
+a particular parse-tree node. 
 
-Your operator class should also implement ``Operator.mutate()``. This is
-the function that actually mutates the AST by adding or removing nodes.
-This method will only ever be called with nodes for which your operator
-called ``visit_mutation_site()`` during traversal. In other words,
-Cosmic Ray splits mutation into two phases:
+Second, an operator subclass must implement ``Operator.mutate()`` which actually mutates 
+a parse-tree node.
 
-1. Detecting where a mutation might potentially be applied
-2. Applying the mutation
+Finally, an operator must implement the class method ``Operator.examples()``.
+This provides a set of before and after code snippets showing how the operator
+works. These examples are used in the test suite and potentially for
+documenation purposes. An operator can choose to provide no examples simply by
+returning and empty iterable from ``examples``, though we may decide to check
+for an absence of examples in the future. In any case, it's good form to provide
+examples.
 
-Your operator needs to implement both of these behaviors, and the
-mutation machinery will take care of calling them at the right time.
+In both cases, the operator implementation works directly with the ``parso``
+parse tree objects.
 
 Operator provider plugins
 -------------------------
@@ -146,32 +130,35 @@ our new operator. Create a file named ``number_replacer.py`` in the
 
 .. code-block:: python
 
-    import ast
-
     from cosmic_ray.operators.operator import Operator
-
+    import parso
 
     class NumberReplacer(Operator):
-        def visit_Num(self, node):
-            return self.visit_mutation_site(node)
+        """An operator that modifies numeric constants."""
 
-        def mutate(self, node):
-            new_node = ast.Num(n=node.n + 1)
-            return new_node
+        def mutation_positions(self, node):
+            if isinstance(node, parso.python.tree.Number):
+                yield (node.start_pos, node.end_pos)
 
-Let's step through this line-by-line. We first import ``ast`` because
-we'll need to create new ``ast.Num`` nodes later and we need access to
-its constructor.
+        def mutate(self, node, index):
+            """Modify the numeric value on `node`."""
 
-.. code-block:: python
+            assert isinstance(node, parso.python.tree.Number)
 
-    import ast
+            val = eval(node.value) + 1
+            return parso.python.tree.Number(' ' + str(val), node.start_pos)
 
-Next we import the ``Operator`` base class.
+Let's step through this line-by-line. We first import ``Operator`` because we need to inherit from it:
 
 .. code-block:: python
 
     from cosmic_ray.operators.operator import Operator
+
+We then import ``parso`` because we need to use it to create mutated nodes:
+
+.. code-block:: python
+
+    import parso
 
 We define our new operator by creating a subclass of ``Operator`` called
 ``NumberReplacer``:
@@ -180,33 +167,33 @@ We define our new operator by creating a subclass of ``Operator`` called
 
     class NumberReplacer(Operator):
 
-In order to do its job, ``NumberReplacer`` needs to detect when AST
-traversal reaches ``Num`` nodes. To do this, it implements
-``ast.NodeTransformer.visit_Num()`` which is called when ``Num`` nodes
-are visited. Since our operator can mutate *any* ``Num`` node, it
-implements this method by simply calling ``visit_mutation_site()``;
-remember that this informs the rest of the mutation machinery that it's
-possible to perform a mutation at this node:
+The ``mutate_positions`` method is called whenever Cosmic Ray needs to know if an operator can mutate a particular
+node. We implement ours to report a single mutation at each "number":
 
 .. code-block:: python
 
-        def visit_Num(self, node):
-            return self.visit_mutation_site(node)
+    def mutation_positions(self, node):
+        if isinstance(node, parso.python.tree.Number):
+            yield (node.start_pos, node.end_pos)
 
 Finally we implement ``Operator.mutate()`` which is called to actually
 perform the mutation. ``mutate()`` should return one of:
 
--  ``None`` if the ``node`` argument should be removed from the AST, or
--  a new ``ast.Node`` instance to replace the original one
+-  ``None`` if the ``node`` argument should be removed from the tree, or
+-  a new ``parso`` node to replace the original one
 
-In this case, simply create a new ``Num`` node with a new value and
+In this case, we simply create a new ``Number`` node with a new value and
 return it:
 
 .. code-block:: python
 
-        def mutate(self, node):
-            new_node = ast.Num(n=node.n + 1)
-            return new_node
+    def mutate(self, node, index):
+        """Modify the numeric value on `node`."""
+
+        assert isinstance(node, parso.python.tree.Number)
+
+        val = eval(node.value) + 1
+        return parso.python.tree.Number(' ' + str(val), node.start_pos)
 
 That's all there is to it. This mutation operator is now ready to be
 applied to any code you want to test.

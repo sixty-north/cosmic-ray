@@ -1,18 +1,15 @@
 Implementation
 ==============
 
-Cosmic Ray works by parsing the module under test (MUT) and its
-submodules into abstract syntax trees using `the ``ast``
-module <https://docs.python.org/3/library/ast.html>`__. It then uses
-`the ``ast.NodeTransformer``
-class <https://docs.python.org/3/library/ast.html#ast.NodeTransformer>`__
-to make systematic mutations to the ASTs.
+Cosmic Ray works by parsing the module under test (MUT) and its submodules into
+abstract syntax trees using `parso <https://github.com/davidhalter/parso>`_. It
+walks the parse trees produced by parso, allowing mutation operators to modify
+or delete them. These modified parse trees are then turned back into code which
+is written to disk for use in a test run.
 
 For each individual mutation, Cosmic Ray modifies the Python runtime
 environment to replace the MUT with the mutated version. It then uses
-```unittest``'s "discovery"
-functionality <https://docs.python.org/3/library/unittest.html#test-discovery>`__
-to discover your tests and run them against the mutant code.
+user-supplied test commands to run tests against mutated code.
 
 In effect, the mutation testing algorithm is something like this:
 
@@ -22,7 +19,7 @@ In effect, the mutation testing algorithm is something like this:
         for op in mutation_operators:
             for site in mutation_sites(op, mod):
                 mutant_ast = mutate_ast(op, mod, site)
-                replace_module(mod.name, compile(mutant_ast)
+                write_to_disk(mutant_ast)
 
                 try:
                     if discover_and_run_tests():

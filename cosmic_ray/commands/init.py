@@ -2,53 +2,49 @@
 import logging
 import uuid
 
+from cosmic_ray.ast import get_ast, Visitor
 import cosmic_ray.modules
-from cosmic_ray.parsing import get_ast
 from cosmic_ray.plugins import get_interceptor, interceptor_names, get_operator
-from cosmic_ray.util import get_col_offset, get_line_number
 from cosmic_ray.work_item import WorkItem
-
 
 log = logging.getLogger()
 
 
-class WorkDBInitCore:
-    """Operator core that initializes a WorkDB for a specific module and operator.
+class WorkDBInitVisitor(Visitor):
+    """An AST visitor that initializes a WorkDB for a specific module and operator.
 
     The idea is to walk the AST looking for nodes that the operator can mutate.
-    As they're found, `visit_mutation_site` is called and this core adds new
+    As they're found, `activate` is called and this core adds new
     WorkItems to the WorkDB. Use this core to populate a WorkDB by creating one
     for each operator-module pair and running it over the module's AST.
     """
-    def __init__(self, module, op_name, work_db):
-        self.module = module
+
+    def __init__(self, module_path, op_name, work_db, operator):
+        self.operator = operator
+        self.module_path = module_path
         self.op_name = op_name
         self.work_db = work_db
         self.occurrence = 0
 
-    def visit_mutation_site(self, node, _, count):
-        """Adds work items to the WorkDB as mutatable nodes are found.
-        """
-        self.work_db.add_work_items(
-            WorkItem(
-                job_id=uuid.uuid4().hex,
-                module=self.module.__name__,
-                operator=self.op_name,
-                occurrence=self.occurrence + c,
-                filename=self.module.__file__,
-                line_number=get_line_number(node),
-                col_offset=get_col_offset(node))
-            for c in range(count))
-
-        self.occurrence += count
-
+    def visit(self, node):
+        for start, stop in self.operator.mutation_positions(node):
+            self._record_work_item(start, stop)
         return node
 
+    def _record_work_item(self, start_pos, end_pos):
+        self.work_db.add_work_item(
+            WorkItem(
+                job_id=uuid.uuid4().hex,
+                module_path=str(self.module_path),
+                operator_name=self.op_name,
+                occurrence=self.occurrence,
+                start_pos=start_pos,
+                end_pos=end_pos))
 
-def init(modules,
-         work_db,
-         config,
-         timeout):
+        self.occurrence += 1
+
+
+def init(module_paths, work_db, config, timeout):
     """Clear and initialize a work-db with work items.
 
     Any existing data in the work-db will be cleared and replaced with entirely
@@ -56,24 +52,25 @@ def init(modules,
     removed.
 
     Args:
-      modules: iterable of module objects to be mutated.
+      module_paths: iterable of pathlib.Paths of modules to mutate.
       work_db: A `WorkDB` instance into which the work orders will be saved.
       config: The configuration for the new session.
       timeout: The timeout to apply to the work in the session.
     """
-    operators = cosmic_ray.plugins.operator_names()
-    work_db.set_config(
-        config=config,
-        timeout=timeout)
+    operator_names = cosmic_ray.plugins.operator_names()
+    work_db.set_config(config=config, timeout=timeout)
 
-    work_db.clear_work_items()
+    work_db.clear()
 
-    for module in modules:
-        for op_name in operators:
-            core = WorkDBInitCore(module, op_name, work_db)
-            operator = get_operator(op_name)(core)
-            module_ast = get_ast(module)
-            operator.visit(module_ast)
+    for module_path in module_paths:
+        module_ast = get_ast(
+            module_path, python_version=config.python_version)
+
+        for op_name in operator_names:
+            operator = get_operator(op_name)(config.python_version)
+            visitor = WorkDBInitVisitor(module_path, op_name, work_db,
+                                        operator)
+            visitor.walk(module_ast)
 
     apply_interceptors(work_db)
 

@@ -1,69 +1,108 @@
 """Implementation of the unary-operator-replacement operator.
 """
 
-import ast
+from enum import Enum
+from itertools import permutations
 
-from ..util import build_mutations
-from .operator import ReplacementOperatorMeta
+from parso.python.tree import Keyword, Operator, PythonNode
 
-
-# None indicates we want to delete the operator
-_AST_OPERATORS = (ast.UAdd, ast.USub, ast.Invert, ast.Not)
-
-
-def _to_ops(from_op):
-    """The sequence of operators which `from_op` could be mutated to.
-    """
-
-    for to_op in _AST_OPERATORS + (None,):
-        if to_op and from_op is ast.Not:
-            # 'not' can only be removed but not replaced with
-            # '+', '-' or '~' b/c that may lead to strange results
-            pass
-        elif from_op is ast.UAdd and to_op is None:
-            # '+1' => '1' yields equivalent mutations
-            pass
-        else:
-            yield to_op
+from . import operator
+from .util import extend_name
 
 
-def _create_replace_unary_operator(from_op, to_op):
-    """Create a ReplaceUnaryOperator subclasses that mutates `from_op` to `to_op`.
-    """
-    class ReplaceUnaryOperator(
-            metaclass=ReplacementOperatorMeta,
-            from_op=from_op,
-            to_op=to_op):  # pylint: disable=abstract-method
-        """An operator that modifies unary operators.
-        """
+class UnaryOperators(Enum):
+    UAdd = '+'
+    USub = '-'
+    Invert = '~'
+    Not = 'not '
+    Nothing = None
 
-        def visit_UnaryOp(self, node):  # pylint: disable=invalid-name, missing-docstring
-            if isinstance(node.op, self.from_op):
-                return self.visit_mutation_site(node)
+
+def _create_replace_unary_operators(from_op, to_op):
+    if to_op.value is None:
+        suffix = '_Delete_{}'.format(from_op.name)
+    else:
+        suffix = '_{}_{}'.format(from_op.name, to_op.name)
+
+    @extend_name(suffix)
+    class ReplaceUnaryOperator(operator.Operator):
+        "An operator that replaces unary {} with unary {}.".format(
+            from_op.name, to_op.name)
+
+        def mutation_positions(self, node):
+            if _is_unary_operator(node):
+                op = node.children[0]
+                if op.value.strip() == from_op.value.strip():
+                    yield (op.start_pos, op.end_pos)
+
+        def mutate(self, node, index):
+            assert index == 0
+            assert _is_unary_operator(node)
+
+            if to_op.value is None:
+                # This is a bit goofy since it can result in "return not x"
+                # becoming "return  x" (i.e. with two spaces). But it's correct
+                # enough.
+                node.children[0].value = ''
+            else:
+                node.children[0].value = to_op.value
             return node
 
-        def mutate(self, node, _):
-            "Perform the `idx`th mutation on node."
-            if self.to_op is None:
-                return node.operand
-
-            node.op = self.to_op()
-            return node
+        @classmethod
+        def examples(cls):
+            return (
+ # TODO: Hmmm....
+#         (ReplaceUnaryOperator_USub_UAdd, 'x = -1', 'x = +1'),
+#         (ReplaceUnaryOperator_UAdd_USub, 'x = +1', 'x = -1'),
+#         (ReplaceUnaryOperator_Delete_Not, 'return not x', 'return  x'),
+#         (ReplaceUnaryOperator_Delete_USub, "x = -1", "x = 1"),
+#         (ReplaceUnaryOperator_USub_Not, "x = -1", "x = not 1"),
+            )
 
     return ReplaceUnaryOperator
 
 
-# Create the mutation operator classes
+def _is_factor(node):
+    return (isinstance(node, PythonNode)
+            and node.type in {'factor', 'not_test'} and len(node.children) > 0
+            and isinstance(node.children[0], Operator))
+
+
+def _is_not_test(node):
+    return (isinstance(node, PythonNode) and node.type == 'not_test'
+            and len(node.children) > 0
+            and isinstance(node.children[0], Keyword)
+            and node.children[0].value == 'not')
+
+
+def _is_unary_operator(node):
+    return _is_factor(node) or _is_not_test(node)
+
+
+def _prohibited(from_op, to_op):
+    "Determines if from_op is allowed to be mutated to to_op."
+    # 'not' can only be removed but not replaced with
+    # '+', '-' or '~' b/c that may lead to strange results
+    if from_op is UnaryOperators.Not:
+        if to_op is not UnaryOperators.Nothing:
+            return True
+
+    # '+1' => '1' yields equivalent mutations
+    if from_op is UnaryOperators.UAdd:
+        if to_op is UnaryOperators.Nothing:
+            return True
+
+    return False
+
+
 _MUTATION_OPERATORS = tuple(
-    _create_replace_unary_operator(_AST_OPERATORS[idx], to_op)
-    for idx, to_op in build_mutations(_AST_OPERATORS, _to_ops))
+    _create_replace_unary_operators(from_op, to_op)
+    for (from_op, to_op) in permutations(UnaryOperators, 2)
+    if from_op.value is not None if not _prohibited(from_op, to_op))
 
-
-# Add the mutation operator classes to the module namespace.
-for op in _MUTATION_OPERATORS:
-    globals()[op.__name__] = op
+for op_cls in _MUTATION_OPERATORS:
+    globals()[op_cls.__name__] = op_cls
 
 
 def operators():
-    "Iterable of all unary operator replacement mutation operators."
-    return iter(_MUTATION_OPERATORS)
+    return _MUTATION_OPERATORS

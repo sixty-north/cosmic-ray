@@ -1,7 +1,8 @@
 "Implementation of the exception-replacement operator."
 
-import ast
 import builtins
+
+from parso.python.tree import Name, PythonNode
 
 from .operator import Operator
 
@@ -13,22 +14,48 @@ class CosmicRayTestingException(Exception):
 
 # We inject this into builtins so we can easily replace other exceptions
 # without necessitating the import of other modules.
-setattr(builtins,
-        CosmicRayTestingException.__name__,
+setattr(builtins, CosmicRayTestingException.__name__,
         CosmicRayTestingException)
 
 
 class ExceptionReplacer(Operator):
     """An operator that modifies exception handlers."""
 
-    def visit_ExceptHandler(self, node):  # noqa # pylint: disable=invalid-name
-        "Visit an exception handler node."
-        return self.visit_mutation_site(node)
+    def mutation_positions(self, node):
+        if isinstance(node, PythonNode):
+            if node.type == 'except_clause':
+                for name in self._name_nodes(node):
+                    yield (name.start_pos, name.end_pos)
 
-    def mutate(self, node, _):
-        """Modify the exception handler with another exception type."""
-        except_id = CosmicRayTestingException.__name__
-        except_type = ast.Name(id=except_id, ctx=ast.Load())
-        new_node = ast.ExceptHandler(type=except_type, name=node.name,
-                                     body=node.body)
-        return new_node
+    def mutate(self, node, index):
+        assert isinstance(node, PythonNode)
+        assert node.type == 'except_clause'
+
+        name_nodes = self._name_nodes(node)
+        assert index < len(name_nodes)
+        name_nodes[index].value = CosmicRayTestingException.__name__
+        return node
+
+    @staticmethod
+    def _name_nodes(node):
+        if isinstance(node.children[1], Name):
+            return (node.children[1], )
+        else:
+            atom = node.children[1]
+            test_list = atom.children[1]
+            return test_list.children[::2]
+
+    @classmethod
+    def examples(cls):
+        return (
+            ('try: raise OSError\nexcept OSError: pass',
+             'try: raise OSError\nexcept CosmicRayTestingException: pass'),
+            ('try: raise OSError\nexcept (OSError, ValueError): pass',
+             'try: raise OSError\nexcept (OSError, CosmicRayTestingException): pass',
+             1),
+            ('try: raise OSError\nexcept (OSError, ValueError, KeyError): pass',
+             'try: raise OSError\nexcept (OSError, CosmicRayTestingException, KeyError): pass',
+             1),
+            ('try: pass\nexcept: pass',
+             'try: pass\nexcept: pass'),
+        )

@@ -90,12 +90,15 @@ def reports_progress(reporter):
             The callable provided should have the means to both
             retrieve and display current progress information.
     """
+
     def decorator(func):  # pylint: disable=missing-docstring
         @wraps(func)
         def wrapper(*args, **kwargs):  # pylint: disable=missing-docstring
             with progress_reporter(reporter):
                 return func(*args, **kwargs)
+
         return wrapper
+
     return decorator
 
 

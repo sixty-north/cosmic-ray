@@ -6,8 +6,6 @@
   CLOSED: [2017-10-26 Thu 15:39]
 * DONE Update unittest runner to use new "args" protocol
   CLOSED: [2017-10-26 Thu 14:01]
-* DONE Update nosetest runner to use new "args" protocol
-  CLOSED: [2017-10-26 Thu 14:08]
 * TODO create plugins for execution engines
 * DONE Update exec to use config file
   CLOSED: [2017-10-26 Thu 12:52]

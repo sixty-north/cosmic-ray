@@ -2,32 +2,16 @@
 replace-continue-with-break operators.
 """
 
-import ast
-
-from .operator import Operator
+from .keyword_replacer import KeywordReplacementOperator
 
 
-class ReplaceBreakWithContinue(Operator):
+class ReplaceBreakWithContinue(KeywordReplacementOperator):
     "Operator which replaces 'break' with 'continue'."
-
-    def visit_Break(self, node):  # pylint: disable=invalid-name
-        "Visit a 'break' node."
-        return self.visit_mutation_site(node)
-
-    def mutate(self, node, _):
-        """Replace a Break node with a Continue node."""
-        assert isinstance(node, ast.Break)
-        return ast.Continue()
+    from_keyword = 'break'
+    to_keyword = 'continue'
 
 
-class ReplaceContinueWithBreak(Operator):
+class ReplaceContinueWithBreak(KeywordReplacementOperator):
     "Operator which replaces 'continue' with 'break'."
-
-    def visit_Continue(self, node):  # pylint: disable=invalid-name
-        "Visit a 'continue' node."
-        return self.visit_mutation_site(node)
-
-    def mutate(self, node, _):
-        """Replace a Continue node with a Break node."""
-        assert isinstance(node, ast.Continue)
-        return ast.Break()
+    from_keyword = 'continue'
+    to_keyword = 'break'

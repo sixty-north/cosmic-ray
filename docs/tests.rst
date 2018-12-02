@@ -58,7 +58,7 @@ Finally, view the results of this test with ``dump`` and ``cr-report``:
 
 ::
 
-    cosmic-ray dump pytest-local | cr-report
+    cr-report pytest-local
 
 You should see a 0% survival rate at the end of the report.
 

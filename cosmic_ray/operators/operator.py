@@ -1,89 +1,63 @@
 "Implementation of operator base class."
 
-from abc import ABCMeta, abstractmethod
-import ast
+from abc import ABC, abstractmethod
 
 
-class Operator(ast.NodeTransformer):
-    """
-    A base class for all mutation operators.
+class Operator(ABC):
+    """The mutation operator base class.
 
-    This takes care of the basic book-keeping that all operators need
-    to do. All operators *must* derive from this class since that's
-    how we keep track of them.
+    Args:
+        python_version: The version of Python to use when interpreting the code in `module_path`. 
+            A string of the form "MAJOR.MINOR", e.g. "3.6" for Python 3.6.x.
     """
 
-    def __init__(self, core):
-        self._core = core
+    def __init__(self, python_version):
+        self._python_version = python_version
 
     @property
-    def core(self):
-        """The core behavior of the operator."""
-        return self._core
+    def python_version(self):
+        "Python major.minor version as a string."
+        return self._python_version
 
-    def repr_args(self):
-        "Extra arguments to display in operator reprs."
-        return self.core.repr_args()
+    @abstractmethod
+    def mutation_positions(self, node):
+        """All positions where this operator can mutate `node`.
 
-    def visit_mutation_site(self, node, num_mutations=1):
-        """Subclasses call this when they encounter a node they can
-         potentially mutate.
+        An operator might be able to mutate a node in multiple ways, and this
+        function should produce a position description for each of these
+        mutations. Critically, if an operator can make multiple mutations to the
+        same position, this should produce a position for each of these
+        mutations (i.e. multiple identical positions).
 
-        This functions delegates to the core, letting it do whatever it needs
-        to do.
+        Returns: An iterable of `((start-line, start-col), (stop-line,
+            stop-col))` tuples describing the locations where this operator will
+            mutate `node`. 
         """
-        return self.core.visit_mutation_site(node, self, num_mutations)
 
-    def mutate(self, node, idx):
+    @abstractmethod
+    def mutate(self, node, index):
         """Mutate a node in an operator-specific manner.
 
         Return the new, mutated node. Return `None` if the node has
         been deleted. Return `node` if there is no mutation at all for
         some reason.
         """
-        raise NotImplementedError(
-            'Mutation operators must implement "mutate()".')
 
-    def __repr__(self):
-        repr_args = [('core', self.core.__class__.__name__)]
-        repr_args.extend(self.core.repr_args())
-        args = ['{}={}'.format(k, v)
-                for k, v
-                in repr_args]
+    @classmethod
+    @abstractmethod
+    def examples(cls):
+        """Examples of the mutations that this operator can make.
 
-        return '{}({})'.format(
-            self.__class__.__name__,
-            ', '.join(args))
+        This is primarily for testing purposes, but it could also be used for
+        docmentation.
 
+        Each example is a tuple of the form `(from-code, to-code, index)`. The
+        `index` is optional and will be assumed to be 0 if it's not included.
+        The `from-code` is a string containing some Python code prior to
+        mutation. The `to-code` is a string desribing the code after mutation.
+        `index` indicates the occurrence of the application of the operator to
+        the code (i.e. for when an operator can perform multiple mutation to a
+        piece of code).
 
-def _op_name(from_op, to_op):
-    assert from_op or to_op, 'Cannot make replacement operator from None to None'
-
-    if from_op is None:
-        return 'Insert_{}'.format(to_op.__name__)
-    elif to_op is None:
-        return 'Delete_{}'.format(from_op.__name__)
-
-    return '{}_{}'.format(from_op.__name__, to_op.__name__)
-
-
-class ReplacementOperatorMeta(type):
-    """Metaclass for mutation operators that replace Python operators.
-
-    This does a few things:
-
-    - Sets the name of the class object based on the class declaration *and* the from-/to-operators.
-    - Makes the from-/to-operators available as class members.
-    - Adds `Operator` as a base class.
-    """
-    def __init__(cls, name, bases, namespace, from_op, to_op, **kwargs):
-        super().__init__(name, bases, namespace, **kwargs)
-
-    def __new__(cls, name, bases, namespace, from_op, to_op, **kwargs):
-        name = '{}_{}'.format(
-            name,
-            _op_name(from_op, to_op))
-        bases = bases + (Operator,)
-        namespace['from_op'] = from_op
-        namespace['to_op'] = to_op
-        return super().__new__(cls, name, bases, namespace, **kwargs)
+        Returns: An iterable of example tuples.
+        """

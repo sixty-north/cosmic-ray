@@ -1,17 +1,13 @@
 """Implementation of the WorkDB."""
 
 import contextlib
-from io import StringIO
 import os
+import sqlite3
 from enum import Enum
+from io import StringIO
 
-# This db may well not scale very well. We need to be ready to switch it out
-# for something quicker if not. But for now it's *very* convenient.
-import tinydb
-import kfg.yaml
-
-from .config import Config
-from .work_item import WorkItem
+from .config import deserialize_config, serialize_config
+from .work_item import TestOutcome, WorkerOutcome, WorkItem, WorkResult
 
 
 class WorkDB:
@@ -21,6 +17,7 @@ class WorkDB:
     executed in some run. These initially start off with no results, and
     results are added as they're completed.
     """
+
     class Mode(Enum):
         "Modes in which a WorkDB may be opened."
 
@@ -42,16 +39,18 @@ class WorkDB:
           FileNotFoundError: If `mode` is `Mode.open` and `path` does not
             exist.
         """
+
         if (mode == WorkDB.Mode.open) and (not os.path.exists(path)):
-            raise FileNotFoundError(
-                'Requested file {} not found'.format(path))
+            raise FileNotFoundError('Requested file {} not found'.format(path))
 
         self._path = path
-        self._db = tinydb.TinyDB(path)
+        self._conn = sqlite3.connect(path)
+
+        self._init_db()
 
     def close(self):
         """Close the database."""
-        self._db.close()
+        self._conn.close()
 
     @property
     def name(self):
@@ -61,28 +60,6 @@ class WorkDB:
         """
         return self._path
 
-    @property
-    def _config(self):
-        """The table of work parameters."""
-        return self._db.table('config')
-
-    @property
-    def _work_items(self):
-        """The table of work items."""
-        return self._db.table('work-items')
-
-    @property
-    def _pending(self):
-        table = self._work_items
-        work_item = tinydb.Query()
-        # This somewhat tortured invocation is intended to appease linters.
-        # They *hate* seeing "x == None" which is the natural expression of
-        # this query, so we use this custom test instead.
-        pending = table.search(
-            work_item.worker_outcome.test(
-                lambda val: val is None))
-        return pending
-
     def set_config(self, config, timeout):
         """Set (replace) the configuration for the session.
 
@@ -90,12 +67,10 @@ class WorkDB:
           config: Configuration object
           timeout: The timeout for tests.
         """
-        table = self._config
-        table.purge()
-        table.insert({
-            'config': kfg.yaml.serialize_config(config),
-            'timeout': timeout,
-        })
+        with self._conn:
+            self._conn.execute("DELETE FROM config")
+            self._conn.execute('INSERT INTO config VALUES(?, ?)',
+                               (serialize_config(config), timeout))
 
     def get_config(self):
         """Get the work parameters (if set) for the session.
@@ -105,71 +80,184 @@ class WorkDB:
         Raises:
           ValueError: If is no config set for the session.
         """
-        table = self._config
+        rows = list(self._conn.execute("SELECT * FROM config"))
+        if not rows:
+            raise ValueError("work-db has no config")
+        config_str, timeout = rows[0]
 
-        try:
-            record = table.all()[0]
-        except IndexError:
-            raise ValueError('work-db has no config')
+        return (deserialize_config(config_str),
+                timeout)
 
-        return (kfg.yaml.load_config(StringIO(record['config']), config=Config()),
-                record['timeout'])
+    @property
+    def work_items(self):
+        """An iterable of all of WorkItems in the db.
 
-    def add_work_items(self, work_items):
-        """Add a sequence of WorkItems.
+        This includes both WorkItems with and without results.
+        """
+        cur = self._conn.cursor()
+        rows = cur.execute("SELECT * FROM work_items")
+        for row in rows:
+            yield _row_to_work_item(row)
+
+    @property
+    def num_work_items(self):
+        """The number of work items."""
+        count = self._conn.execute("SELECT COUNT(*) FROM work_items")
+        return list(count)[0][0]
+
+    def add_work_item(self, work_item):
+        """Add a WorkItems.
 
         Args:
-          work_items: An iterable of WorkItems.
+          work_item: A WorkItem.
         """
-        self._work_items.insert_multiple(work_item.as_dict() for work_item in work_items)
+        with self._conn:
+            self._conn.execute(
+                '''
+                INSERT INTO work_items
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                ''', _work_item_to_row(work_item))
 
-    def clear_work_items(self):
+    def clear(self):
         """Clear all work items from the session.
 
         This removes any associated results as well.
         """
-        self._work_items.purge()
+        with self._conn:
+            self._conn.execute('DELETE FROM results')
+            self._conn.execute('DELETE FROM work_items')
 
     @property
-    def work_items(self):
-        """The sequence of WorkItems in the session.
-
-        This include both complete and incomplete items.
-
-        Each work item is a dict with the keys `module-name`, `op-name`, and
-        `occurrence`. Items with results will also have the keys `results-type`
-        and `results-data`.
-        """
-        return (WorkItem(vals=r) for r in self._work_items)
+    def results(self):
+        "An iterable of all `(job-id, WorkResult)`s."
+        cur = self._conn.cursor()
+        rows = cur.execute("SELECT * FROM results")
+        for row in rows:
+            yield (row['job_id'], _row_to_work_result(row))
 
     @property
-    def num_work_items(self):
-        """The number of WorkItems."""
-        return len(self._work_items)
+    def num_results(self):
+        """The number of results."""
+        count = self._conn.execute("SELECT COUNT(*) FROM results")
+        return list(count)[0][0]
 
-    def update_work_item(self, work_item):
-        """Updates an existing WorkItem by job_id.
+    def set_result(self, job_id, result):
+        """Set the result for a job.
+
+        This will overwrite any existing results for the job.
 
         Args:
-            work_item: A WorkItem representing the new state of a job.
+          job_id: The ID of the WorkItem to set the result for.
+          result: A WorkResult indicating the result of the job.
 
         Raises:
-            KeyError: If there is no existing record with the same job_id.
+           KeyError: If there is no work-item with a matching job-id.
         """
-        self._work_items.update(
-            work_item.as_dict(),
-            tinydb.Query().job_id == work_item.job_id
-        )
+        with self._conn:
+            try:
+                self._conn.execute(
+                    '''
+                    REPLACE INTO results
+                    VALUES (?, ?, ?, ?, ?)
+                    ''', _work_result_to_row(job_id, result))
+            except sqlite3.IntegrityError as exc:
+                raise KeyError('Can not add result with job-id {}'.format(
+                    job_id)) from exc
 
     @property
     def pending_work_items(self):
-        """The sequence of pending WorkItems in the session."""
-        return (WorkItem(vals=r) for r in self._pending)
+        "Iterable of all pending work items."
+        pending = self._conn.execute(
+            "SELECT * FROM work_items WHERE job_id NOT IN (SELECT job_id FROM results)"
+        )
+        return (_row_to_work_item(p) for p in pending)
 
     @property
-    def num_pending_work_items(self):
-        """The number of pending WorkItems in the session."""
-        return len(self._pending)
+    def completed_work_items(self):
+        "Iterable of `(work-item, result)`s for all completed items."
+        completed = self._conn.execute(
+            "SELECT * FROM work_items, results WHERE work_items.job_id == results.job_id"
+        )
+        return ((_row_to_work_item(result), _row_to_work_result(result))
+                for result in completed)
+
+    # @property
+    # def num_pending_work_items(self):
+    #     "The number of pending WorkItems in the session."
+    #     count = self._conn.execute("SELECT COUNT(*) FROM work_items WHERE job_id NOT IN (SELECT job_id FROM results)")
+    #     return count[0][0]
+
+    def _init_db(self):
+        with self._conn:
+            self._conn.row_factory = sqlite3.Row
+
+            self._conn.execute("PRAGMA foreign_keys = 1")
+
+            self._conn.execute('''
+            CREATE TABLE IF NOT EXISTS work_items
+            (module_path text,
+             operator text,
+             occurrence int,
+             start_line int,
+             start_col int,
+             end_line int,
+             end_col int,
+             job_id text primary key)
+            ''')
+
+            self._conn.execute('''
+            CREATE TABLE IF NOT EXISTS results
+            (worker_outcome text,
+             output text,
+             test_outcome text,
+             diff text,
+             job_id text primary key,
+             FOREIGN KEY(job_id) REFERENCES work_items(job_id)
+            )
+            ''')
+
+            self._conn.execute('''
+            CREATE TABLE IF NOT EXISTS config
+            (config text,
+             timeout real)
+            ''')
+
+
+def _row_to_work_item(row):
+    return WorkItem(
+        module_path=row['module_path'],
+        operator_name=row['operator'],
+        occurrence=row['occurrence'],
+        start_pos=(row['start_line'], row['start_col']),
+        end_pos=(row['end_line'], row['end_col']),
+        job_id=row['job_id'])
+
+
+def _work_item_to_row(work_item):
+    return (str(
+        work_item.module_path), work_item.operator_name, work_item.occurrence,
+            work_item.start_pos[0], work_item.start_pos[1],
+            work_item.end_pos[0], work_item.end_pos[1], work_item.job_id)
+
+
+def _row_to_work_result(row):
+    test_outcome = row['test_outcome']
+    test_outcome = None if test_outcome is None else TestOutcome(test_outcome)
+
+    return WorkResult(
+        worker_outcome=WorkerOutcome(row['worker_outcome']),
+        output=row['output'],
+        test_outcome=test_outcome,
+        diff=row['diff'])
+
+
+def _work_result_to_row(job_id, result):
+    return (
+        result.worker_outcome.value,  # should never be None
+        result.output,
+        None if result.test_outcome is None else result.test_outcome.value,
+        result.diff,
+        job_id)
 
 
 @contextlib.contextmanager
@@ -191,7 +279,5 @@ def use_db(path, mode=WorkDB.Mode.create):
     database = WorkDB(path, mode)
     try:
         yield database
-    except Exception:
-        raise
     finally:
         database.close()

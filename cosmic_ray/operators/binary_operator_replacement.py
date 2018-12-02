@@ -1,54 +1,78 @@
 """Implementation of the binary-operator-replacement operator.
 """
 
-import ast
-import sys
+from enum import Enum
+import itertools
 
-from .operator import ReplacementOperatorMeta
-from ..util import build_mutations
+import parso
 
-_AST_OPERATORS = (ast.Add, ast.Sub, ast.Mult, ast.Div, ast.FloorDiv, ast.Mod,
-                  ast.Pow, ast.LShift, ast.RShift, ast.BitOr, ast.BitXor,
-                  ast.BitAnd)
-
-# todo: this often leads to unsupported syntax
-if sys.version_info >= (3, 5):
-    _AST_OPERATORS = _AST_OPERATORS + (ast.MatMult,)
+from .operator import Operator
+from .util import extend_name
 
 
-def _to_ops(from_op):  # pylint: disable=unused-argument
-    """The sequence of operators which `from_op` could be mutated to."""
-    for to_op in _AST_OPERATORS:
-        yield to_op
+class BinaryOperators(Enum):
+    Add = '+'
+    Sub = '-'
+    Mul = '*'
+    Div = '/'
+    FloorDiv = '//'
+    Mod = '%'
+    Pow = '**'
+    RShift = '>>'
+    LShift = '<<'
+    BitOr = '|'
+    BitAnd = '&'
+    BitXor = '^'
 
 
 def _create_replace_binary_operator(from_op, to_op):
-    class ReplaceBinaryOperator(
-            metaclass=ReplacementOperatorMeta,
-            from_op=from_op,
-            to_op=to_op):
-        """An operator that replaces binary operators."""
-        def visit_BinOp(self, node):  # pylint: disable=invalid-name, missing-docstring
-            if isinstance(node.op, self.from_op):
-                return self.visit_mutation_site(node)
+    @extend_name('_{}_{}'.format(from_op.name, to_op.name))
+    class ReplaceBinaryOperator(Operator):
+        "An operator that replaces binary {} with binary {}.".format(
+            from_op.name, to_op.name)
+
+        def mutation_positions(self, node):
+            if _is_binary_operator(node):
+                if node.value == from_op.value:
+                    yield (node.start_pos, node.end_pos)
+
+        def mutate(self, node, index):
+            assert _is_binary_operator(node)
+            assert index == 0
+
+            node.value = to_op.value
             return node
 
-        def mutate(self, node, _):
-            node.op = self.to_op()
-            return node
+        @classmethod
+        def examples(cls):
+            return (
+                ('x {} y'.format(from_op.value), 'x {} y'.format(to_op.value)),
+            )
 
     return ReplaceBinaryOperator
 
 
+def _is_binary_operator(node):
+    if isinstance(node, parso.python.tree.Operator):
+        if isinstance(node.parent, parso.python.tree.PythonNode):
+            return node.parent.type != 'factor'
+
+        return True
+
+    return False
+
+
+# Build all of the binary replacement operators
 _MUTATION_OPERATORS = tuple(
-    _create_replace_binary_operator(_AST_OPERATORS[idx], to_op)
-    for idx, to_op in build_mutations(_AST_OPERATORS, _to_ops))
+    _create_replace_binary_operator(from_op, to_op)
+    for from_op, to_op
+    in itertools.permutations(BinaryOperators, 2))
 
-
-for op in _MUTATION_OPERATORS:
-    globals()[op.__name__] = op
+# Inject operators into module namespace
+for op_cls in _MUTATION_OPERATORS:
+    globals()[op_cls.__name__] = op_cls
 
 
 def operators():
     "Iterable of all binary operator replacement mutation operators."
-    return iter(_MUTATION_OPERATORS)
+    return _MUTATION_OPERATORS

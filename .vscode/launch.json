@@ -1,0 +1,116 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "test_operators",
+            "type": "python",
+            "request": "launch",
+            "module": "pytest",
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "tests/test_suite/unittests/test_operators.py"
+            ]
+        },
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}"
+        },
+        {
+            "name": "Python: Attach",
+            "type": "python",
+            "request": "attach",
+            "localRoot": "${workspaceFolder}",
+            "remoteRoot": "${workspaceFolder}",
+            "port": 3000,
+            "secret": "my_secret",
+            "host": "localhost"
+        },
+        {
+            "name": "Python: Terminal (integrated)",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Python: Terminal (external)",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "externalTerminal"
+        },
+        {
+            "name": "worker",
+            "type": "python",
+            "request": "launch",
+            "module": "cosmic_ray.cli",
+            "cwd": "${workspaceFolder}/test/test_project",
+            "args": [
+                "worker",
+                "adam.py",
+                "core/ReplaceUnaryOperator_UAdd_USub",
+                "0",
+                "cosmic-ray.unittest.local.conf"
+            ]
+        },
+        {
+            "name": "baseline",
+            "type": "python",
+            "request": "launch",
+            "module": "cosmic_ray.cli",
+            "cwd": "${workspaceFolder}/test/test_project",
+            "args": [
+                "baseline",
+                "cosmic-ray.unittest.local.conf"
+            ]
+        },
+        {
+            "name": "init",
+            "type": "python",
+            "request": "launch",
+            "module": "cosmic_ray.cli",
+            "cwd": "${workspaceFolder}/test/test_project",
+            "args": [
+                "init",
+                "cosmic-ray.unittest.local.conf",
+                "deleteme.sqlite"
+            ]
+        },
+        {
+            "name": "exec",
+            "type": "python",
+            "request": "launch",
+            "module": "cosmic_ray.cli",
+            "cwd": "${workspaceFolder}/test/test_project",
+            "args": [
+                "exec",
+                "deleteme.sqlite"
+            ]
+        },
+        {
+            "name": "Python: All debug Options",
+            "type": "python",
+            "request": "launch",
+            "pythonPath": "${config:python.pythonPath}",
+            "program": "${file}",
+            "module": "module.name",
+            "env": {
+                "VAR1": "1",
+                "VAR2": "2"
+            },
+            "envFile": "${workspaceFolder}/.env",
+            "args": [
+                "arg1",
+                "arg2"
+            ],
+            "debugOptions": [
+                "RedirectOutput"
+            ]
+        }
+    ]
+}

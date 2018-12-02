@@ -2,43 +2,31 @@
 
 import qprompt
 
-from cosmic_ray.plugins import (execution_engine_names,
-                                test_runner_names)
-
-TEMPLATE = '''module: {module}
-
-baseline: 10
-
-exclude-modules:
-
-test-runner:
-  name: {test_runner}
-  args: {test_args}
-
-execution-engine:
-  name: {engine}
-'''
+from cosmic_ray.config import ConfigDict
+from cosmic_ray.plugins import execution_engine_names
 
 
 def new_config():
     """Prompt user for config variables and generate new config.
 
-    Returns: A new configuration as a single string.
+    Returns: A new ConfigDict.
     """
-    conf = {'module': qprompt.ask_str("Top-level module")}
+    config = ConfigDict()
+    config["module-path"] = qprompt.ask_str("Top-level module path")
 
-    menu = qprompt.Menu()
-    test_runners = test_runner_names()
-    for at_pos, test_runner in enumerate(test_runners):
-        menu.add(str(at_pos), test_runner)
-    conf['test_runner'] = menu.show(header="Test runner",
-                                    returns="desc")
+    python_version = qprompt.ask_str(
+        'Python version (blank for auto detection)')
+    config['python-version'] = python_version
 
-    conf['test_args'] = qprompt.ask_str('Test args')
+    config['baseline'] = 10
+    config['excluded-modules'] = []
+
+    config["test-command"] = qprompt.ask_str("Test command")
 
     menu = qprompt.Menu()
     for at_pos, engine_name in enumerate(execution_engine_names()):
         menu.add(str(at_pos), engine_name)
-    conf['engine'] = menu.show(header="Execution engine",
-                               returns="desc")
-    return TEMPLATE.format(**conf)
+    config["execution-engine"] = ConfigDict()
+    config['execution-engine']['name'] = menu.show(header="Execution engine", returns="desc")
+    
+    return config

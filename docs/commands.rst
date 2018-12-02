@@ -11,19 +11,17 @@ does things.
 
 Possible verbs are:
 
--  baseline
--  counts
--  `exec <#exec>`__
--  help
--  `init <#init>`__
--  load
--  new-config
--  operators
--  `dump <#dump>`__
--  run
--  survival-rate
--  test-runners
--  worker
+- baseline
+- `exec <#exec>`__
+- help
+- `init <#init>`__
+- load
+- new-config
+- operators
+- `dump <#dump>`__
+- run
+- worker
+- apply
 
 Detailed information on each command can be found by running
 ``cosmic-ray help <command>`` in the terminal.
@@ -33,14 +31,7 @@ various kinds of reports. These commands are:
 
 -  cr-report: provides a report on the status of a session
 -  cr-rate: prints the survival rate of a session
-
-Use these by piping the output of ``cosmic-ray dump`` into them. For
-example:
-
-.. code:: shell
-
-    $ cosmic-ray dump test_session | cr-report
-    $ cosmic-ray dump test_session | cr-rate
+-  cr-html: prints an HTML report on a session
 
 Verbosity: Getting more Feedback when Running
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -86,8 +77,6 @@ code. It has the following optional arguments:
 
 -  ``--no-local-import``: Allow importing module from the current
    directory.
--  ``--test-runner=R``: Use a different test runner, such as pytest or
-   nose.
 -  ``exclude-modules=P``: Exclude modules matching this regex pattern
    from mutation.
 
@@ -148,27 +137,16 @@ to stdout.
     {"data": ["<TestReport 'test_project/tests/test_adam.py::Tests::test_bool_if' when='call' outcome='failed'>"], "test_outcome": "killed", "worker_outcome": "normal", "diff": ["--- mutation diff ---", "--- a/Users/sixtynorth/projects/sixty-north/cosmic-ray/test_project/adam.py", "+++ b/Users/sixtynorth/projects/sixty-north/cosmic-ray/test_project/adam.py", "@@ -20,7 +20,7 @@", "     return (not object())", " ", " def bool_if():", "-    if object():", "+    if (not object()):", "         return True", "     raise Exception('bool_if() failed')", " "], "module": "adam", "operator": "cosmic_ray.operators.boolean_replacer.AddNot", "occurrence": 0, "line_number": 32, "command_line": ["cosmic-ray", "worker", "adam", "add_not", "0", "pytest", "--", "-x", "tests"], "job_id": "c2bb71e6203d44f6af42a7ee35cb5df9"}
     . . .
 
-Generally you'll want to pipe this output into another tool to generate
-some sort of report. For example, you can find the survival rate of a
-session by piping ``cosmic-ray dump`` into ``cr-rate``:
-
-.. code:: shell
-
-    $ cosmic-ray dump test_session | cr-rate
 
 ``dump`` is designed to allow users to develop their own reports. To do
 this, you need a program which reads a series of JSON structures from
-stdin. See the ``cr-rate`` and ``cr-report`` tools included with Cosmic
-Ray for more details.
+stdin. 
 
-``cosmic-ray dump`` **can** be run while ``exec`` is running! This is
-super useful for seeing how far along a your mutation testing is:
+Concurrency
+===========
 
-.. code:: shell
+Note that most Cosmic Ray commands can be safely executed while ``exec`` is
+running. One exception is ``init`` since that will rewrite the work manifest.
 
-    # Run exec in the background
-    (.venv-pyerf) ~/PyErf$ cosmic-ray exec test_session &
-    (.venv-pyerf) ~/PyErf$ cosmic-ray dump test_session | cr-report
-    total jobs: 682
-    complete: 18 (2.64%)
-    survival rate: 0.00%
+For example, you can run ``cr-report`` on a session while that session is being
+executed. This will tell you what progress has been made.

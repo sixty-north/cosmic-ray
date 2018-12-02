@@ -1,3 +1,5 @@
+"""Setup for Cosmic Ray.
+"""
 import io
 import os
 import sys
@@ -8,16 +10,13 @@ from sphinx.setup_command import BuildDoc
 
 
 def local_file(*name):
-    return os.path.join(
-        os.path.dirname(__file__),
-        *name)
+    "Find a file relative to this directory."
+    return os.path.join(os.path.dirname(__file__), *name)
 
 
 def read(name, **kwargs):
-    with io.open(
-        name,
-        encoding=kwargs.get("encoding", "utf8")
-    ) as handle:
+    "Read the contents of a file."
+    with io.open(name, encoding=kwargs.get("encoding", "utf8")) as handle:
         return handle.read()
 
 
@@ -35,55 +34,16 @@ def read_version():
 
 LONG_DESCRIPTION = read(local_file('README.rst'), mode='rt')
 
-OPERATORS = [
-    'number_replacer = '
-    'cosmic_ray.operators.number_replacer:NumberReplacer',
-
-    'mutate_comparison_operator = '
-    'cosmic_ray.operators.comparison_operator_replacement:'
-    'MutateComparisonOperator',
-
-    'replace_true_false = '
-    'cosmic_ray.operators.boolean_replacer:ReplaceTrueFalse',
-
-    'replace_and_with_or = '
-    'cosmic_ray.operators.boolean_replacer:ReplaceAndWithOr',
-
-    'replace_or_with_and = '
-    'cosmic_ray.operators.boolean_replacer:ReplaceOrWithAnd',
-
-    'add_not = '
-    'cosmic_ray.operators.boolean_replacer:AddNot',
-
-    'mutate_unary_operator ='
-    'cosmic_ray.operators.unary_operator_replacement:MutateUnaryOperator',
-
-    'mutate_binary_operator ='
-    'cosmic_ray.operators.binary_operator_replacement:MutateBinaryOperator',
-
-    'break_continue_replacement ='
-    'cosmic_ray.operators.break_continue:ReplaceBreakWithContinue',
-
-    'exception_replacer ='
-    'cosmic_ray.operators.exception_replacer:ExceptionReplacer',
-
-    'zero_iteration_loop ='
-    'cosmic_ray.operators.zero_iteration_loop:ZeroIterationLoop',
-
-    'remove_decorator ='
-    'cosmic_ray.operators.remove_decorator:RemoveDecorator',
-]
-
 INSTALL_REQUIRES = [
     'astunparse',
     'decorator',
-    'docopt_subcommands>=2.3.0',
-    'kfg',
+    'docopt_subcommands>=3.0.0',
+    'parso',
     'pathlib',
     'qprompt',
-    'spor==1.0.2',
+    'spor>=1.1.0',
     'stevedore',
-    'tinydb>=3.2.1',
+    'toml',
     'yattag',
 ]
 
@@ -96,7 +56,6 @@ setup(
     name='cosmic_ray',
     version=version,
     packages=find_packages(),
-
     author='Sixty North AS',
     author_email='austin@sixty-north.com',
     description='Mutation testing',
@@ -125,31 +84,30 @@ setup(
     # $ pip install -e .[dev,test]
     extras_require={
         'test': ['hypothesis', 'pytest', 'pytest-mock', 'tox'],
+        'dev': ['pylint', 'black'],
         'docs': ['sphinx', 'sphinx_rtd_theme'],
         'pytest_runner': ['cosmic_ray_pytest_runner'],
-        'nose_runner': ['cosmic_ray_nose_runner'],
-        'celery3_engine': ['cosmic_ray_celery3_engine'],
+        'celery4_engine': ['cosmic_ray_celery4_engine'],
     },
     entry_points={
         'console_scripts': [
             'cosmic-ray = cosmic_ray.cli:main',
-            'cr-html = cosmic_ray.commands.format:report_html',
-            'cr-report = cosmic_ray.commands.format:report',
-            'cr-rate = cosmic_ray.commands.format:format_survival_rate',
-            'cr-xml = cosmic_ray.commands.format:report_xml',
+            'cr-html = cosmic_ray.tools.html:report_html',
+            'cr-report = cosmic_ray.tools.report:report',
+            'cr-rate = cosmic_ray.tools.survival_rate:format_survival_rate',
+            'cr-xml = cosmic_ray.tools.xml:report_xml',
         ],
         'cosmic_ray.test_runners': [
             'unittest = cosmic_ray.testing.unittest_runner:UnittestRunner',
         ],
         'cosmic_ray.operator_providers': [
-            'core = cosmic_ray.operators.provider:OperatorProvider'
+            'core = cosmic_ray.operators.provider:OperatorProvider',
         ],
         'cosmic_ray.execution_engines': [
             'local = cosmic_ray.execution.local:LocalExecutionEngine',
         ],
-        'cosmic_ray.interceptors': [
-            'spor = cosmic_ray.interceptors.spor:intercept'
-        ],
+        'cosmic_ray.interceptors':
+        ['spor = cosmic_ray.interceptors.spor:intercept'],
     },
     cmdclass={'build_sphinx': BuildDoc},
     command_options={

@@ -1,0 +1,6 @@
+BROKER_URL = 'amqp://merlin:avalon@ec2-54-229-209-219.eu-west-1.compute.amazonaws.com/camelot'
+CELERY_IMPORTS = ('cosmic_ray_celery4_engine.worker', )
+CELERY_RESULT_BACKEND = 'rpc://'
+CELERY_TIMEZONE = 'UTC'
+CELERY_ENABLE_UTC = True
+

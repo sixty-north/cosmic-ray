@@ -2,12 +2,81 @@
 from contextlib import contextmanager
 import logging
 import sys
-
-import kfg.config
-import kfg.yaml
+import toml
 
 log = logging.getLogger()
 
+
+def load_config(filename=None):
+    """Load a configuration from a file or stdin.
+
+    If `filename` is `None` or "-", then configuration gets read from stdin.
+
+    Returns: A `ConfigDict`.
+
+    Raises: ConfigError: If there is an error loading the config.
+    """
+    try:
+        with _config_stream(filename) as handle:
+            filename = handle.name
+            return deserialize_config(handle.read())
+    except (OSError, toml.TomlDecodeError, UnicodeDecodeError) as exc:
+        raise ConfigError(
+            'Error loading configuration from {}'.format(filename)) from exc
+
+
+def deserialize_config(sz):
+    return toml.loads(sz, _dict=ConfigDict)['cosmic-ray']
+
+
+def serialize_config(config):
+    "Return the serialized form of `config`."
+    return toml.dumps({'cosmic-ray': config})
+
+
+
+class ConfigError(Exception):
+    pass
+
+
+class ConfigKeyError(ConfigError, KeyError):
+    pass
+
+
+class ConfigValueError(ConfigError, ValueError):
+    pass
+
+
+class ConfigDict(dict):
+    def __getitem__(self, key):
+        try:
+            return super().__getitem__(key)
+        except KeyError as exc:
+            raise ConfigKeyError(*exc.args)
+
+    @property
+    def python_version(self):
+        """Get the configured Python version.
+
+        If this is not set in the config, then it defaults to the version of the current runtime.
+
+        Returns: A string of the form "MAJOR.MINOR", e.g. "3.6".
+        """
+        v = self.get('python-version', '')
+        if v == '':
+            v = "{}.{}".format(sys.version_info.major, sys.version_info.minor)
+        return v
+
+    @property
+    def timeout(self):
+        return float(self['timeout'])
+
+    @property
+    def baseline(self):
+        b = float(self['baseline'])
+        if b <= 0:
+            raise ConfigValueError('Baseline must be a positive value. value={}'.format(b))
+        return b
 
 @contextmanager
 def _config_stream(filename):
@@ -25,56 +94,14 @@ def _config_stream(filename):
             yield handle
 
 
-class Config(kfg.config.Config):
-    """kfg.config.Config subclass for Cosmic Ray.
-
-    The primary job of this subclass is to configure the transforms for CR's
-    configuration.
-    """
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.set_transform('timeout', float)
-        self.set_transform('baseline', self._positive_float)
-
-    @staticmethod
-    def _positive_float(x):
-        x = float(x)
-        if x <= 0:
-            raise ValueError('positive float expected. value={}'.format(x))
-        return x
-
-
-def load_config(filename=None):
-    """Load a configuration from a file or stdin.
-
-    If `filename` is `None`, then configuration gets read from stdin.
-
-    Returns: A configuration dict.
-
-    Raises:
-      kfg.config.ConfigError: If there is an error loading the config.
-    """
-    try:
-        with _config_stream(filename) as handle:
-            filename = handle.name
-            return kfg.yaml.load_config(handle, config=Config())
-    except (OSError, ValueError) as exc:
-        raise kfg.config.ConfigError(
-            'Error loading configuration from {}'.format(filename)) from exc
-
-
-def serialize_config(config):
-    return kfg.yaml.serialize_config(config)
-
 
 def get_db_name(session_name):
     """Determines the filename for a session.
 
-    Basically, if `session_name` ends in ".json" this return `session_name`
-    unchanged. Otherwise it return `session_name` with ".json" added to the
+    Basically, if `session_name` ends in ".sqlite" this return `session_name`
+    unchanged. Otherwise it return `session_name` with ".sqlite" added to the
     end.
     """
-    if session_name.endswith('.json'):
+    if session_name.endswith('.sqlite'):
         return session_name
-    return '{}.json'.format(session_name)
+    return '{}.sqlite'.format(session_name)

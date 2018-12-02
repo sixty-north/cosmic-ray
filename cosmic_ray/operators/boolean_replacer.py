@@ -1,100 +1,45 @@
 "Implementation of the boolean replacement operators."
 
-import ast
-import sys
+import parso.python.tree
 
+from .keyword_replacer import KeywordReplacementOperator
 from .operator import Operator
 
 
-class ReplaceTrueFalse(Operator):
-    """An operator that modifies True/False constants."""
-
-    def visit_NameConstant(self, node):  # noqa # pylint: disable=invalid-name
-        """New in version 3.4: Previously, these constants were instances of
-        ``Name``:
-        http://greentreesnakes.readthedocs.io/en/latest/nodes.html#NameConstant
-        """
-        if node.value in [True, False]:
-            return self.visit_mutation_site(node)
-        return node
-
-    def visit_Name(self, node):  # noqa # pylint: disable=invalid-name
-        """For backward compatibility with Python 3.3."""
-        if node.id in ['True', 'False']:
-            return self.visit_mutation_site(node)
-        return node
-
-    def mutate(self, node, _):
-        """Modify the boolean value on `node`."""
-        if sys.version_info >= (3, 4):
-            return ast.NameConstant(value=not node.value)
-        return ast.Name(id=not ast.literal_eval(node.id), ctx=node.ctx)
+class ReplaceTrueWithFalse(KeywordReplacementOperator):
+    """An that replaces True with False."""
+    from_keyword = 'True'
+    to_keyword = 'False'
 
 
-class ReplaceAndWithOr(Operator):
+class ReplaceFalseWithTrue(KeywordReplacementOperator):
+    """An that replaces False with True."""
+    from_keyword = 'False'
+    to_keyword = 'To'
+
+
+class ReplaceAndWithOr(KeywordReplacementOperator):
     """An operator that swaps 'and' with 'or'."""
+    from_keyword = 'and'
+    to_keyword = 'or'
 
-    def visit_BoolOp(self, node):  # noqa # pylint: disable=invalid-name
-        """
-            http://greentreesnakes.readthedocs.io/en/latest/nodes.html#BoolOp
-        """
-        if isinstance(node.op, ast.And):
-            return self.visit_mutation_site(node, len(node.values))
-        return node
-
-    def mutate(self, node, idx):
-        """Replace AND with OR."""
-        # replace all occurences of And()
-        # A and B and C -> A or B or C
-        node.op = ast.Or()
-
-        # or replace an operator somewhere in the middle
-        # of the expression
-        if idx and len(node.values) > 2:
-            left = node.values[:idx]
-            if len(left) > 1:
-                left = [ast.BoolOp(op=ast.And(), values=left)]
-
-            right = node.values[idx:]
-            if len(right) > 1:
-                right = [ast.BoolOp(op=ast.And(), values=right)]
-
-            node.values = []
-            node.values.extend(left)
-            node.values.extend(right)
-
-        return node
+    @classmethod
+    def examples(cls):
+        return (
+            ('x and y', 'x or y'),
+        )
 
 
-class ReplaceOrWithAnd(Operator):
+class ReplaceOrWithAnd(KeywordReplacementOperator):
     """An operator that swaps 'or' with 'and'."""
+    from_keyword = 'or'
+    to_keyword = 'and'
 
-    def visit_BoolOp(self, node):  # noqa # pylint: disable=invalid-name
-        """
-            http://greentreesnakes.readthedocs.io/en/latest/nodes.html#BoolOp
-        """
-        if isinstance(node.op, ast.Or):
-            return self.visit_mutation_site(node, len(node.values))
-        return node
-
-    def mutate(self, node, idx):
-        """Replace OR with AND."""
-        if idx and len(node.values) > 2:
-            left_list = node.values[:idx - 1]
-            right_list = node.values[idx + 1:]
-            left = node.values[idx - 1]
-            right = node.values[idx]
-
-            new_node = ast.BoolOp(op=ast.And(), values=[left, right])
-
-            node.values = []
-            node.values.extend(left_list)
-            node.values.append(new_node)
-            node.values.extend(right_list)
-        else:
-            node.op = ast.And()
-
-        return node
+    @classmethod
+    def examples(cls):
+        return (
+            ('x or y', 'x and y'),
+        )
 
 
 class AddNot(Operator):
@@ -105,29 +50,42 @@ class AddNot(Operator):
          `unary_operator_replacement.py`, including deletion of the same
          operator.
     """
+    NODE_TYPES = (parso.python.tree.IfStmt, parso.python.tree.WhileStmt,
+                  parso.python.tree.AssertStmt)
 
-    def visit_If(self, node):  # noqa # pylint: disable=invalid-name
-        "Visit an 'if' node."
-        return self.visit_mutation_site(node)
+    def mutation_positions(self, node):
+        if isinstance(node, self.NODE_TYPES):
+            expr = node.children[1]
+            yield (expr.start_pos, expr.end_pos)
+        elif isinstance(node,
+                        parso.python.tree.PythonNode) and node.type == 'test':
+            # ternary conditional
+            expr = node.children[2]
+            yield (expr.start_pos, expr.end_pos)
 
-    def visit_IfExp(self, node):  # noqa # pylint: disable=invalid-name
-        "Visit an 'if' expression node."
-        return self.visit_mutation_site(node)
+    def mutate(self, node, index):
+        assert index == 0
 
-    def visit_Assert(self, node):  # noqa # pylint: disable=invalid-name
-        "Visit an 'assert' node."
-        return self.visit_mutation_site(node)
+        if isinstance(node, self.NODE_TYPES):
+            expr_node = node.children[1]
+            mutated_code = ' not{}'.format(expr_node.get_code())
+            mutated_node = parso.parse(mutated_code)
+            node.children[1] = mutated_node
 
-    def visit_While(self, node):  # noqa # pylint: disable=invalid-name
-        "Visit a 'while' node."
-        return self.visit_mutation_site(node)
+        else:
+            assert node.type == 'test'
+            expr_node = node.children[2]
+            mutated_code = ' not{}'.format(expr_node.get_code())
+            mutated_node = parso.parse(mutated_code)
+            node.children[2] = mutated_node
 
-    def mutate(self, node, _):
-        """
-        Add the 'not' keyword.
+        return node
 
-        Note: this will negate the entire if condition.
-        """
-        if hasattr(node, 'test'):
-            node.test = ast.UnaryOp(op=ast.Not(), operand=node.test)
-            return node
+    @classmethod
+    def examples(cls):
+        return (
+            ('if True or False: pass', 'if not True or False: pass'),
+            ('A if B else C', 'A if not B else C'),
+            ('assert isinstance(node, ast.Break)', 'assert not isinstance(node, ast.Break)'),
+            ('while True: pass', 'while not True: pass'),
+        )

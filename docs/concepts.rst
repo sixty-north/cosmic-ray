@@ -32,9 +32,9 @@ Execution engines
 =================
 
 *Execution engines* determine the context in which tests are executed. The
-primary examples of execution engines are the *local* and *celery3* engines. The
-local engine executes tests serially on the local machine; the celery3 engine
-distributes tests to remote workers using the Celery (v3) system. Other kinds of
+primary examples of execution engines are the *local* and *celery4* engines. The
+local engine executes tests serially on the local machine; the celery4 engine
+distributes tests to remote workers using the Celery (v4) system. Other kinds of
 engines might run tests on a cloud service or using other task distribution
 technology.
 
@@ -45,23 +45,23 @@ result. Cosmic Ray doesn't impose any real constraints on how engines accomplish
 this.
 
 Engines can require arbitrarily complex infrastructure and configuration. For
-example, the celery3 engine requires you to run rabbitmq and to attach one or
+example, the celery4 engine requires you to run rabbitmq and to attach one or
 more worker tasks to that queue.
 
 Execution engines are implemented as plugins to Cosmic Ray. They are dynamically
 discovered, and users can create their own execution engines if they want.
-Cosmic Ray includes two execution engines plugins, local and celery3.
+Cosmic Ray includes two execution engines plugins, local and celery4.
 
 Configurations
 ==============
 
-A *configuration* is a YAML file that describes the work that Cosmic Ray will
-do. For example, it tells Cosmic Ray which modules to mutate, what test runner
-to use, which tests to run, and so forth. You need to create a config before
-doing any real work with Cosmic Ray.
+A *configuration* is a TOML file that describes the work that Cosmic Ray will
+do. For example, it tells Cosmic Ray which modules to mutate, how to run tests,
+which tests to run, and so forth. You need to create a config before doing any
+real work with Cosmic Ray.
 
-You can create a skeleton config by running `cosmic-ray new-config <config
-file>`. This will ask you a series of questions and create a config from the
+You can create a skeleton config by running ``cosmic-ray new-config <config
+file>``. This will ask you a series of questions and create a config from the
 answers. Note that this config will generally be incomplete and require you to
 edit it for completeness.
 
@@ -98,33 +98,26 @@ Before you can do mutation testing with Cosmic Ray, you need to first initialize
 a session. You can do this using the ``init`` command. With this command you
 tell Cosmic Ray a) the name of the session, b) which module(s) you wish to
 mutate and c) the location of the test suite. For example, to mutate the package
-`allele`, use the `unittest` test-runner to run the tests in `allele_tests`, and
-use the `local` execution engine, you could first need to create a configuration
-like this:
+`allele`, using the `unittest` to run the tests in `allele_tests`, and using the
+`local` execution engine, you could first need to create a configuration like
+this:
 
-.. code-block:: yaml
+.. code-block:: ini
 
-   # allele_config.yml
-   module: allele
-
-   baseline: 10
-
-   exclude-modules:
-
-   test-runner:
-     name: unittest
-     args: allele_tests
-
-   execution-engine:
-     name: local
+    [cosmic-ray]
+    module-path = "allele"
+    baseline = 10
+    exclude-modules = []
+    test-command = {python_executable} -m unittest allele_tests
+    execution-enging.name = "local"
 
 You would run ``cosmic-ray init`` like this:
 
 ::
 
-    cosmic-ray init allele_config.yml allele_session
+    cosmic-ray init allele_config.toml allele_session
 
-You'll notice that this creates a new file called "allele_session.json".
+You'll notice that this creates a new file called "allele_session.sqlite".
 This is the database for your session.
 
 An important note on separating tests and production code
@@ -171,55 +164,21 @@ Once your tests have completed, you can view the results using the
 
 ::
 
-    cosmic-ray dump test_session | cr-report
+    cr-report test_session
 
 This will give you detailed information about what work was done,
 followed by a summary of the entire session.
 
-Test runners
-============
+Test commands 
+=============
 
-Cosmic Ray supports multiple *test runners*. A test runner is simply a
-plugin that supports a particular way of running tests. For example,
-there is a test runner for tests written with the standard ``unittest``
-module, and there's another for tests written using
-```pytest`` <pytest.org>`__.
+The `test-command` field of a configuration tells Cosmic Ray how to run tests.
+Cosmic Ray runs this command from whatever directory you run the `exec` command
+(or, in the case of remote execution, in whatever directory the remote command
+handler is running).
 
-To specify a particular test runner when running Cosmic Ray, specify it in your
-config at the "test-runner:name" key:
-
-.. code-block:: yaml
-
-  # config.yml
-  test-runner:
-    name: <test runner name>
-
-To get a list of the available test runners, use the ``test-runners``
-subcommand:
-
-::
-
-    cosmic-ray test-runners
-
-Test runners require information about which tests to run, flags controlling
-their behavior, and so forth. Since each test runner implementation takes
-different kinds of information, we pass the value of "test-runner:args" to the
-test runner. For example, with this config:
-
-.. code-block:: yaml
-
-   # config.yml
-   test-runner:
-     name: pytest
-     args: -x -k test_foo allele_tests
-
-would pass the string ``-x -k test_foo allele_tests`` to the
-pytest runner initializer. This plugin passes this string directly to the
-``pytest.main()`` function which treats them as command line arguments;
-in this case, it means "exit on first failure, only running tests under
-'allele\_tests' which match 'test\_foo'". Each test runner will accept
-different arguments, so see their documentation for details on how to
-use them.
+Cosmic Ray will will attempt to interpolate the path to its Python executable
+into the test command string whereever it sees ``{python_executable}``.
 
 Baselines and timeouts
 ======================
@@ -237,10 +196,11 @@ specifies an absolute number of seconds that a test will be allowed to
 run. After the timeout is up, the test is killed. For example, to
 specify that tests should timeout after 10 seconds, use:
 
-.. code-block:: yaml
+.. code-block:: ini
 
-   # config.yml
-   timeout: 10
+   # config.toml
+   [cosmic-ray]
+   timeout = 10
 
 The second way is by using a baseline timing. To use this technique,
 set the ``baseline`` config key. When Cosmic
@@ -251,10 +211,11 @@ this baseline timing by the value of ``baseline`` and this final value
 is used as the timeout for tests. For example, to tell Cosmic Ray to
 timeout tests when they take 3 times longer than a baseline run, use
 
-.. code-block:: yaml
+.. code-block:: ini
 
-   # config.yml
-   baseline: 3
+    # config.toml
+    [cosmic-ray]
+    baseline = 3
 
 This baseline technique is particularly useful if your testsuite runtime
 is in flux.

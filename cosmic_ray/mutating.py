@@ -1,75 +1,89 @@
-"""Implementation of the mutating operator core.
+"""Support for making mutations to source code.
 """
+from contextlib import contextmanager
 
-import ast
-import logging
-
-import cosmic_ray.util
-
-log = logging.getLogger()
+from cosmic_ray.ast import get_ast, Visitor
 
 
-def _full_module_name(obj):
-    return '{}.{}'.format(
-        obj.__class__.__module__,
-        obj.__class__.__name__)
+@contextmanager
+def use_mutation(module_path, operator, occurrence):
+    """A context manager that applies a mutation for the duration of a with-block.
 
+    This applies a mutation to a file on disk, and after the with-block it put the unmutated code
+    back in place.
 
-class MutatingCore:
+    Args:
+        module_path: The path to the module to mutate.
+        operator: The `Operator` instance to use.
+        occurrence: The occurrence of the operator to apply.
+
+    Yields: A `(unmutated-code, mutated-code)` tuple to the with-block. If there was 
+        no mutation performed, the `mutated-code` is `None`.
     """
-    An `Operator` core which performs mutation of ASTs.
+    original_code, mutated_code = apply_mutation(module_path, operator,
+                                                 occurrence)
+    try:
+        yield original_code, mutated_code
+    finally:
+        with module_path.open(mode='wt', encoding='utf-8') as handle:
+            handle.write(original_code)
+            handle.flush()
 
-    This core is instantiated with a target count N. The Nth time the operator
-    using the core calls `visit_mutation_site()`, this core will set the
-    `activation_record` attribute and perform a mutation. In other words, this
-    will mutate the `target`-th instance of an operator's mutation candidates
-    if such a candidate exists. If there is no `target`-th candidate then
-    `activation_record` will remain `None` and no mutation will occur.
+
+def apply_mutation(module_path, operator, occurrence):
+    """Apply a specific mutation to a file on disk.
+
+    Args:
+        module_path: The path to the module to mutate.
+        operator: The `operator` instance to use.
+        occurrence: The occurrence of the operator to apply.
+
+    Returns: A `(unmutated-code, mutated-code)` tuple to the with-block. If there was 
+        no mutation performed, the `mutated-code` is `None`.
+    """
+    module_ast = get_ast(module_path, python_version=operator.python_version)
+    original_code = module_ast.get_code()
+    visitor = MutationVisitor(occurrence, operator)
+    mutated_ast = visitor.walk(module_ast)
+
+    mutated_code = None
+    if visitor.mutation_applied:
+        mutated_code = mutated_ast.get_code()
+        with module_path.open(mode='wt', encoding='utf-8') as handle:
+            handle.write(mutated_code)
+            handle.flush()
+
+    return original_code, mutated_code
+
+
+class MutationVisitor(Visitor):
+    """Visitor that mutates a module with the specific occurrence of an operator.
+
+    This will perform at most one mutation in a walk of an AST. If this performs
+    a mutation as part of the walk, it will store the mutated node in the
+    `mutant` attribute. If the walk does not result in any mutation, `mutant`
+    will be `None`.
+
+    Note that `mutant` is just the specifically mutated node. It will generally
+    be a part of the larger AST which is returned from `walk()`.
     """
 
-    def __init__(self, target):
-        self._target = target
+    def __init__(self, occurrence, operator):
+        self.operator = operator
+        self._occurrence = occurrence
         self._count = 0
-        self._activation_record = None
+        self._mutation_applied = False
 
     @property
-    def activation_record(self):
-        """The activation record for the operator.
+    def mutation_applied(self):
+        "Whether this visitor has applied a mutation."
+        return self._mutation_applied
 
-        The activation record is a dict describing where and how the
-        operator was applied.
-        """
-        return self._activation_record
+    def visit(self, node):
+        for index, _ in enumerate(self.operator.mutation_positions(node)):
+            if self._count == self._occurrence:
+                self._mutation_applied = True
+                node = self.operator.mutate(node, index)
+            self._count += 1
 
-    def visit_mutation_site(self, node, op,  # pylint: disable=invalid-name
-                            num_mutations):
-        """Potentially mutate `node`, returning the mutated version.
-
-        `Operator` calls this when AST iteration reaches a
-        potential mutation site. If that site is scheduled for
-        mutation, the subclass instance will be asked to perform the
-        mutation.
-        """
-        # If the current operator will do at least that many mutations,
-        # then let it make the mutation now.
-        if self._count <= self._target < self._count + num_mutations:
-            assert self._activation_record is None
-            assert self._target - self._count < num_mutations
-
-            self._activation_record = {
-                'operator': _full_module_name(op),
-                'occurrence': self._target,
-                'line_number': cosmic_ray.util.get_line_number(node)
-            }
-
-            old_node = node
-            node = op.mutate(old_node, self._target - self._count)
-            # add lineno and col_offset for newly created nodes
-            ast.fix_missing_locations(node)
-
-        self._count += num_mutations
         return node
-
-    def repr_args(self):
-        "Extra arguments to display in operator reprs."
-        return [('target', self._target)]
