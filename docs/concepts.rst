@@ -125,7 +125,7 @@ You would run ``cosmic-ray init`` like this:
     cosmic-ray init allele_config.yml allele_session
 
 You'll notice that this creates a new file called "allele_session.json".
-This the database for your session.
+This is the database for your session.
 
 An important note on separating tests and production code
 ---------------------------------------------------------
