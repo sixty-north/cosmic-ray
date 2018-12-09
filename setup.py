@@ -4,6 +4,8 @@ import sys
 
 from setuptools import setup, find_packages
 
+from sphinx.setup_command import BuildDoc
+
 
 def local_file(*name):
     return os.path.join(
@@ -88,9 +90,11 @@ INSTALL_REQUIRES = [
 if sys.version_info < (3, 4):
     INSTALL_REQUIRES.append('enum34')
 
+version = read_version()[0]
+
 setup(
     name='cosmic_ray',
-    version=read_version()[0],
+    version=version,
     packages=find_packages(),
 
     author='Sixty North AS',
@@ -146,6 +150,15 @@ setup(
         'cosmic_ray.interceptors': [
             'spor = cosmic_ray.interceptors.spor:intercept'
         ],
+    },
+    cmdclass={'build_sphinx': BuildDoc},
+    command_options={
+        'build_sphinx': {
+            'project': ('setup.py', 'Cosmic Ray'),
+            'version': ('setup.py', version),
+            'release': ('setup.py', version),
+            'source_dir': ('setup.py', 'docs'),
+        },
     },
     long_description=LONG_DESCRIPTION,
 )
