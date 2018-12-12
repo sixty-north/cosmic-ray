@@ -41,8 +41,7 @@ And, of course, patches and ideas are welcome.
    implementation
    tests
    continuous_integration
-
-
+   examples
 
 Indices and tables
 ==================

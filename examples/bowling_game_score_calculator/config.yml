@@ -1,0 +1,12 @@
+module: score_calculator
+
+baseline: 10
+
+exclude-modules:
+
+test-runner:
+  name: unittest
+  args: test_score_calculator
+
+execution-engine:
+  name: local
