@@ -48,8 +48,6 @@ def is_killed(record):
     elif record.worker_outcome in {WorkerOutcome.ABNORMAL, WorkerOutcome.NORMAL}:
         if record.test_outcome == TestOutcome.KILLED:
             return True
-        if record.test_outcome == TestOutcome.INCOMPETENT:
-            return True
     return False
 
 
@@ -63,13 +61,17 @@ def create_report(records, show_pending, full_report=False):
     """
     total_jobs = 0
     pending_jobs = 0
+    incompetent_jobs = 0
     kills = 0
     for item in records:
         total_jobs += 1
         if item.worker_outcome is None:
             pending_jobs += 1
-        if is_killed(item):
-            kills += 1
+        else:
+            if item.test_outcome == TestOutcome.INCOMPETENT:
+                incompetent_jobs += 1
+            if is_killed(item):
+                kills += 1
         if (item.worker_outcome is not None) or show_pending:
             yield from _print_item(item, full_report)
 
@@ -78,8 +80,10 @@ def create_report(records, show_pending, full_report=False):
     yield 'total jobs: {}'.format(total_jobs)
 
     if completed_jobs > 0:
-        yield 'complete: {} ({:.2f}%)'.format(
+        yield 'completed: {} ({:.2f}%)'.format(
             completed_jobs, completed_jobs / total_jobs * 100)
+        yield 'incompetent: {} ({:.2f}%)'.format(
+            incompetent_jobs, incompetent_jobs / total_jobs * 100)
         yield 'survival rate: {:.2f}%'.format(
             (1 - kills / completed_jobs) * 100)
     else:
