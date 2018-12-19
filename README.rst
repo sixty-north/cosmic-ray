@@ -25,7 +25,7 @@ And, of course, patches and ideas are welcome.
 
 .. |Python version| image:: https://img.shields.io/badge/Python_version-3.4+-blue.svg
    :target: https://www.python.org/
-.. |Build Status| image:: https://travis-ci.org/sixty-north/cosmic-ray.png?branch=master
+.. |Build Status| image:: https://travis-ci.org/sixty-north/cosmic-ray.svg?branch=master
    :target: https://travis-ci.org/sixty-north/cosmic-ray
 .. |Code Health| image:: https://landscape.io/github/sixty-north/cosmic-ray/master/landscape.svg?style=flat
    :target: https://landscape.io/github/sixty-north/cosmic-ray/master
