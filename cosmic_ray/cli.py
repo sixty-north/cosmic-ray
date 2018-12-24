@@ -38,9 +38,9 @@ DOC_TEMPLATE = """{program}
 Usage: {program} [options] <command> [<args> ...]
 
 Options:
-  -h --help     Show this screen.
-  -v --version  Show the program version.
-  --verbose     Use verbose output
+  -h --help           Show this screen.
+  --version           Show the program version.
+  -v --verbosity=LEVEL  Use verbose output [default: WARNING]
 
 Available commands:
   {available_commands}
@@ -52,10 +52,11 @@ See '{program} <command> -h' for help on specific commands.
 class CosmicRaySubcommands(Subcommands):
     "Subcommand handler."
     def _precommand_option_handler(self, config):
-        if config['--verbose']:
-            logging.basicConfig(
-                level=logging.INFO,
-                format='%(asctime)s %(name)s %(levelname)s %(message)s')
+        verbosity_level = getattr(logging, config.get('--verbosity', 'WARNING'))
+
+        logging.basicConfig(
+            level=verbosity_level,
+            format='%(asctime)s %(name)s %(levelname)s %(message)s')
 
         return super()._precommand_option_handler(config)
 
