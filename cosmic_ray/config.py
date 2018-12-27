@@ -68,6 +68,10 @@ class ConfigDict(dict):
         return v
 
     @property
+    def test_command(self):
+        return self['test-command']
+
+    @property
     def timeout(self):
         return float(self['timeout'])
 
@@ -77,6 +81,17 @@ class ConfigDict(dict):
         if b <= 0:
             raise ConfigValueError('Baseline must be a positive value. value={}'.format(b))
         return b
+
+    @property
+    def execution_engine_name(self):
+        "The name of the execution engine to use."
+        return self['execution-engine']['name']
+
+    @property
+    def execution_engine_config(self):
+        "The configuation for the named execution engine."
+        name = self.execution_engine_name
+        return self['execution-engine'].get(name, ConfigDict())
 
 @contextmanager
 def _config_stream(filename):

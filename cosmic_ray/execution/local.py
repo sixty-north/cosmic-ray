@@ -14,7 +14,7 @@ class LocalExecutionEngine(ExecutionEngine):
                 config.python_version,
                 work_item.operator_name,
                 work_item.occurrence,
-                config["test-command"],
+                config.test_command,
                 timeout,
             )
 

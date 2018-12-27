@@ -41,8 +41,7 @@ def execute(db_name):
         with use_db(db_name, mode=WorkDB.Mode.open) as work_db:
             _update_progress(work_db)
             config, timeout = work_db.get_config()
-            engine_name = config['execution-engine']['name']
-            executor = get_execution_engine(engine_name)
+            engine = get_execution_engine(config.execution_engine_name)
 
             def on_task_complete(job_id, work_result):
                 work_db.set_result(job_id, work_result)
@@ -50,7 +49,7 @@ def execute(db_name):
                 log.info("Job %s complete", job_id)
 
             log.info("Beginning execution")
-            executor(
+            engine(
                 timeout,
                 work_db.pending_work_items,
                 config,
