@@ -9,19 +9,13 @@ Cosmic Ray: mutation testing for Python
 *"Four human beings -- changed by space-born cosmic rays into something more than merely human."*
 *— The Fantastic Four*
 
-Cosmic Ray is a tool for performing mutation testing on Python
-code.
+Cosmic Ray is a mutation testing tool for Python 3. It makes small changes to
+your source code, running your test suite for each one. If a test suite passes
+on mutated code, then you have a mismatch between your tests and your
+functionality.
 
-N.B.! Cosmic Ray is still learning how to walk!
------------------------------------------------
-
-At this time Cosmic Ray is young and incomplete. It doesn't support all of the
-mutations it should, its output format is crude, it only supports some forms of
-test discovery, it may fall over on exotic modules...\ `the list goes on and on
-<https://github.com/sixty-north/cosmic-ray/issues>`__. Still, for the
-adventurous it *does* work. Hopefully things will improve fairly rapidly.
-
-And, of course, patches and ideas are welcome.
+Cosmic Ray has been successfully used on a wide variety of projects ranging from
+assemblers to oil exploration software.
 
 **This documentation is a bit out of date, but we're working to get it in good order!**
 
