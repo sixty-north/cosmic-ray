@@ -21,6 +21,7 @@ import cosmic_ray.modules
 import cosmic_ray.plugins
 import cosmic_ray.testing
 import cosmic_ray.worker
+from cosmic_ray.cloning import cloned_workspace
 from cosmic_ray.config import get_db_name, load_config, serialize_config
 from cosmic_ray.exit_codes import ExitCode
 from cosmic_ray.mutating import apply_mutation
@@ -77,9 +78,8 @@ def handle_baseline(args):
     """
     config = load_config(args['<config-file>'])
 
-    test_cmd = config['test-command']
-
-    outcome, data = cosmic_ray.testing.run_tests(test_cmd)
+    with cloned_workspace(config.execution_engine_config):
+        outcome, data = cosmic_ray.testing.run_tests(config.test_command())
 
     # note: test_runner() results are meant to represent
     # status codes when executed against mutants.

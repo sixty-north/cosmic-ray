@@ -1,5 +1,7 @@
 "Implementation of the local execution engine."
 
+import sys
+
 from .execution_engine import ExecutionEngine
 from ..worker import worker
 
@@ -14,7 +16,7 @@ class LocalExecutionEngine(ExecutionEngine):
                 config.python_version,
                 work_item.operator_name,
                 work_item.occurrence,
-                config.test_command,
+                config.test_command(),
                 timeout,
             )
 

@@ -36,6 +36,7 @@ INSTALL_REQUIRES = [
     'astunparse',
     'decorator',
     'docopt_subcommands>=3.0.0',
+    'gitpython', 
     'parso',
     'pathlib',
     'qprompt',
@@ -84,7 +85,6 @@ setup(
         'test': ['hypothesis', 'pytest', 'pytest-mock', 'tox'],
         'dev': ['pylint', 'black'],
         'docs': ['sphinx', 'sphinx_rtd_theme'],
-        'pytest_runner': ['cosmic_ray_pytest_runner'],
         'celery4_engine': ['cosmic_ray_celery4_engine'],
     },
     entry_points={
@@ -103,9 +103,12 @@ setup(
         ],
         'cosmic_ray.execution_engines': [
             'local = cosmic_ray.execution.local:LocalExecutionEngine',
+            'local-git = cosmic_ray.execution.local_git:LocalGitExecutionEngine',
+
         ],
-        'cosmic_ray.interceptors':
-        ['spor = cosmic_ray.interceptors.spor:intercept'],
+        'cosmic_ray.interceptors': [
+            'spor = cosmic_ray.interceptors.spor:intercept',
+        ],
     },
     long_description=LONG_DESCRIPTION,
 )

@@ -2,6 +2,7 @@
 from contextlib import contextmanager
 import logging
 import sys
+
 import toml
 
 log = logging.getLogger()
@@ -32,7 +33,6 @@ def deserialize_config(sz):
 def serialize_config(config):
     "Return the serialized form of `config`."
     return toml.dumps({'cosmic-ray': config})
-
 
 
 class ConfigError(Exception):
@@ -67,9 +67,10 @@ class ConfigDict(dict):
             v = "{}.{}".format(sys.version_info.major, sys.version_info.minor)
         return v
 
-    @property
-    def test_command(self):
-        return self['test-command']
+    def test_command(self, python_executable=None):
+        if python_executable is None:
+            python_executable = sys.executable
+        return self['test-command'].format(**{'python-executable': python_executable})
 
     @property
     def timeout(self):
@@ -93,6 +94,7 @@ class ConfigDict(dict):
         name = self.execution_engine_name
         return self['execution-engine'].get(name, ConfigDict())
 
+
 @contextmanager
 def _config_stream(filename):
     """Given a configuration's filename, this returns a stream from which a configuration can be read.
@@ -107,7 +109,6 @@ def _config_stream(filename):
         with open(filename, mode='rt') as handle:
             log.info('Reading config from %r', filename)
             yield handle
-
 
 
 def get_db_name(session_name):

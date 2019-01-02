@@ -24,7 +24,6 @@ def run_tests(command, timeout=None):
         containing the output of the command.
     """
     try:
-        command = command.format(**{'python-executable': sys.executable})
         proc = subprocess.run(
             command.split(),
             stdout=subprocess.PIPE,
