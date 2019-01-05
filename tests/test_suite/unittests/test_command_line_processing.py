@@ -33,7 +33,8 @@ def _make_config(test_command='python -m unittest discover tests',
         timeout_type: timeout_val,
         'test-command': test_command,
         'execution-engine': {'name': engine},
-        'exclude-modules': []
+        'exclude-modules': [],
+        'cloning': {'method': 'copy'}
     }
 
 
