@@ -22,7 +22,7 @@ import cosmic_ray.plugins
 import cosmic_ray.testing
 import cosmic_ray.worker
 from cosmic_ray.cloning import cloned_workspace
-from cosmic_ray.config import get_db_name, load_config, serialize_config
+from cosmic_ray.config import ConfigValueError, get_db_name, load_config, serialize_config
 from cosmic_ray.exit_codes import ExitCode
 from cosmic_ray.mutating import apply_mutation
 from cosmic_ray.progress import report_progress

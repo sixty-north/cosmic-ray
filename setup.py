@@ -103,7 +103,6 @@ setup(
         ],
         'cosmic_ray.execution_engines': [
             'local = cosmic_ray.execution.local:LocalExecutionEngine',
-            'local-git = cosmic_ray.execution.local_git:LocalGitExecutionEngine',
 
         ],
         'cosmic_ray.interceptors': [
