@@ -78,7 +78,7 @@ def handle_baseline(args):
     """
     config = load_config(args['<config-file>'])
 
-    with cloned_workspace(config.execution_engine_config):
+    with cloned_workspace(config.cloning_config):
         outcome, data = cosmic_ray.testing.run_tests(config.test_command())
 
     # note: test_runner() results are meant to represent

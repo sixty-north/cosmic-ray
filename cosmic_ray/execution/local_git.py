@@ -65,7 +65,7 @@ def _initialize_worker(timeout, config):
     _timeout = timeout
 
     log.info('Initialize local-git worker in PID %s', os.getpid())
-    _workspace = ClonedWorkspace(config.execution_engine_config)
+    _workspace = ClonedWorkspace(config.cloning_config)
 
     # Register a finalizer
     multiprocessing.util.Finalize(_workspace, lambda: _workspace.cleanup(), exitpriority=16)

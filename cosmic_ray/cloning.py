@@ -5,6 +5,7 @@ import contextlib
 import logging
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import tempfile
 import venv
@@ -15,7 +16,7 @@ log = logging.getLogger(__name__)
 
 
 @contextlib.contextmanager
-def cloned_workspace(engine_config, chdir=True):
+def cloned_workspace(clone_config, chdir=True):
     """Create a cloned workspace and yield it.
 
     This creates a workspace for a with-block and cleans it up on exit. By
@@ -23,12 +24,12 @@ def cloned_workspace(engine_config, chdir=True):
     duration of the with-block. 
 
     Args:
-        engine_config: The execution engine configuration to use for the workspace.
+        clone_config: The execution engine configuration to use for the workspace.
         chdir: Whether to change to the workspace's `clone_dir` before entering the with-block.
 
     Yields: The `CloneWorkspace` instance created for the context.
     """
-    workspace = ClonedWorkspace(engine_config)
+    workspace = ClonedWorkspace(clone_config)
     original_dir = os.getcwd()
     if chdir:
         os.chdir(workspace.clone_dir)
@@ -43,21 +44,20 @@ def cloned_workspace(engine_config, chdir=True):
 class ClonedWorkspace:
     """Clone a project and install it into a temporary virtual environment.
     """
-    def __init__(self, engine_config):
-        # TODO: Rather than passing in the engine_config, perhaps the config
-        # should have a notion of a "code base" section which describes how to
-        # clone the project in an engine-independent way. It could specify git,
-        # file copy, svn, or whatever, along with the relevant paths/URIs/etc.
-
+    def __init__(self, clone_config):
         self._tempdir = tempfile.TemporaryDirectory()
         log.info('New project clone in %s', self._tempdir.name)
 
         self._clone_dir = str(Path(self._tempdir.name) / 'repo')
 
-        # Clone repo. Currently just with git, but could expand it later.
-        repo_uri = engine_config.get('repo-uri', '.')
-        log.info('Cloning git repo %s to %s', repo_uri, self._clone_dir)
-        git.Repo.clone_from(repo_uri, self._clone_dir, depth=1)
+        if clone_config['method'] == 'git':
+            clone_with_git(
+                clone_config.get('repo-uri', '.'),
+                self._clone_dir)
+        elif clone_config['method'] == 'copy':
+            clone_with_copy(
+                os.getcwd(), 
+                self._clone_dir)
 
         # TODO: We should allow user to specify which version of Python to use.
         # How? The EnvBuilder could be passed a path to a python interpreter
@@ -68,7 +68,7 @@ class ClonedWorkspace:
         venv_path = Path(self._tempdir.name) / 'venv'
         log.info('Creating virtual environment in %s', venv_path)
         builder = EnvBuilder(self._clone_dir,
-                            engine_config.get('extras', ()))
+                            clone_config.get('extras', ()))
         context = builder.create_with_context(venv_path)
 
         self._python_executable = context.env_exe
@@ -89,14 +89,24 @@ class ClonedWorkspace:
         self._tempdir.cleanup()
 
 
+def clone_with_git(repo_uri, dest_path):
+    log.info('Cloning git repo %s to %s', repo_uri, dest_path)
+    git.Repo.clone_from(repo_uri, dest_path, depth=1)
+
+
+def clone_with_copy(src_path, dest_path):
+    log.info('Cloning directory tree %s to %s', src_path, dest_path)
+    shutil.copytree(src_path, dest_path)
+
+
 class EnvBuilder(venv.EnvBuilder):
     """EnvBuilder that installs a project and any specified extras.
     """
-    def __init__(self, repo_dir, extras, *args, **kwargs):
+    def __init__(self, repo_dir, commands, *args, **kwargs):
         super().__init__(self, with_pip=True, symlinks=True, *args, **kwargs)
         self.repo_dir = repo_dir
 
-        self.extras = tuple(extras)
+        self.commands = tuple(commands)
 
     def create_with_context(self, env_dir):
         # A bit if a hack. We remember the context seen in a call to
@@ -111,15 +121,11 @@ class EnvBuilder(venv.EnvBuilder):
     def post_setup(self, context):
         self._context = context
 
-        command = '{} -m pip install -e .{}'.format(
-            context.env_exe,
-            '[{}]'.format(','.join(self.extras)) if self.extras else '')
-
-        log.info('Running installation command: {}'.format(command))
-
-        subprocess.run(command.split(),
-                       stdout=subprocess.PIPE,
-                       stderr=subprocess.STDOUT,
-                       cwd=self.repo_dir,
-                       check=True)
+        for command in self.commands:
+            log.info('Running installation command: %s', command)
+            subprocess.run(command.split(),
+                           stdout=subprocess.PIPE,
+                           stderr=subprocess.STDOUT,
+                           cwd=self.repo_dir,
+                           check=True)
 

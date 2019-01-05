@@ -92,7 +92,12 @@ class ConfigDict(dict):
     def execution_engine_config(self):
         "The configuation for the named execution engine."
         name = self.execution_engine_name
-        return self['execution-engine'].get(name, ConfigDict())
+        return self['execution-engine'][name]
+
+    @property
+    def cloning_config(self):
+        "The 'cloning' section of the config."
+        return self['cloning']
 
 
 @contextmanager

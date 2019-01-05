@@ -9,6 +9,8 @@ from ..worker import worker
 class LocalExecutionEngine(ExecutionEngine):
     "Execution engine that runs jobs on the local machine."
 
+    # TODO: This should be using the clone techniques to speed things up.
+
     def __call__(self, timeout, pending_work_items, config, on_task_complete):
         for work_item in pending_work_items:
             work_result = worker(
