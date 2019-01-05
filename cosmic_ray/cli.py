@@ -302,7 +302,9 @@ def handle_worker(args):
             work_item = cosmic_ray.worker.worker(
                 Path(args['<module-path>']),
                 config.python_version, args['<operator>'],
-                int(args['<occurrence>']), config['test-command'], None)
+                int(args['<occurrence>']), 
+                config.test_command(),
+                None)
 
     sys.stdout.write(json.dumps(work_item, cls=WorkItemJsonEncoder))
 
