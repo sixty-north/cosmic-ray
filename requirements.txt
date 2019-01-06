@@ -1,5 +1,4 @@
 astunparse==1.6.1
--e git+https://github.com/sixty-north/cosmic-ray@dd78c542b24f8d3d6b05adf1a03415837b9605a8#egg=cosmic_ray
 decorator==4.3.0
 docopt==0.6.2
 docopt-subcommands==3.0.0
