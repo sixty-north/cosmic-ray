@@ -22,7 +22,7 @@ env:
 
 env:
   global:
-  - TOXENV=py-coverage
+  # - TOXENV=py-coverage
   - PYTEST_ADDOPTS="--e2e-engine=local --e2e-tester=unittest --e2e-tester=pytest"
 
 install:
@@ -39,12 +39,12 @@ services: rabbitmq
 script:
 - tox
 
-after_success:
-- |
-  pip install codecov
-  coverage xml
-  codecov_flags=py${TRAVIS_PYTHON_VERSION//./}
-  codecov --required -X search gcov pycov -f coverage.xml --flags $codecov_flags
+# after_success:
+# - |
+#   pip install codecov
+#   coverage xml
+#   codecov_flags=py${TRAVIS_PYTHON_VERSION//./}
+#   codecov --required -X search gcov pycov -f coverage.xml --flags $codecov_flags
 
 # When we push to 'release', the python-3.6 travis run should do a deployment.
 deploy:
