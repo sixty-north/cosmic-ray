@@ -1,8 +1,12 @@
+"Tests for the WorkDB"
+
 import pytest
 
 from cosmic_ray.config import ConfigDict
 from cosmic_ray.work_db import use_db, WorkDB
 from cosmic_ray.work_item import TestOutcome, WorkerOutcome, WorkItem, WorkResult
+
+# pylint: disable=W0621,C0111
 
 
 @pytest.fixture
@@ -12,7 +16,7 @@ def work_db():
 
 
 def test_empty_db_has_no_pending_jobs(work_db):
-    assert len(list(work_db.pending_work_items)) == 0
+    assert not list(work_db.pending_work_items)
 
 
 def test_find_pending_job(work_db):

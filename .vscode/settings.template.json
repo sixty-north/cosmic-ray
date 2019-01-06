@@ -9,11 +9,5 @@
     "python.formatting.provider": "autopep8",
     "python.linting.pylintEnabled": true,
     "restructuredtext.confPath": "${workspaceFolder}/docs",
-    "restructuredtext.linter.extraArgs": [
-        "--max-line-length=120"
-    ],
-    "python.linting.flake8Enabled": true,
-    "python.linting.flake8Args": [
-        "--max-line-length=120"
-    ]
+    "python.linting.flake8Enabled": true
 }

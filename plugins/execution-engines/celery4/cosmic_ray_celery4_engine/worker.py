@@ -4,7 +4,6 @@ import celery.signals
 from celery.utils.log import get_logger
 
 from cosmic_ray.worker import worker
-from cosmic_ray.work_item import WorkItem
 
 from .app import APP
 
@@ -45,7 +44,7 @@ def execute_work_items(work_items, config):
     Returns: An iterable of WorkItems.
     """
     return celery.group(
-        worker_task.s(work_item, config) 
+        worker_task.s(work_item, config)
         for work_item in work_items
     )
 

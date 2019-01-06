@@ -4,7 +4,6 @@ import contextlib
 import os
 import sqlite3
 from enum import Enum
-from io import StringIO
 
 from .config import deserialize_config, serialize_config
 from .work_item import TestOutcome, WorkerOutcome, WorkItem, WorkResult
@@ -233,8 +232,8 @@ def _row_to_work_item(row):
 def _work_item_to_row(work_item):
     return (str(
         work_item.module_path), work_item.operator_name, work_item.occurrence,
-            work_item.start_pos[0], work_item.start_pos[1],
-            work_item.end_pos[0], work_item.end_pos[1], work_item.job_id)
+        work_item.start_pos[0], work_item.start_pos[1],
+        work_item.end_pos[0], work_item.end_pos[1], work_item.job_id)
 
 
 def _row_to_work_result(row):

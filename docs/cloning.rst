@@ -6,7 +6,7 @@ TODO: Document Cloning
 
 When Cosmic Ray mutates code, it generally does so on a copy of the original
 source code. Since Cosmic Ray mutates code directly on disk, it needs to make
-copies of the code in order to safely run concurrent tests. 
+copies of the code in order to safely run concurrent tests.
 
 Cosmic Ray supports several methods for copying code, including simple file system copies
 as well as git cloning. These methods are currently hard-coded, but we'll probably provide cloning

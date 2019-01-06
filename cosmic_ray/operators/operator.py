@@ -7,7 +7,7 @@ class Operator(ABC):
     """The mutation operator base class.
 
     Args:
-        python_version: The version of Python to use when interpreting the code in `module_path`. 
+        python_version: The version of Python to use when interpreting the code in `module_path`.
             A string of the form "MAJOR.MINOR", e.g. "3.6" for Python 3.6.x.
     """
 
@@ -31,7 +31,7 @@ class Operator(ABC):
 
         Returns: An iterable of `((start-line, start-col), (stop-line,
             stop-col))` tuples describing the locations where this operator will
-            mutate `node`. 
+            mutate `node`
         """
 
     @abstractmethod

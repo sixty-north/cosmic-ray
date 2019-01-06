@@ -139,7 +139,7 @@ to stdout.
 
 ``dump`` is designed to allow users to develop their own reports. To do
 this, you need a program which reads a series of JSON structures from
-stdin. 
+stdin.
 
 Concurrency
 ===========

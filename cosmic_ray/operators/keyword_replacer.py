@@ -4,6 +4,7 @@ from .operator import Operator
 
 # pylint: disable=E1101
 
+
 class KeywordReplacementOperator(Operator):
     """A base class for operators that replace one keyword with another
     """

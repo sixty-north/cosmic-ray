@@ -21,7 +21,7 @@ def cloned_workspace(clone_config, chdir=True):
 
     This creates a workspace for a with-block and cleans it up on exit. By
     default, this will also change to the workspace's `clone_dir` for the
-    duration of the with-block. 
+    duration of the with-block.
 
     Args:
         clone_config: The execution engine configuration to use for the workspace.
@@ -44,6 +44,7 @@ def cloned_workspace(clone_config, chdir=True):
 class ClonedWorkspace:
     """Clone a project and install it into a temporary virtual environment.
     """
+
     def __init__(self, clone_config):
         self._tempdir = tempfile.TemporaryDirectory()
         log.info('New project clone in %s', self._tempdir.name)
@@ -56,7 +57,7 @@ class ClonedWorkspace:
                 self._clone_dir)
         elif clone_config['method'] == 'copy':
             clone_with_copy(
-                os.getcwd(), 
+                os.getcwd(),
                 self._clone_dir)
 
         # TODO: We should allow user to specify which version of Python to use.
@@ -68,7 +69,7 @@ class ClonedWorkspace:
         venv_path = Path(self._tempdir.name) / 'venv'
         log.info('Creating virtual environment in %s', venv_path)
         builder = EnvBuilder(self._clone_dir,
-                            clone_config.get('extras', ()))
+                             clone_config.get('extras', ()))
         context = builder.create_with_context(venv_path)
 
         self._python_executable = context.env_exe
@@ -102,6 +103,7 @@ def clone_with_copy(src_path, dest_path):
 class EnvBuilder(venv.EnvBuilder):
     """EnvBuilder that installs a project and any specified extras.
     """
+
     def __init__(self, repo_dir, commands, *args, **kwargs):
         super().__init__(self, with_pip=True, symlinks=True, *args, **kwargs)
         self.repo_dir = repo_dir
@@ -128,4 +130,3 @@ class EnvBuilder(venv.EnvBuilder):
                            stderr=subprocess.STDOUT,
                            cwd=self.repo_dir,
                            check=True)
-

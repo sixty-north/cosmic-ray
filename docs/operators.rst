@@ -26,9 +26,9 @@ Implementing an operator
 To implement a new operator you need to create a subclass of
 ``cosmic_ray.operators.operator.Operator``. The first method an operator must implement
 is ``Operator.mutation_positions()`` which tells Cosmic Ray how the operator could mutate
-a particular parse-tree node. 
+a particular parse-tree node.
 
-Second, an operator subclass must implement ``Operator.mutate()`` which actually mutates 
+Second, an operator subclass must implement ``Operator.mutate()`` which actually mutates
 a parse-tree node.
 
 Finally, an operator must implement the class method ``Operator.examples()``.

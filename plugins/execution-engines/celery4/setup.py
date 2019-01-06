@@ -32,8 +32,7 @@ setup(
     packages=find_packages(exclude=['contrib', 'docs', 'test*']),
     author='Sixty North AS',
     author_email='austin@sixty-north.com',
-    description=
-    'Cosmic Ray execution engine that distributes execution via Celery 4.',
+    description='Cosmic Ray execution engine that distributes execution via Celery 4.',
     license='MIT',
     keywords='testing',
     url='http://github.com/sixty-north/cosmic-ray',

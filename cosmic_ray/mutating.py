@@ -17,7 +17,7 @@ def use_mutation(module_path, operator, occurrence):
         operator: The `Operator` instance to use.
         occurrence: The occurrence of the operator to apply.
 
-    Yields: A `(unmutated-code, mutated-code)` tuple to the with-block. If there was 
+    Yields: A `(unmutated-code, mutated-code)` tuple to the with-block. If there was
         no mutation performed, the `mutated-code` is `None`.
     """
     original_code, mutated_code = apply_mutation(module_path, operator,
@@ -38,7 +38,7 @@ def apply_mutation(module_path, operator, occurrence):
         operator: The `operator` instance to use.
         occurrence: The occurrence of the operator to apply.
 
-    Returns: A `(unmutated-code, mutated-code)` tuple to the with-block. If there was 
+    Returns: A `(unmutated-code, mutated-code)` tuple to the with-block. If there was
         no mutation performed, the `mutated-code` is `None`.
     """
     module_ast = get_ast(module_path, python_version=operator.python_version)

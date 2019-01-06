@@ -51,12 +51,12 @@ def _create_replace_unary_operators(from_op, to_op):
         @classmethod
         def examples(cls):
             return (
- # TODO: Hmmm....
-#         (ReplaceUnaryOperator_USub_UAdd, 'x = -1', 'x = +1'),
-#         (ReplaceUnaryOperator_UAdd_USub, 'x = +1', 'x = -1'),
-#         (ReplaceUnaryOperator_Delete_Not, 'return not x', 'return  x'),
-#         (ReplaceUnaryOperator_Delete_USub, "x = -1", "x = 1"),
-#         (ReplaceUnaryOperator_USub_Not, "x = -1", "x = not 1"),
+                # TODO: Hmmm....
+                #         (ReplaceUnaryOperator_USub_UAdd, 'x = -1', 'x = +1'),
+                #         (ReplaceUnaryOperator_UAdd_USub, 'x = +1', 'x = -1'),
+                #         (ReplaceUnaryOperator_Delete_Not, 'return not x', 'return  x'),
+                #         (ReplaceUnaryOperator_Delete_USub, "x = -1", "x = 1"),
+                #         (ReplaceUnaryOperator_USub_Not, "x = -1", "x = not 1"),
             )
 
     return ReplaceUnaryOperator

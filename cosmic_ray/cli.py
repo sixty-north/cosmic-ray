@@ -21,15 +21,13 @@ import cosmic_ray.modules
 import cosmic_ray.plugins
 import cosmic_ray.testing
 import cosmic_ray.worker
-from cosmic_ray.cloning import cloned_workspace
-from cosmic_ray.config import ConfigValueError, get_db_name, load_config, serialize_config
+from cosmic_ray.config import get_db_name, load_config, serialize_config
 from cosmic_ray.exit_codes import ExitCode
 from cosmic_ray.mutating import apply_mutation
 from cosmic_ray.progress import report_progress
-from cosmic_ray.timing import Timer
 from cosmic_ray.version import __version__
 from cosmic_ray.work_db import WorkDB, use_db
-from cosmic_ray.work_item import TestOutcome, WorkItemJsonEncoder
+from cosmic_ray.work_item import WorkItemJsonEncoder
 
 log = logging.getLogger()
 
@@ -52,6 +50,7 @@ See '{program} <command> -h' for help on specific commands.
 
 class CosmicRaySubcommands(Subcommands):
     "Subcommand handler."
+
     def _precommand_option_handler(self, config):
         verbosity_level = getattr(logging, config.get('--verbosity', 'WARNING'))
 
@@ -60,6 +59,7 @@ class CosmicRaySubcommands(Subcommands):
             format='%(asctime)s %(name)s %(levelname)s %(message)s')
 
         return super()._precommand_option_handler(config)
+
 
 dsc = CosmicRaySubcommands(
     program='cosmic-ray',
@@ -250,7 +250,7 @@ def handle_worker(args):
             work_item = cosmic_ray.worker.worker(
                 Path(args['<module-path>']),
                 config.python_version, args['<operator>'],
-                int(args['<occurrence>']), 
+                int(args['<occurrence>']),
                 config.test_command(),
                 None)
 

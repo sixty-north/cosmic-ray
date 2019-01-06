@@ -55,7 +55,6 @@ def _create_operator(from_op, to_op):
                 ('x {} y'.format(from_op.value), 'x {} y'.format(to_op.value)),
             )
 
-
     return ReplaceComparisonOperator
 
 

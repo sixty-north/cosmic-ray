@@ -36,7 +36,7 @@ INSTALL_REQUIRES = [
     'astunparse',
     'decorator',
     'docopt_subcommands>=3.0.0',
-    'gitpython', 
+    'gitpython',
     'parso',
     'pathlib',
     'qprompt',

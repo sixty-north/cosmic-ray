@@ -171,7 +171,7 @@ Once your tests have completed, you can view the results using the
 This will give you detailed information about what work was done, followed by a
 summary of the entire session.
 
-Test commands 
+Test commands
 =============
 
 The `test-command` field of a configuration tells Cosmic Ray how to run tests.

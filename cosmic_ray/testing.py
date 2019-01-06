@@ -1,7 +1,6 @@
 "Support for running tests in a subprocess."
 
 import subprocess
-import sys
 import traceback
 
 from cosmic_ray.work_item import TestOutcome
