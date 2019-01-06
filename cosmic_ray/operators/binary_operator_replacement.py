@@ -11,6 +11,7 @@ from .util import extend_name
 
 
 class BinaryOperators(Enum):
+    "All binary operators that we mutate."
     Add = '+'
     Sub = '-'
     Mul = '*'

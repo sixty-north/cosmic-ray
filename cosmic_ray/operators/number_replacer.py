@@ -28,7 +28,7 @@ class NumberReplacer(Operator):
         assert index < len(OFFSETS), 'received count with no associated offset'
         assert isinstance(node, parso.python.tree.Number)
 
-        val = eval(node.value) + OFFSETS[index]
+        val = eval(node.value) + OFFSETS[index]  # pylint: disable=W0123
         return parso.python.tree.Number(' ' + str(val), node.start_pos)
 
     @classmethod

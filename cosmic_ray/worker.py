@@ -4,7 +4,6 @@
 import difflib
 import traceback
 
-import cosmic_ray.compat.json
 import cosmic_ray.mutating
 import cosmic_ray.plugins
 from cosmic_ray.testing import run_tests

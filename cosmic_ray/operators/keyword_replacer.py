@@ -1,3 +1,5 @@
+"Common implementation for operators that replace keywords."
+
 from parso.python.tree import Keyword
 
 from .operator import Operator

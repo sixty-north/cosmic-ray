@@ -12,6 +12,7 @@ from .util import extend_name
 
 
 class ComparisonOperators(Enum):
+    "All comparison operators that we mutate."
     Eq = '=='
     NotEq = '!='
     Lt = '<'

@@ -9,7 +9,6 @@ from .operator import Operator
 
 class CosmicRayTestingException(Exception):
     "A special exception we throw that nobody should be trying to catch."
-    pass
 
 
 # We inject this into builtins so we can easily replace other exceptions

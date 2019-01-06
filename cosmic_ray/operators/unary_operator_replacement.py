@@ -11,6 +11,7 @@ from .util import extend_name
 
 
 class UnaryOperators(Enum):
+    "All unary operators that we mutate."
     UAdd = '+'
     USub = '-'
     Invert = '~'
@@ -50,13 +51,16 @@ def _create_replace_unary_operators(from_op, to_op):
 
         @classmethod
         def examples(cls):
+            from_code = '{}1'.format(from_op.value)
+            to_code = from_code[len(from_op.value):]
+
+            if to_op is not UnaryOperators.Nothing:
+                to_code = to_op.value + to_code
+            elif from_op is UnaryOperators.Not:
+                to_code = ' ' + to_code
+
             return (
-                # TODO: Hmmm....
-                #         (ReplaceUnaryOperator_USub_UAdd, 'x = -1', 'x = +1'),
-                #         (ReplaceUnaryOperator_UAdd_USub, 'x = +1', 'x = -1'),
-                #         (ReplaceUnaryOperator_Delete_Not, 'return not x', 'return  x'),
-                #         (ReplaceUnaryOperator_Delete_USub, "x = -1", "x = 1"),
-                #         (ReplaceUnaryOperator_USub_Not, "x = -1", "x = not 1"),
+                (from_code, to_code),
             )
 
     return ReplaceUnaryOperator
@@ -105,4 +109,5 @@ for op_cls in _MUTATION_OPERATORS:
 
 
 def operators():
+    "Iterable of unary operator mutation operators."
     return _MUTATION_OPERATORS

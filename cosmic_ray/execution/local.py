@@ -87,6 +87,7 @@ class LocalExecutionEngine(ExecutionEngine):
     "The local-git execution engine."
 
     def __call__(self, pending_work, config, on_task_complete):
+        # pylint: disable=W0511
         # TODO: One problem with this approach is that we enqueue all of the
         # pending work at once. This could be a huge number of objects. Is there
         # a clean way to flow-control the pipeline? Or am I wrong and it's already
