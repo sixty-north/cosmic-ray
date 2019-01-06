@@ -17,8 +17,8 @@ Different engines can run tests in different contexts: in parallel on a single
 machine, by distributing them across a message bus, or perhaps by spawning test
 runs on cloud systems.
 
-**THIS SECTION SHOULD BE CONSIDERED OUT OF DATE UNTIL FURTHER NOTICE.** We will
-reimplement celery support, but right now it's probably broken.
+**THIS SECTION SHOULD BE CONSIDERED OUT OF DATE UNTIL FURTHER NOTICE.**
+We will reimplement celery support, but right now it's probably broken.
 
 The Celery execution engine
 ===========================

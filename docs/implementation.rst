@@ -7,9 +7,8 @@ walks the parse trees produced by parso, allowing mutation operators to modify
 or delete them. These modified parse trees are then turned back into code which
 is written to disk for use in a test run.
 
-For each individual mutation, Cosmic Ray modifies the Python runtime
-environment to replace the MUT with the mutated version. It then uses
-user-supplied test commands to run tests against mutated code.
+For each individual mutation, Cosmic Ray applies a mutation to the code on disk.
+It then uses user-supplied test commands to run tests against mutated code.
 
 In effect, the mutation testing algorithm is something like this:
 

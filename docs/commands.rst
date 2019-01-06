@@ -1,7 +1,7 @@
 Commands
 ========
 
-TODO: This is pretty wildly out of date!
+TODO: This is pretty wildly out of date! Perhaps we can use value-add to do this.
 
 Details of Common Commands
 --------------------------
@@ -11,7 +11,6 @@ does things.
 
 Possible verbs are:
 
-- baseline
 - `exec <#exec>`__
 - help
 - `init <#init>`__

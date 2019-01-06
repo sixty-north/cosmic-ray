@@ -21,22 +21,21 @@ An example of an operator is
 implies, this operator mutates code by replacing `break` with `continue`. During
 the initialization of a session, this operator identifies all of the locations
 in the code where this mutation can be applied. Then, during execution of a
-session, it actually mutates the AST by replacing `break` nodes with `continue`
+session, it actually mutates the code by replacing `break` nodes with `continue`
 nodes.
 
-Operators are exposed to Cosmic Ray via plugins, and if they want users can
-extend the available operator set by providing their own operators. Operators
-are implemented as subclasses of `cosmic_ray.operators.operator.Operator`.
+Operators are exposed to Cosmic Ray via plugins, and users can choose to extend
+the available operator set by providing their own operators. Operators are
+implemented as subclasses of `cosmic_ray.operators.operator.Operator`.
 
 Execution engines
 =================
 
 *Execution engines* determine the context in which tests are executed. The
 primary examples of execution engines are the *local* and *celery4* engines. The
-local engine executes tests serially on the local machine; the celery4 engine
-distributes tests to remote workers using the Celery (v4) system. Other kinds of
-engines might run tests on a cloud service or using other task distribution
-technology.
+local engine executes tests on the local machine; the celery4 engine distributes
+tests to remote workers using the Celery (v4) system. Other kinds of engines
+might run tests on a cloud service or using other task distribution technology.
 
 Execution engines have broad control over how they execute tests. During the
 execution phase they are given a sequence of pending mutations to execute, and
@@ -49,8 +48,8 @@ example, the celery4 engine requires you to run rabbitmq and to attach one or
 more worker tasks to that queue.
 
 Execution engines are implemented as plugins to Cosmic Ray. They are dynamically
-discovered, and users can create their own execution engines if they want.
-Cosmic Ray includes two execution engines plugins, local and celery4.
+discovered, and users can create their own execution engines. Cosmic Ray
+includes two execution engines plugins, local and celery4.
 
 Configurations
 ==============
@@ -65,7 +64,7 @@ file>``. This will ask you a series of questions and create a config from the
 answers. Note that this config will generally be incomplete and require you to
 edit it for completeness.
 
-In many Cosmic Ray examples we'll use the name "config.yml" for configurations.
+In many Cosmic Ray examples we'll use the name "config.toml" for configurations.
 You are not required to use this name, however. You can use any file name you
 want for your configurations.
 
@@ -74,22 +73,20 @@ documented. Each plugin can, in principle and often in practice, use their own
 specialized configuration options. We need to work on making the documentation
 of these options automatic and part of the plugin API. For detail on
 configuration options, the best place to check is currently in the
-`test_project` directory.
+`tests/example_project` directory.
 
 Sessions
 ========
 
-Cosmic Ray has a notion of *sessions* which encompass an entire mutation
-testing run. Essentially, a session is a database which records the work
-that needs to be done for a run. Then as results are available from
-workers that do the actual testing, the database is updated with
-results. By having a database like this, Cosmic Ray can safely stop in
-the middle of a (potentially very long) session and be restarted. Since
-the session knows which work is already completed, it can continue where
-it left off.
+Cosmic Ray has a notion of *sessions* which encompass an entire mutation testing
+run. Essentially, a session is a database which records the work that needs to
+be done for a run. Then as results are available from workers that do the actual
+testing, the database is updated with results. By having a database like this,
+Cosmic Ray can safely stop in the middle of a (potentially very long) session
+and be restarted. Since the session knows which work is already completed, it
+can continue where it left off.
 
-Sessions also allow for arbitrary post-facto analysis and report
-generation.
+Sessions also allow for arbitrary post-facto analysis and report generation.
 
 Initializing sessions
 ---------------------
@@ -106,16 +103,21 @@ this:
 
     [cosmic-ray]
     module-path = "allele"
-    baseline = 10
+    python-version = ""
+    timeout = 10
     exclude-modules = []
     test-command = {python_executable} -m unittest allele_tests
     execution-enging.name = "local"
+
+    [cosmic-ray.cloning]
+    method = 'copy'
+    commands = []
 
 You would run ``cosmic-ray init`` like this:
 
 ::
 
-    cosmic-ray init allele_config.toml allele_session
+    cosmic-ray init allele_config.toml allele_session.sqlite
 
 You'll notice that this creates a new file called "allele_session.sqlite".
 This is the database for your session.
@@ -152,7 +154,7 @@ session you provided to ``init``:
 
 ::
 
-    cosmic-ray exec test_session
+    cosmic-ray exec test_session.sqlite
 
 Normally this won't produce any output unless there are errors.
 
@@ -164,10 +166,10 @@ Once your tests have completed, you can view the results using the
 
 ::
 
-    cr-report test_session
+    cr-report test_session.sqlite
 
-This will give you detailed information about what work was done,
-followed by a summary of the entire session.
+This will give you detailed information about what work was done, followed by a
+summary of the entire session.
 
 Test commands 
 =============
@@ -178,7 +180,7 @@ Cosmic Ray runs this command from whatever directory you run the `exec` command
 handler is running).
 
 Cosmic Ray will will attempt to interpolate the path to its Python executable
-into the test command string whereever it sees ``{python_executable}``.
+into the test command string whereever it sees ``{python-executable}``.
 
 Baselines and timeouts
 ======================
@@ -190,32 +192,13 @@ determine when to kill a test and consider it *incompetent*. That is, if
 a test of a mutant takes longer than the timeout, the test is killed,
 and the mutant is marked incompetent.
 
-There are two ways to specify timeout values to Cosmic Ray. The first is
-through the ``timeout`` configuration key. This key
-specifies an absolute number of seconds that a test will be allowed to
-run. After the timeout is up, the test is killed. For example, to
-specify that tests should timeout after 10 seconds, use:
+You specify a test time through the ``timeout`` configuration key. This key
+specifies an absolute number of seconds that a test will be allowed to run.
+After the timeout is up, the test is killed. For example, to specify that tests
+should timeout after 10 seconds, use:
 
 .. code-block:: ini
 
    # config.toml
    [cosmic-ray]
    timeout = 10
-
-The second way is by using a baseline timing. To use this technique,
-set the ``baseline`` config key. When Cosmic
-Ray sees this key it will make an initial run of the tests on an
-un-mutated version of the module under test. The amount of time this
-takes is considered the *baseline timing*. Then, Cosmic Ray multiplies
-this baseline timing by the value of ``baseline`` and this final value
-is used as the timeout for tests. For example, to tell Cosmic Ray to
-timeout tests when they take 3 times longer than a baseline run, use
-
-.. code-block:: ini
-
-    # config.toml
-    [cosmic-ray]
-    baseline = 3
-
-This baseline technique is particularly useful if your testsuite runtime
-is in flux.

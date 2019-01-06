@@ -40,7 +40,7 @@ def execute(db_name):
     try:
         with use_db(db_name, mode=WorkDB.Mode.open) as work_db:
             _update_progress(work_db)
-            config, timeout = work_db.get_config()
+            config = work_db.get_config()
             engine = get_execution_engine(config.execution_engine_name)
 
             def on_task_complete(job_id, work_result):
@@ -50,7 +50,6 @@ def execute(db_name):
 
             log.info("Beginning execution")
             engine(
-                timeout,
                 work_db.pending_work_items,
                 config,
                 on_task_complete=on_task_complete)

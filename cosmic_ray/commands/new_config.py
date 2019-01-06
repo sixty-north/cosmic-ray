@@ -18,7 +18,8 @@ def new_config():
         'Python version (blank for auto detection)')
     config['python-version'] = python_version
 
-    config['baseline'] = 10
+    timeout = qprompt.ask_str('Test execution timeout (seconds)')
+    config['timeout'] = float(timeout)
     config['excluded-modules'] = []
 
     config["test-command"] = qprompt.ask_str("Test command")

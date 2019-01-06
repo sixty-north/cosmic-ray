@@ -68,36 +68,6 @@ dsc = CosmicRaySubcommands(
 
 
 @dsc.command()
-def handle_baseline(args):
-    """usage: cosmic-ray baseline <config-file>
-
-    Run an un-mutated baseline of the specific configuration. This is
-    largely like running a "worker" process, with the difference that
-    a baseline run doesn't mutate the code.
-
-    """
-    config = load_config(args['<config-file>'])
-
-    with cloned_workspace(config.cloning_config):
-        outcome, data = cosmic_ray.testing.run_tests(config.test_command())
-
-    # note: test_runner() results are meant to represent
-    # status codes when executed against mutants.
-    # SURVIVED means that the test suite executed without any error
-    # hence CR thinks the mutant survived. However when running the
-    # baseline execution we don't have mutations and really want the
-    # test suite to report PASS, hence the comparison below!
-    if outcome != TestOutcome.SURVIVED:
-        # baseline failed, print whatever was returned
-        # from the test runner and exit
-        log.error('baseline failed')
-        print(str(data))
-        return 2
-
-    return ExitCode.OK
-
-
-@dsc.command()
 def handle_new_config(args):
     """usage: cosmic-ray new-config <config-file>
 
@@ -133,28 +103,6 @@ def handle_init(args):
 
     config = load_config(config_file)
 
-    if 'timeout' in config:
-        timeout = config['timeout']
-    elif 'baseline' in config:
-        baseline_mult = config.baseline
-
-        command = '{} -m cosmic_ray.cli baseline {}'.format(
-            sys.executable, args['<config-file>'])
-
-        # We run the baseline in a subprocess to more closely emulate the
-        # runtime of a worker subprocess.
-        with Timer() as timer:
-            log.info('Running baseline')
-            subprocess.check_call(command.split())
-            log.info('Baseline complete')
-
-        timeout = baseline_mult * timer.elapsed.total_seconds()
-    else:
-        raise ConfigValueError(
-            "Config must specify either baseline or timeout")
-
-    log.info('timeout = %f seconds', timeout)
-
     modules = set(cosmic_ray.modules.find_modules(Path(config['module-path'])))
 
     print(config['module-path'])
@@ -163,7 +111,7 @@ def handle_init(args):
     db_name = get_db_name(args['<session-file>'])
 
     with use_db(db_name) as database:
-        cosmic_ray.commands.init(modules, database, config, timeout)
+        cosmic_ray.commands.init(modules, database, config)
 
     return ExitCode.OK
 
@@ -176,7 +124,7 @@ def handle_config(args):
     """
     session_file = get_db_name(args['<session-file>'])
     with use_db(session_file) as database:
-        config, _ = database.get_config()
+        config = database.get_config()
         print(serialize_config(config))
 
     return ExitCode.OK

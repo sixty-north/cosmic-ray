@@ -26,8 +26,8 @@ If you want to install Cosmic Ray from source you need to use
 Virtual environments
 --------------------
 
-You'll often want to install Cosmic Ray into a virtual environment.
-However, you generally *don't* want to install it into its own. Rather,
-you want to install it into the virtual environment of the project you
-want to test. This ensures that the test runners have access to the
-modules they are supposed to test.
+You'll often want to install Cosmic Ray into its own virtual environment. In
+earlier versions we suggested installing Cosmic Ray into the same environment as
+the project being tested, but that's no longer the case. In recent versions,
+Cosmic Ray will create temporary virtual environments for the code under test,
+so the environments for Cosmic Ray and the code under test are safely separated.

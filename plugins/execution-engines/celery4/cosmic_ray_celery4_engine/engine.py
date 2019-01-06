@@ -8,7 +8,7 @@ from .worker import execute_work_items
 
 class CeleryExecutionEngine(ExecutionEngine):
     "The celery4 execution engine."
-    def __call__(self, timeout, pending_work, config, on_task_complete):
+    def __call__(self, pending_work, config, on_task_complete):
         purge_queue = config['execution-engine'].get('purge-queue', True)
 
         def celery_task_complete(task_id, result):
@@ -16,7 +16,6 @@ class CeleryExecutionEngine(ExecutionEngine):
 
         try:
             job = execute_work_items(
-                timeout,
                 pending_work,
                 config)
 

@@ -193,7 +193,7 @@ def test_adding_result_completes_work_item(work_db):
 def test_set_config(work_db):
     config = ConfigDict()
     config['color'] = 'blue'
-    work_db.set_config(config, 100.234)
+    work_db.set_config(config)
 
 
 def test_get_config_raises_ValueError_with_no_config(work_db):
@@ -204,9 +204,7 @@ def test_get_config_raises_ValueError_with_no_config(work_db):
 def test_get_config_returns_correct_config(work_db):
     config = ConfigDict()
     config['color'] = 'blue'
-    timeout = 100.234
-    work_db.set_config(config, timeout)
+    work_db.set_config(config)
 
-    actual_config, actual_timeout = work_db.get_config()
+    actual_config = work_db.get_config()
     assert actual_config['color'] == 'blue'
-    assert actual_timeout == timeout

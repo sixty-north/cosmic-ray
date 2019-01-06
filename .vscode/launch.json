@@ -59,17 +59,6 @@
             ]
         },
         {
-            "name": "baseline",
-            "type": "python",
-            "request": "launch",
-            "module": "cosmic_ray.cli",
-            "cwd": "${workspaceFolder}/test/test_project",
-            "args": [
-                "baseline",
-                "cosmic-ray.unittest.local.conf"
-            ]
-        },
-        {
             "name": "init",
             "type": "python",
             "request": "launch",

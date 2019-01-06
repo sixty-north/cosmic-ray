@@ -49,20 +49,16 @@ log = logging.getLogger(__name__)
 # Per-subprocess globals
 _workspace = None
 _config = None
-_timeout = None
 
 
-def _initialize_worker(timeout, config):
+def _initialize_worker(config):
     global _workspace
     global _config
-    global _timeout
 
     assert _workspace is None
     assert _config is None
-    assert _timeout is None
 
     _config = config
-    _timeout = timeout
 
     log.info('Initialize local-git worker in PID %s', os.getpid())
     _workspace = ClonedWorkspace(config.cloning_config)
@@ -82,7 +78,7 @@ def _execute_work_item(work_item):
         work_item.operator_name,
         work_item.occurrence,
         _config.test_command(_workspace.python_executable),
-        _timeout)
+        _config.timeout)
 
     return work_item.job_id, result
 
@@ -90,7 +86,7 @@ def _execute_work_item(work_item):
 class LocalExecutionEngine(ExecutionEngine):
     "The local-git execution engine."
 
-    def __call__(self, timeout, pending_work, config, on_task_complete):
+    def __call__(self, pending_work, config, on_task_complete):
         # TODO: One problem with this approach is that we enqueue all of the
         # pending work at once. This could be a huge number of objects. Is there
         # a clean way to flow-control the pipeline? Or am I wrong and it's already
@@ -98,7 +94,7 @@ class LocalExecutionEngine(ExecutionEngine):
 
         pool = multiprocessing.Pool(
             initializer=_initialize_worker,
-            initargs=(timeout, config))
+            initargs=(config,))
 
         results = pool.map(
             func=_execute_work_item,

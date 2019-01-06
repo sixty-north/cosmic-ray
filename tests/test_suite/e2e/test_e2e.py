@@ -68,19 +68,6 @@ def test_empty___init__(example_project_root, session):
         assert rate == 0.0
 
 
-def test_failing_baseline(example_project_root, session):
-    config = "cosmic-ray.baseline_fail.conf"
-
-    with pytest.raises(subprocess.CalledProcessError):
-        subprocess.check_call(
-            [
-                sys.executable, "-m", "cosmic_ray.cli", "init", config,
-                str(session)
-            ],
-            cwd=str(example_project_root),
-        )
-
-
 def test_config_command(example_project_root, session):
     config = "cosmic-ray.import.conf"
 

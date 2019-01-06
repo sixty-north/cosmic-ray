@@ -41,7 +41,7 @@ def worker(module_path, python_version, operator_name, occurrence,
         operator_name: The name of the operator plugin to use
         occurrence: The occurrence of the operator to apply
         test_command: The command to execute to run the tests
-        timeout: The maximum amount of time to let the tests run
+        timeout: The maximum amount of time (seconds) to let the tests run
 
     Returns: A WorkResult
 

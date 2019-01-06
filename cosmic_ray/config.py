@@ -77,13 +77,6 @@ class ConfigDict(dict):
         return float(self['timeout'])
 
     @property
-    def baseline(self):
-        b = float(self['baseline'])
-        if b <= 0:
-            raise ConfigValueError('Baseline must be a positive value. value={}'.format(b))
-        return b
-
-    @property
     def execution_engine_name(self):
         "The name of the execution engine to use."
         return self['execution-engine']['name']

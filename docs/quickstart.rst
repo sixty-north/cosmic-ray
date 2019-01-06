@@ -1,8 +1,8 @@
 Quickstart
 ==========
 
-If you just want to get down to the business of finding and killing
-mutants, you still need to set a few things up.
+If you just want to get down to the business of finding and killing mutants, you
+still need to set a few things up.
 
 Configurations
 --------------
@@ -34,15 +34,20 @@ testing:
     # config.toml
     [cosmic-ray]
     module-path = "adam.py"
-    baseline = 10
+    python-version = ""
+    timeout = 10
     exclude-modules = []
-    test-command = "{python_executable} -m unittest discover tests"
+    test-command = "{python-executable} -m unittest discover tests"
     execution-engine.name = "local"
+
+    [cosmic-ray.cloning]
+    method = 'copy'
+    commands = []
 
 You can specify a great deal of information in a configuration file, controlling
 things like the test execution, the execution engine, and so forth. It's
 entirely likely that the configuration created by ``cosmic-ray new-config`` won't be
-sufficient for your needs. Simply edit the config file to match your needs. 
+sufficient for your needs. Simply edit the config file to match your needs.
 
 Create a session and run tests
 ------------------------------
@@ -54,17 +59,17 @@ The first step in a full testing run, then, is to initialize a session:
 
 ::
 
-    cosmic-ray init config.yml my_session
+    cosmic-ray init config.toml my_session.sqlite
 
-(Note that you don't have to use the names "config.yml" and "my_session". Any
-names will do.)
+(Note that you don't have to use the names "config.toml" and "my_session.sqlite".
+Any names will do.)
 
 This will also create a database file called ``my_session.sqlite``. Once this is
 created, you can start executing tests with the ``exec`` command:
 
 ::
 
-    cosmic-ray exec my_session
+    cosmic-ray exec my_session.sqlite
 
 Unless there are errors, this won't print anything.
 
@@ -93,16 +98,16 @@ A concrete example: running the ``adam`` unittests
 --------------------------------------------------
 
 Cosmic Ray includes a number of unit tests which perform mutations
-against a simple module called ``adam``. As a way of test driving Cosmic
+against a simple package called ``adam``. As a way of test driving Cosmic
 Ray, you can run these tests, too, like this:
 
 ::
 
     cd test_project
-    cosmic-ray init cosmic-ray.unittest.local.conf example-session
-    cosmic-ray --verbose exec example-session
+    cosmic-ray -v INFO init cosmic-ray.unittest.local.conf example-session.sqlite
+    cosmic-ray -v INFO exec example-session.sqlite
     cr-report example-session.sqlite
 
-In this case we're passing the ``--verbose`` flag to the ``exec``
-command so that you can see what Cosmic Ray is doing. If everything goes
+In this case we're passing the ``-v INFO`` flag to the ``init`` and ``exec``
+commands so that you can see what Cosmic Ray is doing. If everything goes
 as expected, the ``cr-report`` command will report a 0% survival rate.

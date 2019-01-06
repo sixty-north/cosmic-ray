@@ -35,7 +35,7 @@ Finally, an operator must implement the class method ``Operator.examples()``.
 This provides a set of before and after code snippets showing how the operator
 works. These examples are used in the test suite and potentially for
 documenation purposes. An operator can choose to provide no examples simply by
-returning and empty iterable from ``examples``, though we may decide to check
+returning an empty iterable from ``examples``, though we may decide to check
 for an absence of examples in the future. In any case, it's good form to provide
 examples.
 
@@ -45,10 +45,9 @@ parse tree objects.
 Operator provider plugins
 -------------------------
 
-Cosmic Ray is designed to be extended with arbitrary operators provided
-by users. It dynamically discovers operators at runtime using the
-``stevedore`` plugin system which relies on the ``setuptools``
-``entry_points`` concept.
+Cosmic Ray is designed to be extended with arbitrary operators provided by
+users. It dynamically discovers operators at runtime using the ``stevedore``
+plugin system which relies on the ``setuptools`` ``entry_points`` concept.
 
 Rather than having individual plugins for each operator, Cosmic Ray lets users
 specify *operator provider* plugins. An operator provider can supply any number

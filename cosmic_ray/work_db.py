@@ -60,22 +60,21 @@ class WorkDB:
         """
         return self._path
 
-    def set_config(self, config, timeout):
+    def set_config(self, config):
         """Set (replace) the configuration for the session.
 
         Args:
           config: Configuration object
-          timeout: The timeout for tests.
         """
         with self._conn:
             self._conn.execute("DELETE FROM config")
-            self._conn.execute('INSERT INTO config VALUES(?, ?)',
-                               (serialize_config(config), timeout))
+            self._conn.execute('INSERT INTO config VALUES(?)',
+                               (serialize_config(config),))
 
     def get_config(self):
         """Get the work parameters (if set) for the session.
 
-        Returns: a tuple of `(config, timeout)`.
+        Returns: a Configuration object.
 
         Raises:
           ValueError: If is no config set for the session.
@@ -83,10 +82,9 @@ class WorkDB:
         rows = list(self._conn.execute("SELECT * FROM config"))
         if not rows:
             raise ValueError("work-db has no config")
-        config_str, timeout = rows[0]
+        (config_str,) = rows[0]
 
-        return (deserialize_config(config_str),
-                timeout)
+        return deserialize_config(config_str)
 
     @property
     def work_items(self):
@@ -218,8 +216,7 @@ class WorkDB:
 
             self._conn.execute('''
             CREATE TABLE IF NOT EXISTS config
-            (config text,
-             timeout real)
+            (config text)
             ''')
 
 

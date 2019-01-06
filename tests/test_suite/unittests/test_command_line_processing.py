@@ -23,14 +23,11 @@ def config_file(tmpdir):
 
 
 def _make_config(test_command='python -m unittest discover tests',
-                 baseline=None,
                  timeout=100,
                  engine='local'):
-    timeout_type = 'timeout' if baseline is None else 'baseline'
-    timeout_val = timeout if baseline is None else baseline
     return {
         'module-path': 'foo.py',
-        timeout_type: timeout_val,
+        'timeout': timeout,
         'test-command': test_command,
         'execution-engine': {'name': engine},
         'exclude-modules': [],
@@ -45,16 +42,6 @@ def local_unittest_config(config_file):
     """
     with open(config_file, mode='wt') as handle:
         config = _make_config()
-        config_str = cosmic_ray.config.serialize_config(config)
-        handle.write(config_str)
-    return config_file
-
-
-@pytest.fixture(params=['-1', '0'])
-def invalid_baseline_config(request, config_file):
-    "Creates a config file with an invalid baseline."
-    with open(config_file, mode='wt') as handle:
-        config = _make_config(baseline=int(request.param))
         config_str = cosmic_ray.config.serialize_config(config)
         handle.write(config_str)
     return config_file
@@ -85,34 +72,10 @@ def test_unreadable_file_returns_EX_PERM(tmpdir):
     assert cosmic_ray.cli.main(['exec', str(p.realpath())]) == ExitCode.NoPerm
 
 
-def test_baseline_failure_returns_2(monkeypatch, local_unittest_config):
-    monkeypatch.setattr(cosmic_ray.testing, 'run_tests',
-                        lambda *args: (TestOutcome.KILLED, ''))
-
-    errcode = cosmic_ray.cli.main(['baseline', local_unittest_config])
-    assert errcode == 2
-
-
-def test_baseline_success_returns_EX_OK(monkeypatch, local_unittest_config):
-    monkeypatch.setattr(cosmic_ray.testing, 'run_tests',
-                        lambda *args: (TestOutcome.SURVIVED, ''))
-
-    errcode = cosmic_ray.cli.main(['baseline', local_unittest_config])
-    assert errcode == ExitCode.OK
-
-
 def test_new_config_success_returns_EX_OK(monkeypatch, config_file):
     monkeypatch.setattr(cosmic_ray.commands, 'new_config', lambda *args: '')
     errcode = cosmic_ray.cli.main(['new-config', config_file])
     assert errcode == ExitCode.OK
-
-
-def test_init_with_invalid_baseline_returns_EX_CONFIG(invalid_baseline_config,
-                                                      session):
-    errcode = cosmic_ray.cli.main(
-        ['init', invalid_baseline_config,
-         str(session)])
-    assert errcode == ExitCode.Config
 
 
 # NOTE: We have integration tests for the happy-path for many commands, so we don't cover them explicitly here.

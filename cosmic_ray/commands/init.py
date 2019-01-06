@@ -44,7 +44,7 @@ class WorkDBInitVisitor(Visitor):
         self.occurrence += 1
 
 
-def init(module_paths, work_db, config, timeout):
+def init(module_paths, work_db, config):
     """Clear and initialize a work-db with work items.
 
     Any existing data in the work-db will be cleared and replaced with entirely
@@ -55,10 +55,9 @@ def init(module_paths, work_db, config, timeout):
       module_paths: iterable of pathlib.Paths of modules to mutate.
       work_db: A `WorkDB` instance into which the work orders will be saved.
       config: The configuration for the new session.
-      timeout: The timeout to apply to the work in the session.
     """
     operator_names = cosmic_ray.plugins.operator_names()
-    work_db.set_config(config=config, timeout=timeout)
+    work_db.set_config(config=config)
 
     work_db.clear()
 
