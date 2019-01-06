@@ -230,10 +230,15 @@ def _row_to_work_item(row):
 
 
 def _work_item_to_row(work_item):
-    return (str(
-        work_item.module_path), work_item.operator_name, work_item.occurrence,
-        work_item.start_pos[0], work_item.start_pos[1],
-        work_item.end_pos[0], work_item.end_pos[1], work_item.job_id)
+    return (
+        str(work_item.module_path),
+        work_item.operator_name,
+        work_item.occurrence,
+        work_item.start_pos[0],
+        work_item.start_pos[1],
+        work_item.end_pos[0],
+        work_item.end_pos[1],
+        work_item.job_id)
 
 
 def _row_to_work_result(row):

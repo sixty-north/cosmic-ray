@@ -15,6 +15,7 @@ from pathlib import Path
 import docopt
 import docopt_subcommands
 from docopt_subcommands.subcommands import Subcommands
+from exit_codes import ExitCode
 
 import cosmic_ray.commands
 import cosmic_ray.modules
@@ -22,7 +23,6 @@ import cosmic_ray.plugins
 import cosmic_ray.testing
 import cosmic_ray.worker
 from cosmic_ray.config import get_db_name, load_config, serialize_config
-from cosmic_ray.exit_codes import ExitCode
 from cosmic_ray.mutating import apply_mutation
 from cosmic_ray.progress import report_progress
 from cosmic_ray.version import __version__
@@ -310,18 +310,18 @@ def main(argv=None):
             exit_at_end=False)
     except docopt.DocoptExit as exc:
         print(exc, file=sys.stderr)
-        return ExitCode.Usage
+        return ExitCode.USAGE
     except FileNotFoundError as exc:
         print(exc, file=sys.stderr)
-        return ExitCode.NoInput
+        return ExitCode.NO_INPUT
     except PermissionError as exc:
         print(exc, file=sys.stderr)
-        return ExitCode.NoPerm
+        return ExitCode.NO_PERM
     except cosmic_ray.config.ConfigError as exc:
         print(exc, file=sys.stderr)
         if exc.__cause__ is not None:
             print(exc.__cause__, file=sys.stderr)
-        return ExitCode.Config
+        return ExitCode.CONFIG
     except subprocess.CalledProcessError as exc:
         print('Error in subprocess', file=sys.stderr)
         print(exc, file=sys.stderr)

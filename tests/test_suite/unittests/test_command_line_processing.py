@@ -6,6 +6,7 @@ import contextlib
 import io
 import stat
 
+from exit_codes import ExitCode
 import pytest
 
 import cosmic_ray.cli
@@ -13,8 +14,6 @@ import cosmic_ray.config
 import cosmic_ray.modules
 import cosmic_ray.plugins
 import cosmic_ray.worker
-from cosmic_ray.exit_codes import ExitCode
-from cosmic_ray.work_item import TestOutcome
 
 
 @pytest.fixture
@@ -58,18 +57,18 @@ def lobotomize(monkeypatch):
 
 
 def test_invalid_command_line_returns_EX_USAGE():
-    assert cosmic_ray.cli.main(['init', 'foo']) == ExitCode.Usage
+    assert cosmic_ray.cli.main(['init', 'foo']) == ExitCode.USAGE
 
 
 def test_non_existent_file_returns_EX_NOINPUT():
-    assert cosmic_ray.cli.main(['exec', 'foo.session']) == ExitCode.NoInput
+    assert cosmic_ray.cli.main(['exec', 'foo.session']) == ExitCode.NO_INPUT
 
 
 @pytest.mark.skip('need to sort this API out')
 def test_unreadable_file_returns_EX_PERM(tmpdir):
     p = tmpdir.ensure('bogus.session.sqlite')
     p.chmod(stat.S_IRUSR)
-    assert cosmic_ray.cli.main(['exec', str(p.realpath())]) == ExitCode.NoPerm
+    assert cosmic_ray.cli.main(['exec', str(p.realpath())]) == ExitCode.NO_PERM
 
 
 def test_new_config_success_returns_EX_OK(monkeypatch, config_file):

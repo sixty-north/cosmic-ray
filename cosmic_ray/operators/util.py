@@ -1,3 +1,6 @@
+"Utilities for implementing operators."
+
+
 def extend_name(suffix):
     """A factory for class decorators that modify the class name by appending some text to it.
 

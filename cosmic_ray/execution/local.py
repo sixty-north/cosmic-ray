@@ -52,6 +52,7 @@ _config = None
 
 
 def _initialize_worker(config):
+    # pylint: disable=global-statement
     global _workspace
     global _config
 
@@ -64,7 +65,7 @@ def _initialize_worker(config):
     _workspace = ClonedWorkspace(config.cloning_config)
 
     # Register a finalizer
-    multiprocessing.util.Finalize(_workspace, lambda: _workspace.cleanup(), exitpriority=16)
+    multiprocessing.util.Finalize(_workspace, _workspace.cleanup, exitpriority=16)
 
 
 def _execute_work_item(work_item):

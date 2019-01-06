@@ -60,6 +60,7 @@ class ClonedWorkspace:
                 os.getcwd(),
                 self._clone_dir)
 
+        # pylint: disable=fixme
         # TODO: We should allow user to specify which version of Python to use.
         # How? The EnvBuilder could be passed a path to a python interpreter
         # which is used in the call to pip. This path would need to come from
@@ -72,7 +73,7 @@ class ClonedWorkspace:
                              clone_config.get('extras', ()))
         context = builder.create_with_context(venv_path)
 
-        self._python_executable = context.env_exe
+        self._python_executable = context.env_exe  # pylint: disable=no-member
 
     @property
     def clone_dir(self):
@@ -91,11 +92,23 @@ class ClonedWorkspace:
 
 
 def clone_with_git(repo_uri, dest_path):
+    """Create a clone by cloning a git repository.
+
+    Args:
+        repo_uri: The URI of the git repository to clone.
+        dest_path: The location to clone to.
+    """
     log.info('Cloning git repo %s to %s', repo_uri, dest_path)
     git.Repo.clone_from(repo_uri, dest_path, depth=1)
 
 
 def clone_with_copy(src_path, dest_path):
+    """Clone a directory try by copying it.
+
+    Args:
+        src_path: The directory to be copied.
+        dest_path: The location to copy the directory to.
+    """
     log.info('Cloning directory tree %s to %s', src_path, dest_path)
     shutil.copytree(src_path, dest_path)
 
@@ -107,16 +120,19 @@ class EnvBuilder(venv.EnvBuilder):
     def __init__(self, repo_dir, commands, *args, **kwargs):
         super().__init__(self, with_pip=True, symlinks=True, *args, **kwargs)
         self.repo_dir = repo_dir
+        self._context = None
 
         self.commands = tuple(commands)
 
     def create_with_context(self, env_dir):
-        # A bit if a hack. We remember the context seen in a call to
-        # `post_setup()` and return it here.
-        self._context = None
+        """Call create() and return the context.
+        """
+        assert self._context is None
 
         super().create(env_dir)
 
+        # A bit if a hack. We remember the context seen in a call to
+        # `post_setup()` and return it here.
         assert self._context is not None
         return self._context
 

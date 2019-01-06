@@ -27,6 +27,7 @@ def load_config(filename=None):
 
 
 def deserialize_config(sz):
+    "Parse a serialized config into a ConfigDict."
     return toml.loads(sz, _dict=ConfigDict)['cosmic-ray']
 
 
@@ -36,18 +37,20 @@ def serialize_config(config):
 
 
 class ConfigError(Exception):
-    pass
+    "Base class for exceptions raised by ConfigDict."
 
 
 class ConfigKeyError(ConfigError, KeyError):
-    pass
+    "KeyError subclass raised by ConfigDict."
 
 
 class ConfigValueError(ConfigError, ValueError):
-    pass
+    "ValueError subclass raised by ConfigDict."
 
 
 class ConfigDict(dict):
+    """A dictionary subclass that contains the application configuration.
+    """
     def __getitem__(self, key):
         try:
             return super().__getitem__(key)
@@ -68,12 +71,19 @@ class ConfigDict(dict):
         return v
 
     def test_command(self, python_executable=None):
+        """Get the command to run to execute tests.
+
+        Args:
+            python_executable: The Python executable to use if the command string
+                needs it. If this is not provided, it defaults to `sys.executable`.
+        """
         if python_executable is None:
             python_executable = sys.executable
         return self['test-command'].format(**{'python-executable': python_executable})
 
     @property
     def timeout(self):
+        "The timeout (seconds) for tests."
         return float(self['timeout'])
 
     @property

@@ -39,10 +39,10 @@ class ExceptionReplacer(Operator):
     def _name_nodes(node):
         if isinstance(node.children[1], Name):
             return (node.children[1], )
-        else:
-            atom = node.children[1]
-            test_list = atom.children[1]
-            return test_list.children[::2]
+
+        atom = node.children[1]
+        test_list = atom.children[1]
+        return test_list.children[::2]
 
     @classmethod
     def examples(cls):

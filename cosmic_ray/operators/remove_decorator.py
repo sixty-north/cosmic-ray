@@ -15,7 +15,6 @@ class RemoveDecorator(Operator):
     def mutate(self, node, index):
         assert isinstance(node, Decorator)
         assert index == 0
-        return None
 
     @classmethod
     def examples(cls):

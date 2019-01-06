@@ -24,6 +24,7 @@ Print an HTML formatted report of test results.
 
 
 def _generate_html_report(db):
+    # pylint: disable=too-many-statements
     doc, tag, text = Doc().tagtext()
     doc.asis('<!DOCTYPE html>')
     with tag('html', lang='en'):
@@ -124,6 +125,7 @@ def _generate_html_report(db):
 
 
 def pycharm_url(filename, line_number):
+    "Get a URL for opening a file in Pycharm."
     return 'pycharm://open?file={}&line={}'.format(filename, line_number)
 
 

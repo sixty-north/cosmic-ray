@@ -6,7 +6,7 @@ import pathlib
 
 
 class StrEnum(str, enum.Enum):
-    pass
+    "An Enum subclass with str values."
 
 
 class WorkerOutcome(StrEnum):
@@ -65,6 +65,7 @@ class WorkResult:
         return self._diff
 
     def as_dict(self):
+        "Get the WorkResult as a dict."
         return {
             'output': self.output,
             'test_outcome': self.test_outcome,
@@ -88,6 +89,7 @@ class WorkItem:
     """Description of the work for a single mutation and test run.
     """
 
+    # pylint: disable=R0913
     def __init__(self,
                  module_path=None,
                  operator_name=None,
@@ -160,23 +162,30 @@ class WorkItem:
 
 
 class WorkItemJsonEncoder(json.JSONEncoder):
-    def default(self, o):
+    "Custom JSON encoder for workitems and workresults."
+    def default(self, o):  # pylint: disable=E0202
         if isinstance(o, WorkItem):
             return {"_type": "WorkItem", "values": o.as_dict()}
-        elif isinstance(o, WorkResult):
+
+        if isinstance(o, WorkResult):
             return {"_type": "WorkResult", "values": o.as_dict()}
+
         return super().default(o)
 
 
 class WorkItemJsonDecoder(json.JSONDecoder):
+    "Custom JSON decoder for WorkItems and WorkResults."
     def __init__(self):
-        json.JSONDecoder.__init__(self, object_hook=self.object_hook)
+        json.JSONDecoder.__init__(self, object_hook=self._decode_work_items)
 
-    def object_hook(self, obj):
+    @staticmethod
+    def _decode_work_items(obj):
         if (obj.get('_type') == 'WorkItem') and ('values' in obj):
             values = obj['values']
             return WorkItem(**values)
-        elif (obj.get('_type') == 'WorkResult') and ('values' in obj):
+
+        if (obj.get('_type') == 'WorkResult') and ('values' in obj):
             values = obj['values']
             return WorkResult(**values)
+
         return obj

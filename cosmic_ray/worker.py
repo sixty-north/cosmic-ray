@@ -10,8 +10,13 @@ from cosmic_ray.testing import run_tests
 from cosmic_ray.work_item import TestOutcome, WorkerOutcome, WorkResult
 
 
-def worker(module_path, python_version, operator_name, occurrence,
-           test_command, timeout):
+# pylint: disable=R0913
+def worker(module_path,
+           python_version,
+           operator_name,
+           occurrence,
+           test_command,
+           timeout):
     """Mutate the OCCURRENCE-th site for OPERATOR_NAME in MODULE_PATH, run the
     tests, and report the results.
 
