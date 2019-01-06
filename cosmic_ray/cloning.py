@@ -129,7 +129,7 @@ class EnvBuilder(venv.EnvBuilder):
         """
         assert self._context is None
 
-        super().create(env_dir)
+        super().create(str(env_dir))
 
         # A bit if a hack. We remember the context seen in a call to
         # `post_setup()` and return it here.
