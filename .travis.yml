@@ -28,7 +28,7 @@ install:
 services: rabbitmq
 
 before_script:
- - pushd test/example_project
+ - pushd tests/example_project
  - python -m celery worker -A cosmic_ray_celery4_engine.worker &
  - popd
 
