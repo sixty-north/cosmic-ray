@@ -9,9 +9,9 @@ from .worker import execute_work_items
 class CeleryExecutionEngine(ExecutionEngine):
     "The celery4 execution engine."
     def __call__(self, pending_work, config, on_task_complete):
-        purge_queue = config['execution-engine'].get('purge-queue', True)
+        purge_queue = config.execution_engine_config.get('purge-queue', True)
 
-        def celery_task_complete(task_id, result):
+        def celery_task_complete(_task_id, result):
             on_task_complete(*result)
 
         try:

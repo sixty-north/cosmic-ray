@@ -19,19 +19,18 @@ matrix:
 
 env:
   global:
-  - PYTEST_ADDOPTS="--e2e-engine=local --e2e-tester=unittest --e2e-tester=pytest"
+  - PYTEST_ADDOPTS="--e2e-engine=celery4 --e2e-engine=local --e2e-tester=unittest --e2e-tester=pytest"
   # - TOXENV=py-coverage
 
 install:
 - pip install tox
 
-# services: rabbitmq
+services: rabbitmq
 
-# before_script:
-#  - pushd test/test_project
-#  - celery -A cosmic_ray_celery3_engine.worker worker &
-#  - celery -A cosmic_ray_celery4_engine.worker worker --concurrency=1 --purge &
-#  - popd
+before_script:
+ - pushd test/example_project
+ - python -m celery worker -A cosmic_ray_celery4_engine.worker &
+ - popd
 
 script:
 - tox

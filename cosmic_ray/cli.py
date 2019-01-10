@@ -318,7 +318,7 @@ def main(argv=None):
         print(exc, file=sys.stderr)
         return ExitCode.NO_PERM
     except cosmic_ray.config.ConfigError as exc:
-        print(exc, file=sys.stderr)
+        print(repr(exc), file=sys.stderr)
         if exc.__cause__ is not None:
             print(exc.__cause__, file=sys.stderr)
         return ExitCode.CONFIG

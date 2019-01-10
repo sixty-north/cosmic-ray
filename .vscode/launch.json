@@ -63,10 +63,10 @@
             "type": "python",
             "request": "launch",
             "module": "cosmic_ray.cli",
-            "cwd": "${workspaceFolder}/test/test_project",
+            "cwd": "${workspaceFolder}/tests/example_project",
             "args": [
                 "init",
-                "cosmic-ray.unittest.local.conf",
+                "cosmic-ray.unittest.celery4.conf",
                 "deleteme.sqlite"
             ]
         },
@@ -75,7 +75,7 @@
             "type": "python",
             "request": "launch",
             "module": "cosmic_ray.cli",
-            "cwd": "${workspaceFolder}/test/test_project",
+            "cwd": "${workspaceFolder}/tests/example_project",
             "args": [
                 "exec",
                 "deleteme.sqlite"
