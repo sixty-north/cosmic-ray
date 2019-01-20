@@ -71,11 +71,12 @@ def init(module_paths, work_db, config):
                                         operator)
             visitor.walk(module_ast)
 
-    apply_interceptors(work_db)
+    apply_interceptors(work_db, config.sub('interceptors').get('enabled', ()))
 
 
-def apply_interceptors(work_db):
+def apply_interceptors(work_db, enabled_interceptors):
     """Apply each registered interceptor to the WorkDB."""
-    for name in interceptor_names():
+    names = (name for name in interceptor_names() if name in enabled_interceptors)
+    for name in names:
         interceptor = get_interceptor(name)
         interceptor(work_db)
