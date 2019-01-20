@@ -57,6 +57,16 @@ class ConfigDict(dict):
         except KeyError as exc:
             raise ConfigKeyError(*exc.args)
 
+    def sub(self, *segments):
+        "Get a sub-configuration."
+        d = self
+        for segment in segments:
+            try:
+                d = d[segment]
+            except KeyError:
+                return ConfigDict({})
+        return d
+
     @property
     def python_version(self):
         """Get the configured Python version.
