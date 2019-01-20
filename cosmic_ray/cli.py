@@ -105,7 +105,6 @@ def handle_init(args):
 
     modules = set(cosmic_ray.modules.find_modules(Path(config['module-path'])))
 
-    print(config['module-path'])
     log.info('Modules discovered: %s', [m for m in modules])
 
     db_name = get_db_name(args['<session-file>'])
