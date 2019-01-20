@@ -274,17 +274,6 @@ See '{program} help <command>' for help on specific commands.
 """
 
 
-def common_option_handler(args):
-    """Add verbose mode.
-
-    :param config: holds the configuration values
-    """
-    if args['--verbose']:
-        logging.basicConfig(
-            level=logging.INFO,
-            format='%(asctime)s %(name)s %(levelname)s %(message)s')
-
-
 _SIGNAL_EXIT_CODE_BASE = 128
 
 
