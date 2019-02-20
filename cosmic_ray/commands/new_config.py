@@ -30,4 +30,8 @@ def new_config():
     config["execution-engine"] = ConfigDict()
     config['execution-engine']['name'] = menu.show(header="Execution engine", returns="desc")
 
+    config["cloning"] = ConfigDict()
+    config['cloning']['method'] = 'copy'
+    config['cloning']['commands'] = []
+
     return config
