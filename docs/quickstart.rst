@@ -18,10 +18,10 @@ create an initial configuration using the ``new-config`` command. This will ask
 you a series of questions and construct a new configuration based on your
 answers.
 
-For example, to create a new configuration in the file ``config.yml`` use this
+For example, to create a new configuration in the file ``config.toml`` use this
 command::
 
-    cosmic-ray new-config config.yml
+    cosmic-ray new-config config.toml
 
 Example configuration
 ~~~~~~~~~~~~~~~~~~~~~
