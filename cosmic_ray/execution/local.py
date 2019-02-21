@@ -78,7 +78,7 @@ def _execute_work_item(work_item):
         _config.python_version,
         work_item.operator_name,
         work_item.occurrence,
-        _config.test_command(_workspace.python_executable),
+        _workspace.replace_variables(_config.test_command),
         _config.timeout)
 
     return work_item.job_id, result
@@ -88,19 +88,21 @@ class LocalExecutionEngine(ExecutionEngine):
     "The local-git execution engine."
 
     def __call__(self, pending_work, config, on_task_complete):
-        # pylint: disable=W0511
-        # TODO: One problem with this approach is that we enqueue all of the
-        # pending work at once. This could be a huge number of objects. Is there
-        # a clean way to flow-control the pipeline? Or am I wrong and it's already
-        # being limited for me?
-
         pool = multiprocessing.Pool(
             initializer=_initialize_worker,
             initargs=(config,))
 
-        results = pool.map(
+        # pylint: disable=W0511
+        # TODO: This is not optimal. The pending-work iterable could be millions
+        # or billions of elements. We don't want to copy it. We copy it right
+        # now so that we don't access the database in a separate thread (i.e.
+        # one created by imap_unoredered below). We need to find a way around
+        # this.
+        pending = list(pending_work)
+
+        results = pool.imap_unordered(
             func=_execute_work_item,
-            iterable=pending_work)
+            iterable=pending)
 
         for job_id, result in results:
             on_task_complete(job_id, result)

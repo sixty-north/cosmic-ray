@@ -80,16 +80,11 @@ class ConfigDict(dict):
             v = "{}.{}".format(sys.version_info.major, sys.version_info.minor)
         return v
 
-    def test_command(self, python_executable=None):
-        """Get the command to run to execute tests.
-
-        Args:
-            python_executable: The Python executable to use if the command string
-                needs it. If this is not provided, it defaults to `sys.executable`.
+    @property
+    def test_command(self):
+        """The command to run to execute tests.
         """
-        if python_executable is None:
-            python_executable = sys.executable
-        return self['test-command'].format(**{'python-executable': python_executable})
+        return self['test-command']
 
     @property
     def timeout(self):
