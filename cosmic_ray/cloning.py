@@ -75,6 +75,7 @@ class ClonedWorkspace:
             command = self.replace_variables(command)
             log.info('Running installation command: %s', command)
             try:
+                # TODO: How to we execute this in the environment of the venv we just created?
                 r = subprocess.run(command.split(),
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT,
