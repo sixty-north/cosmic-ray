@@ -2,7 +2,6 @@
 """
 import io
 import os
-import sys
 
 from setuptools import setup, find_packages
 
@@ -22,8 +21,8 @@ def read(name, **kwargs):
 # couldn't find a way to use the original version and still have tox
 # work...hmmm...
 def read_version():
-    "Read the `(version-string, version-info)` from `cosmic_ray/version.py`."
-    version_file = local_file('cosmic_ray', 'version.py')
+    "Read the `(version-string, version-info)` from `src/cosmic_ray/version.py`."
+    version_file = local_file('src', 'cosmic_ray', 'version.py')
     local_vars = {}
     with open(version_file) as handle:
         exec(handle.read(), {}, local_vars)  # pylint: disable=exec-used
@@ -47,20 +46,18 @@ INSTALL_REQUIRES = [
     'yattag',
 ]
 
-if sys.version_info < (3, 4):
-    INSTALL_REQUIRES.append('enum34')
-
 version = read_version()[0]
 
 setup(
     name='cosmic_ray',
     version=version,
-    packages=find_packages(),
+    packages=find_packages('src'),
     author='Sixty North AS',
     author_email='austin@sixty-north.com',
     description='Mutation testing',
     license='MIT License',
     keywords='testing',
+    package_dir={'': 'src'},
     url='http://github.com/sixty-north/cosmic-ray',
     classifiers=[
         'Development Status :: 4 - Beta',
