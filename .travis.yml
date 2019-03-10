@@ -1,5 +1,6 @@
 language: python
-
+sudo: required
+dist: xenial
 matrix:
   include:
   - python: 3.5
@@ -16,7 +17,6 @@ matrix:
     env: TOXENV=docs
   fast_finish: true
   allow_failures:
-  - python: 3.7  # Travis doesn't seem to support 3.7 yet...
   - python: nightly
   - python: 3.6
     env: TOXENV=lint,style
