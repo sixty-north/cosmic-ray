@@ -12,7 +12,9 @@ Cosmic Ray supports several methods for copying code, including simple file syst
 as well as git cloning. These methods are currently hard-coded, but we'll probably provide cloning
 methods via plugins at some point.
 
-You can configure cloning in your configuration TOML in the  `cosmic-ray.cloning` section.
+You can configure cloning in your configuration TOML in the
+`cosmic-ray.cloning` section. At a minimum, you must have a
+`cosmic-ray.cloning.method` entry in your config.
 
 The "copy" cloning method simple copies an entire filesystem directory tree. You can use configure it like
 this::
@@ -30,3 +32,21 @@ The "git" method clones a git repository to make a clone. You can configure it l
         "pip install .[test]"
     ]
 
+Commands
+========
+
+The `commands` entry is a list of shell commands that will be executed in order
+after the copy/clone has been created. They commands will be executed from the
+root of the clone and with the new virtual environment activated. You almost
+always need to execute at least one command to install your package, e.g.
+``python setup.py install``.
+
+The commands will go through a simple variable substitution before being
+executed. Here are the variables that will be replaced:
+
+- {python-executable} will be replaced with the full path to the Python
+  executable in the virtual environment.
+  
+So, for example, the string "{python-executable} -m pip install ." will be
+transformed to "/full/path/to/venv/bin/python -m pip install" before it's
+executed.

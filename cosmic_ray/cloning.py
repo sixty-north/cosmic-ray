@@ -7,8 +7,8 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
+import sys
 import tempfile
-import venv
 
 import git
 
@@ -67,23 +67,46 @@ class ClonedWorkspace:
         # the config.
 
         # Install into venv
-        venv_path = Path(self._tempdir.name) / 'venv'
-        log.info('Creating virtual environment in %s', venv_path)
-        builder = EnvBuilder(self._clone_dir,
-                             clone_config.get('extras', ()))
-        context = builder.create_with_context(venv_path)
+        self._venv_path = Path(self._tempdir.name) / 'venv'
+        log.info('Creating virtual environment in %s', self._venv_path)
+        _build_env(self._venv_path)
 
-        self._python_executable = context.env_exe  # pylint: disable=no-member
+        for command in clone_config.get('commands', ()):
+            command = self.replace_variables(command)
+            log.info('Running installation command: %s', command)
+            try:
+                # TODO: How to we execute this in the environment of the venv we just created?
+                r = subprocess.run(command.split(),
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.STDOUT,
+                                   cwd=self._clone_dir,
+                                   check=True)
+
+                log.info('Command results: %s', r.stdout)
+            except subprocess.CalledProcessError as exc:
+                log.error("Error running command in virtual environment\ncommand: %s\nerror: %s",
+                          command, exc.output)
 
     @property
     def clone_dir(self):
         "The root of the cloned project."
         return self._clone_dir
 
-    @property
-    def python_executable(self):
-        "The python executable of the virtual environment"
-        return self._python_executable
+    def replace_variables(self, text):
+        """Replace variable placeholders in `text` with values from the virtual env.
+
+        The variables are:
+          - {python-executable}
+
+        Args:
+            text: The text to do replacment int.
+
+        Returns: The text after replacement.
+        """
+        variables = {
+            'python-executable': str(self._venv_path / 'bin' / 'python')
+        }
+        return text.format(**variables)
 
     def cleanup(self):
         "Remove the directory containin the clone and virtual environment."
@@ -105,7 +128,7 @@ def clone_with_git(repo_uri, dest_path):
 def clone_with_copy(src_path, dest_path):
     """Clone a directory try by copying it.
 
-    Args:
+   Args:
         src_path: The directory to be copied.
         dest_path: The location to copy the directory to.
     """
@@ -113,36 +136,27 @@ def clone_with_copy(src_path, dest_path):
     shutil.copytree(src_path, dest_path)
 
 
-class EnvBuilder(venv.EnvBuilder):
-    """EnvBuilder that installs a project and any specified extras.
+def _build_env(venv_dir):
+    """Create a new virtual environment in `venv_dir`.
+
+    This uses the base prefix of any virtual environment that you may be using
+    when you call this.
     """
-
-    def __init__(self, repo_dir, commands, *args, **kwargs):
-        super().__init__(self, with_pip=True, symlinks=True, *args, **kwargs)
-        self.repo_dir = repo_dir
-        self._context = None
-
-        self.commands = tuple(commands)
-
-    def create_with_context(self, env_dir):
-        """Call create() and return the context.
-        """
-        assert self._context is None
-
-        super().create(str(env_dir))
-
-        # A bit if a hack. We remember the context seen in a call to
-        # `post_setup()` and return it here.
-        assert self._context is not None
-        return self._context
-
-    def post_setup(self, context):
-        self._context = context
-
-        for command in self.commands:
-            log.info('Running installation command: %s', command)
-            subprocess.run(command.split(),
-                           stdout=subprocess.PIPE,
-                           stderr=subprocess.STDOUT,
-                           cwd=self.repo_dir,
-                           check=True)
+    # NB: We had to create the because the venv modules wasn't doing what we
+    # needed. In particular, if we used it create a venv from an existing venv,
+    # it *always* created symlinks back to the original venv's python
+    # executables. Then, when you used those linked executables, you ended up
+    # interacting with the original venv. I could find no way around this, hence
+    # this function.
+    prefix = getattr(sys, 'real_prefix', sys.prefix)
+    python = Path(prefix) / 'bin' / 'python'
+    command = '{} -m venv {}'.format(python, venv_dir)
+    try:
+        log.info('Creating virtual environment: %s', command)
+        subprocess.run(command.split(),
+                       stdout=subprocess.PIPE,
+                       stderr=subprocess.STDOUT,
+                       check=True)
+    except subprocess.CalledProcessError as exc:
+        log.error("Error creating virtual environment: %s", exc.output)
+        raise

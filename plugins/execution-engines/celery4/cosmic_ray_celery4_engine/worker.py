@@ -43,7 +43,7 @@ def worker_task(work_item, config):
         config.python_version,
         work_item.operator_name,
         work_item.occurrence,
-        config.test_command(_workspace.python_executable),
+        config.test_command,
         config.timeout)
     return work_item.job_id, result
 
