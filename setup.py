@@ -43,6 +43,7 @@ INSTALL_REQUIRES = [
     'spor>=1.1.0',
     'stevedore',
     'toml',
+    'virtualenv',
     'yattag',
 ]
 

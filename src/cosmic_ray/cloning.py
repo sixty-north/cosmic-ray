@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import virtualenv
 
 import git
 
@@ -69,7 +70,7 @@ class ClonedWorkspace:
         # Install into venv
         self._venv_path = Path(self._tempdir.name) / 'venv'
         log.info('Creating virtual environment in %s', self._venv_path)
-        _build_env(self._venv_path)
+        virtualenv.create_environment(self._venv_path)
 
         for command in clone_config.get('commands', ()):
             command = self.replace_variables(command)
@@ -134,39 +135,3 @@ def clone_with_copy(src_path, dest_path):
     """
     log.info('Cloning directory tree %s to %s', src_path, dest_path)
     shutil.copytree(src_path, dest_path)
-
-
-def _build_env(venv_dir):
-    """Create a new virtual environment in `venv_dir`.
-
-    This uses the base prefix of any virtual environment that you may be using
-    when you call this.
-    """
-    # NB: We had to create the because the venv modules wasn't doing what we
-    # needed. In particular, if we used it create a venv from an existing venv,
-    # it *always* created symlinks back to the original venv's python
-    # executables. Then, when you used those linked executables, you ended up
-    # interacting with the original venv. I could find no way around this, hence
-    # this function.
-    # 
-    # In short: we find the path to the current Python executable relative to the
-    # active environment (virtual or not). We then append that relative path to the "real" 
-    # prefix (i.e. the one underlying any active venv) to get the *real* python executable.
-    # We then use that real executable for creating a virtual environment.
-
-    active_prefix = Path(sys.prefix).resolve()
-    real_prefix = Path(getattr(sys, 'real_prefix', sys.prefix)).resolve()
-    active_bin = Path(sys.executable).resolve()
-    relative_bin = active_bin.relative_to(active_prefix)
-    real_bin = real_prefix / relative_bin
-
-    command = '{} -m venv {}'.format(real_bin, venv_dir)
-    try:
-        log.info('Creating virtual environment: %s', command)
-        subprocess.run(command.split(),
-                       stdout=subprocess.PIPE,
-                       stderr=subprocess.STDOUT,
-                       check=True)
-    except subprocess.CalledProcessError as exc:
-        log.error("Error creating virtual environment: %s", exc.output)
-        raise
