@@ -43,6 +43,9 @@ def cloned_workspace(clone_config, chdir=True):
 
 class ClonedWorkspace:
     """Clone a project and install it into a temporary virtual environment.
+
+    Note that this actually *activates* the virtual environment, so don't construct one
+    of these unless you want that to happen in your process.
     """
 
     def __init__(self, clone_config):
@@ -52,11 +55,11 @@ class ClonedWorkspace:
         self._clone_dir = str(Path(self._tempdir.name) / 'repo')
 
         if clone_config['method'] == 'git':
-            clone_with_git(
+            _clone_with_git(
                 clone_config.get('repo-uri', '.'),
                 self._clone_dir)
         elif clone_config['method'] == 'copy':
-            clone_with_copy(
+            _clone_with_copy(
                 os.getcwd(),
                 self._clone_dir)
 
@@ -70,15 +73,33 @@ class ClonedWorkspace:
         self._venv_path = Path(self._tempdir.name) / 'venv'
         log.info('Creating virtual environment in %s', self._venv_path)
         virtualenv.create_environment(str(self._venv_path))
+        _activate(self._venv_path)
 
-        for command in clone_config.get('commands', ()):
+        self._run_commands(clone_config.get('commands', ()))
+
+    @property
+    def clone_dir(self):
+        "The root of the cloned project."
+        return self._clone_dir
+
+    def cleanup(self):
+        "Remove the directory containin the clone and virtual environment."
+        log.info('Removing temp dir %s', self._tempdir.name)
+        self._tempdir.cleanup()
+
+    def _run_commands(self, commands):
+        """Run a set of commands in the workspace's virtual environment.
+
+        Args:
+            commands: An iterable of strings each representing a command to be executed.
+        """
+        for command in commands:
             log.info('Running installation command: %s', command)
             try:
-                # TODO: How to we execute this in the environment of the venv we just created?
                 r = subprocess.run(command.split(),
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT,
-                                   cwd=self._clone_dir,
+                                   cwd=str(self._clone_dir),
                                    check=True)
 
                 log.info('Command results: %s', r.stdout)
@@ -86,28 +107,8 @@ class ClonedWorkspace:
                 log.error("Error running command in virtual environment\ncommand: %s\nerror: %s",
                           command, exc.output)
 
-    @property
-    def clone_dir(self):
-        "The root of the cloned project."
-        return self._clone_dir
 
-    def activate(self):
-        """Activate the virtual environment for the current process.
-        """
-        _home_dir, _lib_dir, _inc_dir, bin_dir = virtualenv.path_locations(str(self._venv_path))
-        activate_script = str(Path(bin_dir) / 'activate_this.py')
-
-        # This is the recommended way of activating venvs in a program:
-        # https://virtualenv.pypa.io/en/stable/userguide/#using-virtualenv-without-bin-python
-        exec(open(activate_script).read(), {'__file__': activate_script})  # pylint: disable=exec-used
-
-    def cleanup(self):
-        "Remove the directory containin the clone and virtual environment."
-        log.info('Removing temp dir %s', self._tempdir.name)
-        self._tempdir.cleanup()
-
-
-def clone_with_git(repo_uri, dest_path):
+def _clone_with_git(repo_uri, dest_path):
     """Create a clone by cloning a git repository.
 
     Args:
@@ -118,7 +119,7 @@ def clone_with_git(repo_uri, dest_path):
     git.Repo.clone_from(repo_uri, dest_path, depth=1)
 
 
-def clone_with_copy(src_path, dest_path):
+def _clone_with_copy(src_path, dest_path):
     """Clone a directory try by copying it.
 
    Args:
@@ -127,3 +128,20 @@ def clone_with_copy(src_path, dest_path):
     """
     log.info('Cloning directory tree %s to %s', src_path, dest_path)
     shutil.copytree(src_path, dest_path)
+
+
+def _activate(venv_path):
+    """Activate a virtual environment in the current process.
+
+    This assumes a virtual environment that has a "activate_this.py" script, e.g.
+    one created with `virtualenv` and *not* `venv`.
+
+    Args:
+        venv_path: Path of virtual environment to activate.
+    """
+    _home_dir, _lib_dir, _inc_dir, bin_dir = virtualenv.path_locations(str(venv_path))
+    activate_script = str(Path(bin_dir) / 'activate_this.py')
+
+    # This is the recommended way of activating venvs in a program:
+    # https://virtualenv.pypa.io/en/stable/userguide/#using-virtualenv-without-bin-python
+    exec(open(activate_script).read(), {'__file__': activate_script})  # pylint: disable=exec-used
