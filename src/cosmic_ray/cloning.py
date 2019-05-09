@@ -148,9 +148,19 @@ def _build_env(venv_dir):
     # executables. Then, when you used those linked executables, you ended up
     # interacting with the original venv. I could find no way around this, hence
     # this function.
-    prefix = getattr(sys, 'real_prefix', sys.prefix)
-    python = Path(prefix) / 'bin' / 'python'
-    command = '{} -m venv {}'.format(python, venv_dir)
+    # 
+    # In short: we find the path to the current Python executable relative to the
+    # active environment (virtual or not). We then append that relative path to the "real" 
+    # prefix (i.e. the one underlying any active venv) to get the *real* python executable.
+    # We then use that real executable for creating a virtual environment.
+
+    active_prefix = Path(sys.prefix).resolve()
+    real_prefix = Path(getattr(sys, 'real_prefix', sys.prefix)).resolve()
+    active_bin = Path(sys.executable).resolve()
+    relative_bin = active_bin.relative_to(active_prefix)
+    real_bin = real_prefix / relative_bin
+
+    command = '{} -m venv {}'.format(real_bin, venv_dir)
     try:
         log.info('Creating virtual environment: %s', command)
         subprocess.run(command.split(),
