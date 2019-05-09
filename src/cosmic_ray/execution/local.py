@@ -63,6 +63,7 @@ def _initialize_worker(config):
 
     log.info('Initialize local-git worker in PID %s', os.getpid())
     _workspace = ClonedWorkspace(config.cloning_config)
+    _workspace.activate()
 
     # Register a finalizer
     multiprocessing.util.Finalize(_workspace, _workspace.cleanup, exitpriority=16)
@@ -78,7 +79,7 @@ def _execute_work_item(work_item):
         _config.python_version,
         work_item.operator_name,
         work_item.occurrence,
-        _workspace.replace_variables(_config.test_command),
+        _config.test_command,
         _config.timeout)
 
     return work_item.job_id, result

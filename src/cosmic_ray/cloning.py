@@ -7,7 +7,6 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
-import sys
 import tempfile
 import virtualenv
 
@@ -70,10 +69,9 @@ class ClonedWorkspace:
         # Install into venv
         self._venv_path = Path(self._tempdir.name) / 'venv'
         log.info('Creating virtual environment in %s', self._venv_path)
-        virtualenv.create_environment(self._venv_path)
+        virtualenv.create_environment(str(self._venv_path))
 
         for command in clone_config.get('commands', ()):
-            command = self.replace_variables(command)
             log.info('Running installation command: %s', command)
             try:
                 # TODO: How to we execute this in the environment of the venv we just created?
@@ -93,21 +91,15 @@ class ClonedWorkspace:
         "The root of the cloned project."
         return self._clone_dir
 
-    def replace_variables(self, text):
-        """Replace variable placeholders in `text` with values from the virtual env.
-
-        The variables are:
-          - {python-executable}
-
-        Args:
-            text: The text to do replacment int.
-
-        Returns: The text after replacement.
+    def activate(self):
+        """Activate the virtual environment for the current process.
         """
-        variables = {
-            'python-executable': str(self._venv_path / 'bin' / 'python')
-        }
-        return text.format(**variables)
+        _home_dir, _lib_dir, _inc_dir, bin_dir = virtualenv.path_locations(str(self._venv_path))
+        activate_script = str(Path(bin_dir) / 'activate_this.py')
+
+        # This is the recommended way of activating venvs in a program:
+        # https://virtualenv.pypa.io/en/stable/userguide/#using-virtualenv-without-bin-python
+        exec(open(activate_script).read(), {'__file__': activate_script})  # pylint: disable=exec-used
 
     def cleanup(self):
         "Remove the directory containin the clone and virtual environment."

@@ -106,7 +106,7 @@ this:
     python-version = ""
     timeout = 10
     exclude-modules = []
-    test-command = {python_executable} -m unittest allele_tests
+    test-command = python -m unittest allele_tests
     execution-enging.name = "local"
 
     [cosmic-ray.cloning]
@@ -178,9 +178,6 @@ The `test-command` field of a configuration tells Cosmic Ray how to run tests.
 Cosmic Ray runs this command from whatever directory you run the `exec` command
 (or, in the case of remote execution, in whatever directory the remote command
 handler is running).
-
-Cosmic Ray will will attempt to interpolate the path to its Python executable
-into the test command string whereever it sees ``{python-executable}``.
 
 Baselines and timeouts
 ======================

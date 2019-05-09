@@ -34,12 +34,6 @@ that of the workers.
 """
 
 TEST_COMMAND_HELP = """The command to execute to run the tests on mutated code.
-
-The string "{python-executable}" will be replaced with the
-correct Python executable when tests are run. It's often
-best to use this variable rather than use test program names
-directly. For example, use "{python-executable} -m pytest
-tests" rather than "pytest tests".
 """
 
 

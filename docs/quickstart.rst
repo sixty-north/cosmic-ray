@@ -37,7 +37,7 @@ testing:
     python-version = ""
     timeout = 10
     exclude-modules = []
-    test-command = "{python-executable} -m unittest discover tests"
+    test-command = "python -m unittest discover tests"
     execution-engine.name = "local"
 
     [cosmic-ray.cloning]
