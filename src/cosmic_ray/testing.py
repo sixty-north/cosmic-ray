@@ -30,6 +30,9 @@ def run_tests(command, timeout=None):
             check=True,
             universal_newlines=True,
             timeout=timeout,
+            env={
+                'PYTHONDONTWRITEBYTECODE': '1',
+            },
         )
 
         return (TestOutcome.SURVIVED, proc.stdout)
