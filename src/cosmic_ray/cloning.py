@@ -76,7 +76,7 @@ class ClonedWorkspace:
 
         # Neither the venv nor virtualenv APIs for creating virtual environments seem to work
         # in all cases and platforms. But shelling out like this does seem to work. Strange.
-        proc = subprocess.run([sys.executable, '-m', 'virtualenv', str(self._venv_path)],
+        proc = subprocess.run(f'{sys.executable} -m virtualenv {self._venv_path}',
                               shell=True,
                               stderr=subprocess.STDOUT,
                               stdout=subprocess.PIPE,
@@ -107,7 +107,7 @@ class ClonedWorkspace:
         for command in commands:
             log.info('Running installation command: %s', command)
             try:
-                r = subprocess.run(command.split(),
+                r = subprocess.run(command,
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT,
                                    shell=True,

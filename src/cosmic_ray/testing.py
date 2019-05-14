@@ -32,7 +32,7 @@ def run_tests(command, timeout=None):
 
     try:
         proc = subprocess.run(
-            command.split(),
+            command,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             check=True,
