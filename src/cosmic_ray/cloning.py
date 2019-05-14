@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
+import sys
 import tempfile
 import virtualenv
 
@@ -72,7 +73,17 @@ class ClonedWorkspace:
         # Install into venv
         self._venv_path = Path(self._tempdir.name) / 'venv'
         log.info('Creating virtual environment in %s', self._venv_path)
-        virtualenv.create_environment(str(self._venv_path))
+
+        # Neither the venv nor virtualenv APIs for creating virtual environments seem to work
+        # in all cases and platforms. But shelling out like this does seem to work. Strange.
+        proc = subprocess.run([sys.executable, '-m', 'virtualenv', str(self._venv_path)],
+                              shell=True,
+                              stderr=subprocess.STDOUT,
+                              stdout=subprocess.PIPE,
+                              check=True)
+
+        log.info('Created virtual environment: %s', proc.stdout)
+
         _activate(self._venv_path)
 
         self._run_commands(clone_config.get('commands', ()))
@@ -99,6 +110,7 @@ class ClonedWorkspace:
                 r = subprocess.run(command.split(),
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT,
+                                   shell=True,
                                    cwd=str(self._clone_dir),
                                    check=True)
 

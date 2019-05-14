@@ -1,5 +1,6 @@
 "Support for running tests in a subprocess."
 
+import os
 import subprocess
 import traceback
 
@@ -22,6 +23,13 @@ def run_tests(command, timeout=None):
     Return: A tuple `(TestOutcome, output)` where the `output` is a string
         containing the output of the command.
     """
+    
+    # We want to avoid writing pyc files in case our changes happen too fast for Python to
+    # notice them. If the timestamps between two changes are too small, Python won't recompile
+    # the source.
+    env = dict(os.environ)
+    env['PYTHONDONTWRITEBUTECODE'] = '1'
+
     try:
         proc = subprocess.run(
             command.split(),
@@ -30,9 +38,8 @@ def run_tests(command, timeout=None):
             check=True,
             universal_newlines=True,
             timeout=timeout,
-            env={
-                'PYTHONDONTWRITEBYTECODE': '1',
-            },
+            shell=True,
+            env=env,
         )
 
         return (TestOutcome.SURVIVED, proc.stdout)
