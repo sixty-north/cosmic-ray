@@ -88,21 +88,21 @@ class LocalExecutionEngine(ExecutionEngine):
     "The local-git execution engine."
 
     def __call__(self, pending_work, config, on_task_complete):
-        pool = multiprocessing.Pool(
-            initializer=_initialize_worker,
-            initargs=(config,))
+        with multiprocessing.Pool(
+                initializer=_initialize_worker,
+                initargs=(config,)) as pool:
 
-        # pylint: disable=W0511
-        # TODO: This is not optimal. The pending-work iterable could be millions
-        # or billions of elements. We don't want to copy it. We copy it right
-        # now so that we don't access the database in a separate thread (i.e.
-        # one created by imap_unoredered below). We need to find a way around
-        # this.
-        pending = list(pending_work)
+            # pylint: disable=W0511
+            # TODO: This is not optimal. The pending-work iterable could be millions
+            # or billions of elements. We don't want to copy it. We copy it right
+            # now so that we don't access the database in a separate thread (i.e.
+            # one created by imap_unoredered below). We need to find a way around
+            # this.
+            pending = list(pending_work)
 
-        results = pool.imap_unordered(
-            func=_execute_work_item,
-            iterable=pending)
+            results = pool.imap_unordered(
+                func=_execute_work_item,
+                iterable=pending)
 
-        for job_id, result in results:
-            on_task_complete(job_id, result)
+            for job_id, result in results:
+                on_task_complete(job_id, result)
