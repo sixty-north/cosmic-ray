@@ -1,5 +1,9 @@
 language: python
 sudo: required
+os:
+  - linux
+  - osx
+  - windows
 dist: xenial
 matrix:
   include:
@@ -12,8 +16,10 @@ matrix:
   - python: nightly
     env: TOXENV=py
   - python: 3.6
+    os: linux
     env: TOXENV=lint,style
   - python: 3.6
+    os: linux
     env: TOXENV=docs
   fast_finish: true
   allow_failures:
