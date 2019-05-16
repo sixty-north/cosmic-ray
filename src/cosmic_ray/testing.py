@@ -28,7 +28,6 @@ async def _run_tests(command, timeout):
             command,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.STDOUT,
-            text=True,
             env=env)
     except Exception:  # pylint: disable=W0703
         return (TestOutcome.INCOMPETENT, traceback.format_exc())
@@ -39,9 +38,9 @@ async def _run_tests(command, timeout):
         assert proc.returncode is not None
 
         if proc.returncode == 0:
-            return (TestOutcome.SURVIVED, outs)
+            return (TestOutcome.SURVIVED, outs.decode('utf-8'))
         else:
-            return (TestOutcome.KILLED, outs)
+            return (TestOutcome.KILLED, outs.decode('utf-8'))
 
     except asyncio.TimeoutError:
         proc.terminate()
