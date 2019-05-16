@@ -1,5 +1,7 @@
 "A tool for generating HTML reports."
 
+import datetime
+
 from itertools import chain
 
 import docopt
@@ -44,8 +46,14 @@ def _generate_html_report(db):
             with tag('title'):
                 text('Cosmic Ray Report')
         with tag('body'):
-            with tag('h1'):
-                text('Cosmic Ray Report')
+            with tag('div', klass='container'):
+                with tag('div', klass='row'):
+                    with tag('div', klass='col'):
+                        with tag('h1'):
+                            text('Cosmic Ray Report')
+                    with tag('div', klass='col'):
+                        with tag('p', klass='text-right'):
+                            text(datetime.datetime.now().strftime('This report was created: %d/%m/%Y %H:%M:%S'))
 
             completed = db.completed_work_items
             incomplete = ((item, None) for item in db.pending_work_items)
