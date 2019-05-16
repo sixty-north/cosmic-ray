@@ -8,6 +8,13 @@ import traceback
 
 from cosmic_ray.work_item import TestOutcome
 
+# We use an asyncio-subprocess-based approach here instead of a simple
+# subprocess.run()-based approach because there are problems with timeouts and
+# reading from stderr in subprocess.run. Since we have to be prepared for test
+# processes that run longer than timeout (and, indeed, which run forever), the
+# broken subprocess stuff simply doesn't work. So we do this, which seesm to
+# work on all platforms.
+
 
 async def _run_tests(command, timeout):
     # We want to avoid writing pyc files in case our changes happen too fast for Python to
