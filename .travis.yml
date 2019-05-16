@@ -1,9 +1,5 @@
 language: python
 sudo: required
-os:
-  - linux
-  - osx
-  - windows
 dist: xenial
 matrix:
   include:
