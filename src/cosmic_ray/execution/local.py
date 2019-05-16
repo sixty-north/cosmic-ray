@@ -35,6 +35,7 @@ the root of the cloned repository, so you need to take this into account when
 creating the configuration.
 """
 
+import contextlib
 import logging
 import multiprocessing
 import multiprocessing.util
@@ -51,11 +52,19 @@ _workspace = None
 _config = None
 
 
+@contextlib.contextmanager
+def excursion(dirname):
+    orig = os.getcwd()
+    try:
+        os.chdir(dirname)
+        yield
+    finally:
+        os.chdir(orig)
+
 def _initialize_worker(config):
     # pylint: disable=global-statement
     global _workspace
     global _config
-
     assert _workspace is None
     assert _config is None
 
@@ -71,15 +80,14 @@ def _initialize_worker(config):
 def _execute_work_item(work_item):
     log.info('Executing worker in %s, PID=%s', _workspace.clone_dir, os.getpid())
 
-    os.chdir(_workspace.clone_dir)
-
-    result = worker(
-        work_item.module_path,
-        _config.python_version,
-        work_item.operator_name,
-        work_item.occurrence,
-        _config.test_command,
-        _config.timeout)
+    with excursion(_workspace.clone_dir):
+        result = worker(
+            work_item.module_path,
+            _config.python_version,
+            work_item.operator_name,
+            work_item.occurrence,
+            _config.test_command,
+            _config.timeout)
 
     return work_item.job_id, result
 
