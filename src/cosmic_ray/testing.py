@@ -21,7 +21,7 @@ async def _run_tests(command, timeout):
     # notice them. If the timestamps between two changes are too small, Python won't recompile
     # the source.
     env = dict(os.environ)
-    env['PYTHONDONTWRITEBUTECODE'] = '1'
+    env['PYTHONDONTWRITEBYTECODE'] = '1'
 
     try:
         proc = await asyncio.create_subprocess_shell(
