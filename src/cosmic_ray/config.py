@@ -122,15 +122,3 @@ def _config_stream(filename):
         with open(filename, mode='rt') as handle:
             log.info('Reading config from %r', filename)
             yield handle
-
-
-def get_db_name(session_name):
-    """Determines the filename for a session.
-
-    Basically, if `session_name` ends in ".sqlite" this return `session_name`
-    unchanged. Otherwise it return `session_name` with ".sqlite" added to the
-    end.
-    """
-    if session_name.endswith('.sqlite'):
-        return session_name
-    return '{}.sqlite'.format(session_name)

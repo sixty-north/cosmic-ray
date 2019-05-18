@@ -22,7 +22,7 @@ import cosmic_ray.modules
 import cosmic_ray.plugins
 import cosmic_ray.testing
 import cosmic_ray.worker
-from cosmic_ray.config import get_db_name, load_config, serialize_config
+from cosmic_ray.config import load_config, serialize_config
 from cosmic_ray.mutating import apply_mutation
 from cosmic_ray.progress import report_progress
 from cosmic_ray.version import __version__
@@ -107,7 +107,7 @@ def handle_init(args):
 
     log.info('Modules discovered: %s', [m for m in modules])
 
-    db_name = get_db_name(args['<session-file>'])
+    db_name = args['<session-file>']
 
     with use_db(db_name) as database:
         cosmic_ray.commands.init(modules, database, config)
@@ -121,7 +121,7 @@ def handle_config(args):
 
     Show the configuration for in a session.
     """
-    session_file = get_db_name(args['<session-file>'])
+    session_file = args['<session-file>']
     with use_db(session_file) as database:
         config = database.get_config()
         print(serialize_config(config))
@@ -137,7 +137,7 @@ def handle_exec(args):
     This requires that the rest of your mutation testing
     infrastructure (e.g. worker processes) are already running.
     """
-    session_file = get_db_name(args.get('<session-file>'))
+    session_file = args.get('<session-file>')
     cosmic_ray.commands.execute(session_file)
 
     return ExitCode.OK
@@ -154,7 +154,7 @@ def handle_dump(args):
     WorkResult, both JSON-serialized. The WorkResult can be null, indicating a
     WorkItem with no results.
     """
-    session_file = get_db_name(args['<session-file>'])
+    session_file = args['<session-file>']
 
     with use_db(session_file, WorkDB.Mode.open) as database:
         for work_item, result in database.completed_work_items:
