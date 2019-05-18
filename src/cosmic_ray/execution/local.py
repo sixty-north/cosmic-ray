@@ -61,6 +61,7 @@ def excursion(dirname):
     finally:
         os.chdir(orig)
 
+
 def _initialize_worker(config):
     # pylint: disable=global-statement
     global _workspace

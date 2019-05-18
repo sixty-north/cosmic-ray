@@ -75,4 +75,6 @@ def run_tests(command, timeout=None):
         asyncio.set_event_loop_policy(
             asyncio.WindowsProactorEventLoopPolicy())
 
-    return asyncio.run(_run_tests(command, timeout))
+    result = asyncio.get_event_loop().run_until_complete(
+        _run_tests(command, timeout))
+    return result
