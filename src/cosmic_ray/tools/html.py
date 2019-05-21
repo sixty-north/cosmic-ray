@@ -9,6 +9,7 @@ from yattag import Doc
 
 from cosmic_ray.work_db import WorkDB, use_db
 from cosmic_ray.work_item import TestOutcome
+from cosmic_ray.tools.survival_rate import survival_rate
 
 
 def report_html():
@@ -47,17 +48,35 @@ def _generate_html_report(db):
                 text('Cosmic Ray Report')
         with tag('body'):
             with tag('div', klass='container'):
-                with tag('div', klass='row'):
-                    with tag('div', klass='col'):
-                        with tag('h1'):
-                            text('Cosmic Ray Report')
-                    with tag('div', klass='col'):
-                        with tag('p', klass='text-right'):
-                            text(datetime.datetime.now().strftime('This report was created: %d/%m/%Y %H:%M:%S'))
+                with tag('h1'):
+                    text('Cosmic Ray Report')
 
             completed = db.completed_work_items
             incomplete = ((item, None) for item in db.pending_work_items)
             all_items = chain(completed, incomplete)
+
+            num_items = db.num_work_items
+            num_complete = db.num_results
+
+            with tag('div', klass='container'):
+                with tag('h4', klass='job_id'):
+                    text('Summary info')
+
+                with tag('p'):
+                    text('Date time: {}'.format(datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')))
+
+                with tag('p'):
+                    text('Total jobs: {}'.format(num_items))
+
+                if num_complete > 0:
+                    with tag('p'):
+                        text('Complete: {} ({:.2f}%)'.format(
+                            num_complete, num_complete / num_items * 100))
+                    with tag('p'):
+                        text('Survival rate: {:.2f}%'.format(survival_rate(db)))
+                else:
+                    with tag('p'):
+                        text('No jobs completed')
 
             for index, (work_item, result) in enumerate(all_items, start=1):
                 with tag('div', klass='container work-item'):
@@ -88,12 +107,12 @@ def _generate_html_report(db):
                                 text('test outcome: {}'.format(
                                     result.test_outcome))
 
-                    with tag(
-                            'a',
-                            href=pycharm_url(
-                                str(work_item.module_path),
-                                work_item.start_pos[0])):
-                        with tag('pre', klass='location'):
+                    with tag('pre', klass='location'):
+                        with tag(
+                                'a',
+                                href=pycharm_url(
+                                    str(work_item.module_path),
+                                    work_item.start_pos[0]), klass='text-secondary'):
                             text('{}, start pos: {}, end pos: {}'.format(
                                 work_item.module_path, work_item.start_pos,
                                 work_item.end_pos))
@@ -135,6 +154,5 @@ def _generate_html_report(db):
 def pycharm_url(filename, line_number):
     "Get a URL for opening a file in Pycharm."
     return 'pycharm://open?file={}&line={}'.format(filename, line_number)
-
 
 #
