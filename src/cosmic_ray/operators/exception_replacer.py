@@ -1,20 +1,10 @@
 "Implementation of the exception-replacement operator."
 
-import builtins
-
 from parso.python.tree import Name, PythonNode
 
 from .operator import Operator
 
-
-class CosmicRayTestingException(Exception):
-    "A special exception we throw that nobody should be trying to catch."
-
-
-# We inject this into builtins so we can easily replace other exceptions
-# without necessitating the import of other modules.
-setattr(builtins, CosmicRayTestingException.__name__,
-        CosmicRayTestingException)
+from cosmic_ray.exceptions import CosmicRayTestingException
 
 
 class ExceptionReplacer(Operator):
@@ -48,12 +38,12 @@ class ExceptionReplacer(Operator):
     def examples(cls):
         return (
             ('try: raise OSError\nexcept OSError: pass',
-             'try: raise OSError\nexcept CosmicRayTestingException: pass'),
+             'try: raise OSError\nexcept {}: pass'.format(CosmicRayTestingException.__name__)),
             ('try: raise OSError\nexcept (OSError, ValueError): pass',
-             'try: raise OSError\nexcept (OSError, CosmicRayTestingException): pass',
+             'try: raise OSError\nexcept (OSError, {}): pass'.format(CosmicRayTestingException.__name__),
              1),
             ('try: raise OSError\nexcept (OSError, ValueError, KeyError): pass',
-             'try: raise OSError\nexcept (OSError, CosmicRayTestingException, KeyError): pass',
+             'try: raise OSError\nexcept (OSError, {}, KeyError): pass'.format(CosmicRayTestingException.__name__),
              1),
             ('try: pass\nexcept: pass',
              'try: pass\nexcept: pass'),
