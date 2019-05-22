@@ -162,5 +162,5 @@ __builtins__['{0}'] = {0}
 
 def _install_sitecustomize(venv_path):
     _home_dir, lib_dir, _inc_dir, _bin_dir = virtualenv.path_locations(str(venv_path))
-    with open(Path(lib_dir) / 'site-packages' / 'sitecustomize.py', mode='wt', encoding='utf-8') as sc:
+    with open(str(Path(lib_dir) / 'site-packages' / 'sitecustomize.py'), mode='wt', encoding='utf-8') as sc:
         sc.write(_SITE_CUSTOMIZE)
