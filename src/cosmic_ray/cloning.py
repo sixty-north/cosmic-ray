@@ -7,11 +7,12 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
-import sys
 import tempfile
 import virtualenv
 
 import git
+
+from cosmic_ray.exceptions import CosmicRayTestingException as Exc
 
 log = logging.getLogger(__name__)
 
@@ -76,6 +77,7 @@ class ClonedWorkspace:
         virtualenv.create_environment(str(self._venv_path))
 
         _activate(self._venv_path)
+        _install_sitecustomize(self._venv_path)
 
         self._run_commands(clone_config.get('commands', ()))
 
@@ -148,3 +150,17 @@ def _activate(venv_path):
     # This is the recommended way of activating venvs in a program:
     # https://virtualenv.pypa.io/en/stable/userguide/#using-virtualenv-without-bin-python
     exec(open(activate_script).read(), {'__file__': activate_script})  # pylint: disable=exec-used
+
+
+_SITE_CUSTOMIZE = """
+class {0}(Exception):
+    pass
+
+__builtins__['{0}'] = {0}
+""".format(Exc.__name__)
+
+
+def _install_sitecustomize(venv_path):
+    _home_dir, lib_dir, _inc_dir, _bin_dir = virtualenv.path_locations(str(venv_path))
+    with open(Path(lib_dir) / 'site-packages' / 'sitecustomize.py', mode='wt', encoding='utf-8') as sc:
+        sc.write(_SITE_CUSTOMIZE)
