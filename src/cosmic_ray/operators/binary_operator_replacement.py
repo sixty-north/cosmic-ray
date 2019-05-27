@@ -57,6 +57,7 @@ def _create_replace_binary_operator(from_op, to_op):
 _NON_BINARY_PARENTS = set((
     'factor',     # unary operators, e.g. -1
     'argument',   # extended function definitions, e.g. def foo(*args)
+    'star_expr',  # destructuring, e.g. a, *b = x
 ))
 
 

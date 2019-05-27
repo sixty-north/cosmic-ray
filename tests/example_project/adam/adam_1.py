@@ -83,5 +83,9 @@ def use_star_args(*args):
     pass
 
 
-def unpacking(x):
+def use_extended_call_syntax(x):
     use_star_args(*x)
+
+
+def use_star_expr(x):
+    a, *b = x
