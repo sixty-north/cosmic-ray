@@ -81,3 +81,7 @@ def use_continue(limit):
 
 def use_star_args(*args):
     pass
+
+
+def unpacking(x):
+    use_star_args(*x)

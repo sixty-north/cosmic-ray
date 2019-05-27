@@ -53,13 +53,21 @@ def _create_replace_binary_operator(from_op, to_op):
     return ReplaceBinaryOperator
 
 
+# Parent types of operators which indicate that the operator isn't binary.
+_NON_BINARY_PARENTS = set((
+    'factor',     # unary operators, e.g. -1
+    'argument',   # extended function definitions, e.g. def foo(*args)
+))
+
+
 def _is_binary_operator(node):
     if isinstance(node, parso.python.tree.Operator):
+        # This catches extended call syntax, e.g. call(*x)
         if isinstance(node.parent, parso.python.tree.Param):
             return False
 
         elif isinstance(node.parent, parso.python.tree.PythonNode):
-            return node.parent.type != 'factor' 
+            return node.parent.type not in _NON_BINARY_PARENTS
 
         return True
 
