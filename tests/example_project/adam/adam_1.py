@@ -2,8 +2,9 @@
 """
 
 # pylint: disable=C0111
-
 import operator
+
+from math import *  # noqa: F401,F403
 
 # Add mutation points for comparison operators.
 
