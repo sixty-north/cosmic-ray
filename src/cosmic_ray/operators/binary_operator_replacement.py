@@ -55,8 +55,11 @@ def _create_replace_binary_operator(from_op, to_op):
 
 def _is_binary_operator(node):
     if isinstance(node, parso.python.tree.Operator):
-        if isinstance(node.parent, parso.python.tree.PythonNode):
-            return node.parent.type != 'factor'
+        if isinstance(node.parent, parso.python.tree.Param):
+            return False
+
+        elif isinstance(node.parent, parso.python.tree.PythonNode):
+            return node.parent.type != 'factor' 
 
         return True
 

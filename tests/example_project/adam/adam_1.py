@@ -77,3 +77,7 @@ def use_continue(limit):
     for x in range(limit):
         continue
     return x
+
+
+def use_star_args(*args):
+    pass
