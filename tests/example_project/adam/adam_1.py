@@ -2,8 +2,9 @@
 """
 
 # pylint: disable=C0111
-
 import operator
+
+from math import *  # noqa: F401,F403
 
 # Add mutation points for comparison operators.
 
@@ -77,3 +78,15 @@ def use_continue(limit):
     for x in range(limit):
         continue
     return x
+
+
+def use_star_args(*args):
+    pass
+
+
+def use_extended_call_syntax(x):
+    use_star_args(*x)
+
+
+def use_star_expr(x):
+    a, *b = x
