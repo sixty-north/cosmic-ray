@@ -11,7 +11,7 @@ Cosmic Ray is a mutation testing tool for Python 3.
 It makes small changes to your source code, running your test suite for each
 one. Here's how the mutations look:
 
-.. image:: docs/cr-in-action.gif
+.. image:: docs/source/cr-in-action.gif
 
 |full_documentation|_
 
