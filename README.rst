@@ -15,6 +15,12 @@ one. Here's how the mutations look:
 
 |full_documentation|_
 
+Contributing
+------------
+
+The easiest way to contribute is to use Cosmic Ray and submit reports for defects or any other issues you come across.
+Please see CONTRIBUTING.rst for more details.
+
 .. |Python version| image:: https://img.shields.io/badge/Python_version-3.5+-blue.svg
    :target: https://www.python.org/
 .. |Build Status| image:: https://travis-ci.org/sixty-north/cosmic-ray.svg?branch=master
