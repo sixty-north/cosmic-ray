@@ -1,0 +1,3 @@
+# Requirements for building the docs locally (i.e. not on readthedocs)
+sphinx
+sphinx_rtd_theme
