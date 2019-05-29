@@ -1,4 +1,5 @@
 """Celery specific details for routing work requests to Cosmic Ray workers."""
+
 import os
 
 import celery
@@ -25,17 +26,12 @@ _pid = None
 def worker_task(work_item, config):
     """The celery task which performs a single mutation and runs a test suite.
 
-    This runs `cosmic-ray worker` in a subprocess and returns the results,
-    passing `config` to it via stdin.
-
     Args:
         work_item: A dict describing a WorkItem.
         config: The configuration to use for the test execution.
 
     Returns: An updated WorkItem
     """
-    global _workspace
-
     _ensure_workspace(config)
 
     result = worker(
@@ -49,6 +45,9 @@ def worker_task(work_item, config):
 
 
 def _ensure_workspace(config):
+    """This ensures that there is a ClonedWorkspace for the current
+    process.
+    """
     global _workspace
     global _pid
 
@@ -60,11 +59,15 @@ def _ensure_workspace(config):
     _workspace = ClonedWorkspace(config.cloning_config)
     _pid = os.getpid()
 
+    # TODO: Consider a signal handler or something to know when to clean up the cloned workspace.
+
     os.chdir(_workspace.clone_dir)
 
 
 def execute_work_items(work_items, config):
     """Execute a suite of tests for a given set of work items.
+
+    This farms the work_items out to Celery workers running `worker_task`.
 
     Args:
       work_items: An iterable of `work_db.WorkItem`s.
