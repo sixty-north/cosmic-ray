@@ -52,7 +52,7 @@ setup(
     platforms='any',
     include_package_data=True,
     install_requires=[
-        'celery>=4',
+        'celery>=4.3.0',
     ],
     entry_points={
         'cosmic_ray.execution_engines': [
