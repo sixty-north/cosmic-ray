@@ -14,7 +14,7 @@ def report_xml():
 
 Usage: cr-xml <session-file>
 
-Print an XML formatted report of test results for continuos integration systems
+Print an XML formatted report of test results for continuous integration systems
 """
     arguments = docopt.docopt(report_xml.__doc__, version='cr-rate 1.0')
     with use_db(arguments['<session-file>'], WorkDB.Mode.open) as db:
