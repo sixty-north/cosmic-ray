@@ -58,7 +58,7 @@ def _create_element_from_work_item(work_item):
     sub_elem = xml.etree.ElementTree.Element('testcase')
 
     sub_elem.set('classname', work_item.job_id)
-    sub_elem.set('line', str(work_item.line_number))
+    sub_elem.set('line', str(work_item.start_pos[0]))
     sub_elem.set('file', str(work_item.module_path))
 
     return sub_elem
