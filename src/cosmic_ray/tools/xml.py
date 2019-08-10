@@ -14,7 +14,7 @@ def report_xml():
 
 Usage: cr-xml <session-file>
 
-Print an XML formatted report of test results for continuos integration systems
+Print an XML formatted report of test results for continuous integration systems
 """
     arguments = docopt.docopt(report_xml.__doc__, version='cr-rate 1.0')
     with use_db(arguments['<session-file>'], WorkDB.Mode.open) as db:
@@ -58,7 +58,7 @@ def _create_element_from_work_item(work_item):
     sub_elem = xml.etree.ElementTree.Element('testcase')
 
     sub_elem.set('classname', work_item.job_id)
-    sub_elem.set('line', str(work_item.line_number))
+    sub_elem.set('line', str(work_item.start_pos[0]))
     sub_elem.set('file', str(work_item.module_path))
 
     return sub_elem
