@@ -4,7 +4,7 @@ import logging
 
 from cosmic_ray.progress import reports_progress
 from cosmic_ray.work_db import use_db, WorkDB
-from cosmic_ray.plugins import get_execution_engine
+from cosmic_ray.plugins import get_execution_engine, load_operators
 
 log = logging.getLogger(__name__)
 
@@ -41,6 +41,9 @@ def execute(db_name):
         with use_db(db_name, mode=WorkDB.Mode.open) as work_db:
             _update_progress(work_db)
             config = work_db.get_config()
+
+            load_operators(config['exclude-operators'])
+
             engine = get_execution_engine(config.execution_engine_name)
 
             def on_task_complete(job_id, work_result):

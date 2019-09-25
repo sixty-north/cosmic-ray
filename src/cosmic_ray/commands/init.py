@@ -1,10 +1,12 @@
 "Implementation of the 'init' command."
 import logging
 import uuid
+from collections import defaultdict
 
 from cosmic_ray.ast import get_ast, Visitor
 import cosmic_ray.modules
-from cosmic_ray.plugins import get_interceptor, interceptor_names, get_operator
+from cosmic_ray.plugins import get_interceptor, interceptor_names, \
+    get_operator, load_operators
 from cosmic_ray.work_item import WorkItem
 
 log = logging.getLogger()
@@ -56,7 +58,28 @@ def init(module_paths, work_db, config):
       work_db: A `WorkDB` instance into which the work orders will be saved.
       config: The configuration for the new session.
     """
-    operator_names = cosmic_ray.plugins.operator_names()
+
+    load_operators(config['exclude-operators'])
+    operator_names = list(cosmic_ray.plugins.operator_names())
+
+    if log.isEnabledFor(logging.INFO):
+        log.info("Operators used:")
+        d = defaultdict(lambda : defaultdict(list))
+        for op_name in operator_names:
+            provider_name, op_name = op_name.split('/', maxsplit=1)
+            op_name_split = op_name.split('_', maxsplit=1)
+            if len(op_name_split) == 1:
+                d[provider_name][op_name] = None
+            else:
+                d[provider_name][op_name_split[0]].append(op_name_split[1])
+
+        for provider_name, op_names in d.items():
+                log.info(" - %s: %s", provider_name, ', '.join(k for k, v in op_names.items() if not v))
+        for provider_name, op_names in d.items():
+            for op_name0, op_names1 in op_names.items():
+                if op_names1:
+                    log.info(" - %s: %s - %s", provider_name, op_name0, ', '.join(op_names1))
+
     work_db.set_config(config=config)
 
     work_db.clear()
