@@ -97,15 +97,25 @@ class WorkItem:
                  start_pos=None,
                  end_pos=None,
                  job_id=None):
-        if start_pos[0] > end_pos[0]:
-            raise ValueError('Start line must not be after end line')
 
-        if start_pos[0] == end_pos[0]:
-            if start_pos[1] >= end_pos[1]:
-                raise ValueError(
-                    'End position must come after start position.')
+        if start_pos is not None:
+            if start_pos[0] is None and start_pos[1] is None:
+                start_pos = None
 
-        self._module_path = pathlib.Path(module_path)
+        if end_pos is not None:
+            if end_pos[0] is None and end_pos[1] is None:
+                end_pos = None
+
+        if start_pos is not None and end_pos is not None:
+            if start_pos[0] > end_pos[0]:
+                raise ValueError('Start line must not be after end line')
+
+            if start_pos[0] == end_pos[0]:
+                if start_pos[1] >= end_pos[1]:
+                    raise ValueError(
+                        'End position must come after start position.')
+
+        self._module_path = pathlib.Path(module_path) if module_path else None
         self._operator_name = operator_name
         self.occurrence = occurrence
         self._start_pos = start_pos

@@ -61,6 +61,8 @@ def init(module_paths, work_db, config):
 
     work_db.clear()
 
+    work_db.add_work_item(WorkItem(job_id="no mutation"))
+
     for module_path in module_paths:
         module_ast = get_ast(
             module_path, python_version=config.python_version)

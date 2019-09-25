@@ -26,6 +26,8 @@ def intercept(work_db):
             return handle.readlines()
 
     for item in work_db.work_items:
+        if item.module_path is None:
+            continue
         try:
             repo = open_repository(item.module_path)
         except ValueError:

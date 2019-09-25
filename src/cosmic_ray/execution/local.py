@@ -40,9 +40,13 @@ import logging
 import multiprocessing
 import multiprocessing.util
 import os
+from _queue import Empty
+from multiprocessing import Queue
 
 from cosmic_ray.cloning import ClonedWorkspace
 from cosmic_ray.execution.execution_engine import ExecutionEngine
+from cosmic_ray.testing import run_tests
+from cosmic_ray.work_item import WorkResult, WorkerOutcome, TestOutcome
 from cosmic_ray.worker import worker
 
 log = logging.getLogger(__name__)
@@ -93,6 +97,22 @@ def _execute_work_item(work_item):
     return work_item.job_id, result
 
 
+def _execute_no_mutate():
+    log.info('Executing worker in %s, PID=%s', _workspace.clone_dir, os.getpid())
+
+    with excursion(_workspace.clone_dir):
+        test_outcome, output = run_tests(_config.test_command, _config.timeout)
+        if test_outcome == TestOutcome.SURVIVED:
+            worker_outcome = WorkerOutcome.NORMAL
+        else:
+            worker_outcome = WorkerOutcome.ABNORMAL
+
+        return WorkResult(
+            output=output,
+            test_outcome=test_outcome,
+            worker_outcome=worker_outcome)
+
+
 class LocalExecutionEngine(ExecutionEngine):
     "The local-git execution engine."
 
@@ -101,17 +121,47 @@ class LocalExecutionEngine(ExecutionEngine):
                 initializer=_initialize_worker,
                 initargs=(config,)) as pool:
 
-            # pylint: disable=W0511
-            # TODO: This is not optimal. The pending-work iterable could be millions
-            # or billions of elements. We don't want to copy it. We copy it right
-            # now so that we don't access the database in a separate thread (i.e.
-            # one created by imap_unoredered below). We need to find a way around
-            # this.
-            pending = list(pending_work)
+            log.info("Running initial work")
+            result = pool.apply(_execute_no_mutate)
+            on_task_complete("no mutation", result)
+            if result.worker_outcome != WorkerOutcome.NORMAL:
+                return
 
-            results = pool.imap_unordered(
-                func=_execute_work_item,
-                iterable=pending)
+            result_queue = Queue()
+            pending_task_numbers = 0
 
-            for job_id, result in results:
-                on_task_complete(job_id, result)
+            def consume_next_result_generator():
+                nonlocal pending_task_numbers
+                while pending_task_numbers > 0:
+                    yield
+                    try:
+                        result = result_queue.get_nowait()
+                        pending_task_numbers -= 1
+                        on_task_complete(*result)
+                    except Empty:
+                        pass
+
+            consume_next_result = consume_next_result_generator()
+
+            def execution_done(result):
+                result_queue.put(result)
+
+            def execution_on_error(result):
+                log.info("Execution_ error %s", result)
+
+            for work_item in pending_work:
+                if work_item.job_id != "no mutation":
+                    pending_task_numbers += 1
+                    pool.apply_async(_execute_work_item, (work_item,),
+                                     callback=execution_done,
+                                     error_callback=execution_on_error)
+
+                    next(consume_next_result)
+                    # here, we now that next can' raise StopIteration:
+                    # len(consume_next_result) >= len(pending_work)
+
+            pool.close()
+            pool.join()
+
+            for _ in consume_next_result:
+                pass

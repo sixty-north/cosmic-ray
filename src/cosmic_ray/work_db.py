@@ -231,13 +231,13 @@ def _row_to_work_item(row):
 
 def _work_item_to_row(work_item):
     return (
-        str(work_item.module_path),
+        str(work_item.module_path) if work_item.module_path else None,
         work_item.operator_name,
         work_item.occurrence,
-        work_item.start_pos[0],
-        work_item.start_pos[1],
-        work_item.end_pos[0],
-        work_item.end_pos[1],
+        work_item.start_pos[0] if work_item.start_pos else None,
+        work_item.start_pos[1] if work_item.start_pos else None,
+        work_item.end_pos[0] if work_item.end_pos else None,
+        work_item.end_pos[1] if work_item.end_pos else None,
         work_item.job_id)
 
 
