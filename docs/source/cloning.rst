@@ -16,6 +16,37 @@ You can configure cloning in your configuration TOML in the
 `cosmic-ray.cloning` section. At a minimum, you must have a
 `cosmic-ray.cloning.method` entry in your config.
 
+Possible entry into `[cosmic-ray.cloning]` are:
+
+- `workspace_type`
+- `method`
+- `command`
+
+workspace_type
+==============
+
+The `workspace_type` entry is the name of workspace method creation:
+Possible names are:
+
+- `cloned`: Workspace is built by cloning your sources with the `copy` method
+  (see bellow). Useful if your sources can be run in-place.
+- `cloned_with_virtualenv`: Workspace is built by cloning your sources like
+  previous method and create an local virtualenv environment locally.
+  Useful to deploy your sources.
+
+::
+
+ [cosmic-ray.cloning]
+ workspace_type = 'cloned'
+
+This entry is optional. For compatibility reason, the default is
+`cloned_with_virtualenv`.
+
+After This workspace deployent, `command` will be executed (see bellow).
+
+copy
+====
+
 The "copy" cloning method simple copies an entire filesystem directory tree. You can use configure it like
 this::
 

@@ -1,13 +1,14 @@
 """Support for making clones of projects for test isolation.
 """
-
-import contextlib
+import abc
 import logging
 import os
 from pathlib import Path
 import shutil
 import subprocess
 import tempfile
+from typing import Type
+
 import virtualenv
 
 import git
@@ -17,69 +18,68 @@ from cosmic_ray.exceptions import CosmicRayTestingException as Exc
 log = logging.getLogger(__name__)
 
 
-@contextlib.contextmanager
-def cloned_workspace(clone_config, chdir=True):
-    """Create a cloned workspace and yield it.
+class WorkspaceMeta(type):
+    _registred = {}
 
-    This creates a workspace for a with-block and cleans it up on exit. By
-    default, this will also change to the workspace's `clone_dir` for the
-    duration of the with-block.
+    def __new__(cls, *args, **kwargs):
+        new_class = super(WorkspaceMeta, cls).__new__(cls, *args, **kwargs)  # type: Type[Workspace]
+        cls._registred[new_class.name] = new_class
+        return new_class
 
-    Args:
-        clone_config: The execution engine configuration to use for the workspace.
-        chdir: Whether to change to the workspace's `clone_dir` before entering the with-block.
+    @classmethod
+    def get_workspace_class(cls, name):
+        return cls._registred[name]
 
-    Yields: The `CloneWorkspace` instance created for the context.
+
+class Workspace(metaclass=WorkspaceMeta):
+    name = None
+
+    @classmethod
+    def get_workspace(cls, name, clone_config) -> 'Workspace':
+        return type(cls).get_workspace_class(name)(clone_config)
+
+    @abc.abstractmethod
+    def cleanup(self):
+        pass
+
+    @property
+    @abc.abstractmethod
+    def clone_dir(self):
+        pass
+
+
+class ClonedWorkspace(Workspace):
+    """Clone a project into a temporary directory.
     """
-    workspace = ClonedWorkspace(clone_config)
-    original_dir = os.getcwd()
-    if chdir:
-        os.chdir(workspace.clone_dir)
-
-    try:
-        yield workspace
-    finally:
-        os.chdir(original_dir)
-        workspace.cleanup()
-
-
-class ClonedWorkspace:
-    """Clone a project and install it into a temporary virtual environment.
-
-    Note that this actually *activates* the virtual environment, so don't construct one
-    of these unless you want that to happen in your process.
-    """
+    name = 'cloned'
 
     def __init__(self, clone_config):
         self._tempdir = tempfile.TemporaryDirectory()
-        log.info('New project clone in %s', self._tempdir.name)
+        self._prepare_directory(clone_config)
+        self._load_environment()
+        self._run_commands(clone_config.get('commands', ()))
 
+    def _prepare_directory(self, clone_config):
+        log.info('New project clone in %s', self._tempdir.name)
         self._clone_dir = str(Path(self._tempdir.name) / 'repo')
 
-        if clone_config['method'] == 'git':
+        method = clone_config['method']
+        if method == 'git':
             _clone_with_git(
                 clone_config.get('repo-uri', '.'),
                 self._clone_dir)
-        elif clone_config['method'] == 'copy':
+
+        elif method == 'copy':
             _clone_with_copy(
                 os.getcwd(),
                 self._clone_dir)
 
-        # pylint: disable=fixme
-        # TODO: We should allow user to specify which version of Python to use.
-        # How? The EnvBuilder could be passed a path to a python interpreter
-        # which is used in the call to pip. This path would need to come from
-        # the config.
+        else:
+            raise Exception("Clone method '%s' unknown" % method)
 
-        # Install into venv
-        self._venv_path = Path(self._tempdir.name) / 'venv'
-        log.info('Creating virtual environment in %s', self._venv_path)
-        virtualenv.create_environment(str(self._venv_path))
-
-        _activate(self._venv_path)
-        _install_sitecustomize(self._venv_path)
-
-        self._run_commands(clone_config.get('commands', ()))
+    def _load_environment(self):
+        os.environ['PYTHONPATH'] = \
+            '%s:%s' % (self.clone_dir, os.environ.get('PYTHONPATH', ''))
 
     @property
     def clone_dir(self):
@@ -111,6 +111,31 @@ class ClonedWorkspace:
             except subprocess.CalledProcessError as exc:
                 log.error("Error running command in virtual environment\ncommand: %s\nerror: %s",
                           command, exc.output)
+
+
+class ClonedWorkspaceWithVirtualenv(ClonedWorkspace):
+    """Clone a project and install it into a temporary virtual environment.
+
+    Note that this actually *activates* the virtual environment, so don't construct one
+    of these unless you want that to happen in your process.
+    """
+    name = 'cloned_with_virtualenv'
+
+    def _prepare_directory(self, clone_config):
+        # pylint: disable=fixme
+        # TODO: We should allow user to specify which version of Python to use.
+        # How? The EnvBuilder could be passed a path to a python interpreter
+        # which is used in the call to pip. This path would need to come from
+        # the config.
+
+        # Install into venv
+        self._venv_path = Path(self._tempdir.name) / 'venv'
+        log.info('Creating virtual environment in %s', self._venv_path)
+        virtualenv.create_environment(str(self._venv_path))
+
+    def _load_environment(self):
+        _activate(self._venv_path)
+        _install_sitecustomize(self._venv_path)
 
 
 def _clone_with_git(repo_uri, dest_path):

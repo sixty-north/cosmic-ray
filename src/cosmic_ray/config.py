@@ -107,6 +107,11 @@ class ConfigDict(dict):
         "The 'cloning' section of the config."
         return self['cloning']
 
+    @property
+    def cloning_config_workspace_type(self):
+        "The 'workspace' section of the cloning section"
+        return self.cloning_config.get('workspace_type', 'cloned_with_virtualenv')
+
 
 @contextmanager
 def _config_stream(filename):

@@ -41,7 +41,8 @@ import multiprocessing
 import multiprocessing.util
 import os
 
-from cosmic_ray.cloning import ClonedWorkspace
+from cosmic_ray.cloning import ClonedWorkspaceWithVirtualenv, Workspace
+from cosmic_ray.config import ConfigDict
 from cosmic_ray.execution.execution_engine import ExecutionEngine
 from cosmic_ray.worker import worker
 
@@ -62,7 +63,7 @@ def excursion(dirname):
         os.chdir(orig)
 
 
-def _initialize_worker(config):
+def _initialize_worker(config: ConfigDict):
     # pylint: disable=global-statement
     global _workspace
     global _config
@@ -72,7 +73,8 @@ def _initialize_worker(config):
     _config = config
 
     log.info('Initialize local-git worker in PID %s', os.getpid())
-    _workspace = ClonedWorkspace(config.cloning_config)
+    _workspace = Workspace.get_workspace(config.cloning_config_workspace_type,
+                                         config.cloning_config)
 
     # Register a finalizer
     multiprocessing.util.Finalize(_workspace, _workspace.cleanup, exitpriority=16)
