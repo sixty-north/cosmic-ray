@@ -11,11 +11,10 @@ log = logging.getLogger()
 
 
 def intercept(work_db):
-    """Look for WorkItems in `work_db` that should not be mutated due to spor metadata.
+    """Mark lines with "# pragma: no mutate" as SKIPPED
 
-    For each WorkItem, find anchors for the item's file/line/columns. If an
-    anchor exists with metadata containing `{mutate: False}` then the WorkItem
-    is marked as SKIPPED.
+    For all work_item in db, if the LAST line of the working zone is marked
+     with "# pragma: no mutate", This work_item will be skipped.
     """
 
     @lru_cache()
@@ -29,8 +28,11 @@ def intercept(work_db):
     for item in work_db.work_items:
         lines = file_contents(item.module_path)
         try:
+            # item.{start,end}_pos[0] seems to be 1-based.
             line_number = item.end_pos[0] - 1
             if item.end_pos[1] == 0:
+                # The working zone ends at begin of line,
+                # consider the previous line.
                 line_number -= 1
             line = lines[line_number]
             if re_is_mutate.match(line):
