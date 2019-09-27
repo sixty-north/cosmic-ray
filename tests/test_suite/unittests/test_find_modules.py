@@ -1,6 +1,7 @@
 from pathlib import Path
+from unittest import result
 
-from cosmic_ray.modules import find_modules
+from cosmic_ray.modules import find_modules, filter_paths
 
 
 def test_small_directory_tree(data_dir):
@@ -48,20 +49,22 @@ def test_small_directory_tree_with_excluding_files(data_dir):
     paths = (('a', 'b.py'), ('a', 'py.py'),
              ('a', 'c', 'd.py'))
     excluded_modules = ['**/__init__.py']
-    expected = sorted(Path(*path) for path in paths)
+    expected = set(Path(*path) for path in paths)
 
     from cosmic_ray.execution.local import excursion
     with excursion(data_dir):
-        results = sorted(find_modules(Path('a'), excluded_modules))
+        results = find_modules(Path('a'))
+        results = filter_paths(results, excluded_modules)
         assert expected == results
 
 
 def test_small_directory_tree_with_excluding_dir(data_dir):
     paths = (('a', '__init__.py'), ('a', 'b.py'), ('a', 'py.py'))
     excluded_modules = ['*/c/*']
-    expected = sorted(Path(*path) for path in paths)
+    expected = set(Path(*path) for path in paths)
 
     from cosmic_ray.execution.local import excursion
     with excursion(data_dir):
-        results = sorted(find_modules(Path('a'), excluded_modules))
+        results = find_modules(Path('a'))
+        results = filter_paths(results, excluded_modules)
         assert expected == results
