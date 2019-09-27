@@ -24,7 +24,6 @@ import cosmic_ray.testing
 import cosmic_ray.worker
 from cosmic_ray.config import load_config, serialize_config
 from cosmic_ray.mutating import apply_mutation
-from cosmic_ray.plugins import load_operators
 from cosmic_ray.progress import report_progress
 from cosmic_ray.version import __version__
 from cosmic_ray.work_db import WorkDB, use_db
@@ -244,8 +243,6 @@ def handle_worker(args):
 
     """
     config = load_config(args.get('<config-file>'))
-
-    load_operators(config['exclude-operators'])
 
     with open(os.devnull, 'w') as devnull:
         with redirect_stdout(sys.stdout if args['--keep-stdout'] else devnull):

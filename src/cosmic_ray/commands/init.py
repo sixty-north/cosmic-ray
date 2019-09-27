@@ -5,8 +5,7 @@ from collections import defaultdict
 
 from cosmic_ray.ast import get_ast, Visitor
 import cosmic_ray.modules
-from cosmic_ray.plugins import get_interceptor, interceptor_names, \
-    get_operator, load_operators
+from cosmic_ray.plugins import get_interceptor, interceptor_names, get_operator
 from cosmic_ray.work_item import WorkItem
 
 log = logging.getLogger()
@@ -59,12 +58,11 @@ def init(module_paths, work_db, config):
       config: The configuration for the new session.
     """
 
-    load_operators(config['exclude-operators'])
     operator_names = list(cosmic_ray.plugins.operator_names())
 
     if log.isEnabledFor(logging.INFO):
-        log.info("Operators used:")
-        d = defaultdict(lambda : defaultdict(list))
+        log.info("Operators available:")
+        d = defaultdict(lambda: defaultdict(list))
         for op_name in operator_names:
             provider_name, op_name = op_name.split('/', maxsplit=1)
             op_name_split = op_name.split('_', maxsplit=1)
@@ -94,12 +92,14 @@ def init(module_paths, work_db, config):
                                         operator)
             visitor.walk(module_ast)
 
-    apply_interceptors(work_db, config.sub('interceptors').get('enabled', ()))
+    enabled_interceptors = config.sub('interceptors').get('enabled', ())
+    apply_interceptors(work_db, enabled_interceptors, config)
 
 
-def apply_interceptors(work_db, enabled_interceptors):
+def apply_interceptors(work_db, enabled_interceptors, config):
     """Apply each registered interceptor to the WorkDB."""
     names = (name for name in interceptor_names() if name in enabled_interceptors)
     for name in names:
+        sub_config = config.sub(name)
         interceptor = get_interceptor(name)
-        interceptor(work_db)
+        interceptor(work_db, sub_config)

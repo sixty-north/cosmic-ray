@@ -2,7 +2,6 @@
 """
 
 import logging
-import re
 
 from stevedore import driver, ExtensionManager
 
@@ -17,26 +16,12 @@ def _log_extension_loading_failure(_mgr, ep, err):
               ep, err)
 
 
-OPERATOR_PROVIDERS = None
-
-
-def load_operators(exclude_operators):
-    global OPERATOR_PROVIDERS
-    re_exclude_operators = [re.compile(e) for e in exclude_operators]
-
-    operator_providers = ExtensionManager('cosmic_ray.operator_providers',
-                                          on_load_failure_callback=_log_extension_loading_failure)
-
-    OPERATOR_PROVIDERS = {}
-    for e in operator_providers:
-        provider_plugin = e.plugin()
-
-        for op_name in provider_plugin:
-            full_op_name = '%s/%s' % ((e.name), op_name)
-
-            # Filter out operators according to exclude_operators
-            if not any(r.match(full_op_name) for r in re_exclude_operators):
-                    OPERATOR_PROVIDERS[full_op_name] = provider_plugin[op_name]
+OPERATOR_PROVIDERS = {
+    extension.name: extension.plugin()
+    for extension in ExtensionManager(
+        'cosmic_ray.operator_providers',
+        on_load_failure_callback=_log_extension_loading_failure)
+}
 
 
 def get_operator(name):
@@ -47,7 +32,12 @@ def get_operator(name):
 
     Returns: The operator *class object* (i.e. not an instance).
     """
-    return OPERATOR_PROVIDERS[name]
+    sep = name.index('/')
+    provider_name = name[:sep]
+    operator_name = name[sep + 1:]
+
+    provider = OPERATOR_PROVIDERS[provider_name]
+    return provider[operator_name]
 
 
 def operator_names():
@@ -55,7 +45,9 @@ def operator_names():
 
     Returns: A sequence of operator names.
     """
-    return OPERATOR_PROVIDERS.keys()
+    return tuple('{}/{}'.format(provider_name, operator_name)
+                 for provider_name, provider in OPERATOR_PROVIDERS.items()
+                 for operator_name in provider)
 
 
 def get_interceptor(name):

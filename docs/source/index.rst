@@ -31,6 +31,7 @@ assemblers to oil exploration software.
    cloning
    commands
    operators
+   interceptors
    distributed
    implementation
    tests

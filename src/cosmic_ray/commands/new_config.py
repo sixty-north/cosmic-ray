@@ -88,10 +88,12 @@ def new_config():
         menu.add(str(at_pos), engine_name)
     config["execution-engine"] = ConfigDict()
     config['execution-engine']['name'] = menu.show(header="Execution engine", returns="desc")
-    config['exclude-operators'] = []
 
     config["cloning"] = ConfigDict()
     config['cloning']['method'] = 'copy'
     config['cloning']['commands'] = []
+
+    config['interceptors']['enabled'] = ['operators-filter']
+    config['operators-filter']['exclude-operators'] = []
 
     return config
