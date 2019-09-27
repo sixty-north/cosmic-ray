@@ -4,7 +4,7 @@ import glob
 from pathlib import Path
 
 
-def find_modules(module_path, excluded_modules):
+def find_modules(module_path, excluded_modules=None):
     """Find all modules in the module (possibly package) represented by `module_path`.
 
     Args:
@@ -22,7 +22,9 @@ def find_modules(module_path, excluded_modules):
         else:
             pyfiles = set()
 
-    excluded = set(f for excluded_module in excluded_modules
-                   for f in glob.glob(excluded_module, recursive=True))
+    if excluded_modules:
+        excluded = set(f for excluded_module in excluded_modules
+                       for f in glob.glob(excluded_module, recursive=True))
+        pyfiles = pyfiles - excluded
 
-    yield from (Path(pyfile) for pyfile in pyfiles - excluded)
+    yield from (Path(pyfile) for pyfile in pyfiles)

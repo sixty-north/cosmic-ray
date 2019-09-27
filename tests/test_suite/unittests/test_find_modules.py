@@ -42,3 +42,26 @@ def test_finding_modules_py_dot_py_using_slashes_with_full_filename(data_dir):
     expected = sorted(data_dir / Path(*path) for path in paths)
     results = sorted(find_modules(data_dir / 'a' / 'py.py'))
     assert expected == results
+
+
+def test_small_directory_tree_with_excluding_files(data_dir):
+    paths = (('a', 'b.py'), ('a', 'py.py'),
+             ('a', 'c', 'd.py'))
+    excluded_modules = ['**/__init__.py']
+    expected = sorted(Path(*path) for path in paths)
+
+    from cosmic_ray.execution.local import excursion
+    with excursion(data_dir):
+        results = sorted(find_modules(Path('a'), excluded_modules))
+        assert expected == results
+
+
+def test_small_directory_tree_with_excluding_dir(data_dir):
+    paths = (('a', '__init__.py'), ('a', 'b.py'), ('a', 'py.py'))
+    excluded_modules = ['*/c/*']
+    expected = sorted(Path(*path) for path in paths)
+
+    from cosmic_ray.execution.local import excursion
+    with excursion(data_dir):
+        results = sorted(find_modules(Path('a'), excluded_modules))
+        assert expected == results
