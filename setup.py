@@ -45,6 +45,7 @@ INSTALL_REQUIRES = [
     'toml',
     'virtualenv',
     'yattag',
+    'anybadge',
 ]
 
 version = read_version()[0]
@@ -91,6 +92,7 @@ setup(
             'cosmic-ray = cosmic_ray.cli:main',
             'cr-html = cosmic_ray.tools.html:report_html',
             'cr-report = cosmic_ray.tools.report:report',
+            'cr-badge = cosmic_ray.tools.badge:generate_badge',
             'cr-rate = cosmic_ray.tools.survival_rate:format_survival_rate',
             'cr-xml = cosmic_ray.tools.xml:report_xml',
         ],
