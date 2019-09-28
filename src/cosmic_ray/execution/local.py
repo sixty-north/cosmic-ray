@@ -34,19 +34,21 @@ One major difference is the directory in which the subprocesses run. They run
 the root of the cloned repository, so you need to take this into account when
 creating the configuration.
 """
-
+import asyncio
+import concurrent.futures
 import contextlib
 import logging
 import multiprocessing
 import multiprocessing.util
 import os
-from _queue import Empty
-from multiprocessing import Queue
+from typing import Iterable, Callable
 
 from cosmic_ray.cloning import ClonedWorkspace
+from cosmic_ray.config import ConfigDict
 from cosmic_ray.execution.execution_engine import ExecutionEngine
 from cosmic_ray.testing import run_tests
-from cosmic_ray.work_item import WorkResult, WorkerOutcome, TestOutcome
+from cosmic_ray.work_item import TestOutcome, WorkerOutcome, WorkResult, \
+    WorkItem
 from cosmic_ray.worker import worker
 
 log = logging.getLogger(__name__)
@@ -117,51 +119,33 @@ class LocalExecutionEngine(ExecutionEngine):
     "The local-git execution engine."
 
     def __call__(self, pending_work, config, on_task_complete):
-        with multiprocessing.Pool(
+        asyncio.run(self._execute_pending_works(pending_work, config, on_task_complete))
+
+    async def _execute_pending_works(self,
+                                     pending_work: Iterable[WorkItem],
+                                     config: ConfigDict,
+                                     on_task_complete: Callable):
+        loop = asyncio.get_running_loop()
+
+        with concurrent.futures.ProcessPoolExecutor(
                 initializer=_initialize_worker,
-                initargs=(config,)) as pool:
+                initargs=(config,)
+        ) as pool:
 
-            log.info("Running initial work")
-            result = pool.apply(_execute_no_mutate)
-            on_task_complete("no mutation", result)
-            if result.worker_outcome != WorkerOutcome.NORMAL:
-                return
+            if config.run_with_no_mutation:
+                log.info("Running initial work")
+                result = await loop.run_in_executor(pool, _execute_no_mutate)
+                log.info("Initial work ends with %s", result.worker_outcome)
+                if result.worker_outcome != WorkerOutcome.NORMAL:
+                    print("ERROR OCCURS DURING RUN WITH NO MUTATION")
+                    for line in result.output.split('\n'):
+                        print(" >>", line)
+                    return
 
-            result_queue = Queue()
-            pending_task_numbers = 0
+            async def run_task(work_item):
+                result = await loop.run_in_executor(pool, _execute_work_item,
+                                                    work_item)
+                on_task_complete(*result)
 
-            def consume_next_result_generator():
-                nonlocal pending_task_numbers
-                while pending_task_numbers > 0:
-                    yield
-                    try:
-                        result = result_queue.get_nowait()
-                        pending_task_numbers -= 1
-                        on_task_complete(*result)
-                    except Empty:
-                        pass
-
-            consume_next_result = consume_next_result_generator()
-
-            def execution_done(result):
-                result_queue.put(result)
-
-            def execution_on_error(result):
-                log.info("Execution_ error %s", result)
-
-            for work_item in pending_work:
-                if work_item.job_id != "no mutation":
-                    pending_task_numbers += 1
-                    pool.apply_async(_execute_work_item, (work_item,),
-                                     callback=execution_done,
-                                     error_callback=execution_on_error)
-
-                    next(consume_next_result)
-                    # here, we now that next can' raise StopIteration:
-                    # len(consume_next_result) >= len(pending_work)
-
-            pool.close()
-            pool.join()
-
-            for _ in consume_next_result:
-                pass
+            tasks = [run_task(work_item) for work_item in pending_work]
+            await asyncio.gather(*tasks)

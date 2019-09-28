@@ -11,7 +11,7 @@ from cosmic_ray.work_item import TestOutcome
 # subprocess.run()-based approach because there are problems with timeouts and
 # reading from stderr in subprocess.run. Since we have to be prepared for test
 # processes that run longer than timeout (and, indeed, which run forever), the
-# broken subprocess stuff simply doesn't work. So we do this, which seesm to
+# broken subprocess stuff simply doesn't work. So we do this, which seems to
 # work on all platforms.
 
 
@@ -44,7 +44,7 @@ async def _run_tests(command, timeout):
     except asyncio.TimeoutError:
         proc.terminate()
         return (TestOutcome.KILLED, 'timeout')
-        
+
     except Exception:  # pylint: disable=W0703
         proc.terminate()
         return (TestOutcome.INCOMPETENT, traceback.format_exc())
@@ -74,6 +74,5 @@ def run_tests(command, timeout=None):
         asyncio.set_event_loop_policy(
             asyncio.WindowsProactorEventLoopPolicy())
 
-    result = asyncio.get_event_loop().run_until_complete(
-        _run_tests(command, timeout))
+    result = asyncio.run(_run_tests(command, timeout))
     return result

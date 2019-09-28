@@ -103,6 +103,11 @@ class ConfigDict(dict):
         return self['execution-engine'].get(name, ConfigDict())
 
     @property
+    def run_with_no_mutation(self):
+        "The configuration for the named execution engine."
+        return self.get('run-with-no-mutation-engine', False)
+
+    @property
     def cloning_config(self):
         "The 'cloning' section of the config."
         return self['cloning']
