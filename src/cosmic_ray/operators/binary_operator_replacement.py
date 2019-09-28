@@ -54,12 +54,12 @@ def _create_replace_binary_operator(from_op, to_op):
 
 
 # Parent types of operators which indicate that the operator isn't binary.
-_NON_BINARY_PARENTS = set((
+_NON_BINARY_PARENTS = {
     'factor',       # unary operators, e.g. -1
     'argument',     # extended function definitions, e.g. def foo(*args)
     'star_expr',    # destructuring, e.g. a, *b = x
     'import_from',  # star import, e.g. from module import *
-))
+}
 
 
 def _is_binary_operator(node):

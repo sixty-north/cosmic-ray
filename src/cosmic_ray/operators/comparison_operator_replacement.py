@@ -84,14 +84,14 @@ _RHS_IS_NONE_OPS = {
 }
 
 # This determines the allowed to mutations when the RHS is a number
-_RHS_IS_INTEGER_OPS = set([
+_RHS_IS_INTEGER_OPS = {
     ComparisonOperators.Eq,
     ComparisonOperators.NotEq,
     ComparisonOperators.Lt,
     ComparisonOperators.LtE,
     ComparisonOperators.Gt,
     ComparisonOperators.GtE,
-])
+}
 
 
 def _allowed(to_op, from_op, rhs):
