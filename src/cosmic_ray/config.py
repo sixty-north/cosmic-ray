@@ -26,7 +26,7 @@ def load_config(filename=None):
             'Error loading configuration from {}'.format(filename)) from exc
 
 
-def deserialize_config(sz):
+def deserialize_config(sz) -> 'ConfigDict':
     "Parse a serialized config into a ConfigDict."
     return toml.loads(sz, _dict=ConfigDict)['cosmic-ray']
 
@@ -106,6 +106,22 @@ class ConfigDict(dict):
     def cloning_config(self):
         "The 'cloning' section of the config."
         return self['cloning']
+
+    @property
+    def badge(self):
+        return self['badge']
+
+    @property
+    def badge_label(self):
+        return self.badge['label']
+
+    @property
+    def badge_format(self):
+        return self.badge['format']
+
+    @property
+    def badge_thresholds(self):
+        return self.badge['thresholds']
 
 
 @contextmanager
