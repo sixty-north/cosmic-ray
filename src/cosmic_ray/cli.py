@@ -1,7 +1,6 @@
-"""This is the command-line program for cosmic ray.
+"""This is the command-line program for cosmic ray. 
 
-Here we manage command-line parsing and launching of the internal
-machinery that does mutation testing.
+Here we manage command-line parsing and launching of the internal machinery that does mutation testing.
 """
 import json
 import logging
@@ -27,7 +26,7 @@ from cosmic_ray.mutating import apply_mutation
 from cosmic_ray.progress import report_progress
 from cosmic_ray.version import __version__
 from cosmic_ray.work_db import WorkDB, use_db
-from cosmic_ray.work_item import WorkItemJsonEncoder
+from cosmic_ray.work_item import WorkItem, WorkItemJsonEncoder
 
 log = logging.getLogger()
 
@@ -145,17 +144,41 @@ def handle_exec(args):
 
 @dsc.command()
 def handle_baseline(args):
-    """usage: cosmic-ray baseline <session-file> 
+    """usage: cosmic-ray baseline <session-file>
 
     Runs a baseline execution that executes the test suite over
-    unmutated code. 
+    unmutated code.
     """
-    session_file = args.get('<session-file>')
-    try:
-        cosmic_ray.commands.baseline(session_file)
-    except cosmic_ray.commands.BaselineError as exc:
-        log.error(repr(exc))
-        return ExitCode.DATA_ERR
+    session_file = Path(args.get('<session-file>'))
+    baseline_session_file = session_file.parent / '{}.baseline{}'.format(
+        session_file.stem, session_file.suffix)
+
+    # Find arbitrary work-item in input session that we can copy.
+    with use_db(session_file) as db:
+        try:
+            template = next(iter(db.work_items))
+        except StopIteration:
+            log.error('No work items in session')
+            return ExitCode.DATA_ERR
+
+        config = db.get_config()
+
+    # Copy input work-item, but tell it to use the no-op operator. Create a new
+    # session containing only this work-item and execute this new session.
+    with use_db(baseline_session_file, mode=WorkDB.Mode.create) as db:
+        db.set_config(config)
+
+        db.add_work_item(
+            WorkItem(
+                module_path=template.module_path,
+                operator_name='core/NoOp',
+                occurrence=0,
+                start_pos=template.start_pos,
+                end_pos=template.end_pos,
+                job_id=template.job_id))
+
+    # Run the single-entry session.
+    cosmic_ray.commands.execute(baseline_session_file)
 
     return ExitCode.OK
 
