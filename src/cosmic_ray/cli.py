@@ -144,6 +144,23 @@ def handle_exec(args):
 
 
 @dsc.command()
+def handle_baseline(args):
+    """usage: cosmic-ray baseline <session-file> 
+
+    Runs a baseline execution that executes the test suite over
+    unmutated code. 
+    """
+    session_file = args.get('<session-file>')
+    try:
+        cosmic_ray.commands.baseline(session_file)
+    except cosmic_ray.commands.BaselineError as exc:
+        log.error(repr(exc))
+        return ExitCode.DATA_ERR
+
+    return ExitCode.OK
+
+
+@dsc.command()
 def handle_dump(args):
     """usage: cosmic-ray dump <session-file>
 

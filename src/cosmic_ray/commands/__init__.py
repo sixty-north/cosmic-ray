@@ -5,6 +5,7 @@ Not all commands are represented here, just the ones which seem big enough to
 justify a separate module.
 """
 
+from .baseline import BaselineError, baseline  # NOQA
 from .execute import execute  # NOQA
 from .init import init  # NOQA
 from .new_config import new_config  # NOQA
