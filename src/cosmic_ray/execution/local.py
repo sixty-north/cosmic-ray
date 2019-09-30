@@ -34,15 +34,19 @@ One major difference is the directory in which the subprocesses run. They run
 the root of the cloned repository, so you need to take this into account when
 creating the configuration.
 """
-
+import asyncio
+import concurrent.futures
 import contextlib
 import logging
 import multiprocessing
 import multiprocessing.util
 import os
+from typing import Iterable, Callable
 
 from cosmic_ray.cloning import ClonedWorkspace
+from cosmic_ray.config import ConfigDict
 from cosmic_ray.execution.execution_engine import ExecutionEngine
+from cosmic_ray.work_item import WorkItem
 from cosmic_ray.worker import worker
 
 log = logging.getLogger(__name__)
@@ -97,21 +101,23 @@ class LocalExecutionEngine(ExecutionEngine):
     "The local-git execution engine."
 
     def __call__(self, pending_work, config, on_task_complete):
-        with multiprocessing.Pool(
+        asyncio.run(self._execute_pending_works(pending_work, config, on_task_complete))
+
+    async def _execute_pending_works(self,
+                                     pending_work: Iterable[WorkItem],
+                                     config: ConfigDict,
+                                     on_task_complete: Callable):
+        loop = asyncio.get_running_loop()
+
+        with concurrent.futures.ProcessPoolExecutor(
                 initializer=_initialize_worker,
-                initargs=(config,)) as pool:
+                initargs=(config,)
+        ) as pool:
 
-            # pylint: disable=W0511
-            # TODO: This is not optimal. The pending-work iterable could be millions
-            # or billions of elements. We don't want to copy it. We copy it right
-            # now so that we don't access the database in a separate thread (i.e.
-            # one created by imap_unoredered below). We need to find a way around
-            # this.
-            pending = list(pending_work)
+            async def run_task(work_item):
+                result = await loop.run_in_executor(pool, _execute_work_item,
+                                                    work_item)
+                on_task_complete(*result)
 
-            results = pool.imap_unordered(
-                func=_execute_work_item,
-                iterable=pending)
-
-            for job_id, result in results:
-                on_task_complete(job_id, result)
+            tasks = [run_task(work_item) for work_item in pending_work]
+            await asyncio.gather(*tasks)
