@@ -44,7 +44,7 @@ async def _run_tests(command, timeout):
     except asyncio.TimeoutError:
         proc.terminate()
         return (TestOutcome.KILLED, 'timeout')
-
+        
     except Exception:  # pylint: disable=W0703
         proc.terminate()
         return (TestOutcome.INCOMPETENT, traceback.format_exc())
@@ -74,5 +74,6 @@ def run_tests(command, timeout=None):
         asyncio.set_event_loop_policy(
             asyncio.WindowsProactorEventLoopPolicy())
 
-    result = asyncio.run(_run_tests(command, timeout))
+    result = asyncio.get_event_loop().run_until_complete(
+        _run_tests(command, timeout))
     return result
