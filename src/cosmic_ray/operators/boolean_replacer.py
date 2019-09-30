@@ -1,7 +1,10 @@
 "Implementation of the boolean replacement operators."
 
 import parso.python.tree
+from parso.python.tree import Keyword, PythonNode, Operator as tree_Operator, \
+    Function
 
+from cosmic_ray.operators.util import ObjTest
 from .keyword_replacer import KeywordReplacementOperator
 from .operator import Operator
 
@@ -18,7 +21,115 @@ class ReplaceFalseWithTrue(KeywordReplacementOperator):
     to_keyword = 'To'
 
 
-class ReplaceAndWithOr(KeywordReplacementOperator):
+class KeywordNoAnnotationReplacementOperator(KeywordReplacementOperator):
+    """
+    Filter all keyword inside annotation:
+    Example 'or' inside following sentence must be skipped for mutation
+    >>> a: int or float = None
+    >>> def f(a: int or float): pass
+    >>> def g(a) -> int or float: pass
+    """
+    def mutation_positions(self, node):
+        if ObjTest(node).match(Keyword):
+            if self._is_def_function_annotation(node) or \
+                    self._is_var_annotation(node) or \
+                    self._is_def_function_var_annotation(node):
+                return
+        yield from super().mutation_positions(node)
+
+    @staticmethod
+    def _is_var_annotation(node: Keyword):
+        """
+        a: int or float = None
+
+        ExprStmt(expr_stmt, [
+            Name(name, 'a'),
+            PythonNode(annassign, [          <-- test this
+                Operator(operator, ':'),
+                PythonNode(or_test, [
+                    Name(name, 'int'),
+                    Keyword(keyword, 'or'),  <-- node
+                    Name(name, 'float'),
+                ]),
+                Operator(operator, '='),
+                Keyword(keyword, 'None'),
+            ]),
+        ]),
+        """
+        t = ObjTest(node).parent
+        while t:
+            if t.match(PythonNode, type='annassign'):
+                return True
+            t = t.parent
+        return False
+
+    @staticmethod
+    def _is_def_function_var_annotation(node: Keyword):
+        """
+        def f(a: int or float): pass
+
+        Function(funcdef, [                          <-- recursion guard
+            Keyword(keyword, 'def'),
+            Name(name, 'f'),
+            PythonNode(parameters, [
+                Operator(operator, '('),
+                Param(param, [
+                    PythonNode(tfpdef, [             <-- test this
+                        Name(name, 'a'),
+                        Operator(operator, ':'),
+                        PythonNode(or_test, [
+                            Name(name, 'int'),
+                            Keyword(keyword, 'or'),  <-- node
+                            Name(name, 'float'),
+                        ]),
+                    ]),
+                ]),
+                Operator(operator, ')'),
+            ]),
+            Operator(operator, ':'),
+            ...,
+        ]),
+        """
+        t = ObjTest(node).parent
+        while t and not t.match(Function, type='funcdef'):
+            if t.match(PythonNode, type='tfpdef'):
+                return True
+            t = t.parent
+        return False
+
+    @staticmethod
+    def _is_def_function_annotation(node: Keyword):
+        """
+        def f(a) -> int or float: pass
+
+        Function(funcdef, [              <-- recursion guard
+            Keyword(keyword, 'def'),
+            Name(name, 'f'),
+            PythonNode(parameters, [
+                Operator(operator, '('),
+                ...,
+                Operator(operator, ')'),
+            ]),
+            Operator(operator, '->'),    <-- test this
+            PythonNode(or_test, [
+                Name(name, 'int'),
+                Keyword(keyword, 'or'),  <-- node
+                Name(name, 'float'),
+            ]),
+            Operator(operator, ':'),
+            ...,
+        ]),
+        """
+        t = ObjTest(node).parent
+        while t and not t.match(Function, type='funcdef'):
+            if t.match(PythonNode).get_previous_sibling(). \
+                    match(tree_Operator, value='->'):
+                return True
+            t = t.parent
+        return False
+
+
+class ReplaceAndWithOr(KeywordNoAnnotationReplacementOperator):
     """An operator that swaps 'and' with 'or'."""
     from_keyword = 'and'
     to_keyword = 'or'
@@ -30,7 +141,7 @@ class ReplaceAndWithOr(KeywordReplacementOperator):
         )
 
 
-class ReplaceOrWithAnd(KeywordReplacementOperator):
+class ReplaceOrWithAnd(KeywordNoAnnotationReplacementOperator):
     """An operator that swaps 'or' with 'and'."""
     from_keyword = 'or'
     to_keyword = 'and'
@@ -39,6 +150,9 @@ class ReplaceOrWithAnd(KeywordReplacementOperator):
     def examples(cls):
         return (
             ('x or y', 'x and y'),
+            ('a: int or float = None', 'a: int or float = None'),
+            ('def f(a: int or float): pass', 'def f(a: int or float): pass'),
+            ('def f() -> int or float: pass', 'def f() -> int or float: pass'),
         )
 
 
