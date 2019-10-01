@@ -30,6 +30,7 @@ assemblers to oil exploration software.
    concepts
    cloning
    commands
+   badge
    operators
    interceptors
    distributed
