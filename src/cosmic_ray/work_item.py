@@ -32,9 +32,9 @@ class WorkResult:
     """
 
     def __init__(self,
-                 worker_outcome,
+                 worker_outcome: WorkerOutcome,
                  output=None,
-                 test_outcome=None,
+                 test_outcome: TestOutcome=None,
                  diff=None):
         if worker_outcome is None:
             raise ValueError('Worker outcome must always have a value.')
