@@ -1,6 +1,9 @@
 "Implementation of operator base class."
-
+import re
 from abc import ABC, abstractmethod
+
+
+_re_camel_to_kebab_case = re.compile(r'([a-z0-9])([A-Z])')
 
 
 class Operator(ABC):
@@ -13,11 +16,24 @@ class Operator(ABC):
 
     def __init__(self, python_version):
         self._python_version = python_version
+        self._pragma_category_name = None
 
     @property
     def python_version(self):
         "Python major.minor version as a string."
         return self._python_version
+
+    @property
+    def pragma_category_name(self):
+        if self._pragma_category_name is None:
+            name = type(self).__name__
+            # Removing remove because this is a pragma category name after: 'no mutate'
+            if name.startswith('Remove'):
+                name = name[len('Remove'):]
+            name = _re_camel_to_kebab_case.sub(r'\1-\2', name).lower()
+            self._pragma_category_name = name
+
+        return self._pragma_category_name
 
     @abstractmethod
     def mutation_positions(self, node):
@@ -49,12 +65,12 @@ class Operator(ABC):
         """Examples of the mutations that this operator can make.
 
         This is primarily for testing purposes, but it could also be used for
-        docmentation.
+        documentation.
 
         Each example is a tuple of the form `(from-code, to-code, index)`. The
         `index` is optional and will be assumed to be 0 if it's not included.
         The `from-code` is a string containing some Python code prior to
-        mutation. The `to-code` is a string desribing the code after mutation.
+        mutation. The `to-code` is a string describing the code after mutation.
         `index` indicates the occurrence of the application of the operator to
         the code (i.e. for when an operator can perform multiple mutation to a
         piece of code).

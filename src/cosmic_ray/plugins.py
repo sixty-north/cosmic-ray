@@ -2,8 +2,11 @@
 """
 
 import logging
+from typing import Type
 
 from stevedore import driver, ExtensionManager
+
+from cosmic_ray.interceptors import Interceptor
 
 log = logging.getLogger()
 
@@ -50,7 +53,7 @@ def operator_names():
                  for operator_name in provider)
 
 
-def get_interceptor(name):
+def get_interceptor(name) -> Type[Interceptor]:
     """Get an interceptor by name.
 
     Attrs:
