@@ -12,16 +12,12 @@ def find_modules(module_path):
 
     Returns: An iterable of paths Python modules (i.e. *py files).
     """
-    if module_path.is_dir():
-        pyfiles = glob.glob('{}/**/*.py'.format(module_path), recursive=True)
-
-    else:
+    if module_path.is_file():
         if module_path.suffix == '.py':
-            pyfiles = module_path,
-        else:
-            pyfiles = ()
-
-    yield from (Path(pyfile) for pyfile in pyfiles)
+            yield module_path
+    elif module_path.is_dir():
+        pyfiles = glob.glob('{}/**/*.py'.format(module_path), recursive=True)
+        yield from (Path(pyfile) for pyfile in pyfiles)
 
 
 def filter_paths(paths, excluded_paths):
