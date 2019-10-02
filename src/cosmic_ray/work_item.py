@@ -84,6 +84,9 @@ class WorkResult:
     def __neq__(self, rhs):
         return not self == rhs
 
+    def __repr__(self):
+        return f"<WorkResult {self._test_outcome}/{self.worker_outcome}: '{self.output}'>"
+
 
 class WorkItem:
     """Description of the work for a single mutation and test run.
@@ -157,8 +160,9 @@ class WorkItem:
     def __eq__(self, rhs):
         return self.as_dict() == rhs.as_dict()
 
-    def __neq__(self, rhs):
-        return not self == rhs
+    def __repr__(self):
+        return f"<WorkItem {self.job_id}: ({self.start_pos}/{self.end_pos}) " \
+               f"{self.occurrence} - {self.operator_name} ({self.module_path})>"
 
 
 class WorkItemJsonEncoder(json.JSONEncoder):

@@ -84,15 +84,20 @@ def init(module_paths, work_db: WorkDB, config: ConfigDict):
 
     for module_path in module_paths:
         module_ast = get_ast(module_path, python_version=config.python_version)
-
-        if interceptors.pre_scan_module_path(module_path):
-
-            for op_name in operator_names:
-                operator = get_operator(op_name)(config.python_version)
-                visitor = WorkDBInitVisitor(module_path, op_name, work_db,
-                                            operator, interceptors)
-                visitor.walk(module_ast)
-
-            interceptors.post_scan_module_path(module_path)
+        visit_module(work_db, interceptors, module_path, module_ast,
+                     operator_names, config)
 
     interceptors.post_init()
+
+
+def visit_module(work_db, interceptors, module_path, module_ast,
+                 operator_names, config):
+    if interceptors.pre_scan_module_path(module_path):
+
+        for op_name in operator_names:
+            operator = get_operator(op_name)(config.python_version)
+            visitor = WorkDBInitVisitor(module_path, op_name, work_db,
+                                        operator, interceptors)
+            visitor.walk(module_ast)
+
+        interceptors.post_scan_module_path(module_path)

@@ -1,13 +1,10 @@
 "Tools for working with parso ASTs."
 
 from abc import ABC, abstractmethod
-from typing import Dict, List
 
 import parso.python.tree
 import parso.tree
 from parso.tree import Node, Leaf
-
-from cosmic_ray.pragma import get_pragma_list
 
 
 class Visitor(ABC):
@@ -67,18 +64,6 @@ def get_comment_on_node_line(node) -> str or None:
 
         if isinstance(node, parso.python.tree.Newline):
             return node.prefix
-
-
-def get_node_pragma_categories(node) -> None or Dict[str, None or List[str]]:
-    """
-    Get pragma dictionary `see get_pragma_list` declared on the line
-    of the node
-    """
-    comment = get_comment_on_node_line(node)
-    if comment:
-        return get_pragma_list(comment)
-    else:
-        return None
 
 
 def is_none(node):
