@@ -7,7 +7,6 @@ import logging
 from spor.repository import open_repository
 
 from cosmic_ray.interceptors.base import Interceptor
-from cosmic_ray.work_db import WorkDB
 from cosmic_ray.work_item import WorkerOutcome, WorkResult
 
 log = logging.getLogger()
@@ -29,7 +28,7 @@ class SporInterceptor(Interceptor):
             with file_path.open(mode="rt") as handle:
                 return handle.readlines()
 
-        for item in self.work_db.work_items:
+        for item in self.work_db.pending_work_items:
             try:
                 repo = open_repository(item.module_path)
             except ValueError:
@@ -59,7 +58,7 @@ class SporInterceptor(Interceptor):
                     self.work_db.set_result(
                         item.job_id,
                         WorkResult(
-                            output=None,
+                            output="filtered by spor",
                             test_outcome=None,
                             diff=None,
                             worker_outcome=WorkerOutcome.SKIPPED,

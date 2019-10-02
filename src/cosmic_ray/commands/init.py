@@ -69,7 +69,9 @@ def init(module_paths, work_db: WorkDB, config: ConfigDict):
       work_db: A `WorkDB` instance into which the work orders will be saved.
       config: The configuration for the new session.
     """
-    operator_names = cosmic_ray.plugins.operator_names()
+
+    operator_names = list(cosmic_ray.plugins.operator_names())
+
     work_db.set_config(config=config)
 
     enabled_interceptors = config.sub('interceptors').get('enabled', ())
