@@ -56,7 +56,9 @@ def init(module_paths, work_db, config):
       work_db: A `WorkDB` instance into which the work orders will be saved.
       config: The configuration for the new session.
     """
-    operator_names = cosmic_ray.plugins.operator_names()
+
+    operator_names = list(cosmic_ray.plugins.operator_names())
+
     work_db.set_config(config=config)
 
     work_db.clear()
@@ -71,12 +73,14 @@ def init(module_paths, work_db, config):
                                         operator)
             visitor.walk(module_ast)
 
-    apply_interceptors(work_db, config.sub('interceptors').get('enabled', ()))
+    enabled_interceptors = config.sub('interceptors').get('enabled', ())
+    apply_interceptors(work_db, enabled_interceptors, config)
 
 
-def apply_interceptors(work_db, enabled_interceptors):
+def apply_interceptors(work_db, enabled_interceptors, config):
     """Apply each registered interceptor to the WorkDB."""
     names = (name for name in interceptor_names() if name in enabled_interceptors)
     for name in names:
+        sub_config = config.sub(name)
         interceptor = get_interceptor(name)
-        interceptor(work_db)
+        interceptor(work_db, sub_config)

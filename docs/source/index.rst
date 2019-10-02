@@ -32,6 +32,7 @@ assemblers to oil exploration software.
    commands
    badge
    operators
+   interceptors
    distributed
    implementation
    tests

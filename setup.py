@@ -109,6 +109,7 @@ setup(
         'cosmic_ray.interceptors': [
             'spor = cosmic_ray.interceptors.spor:intercept',
             'pragma_no_mutate = cosmic_ray.interceptors.pragma_no_mutate:intercept',
+            'operators-filter = cosmic_ray.interceptors.operators_filter:intercept',
         ],
     },
     long_description=LONG_DESCRIPTION,

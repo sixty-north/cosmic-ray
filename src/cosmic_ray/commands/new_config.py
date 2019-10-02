@@ -94,6 +94,7 @@ def new_config():
     config['cloning']['commands'] = []
 
     config['interceptors'] = ConfigDict()
-    config['interceptors']['enabled'] = ['spor', 'pragma_no_mutate']
+    config['interceptors']['enabled'] = ['spor', 'pragma_no_mutate', 'operators-filter']
+    config['operators-filter']['exclude-operators'] = []
 
     return config

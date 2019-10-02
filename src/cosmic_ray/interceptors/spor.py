@@ -11,7 +11,7 @@ from cosmic_ray.work_item import WorkerOutcome, WorkResult
 log = logging.getLogger()
 
 
-def intercept(work_db):
+def intercept(work_db, config):
     """Look for WorkItems in `work_db` that should not be mutated due to spor metadata.
 
     For each WorkItem, find anchors for the item's file/line/columns. If an
@@ -25,7 +25,7 @@ def intercept(work_db):
         with file_path.open(mode="rt") as handle:
             return handle.readlines()
 
-    for item in work_db.work_items:
+    for item in work_db.pending_work_items:
         try:
             repo = open_repository(item.module_path)
         except ValueError:
@@ -55,7 +55,7 @@ def intercept(work_db):
                 work_db.set_result(
                     item.job_id,
                     WorkResult(
-                        output=None,
+                        output="Filtered by spor",
                         test_outcome=None,
                         diff=None,
                         worker_outcome=WorkerOutcome.SKIPPED,
