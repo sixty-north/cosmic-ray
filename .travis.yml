@@ -22,43 +22,29 @@ matrix:
   - python: nightly
   - python: 3.6
     env: TOXENV=lint,style
-
 env:
   global:
-  - PYTEST_ADDOPTS="--e2e-engine=celery4 --e2e-engine=local --e2e-tester=unittest --e2e-tester=pytest"
-  # - TOXENV=py-coverage
-
+  - PYTEST_ADDOPTS="--e2e-engine=celery4 --e2e-engine=local --e2e-tester=unittest
+    --e2e-tester=pytest"
 install:
 - pip install tox
-
 services: rabbitmq
-
 before_script:
- - pushd tests/example_project
- - python -m celery worker -A cosmic_ray_celery4_engine.worker &
- - popd
-
+- pushd tests/example_project
+- python -m celery worker -A cosmic_ray_celery4_engine.worker &
+- popd
 script:
 - tox
-
-# after_success:
-# - |
-#   pip install codecov
-#   coverage xml
-#   codecov_flags=py${TRAVIS_PYTHON_VERSION//./}
-#   codecov --required -X search gcov pycov -f coverage.xml --flags $codecov_flags
-
-# When we push to 'release', the python-3.6 travis run should do a deployment.
 deploy:
   provider: pypi
-  user: abingham
+  user: sixty-north
   password:
-    secure: ckgurny6GwdI4Ya7FtyP536v11ynyc3uUgjUjQPANtXf8duyB57dKN28UJQ2CcpDHNRCaJPVsZZBgIARwnbSozEgDKiZk7Ng13dU/tHZ9bkMcFPvQMLwCv5JTG33M0dn9SEzoV5YZT0ro35zC+VDJFOO7yvX1cb2WiMLTcudV9A=
+    secure: OtGzgIBstMHaLj2gNroxH47W+j6ukzShGU9+PjjWGWuoYlNPoYCWcUsBs5MkmttMeDiZddJX2r9ezQ9872rfc0tRrcakZ6CoAjk4q5eWdrn9tHeivYW3zK9IsL5KHGyPLMrZNVACFvH9J/uHqD3tDlOzO75HNEmmAb6BkNw2sCs=
   distributions: bdist_wheel sdist
   on:
     branch: release
     python: 3.6
-
 before_deploy:
-- openssl aes-256-cbc -K $encrypted_6ad9c4041ffc_key -iv $encrypted_6ad9c4041ffc_iv -in deploy_key.enc -out deploy_key -d
+- openssl aes-256-cbc -K $encrypted_6ad9c4041ffc_key -iv $encrypted_6ad9c4041ffc_iv
+  -in deploy_key.enc -out deploy_key -d
 - python scripts/make_release_tag.py
