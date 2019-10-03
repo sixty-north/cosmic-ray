@@ -13,7 +13,7 @@ class Data:
     def new_work_item(self, operator_name, job_id):
         self.count += 1
         return WorkItem(
-            module_path=f"{self.count}.py",
+            module_path="{}.py".format(self.count),
             operator_name=operator_name,
             occurrence=self.count,
             start_pos=(self.count, self.count),
