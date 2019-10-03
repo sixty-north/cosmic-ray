@@ -8,7 +8,7 @@ import subprocess
 ROOT = subprocess.check_output([
     'git', 'rev-parse', '--show-toplevel']).decode('ascii').strip()
 
-VERSION_FILE = os.path.join(ROOT, 'cosmic_ray', 'version.py')
+VERSION_FILE = os.path.join(ROOT, 'src', 'cosmic_ray', 'version.py')
 
 
 def git(*args):
