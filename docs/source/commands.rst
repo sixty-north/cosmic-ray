@@ -76,46 +76,29 @@ code. It has the following optional arguments:
 
 -  ``--no-local-import``: Allow importing module from the current
    directory.
--  ``exclude-modules=P``: Exclude modules matching this regex pattern
-   from mutation.
 
-Some packages place the tests within a sub-package of the main one:
+The ``init`` verb use following entries from the configuration file:
 
-::
+- ``[cosmic-ray] exclude-modules = []``: Exclude modules matching those glob
+  patterns from mutation. Use ``glob.glob`` syntax.
 
-    C:\dev\PyErf
-    ¦   .gitignore
-    ¦   .travis.yml
-    ¦   CHANGELOG.md
-    ¦   LICENSE
-    ¦   README.rst
-    ¦   requirements-dev.txt
-    ¦   setup.py
-    ¦
-    +---docs
-    ¦       conf.py
-    ¦       index.rst
-    ¦       make.bat
-    ¦       Makefile
-    ¦
-    +---pyerf
-        ¦   __init__.py
-        ¦   __about__.py
-        ¦   pyerf.py
-        ¦
-        +---tests
-                __init__.py
-                test_pyerf.py
+  Sample for django projects:
+
+  ::
+
+   exclude-modules = ["*/tests/*", "*/migrations/*"]
+
 
 As mentioned in
 `here <#An-important-note-on-separating-tests-and-production-code>`__,
-this can be handled via the ``--exlcuded-modules`` flag. With the
-example above, the command to run would be from the Project directory
-(``C:\dev\PyErf``):
+test directory can be handled via the ``excluded-modules`` option.
+
+The list of files that will be mutate effectively can be show by running
+``cosmic-ray init`` with INFO debug level:
 
 ::
 
-    cosmic-ray init --baseline=2 test_session pyerf --exclude-modules=.*tests.* -- pyerf/tests
+ cosmic-ray init -v INFO
 
 Command: exec
 ~~~~~~~~~~~~~

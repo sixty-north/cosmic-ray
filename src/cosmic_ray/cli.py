@@ -8,6 +8,7 @@ import os
 import signal
 import subprocess
 import sys
+from collections import defaultdict
 from contextlib import redirect_stdout
 from pathlib import Path
 
@@ -102,9 +103,16 @@ def handle_init(args):
 
     config = load_config(config_file)
 
-    modules = set(cosmic_ray.modules.find_modules(Path(config['module-path'])))
+    modules = cosmic_ray.modules.find_modules(Path(config['module-path']))
+    modules = cosmic_ray.modules.filter_paths(modules, config.get('exclude-modules', ()))
 
-    log.info('Modules discovered: %s', [m for m in modules])
+    if log.isEnabledFor(logging.INFO):
+        log.info('Modules discovered:')
+        per_dir = defaultdict(list)
+        for m in modules:
+            per_dir[m.parent].append(m.name)
+        for dir, files in per_dir.items():
+            log.info(' - %s: %s', dir, ', '.join(sorted(files)))
 
     db_name = args['<session-file>']
 

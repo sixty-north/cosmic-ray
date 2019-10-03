@@ -15,7 +15,7 @@ class ReplaceTrueWithFalse(KeywordReplacementOperator):
 class ReplaceFalseWithTrue(KeywordReplacementOperator):
     """An that replaces False with True."""
     from_keyword = 'False'
-    to_keyword = 'To'
+    to_keyword = 'True'
 
 
 class ReplaceAndWithOr(KeywordReplacementOperator):
