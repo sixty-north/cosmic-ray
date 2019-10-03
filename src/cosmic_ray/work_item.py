@@ -84,6 +84,12 @@ class WorkResult:
     def __neq__(self, rhs):
         return not self == rhs
 
+    def __repr__(self):
+        return "<WorkResult {test_outcome}/{worker_outcome}: '{output}'>".format(
+            test_outcome=self._test_outcome,
+            worker_outcome=self.worker_outcome,
+            output=self.output)
+
 
 class WorkItem:
     """Description of the work for a single mutation and test run.
@@ -160,9 +166,19 @@ class WorkItem:
     def __neq__(self, rhs):
         return not self == rhs
 
+    def __repr__(self):
+        return "<WorkItem {job_id}: ({start_pos}/{end_pos}) {occurrence} - {operator} ({module})>".format(
+            job_id=self.job_id,
+            start_pos=self.start_pos,
+            end_pos=self.end_pos,
+            occurrence=self.occurrence,
+            operator=self.operator_name,
+            module=self.module_path)
+
 
 class WorkItemJsonEncoder(json.JSONEncoder):
     "Custom JSON encoder for workitems and workresults."
+
     def default(self, o):  # pylint: disable=E0202
         if isinstance(o, WorkItem):
             return {"_type": "WorkItem", "values": o.as_dict()}
@@ -175,6 +191,7 @@ class WorkItemJsonEncoder(json.JSONEncoder):
 
 class WorkItemJsonDecoder(json.JSONDecoder):
     "Custom JSON decoder for WorkItems and WorkResults."
+
     def __init__(self):
         json.JSONDecoder.__init__(self, object_hook=self._decode_work_items)
 
