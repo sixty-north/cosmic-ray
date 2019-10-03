@@ -105,7 +105,7 @@ def handle_init(args):
     config = load_config(config_file)
 
     modules = cosmic_ray.modules.find_modules(Path(config['module-path']))
-    modules = cosmic_ray.modules.filter_paths(modules, config['exclude-modules'])
+    modules = cosmic_ray.modules.filter_paths(modules, config.get('exclude-modules', ()))
 
     if log.isEnabledFor(logging.INFO):
         log.info('Modules discovered:')
