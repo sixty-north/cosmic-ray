@@ -16,13 +16,13 @@ def test_pragma():
     r = get_pragma_list("# comment pragma:")
     assert r == {}
     r = get_pragma_list("# comment pragma: x y  z")
-    assert r == {'x y': None, 'z': None}
+    assert r == {'x y': True, 'z': True}
     r = get_pragma_list("# comment pragma: x:")
     assert r == {'x': []}
     r = get_pragma_list("# comment pragma: x:  y")
-    assert r == {'x': [], 'y': None}
+    assert r == {'x': [], 'y': True}
     r = get_pragma_list("# comment pragma: x y  z: d, e")
-    assert r == {'x y': None, 'z': ['d', 'e']}
+    assert r == {'x y': True, 'z': ['d', 'e']}
     r = get_pragma_list("# comment pragma: x: a, b, c  y z: d, e")
     assert r == {'x': ['a', 'b', 'c'], 'y z': ['d', 'e']}
     r = get_pragma_list("comment pragma: x: a, b, c y  z: d, e")
@@ -40,6 +40,8 @@ class Data:
     def set_result(self, job_id, work_result: WorkResult):
         self.results[job_id] = work_result
 
+    config = {'pragma': {'filter-no-coverage': True}}
+
     operator_names = [
         'core/ReplaceTrueWithFalse',
         'core/ReplaceFalseWithTrue',
@@ -53,6 +55,7 @@ c = True  # pragma: no mutate: other
 
 @decorator  # pragma: no mutate: decorator
 d = 0  
+e = True  # pragma: no coverage
 
     """
 
@@ -76,6 +79,8 @@ d = 0
         ((3, 15), (3, 20), 0): ('core/ReplaceFalseWithTrue', WorkerOutcome.SKIPPED),
         # skip @decorator
         ((6, 0), (7, 0), 0): ('core/RemoveDecorator', WorkerOutcome.SKIPPED),
+        # skip pragma no coverage
+        ((8, 4), (8, 8), 3): ('core/ReplaceTrueWithFalse', WorkerOutcome.SKIPPED),
     }
 
 
@@ -87,7 +92,7 @@ def test_interceptor():
         module_path="a.py",
         module_ast=parso.parse(data.content),
         work_db=data,
-        interceptors=Interceptors([interceptor]),
+        interceptors=Interceptors([interceptor], data.config),
         operator_names=data.operator_names,
         config=ConfigDict(),
     )

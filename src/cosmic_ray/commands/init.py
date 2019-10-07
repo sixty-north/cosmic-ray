@@ -78,7 +78,7 @@ def init(module_paths, work_db: WorkDB, config: ConfigDict):
     interceptors = [get_interceptor(name)(work_db)
                     for name in interceptor_names()
                     if name in enabled_interceptors]
-    interceptors = Interceptors(interceptors)
+    interceptors = Interceptors(interceptors, config.get('interceptors', {}))
 
     work_db.clear()
 

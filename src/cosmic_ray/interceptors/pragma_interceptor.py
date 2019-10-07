@@ -13,6 +13,10 @@ class PragmaInterceptor(Interceptor):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._pragma_cache = None
+        self.filter_no_coverage = False
+
+    def set_config(self, config):
+        self.filter_no_coverage = config.get('filter-no-coverage', False)
 
     def pre_scan_module_path(self, module_path):
         self._pragma_cache = {}
@@ -43,32 +47,32 @@ class PragmaInterceptor(Interceptor):
         It use cache mechanism of pragma information across visitors.
         """
 
-        pragma_categories = self._pragma_cache.get(node, True)
-        # pragma_categories can be (None, False, list):
-        #   use True as guard
-
-        if pragma_categories is True:
-            pragma = get_node_pragma_categories(node)
-            if pragma:
-                pragma_categories = pragma.get('no mutate', False)
-            else:
-                pragma_categories = False
-            # pragma_categories is None: Exclude all operator
-            # pragma_categories is list: Exclude operators in the list
-            # pragma_categories is False:
-            #    guard indicate no pragma: no filter
-            self._pragma_cache[node] = pragma_categories
-
-        if pragma_categories is False:
-            return False
+        pragma_categories = self._pragma_cache.get(node)
 
         if pragma_categories is None:
+            pragma = get_node_pragma_categories(node)
+            if pragma:
+                pragma_categories = pragma.get('no mutate')
+                if self.filter_no_coverage:
+                    no_coverage = pragma.get('no coverage')
+                    if no_coverage:
+                        pragma_categories = True
+            else:
+                pragma_categories = False
+            # pragma_categories is True: Exclude all operator
+            # pragma_categories is list: Exclude operators in the list
+            self._pragma_cache[node] = pragma_categories
+
+        if pragma_categories is None:
+            return False
+
+        if pragma_categories is True:
             return True
 
         return operator.pragma_category_name in pragma_categories
 
 
-def get_node_pragma_categories(node) -> None or Dict[str, None or List[str]]:
+def get_node_pragma_categories(node) -> None or Dict[str, bool or List[str]]:
     """
     Get pragma dictionary `see get_pragma_list` declared on the line
     of the node
@@ -83,7 +87,7 @@ def get_node_pragma_categories(node) -> None or Dict[str, None or List[str]]:
 _re_pragma = re.compile(r'([-A-Za-z0-9](?: (?! )|[-A-Za-z0-9])*)(:?)(,?)')
 
 
-def get_pragma_list(line: str) -> None or Dict[str, None or List[str]]:
+def get_pragma_list(line: str) -> None or Dict[str, bool or List[str]]:
     """
     Pragma syntax:
     - Any comment can be present before 'pragma:' declaration
@@ -99,20 +103,20 @@ def get_pragma_list(line: str) -> None or Dict[str, None or List[str]]:
         previous section (no space)
 
     :return Dictionary of list of sections per pragma family.
-        If a pragma family have no section, the dictionary will returns None
+        If a pragma family have no section, the dictionary will returns True
 
     >>> get_pragma_list("# comment")
     None
     >>> get_pragma_list("# comment pragma:")
     {}
     >>> get_pragma_list("# comment pragma: x y  z")
-    {'x y': None, 'z': None}
+    {'x y': True, 'z': True}
     >>> get_pragma_list("# comment pragma: x:")
     {'x': []}
     >>> get_pragma_list("# comment pragma: x:  y")
-    {'x': [], 'y': None}
+    {'x': [], 'y': True}
     >>> get_pragma_list("# comment pragma: x y  z: d, e")
-    {'x y': None, 'z': ['d', 'e']}
+    {'x y': True, 'z': ['d', 'e']}
     >>> get_pragma_list("# comment pragma: x: a, b, c  y z: d, e")
     {'x': ['a', 'b', 'c'], 'y z': ['d', 'e']}
     >>> get_pragma_list("comment pragma: x: a, b, c y  z: d, e")
@@ -152,5 +156,5 @@ def get_pragma_list(line: str) -> None or Dict[str, None or List[str]]:
             else:
                 # No ':', this family_name have no section,
                 # next is another family_name
-                pragma[elt] = None
+                pragma[elt] = True
     return pragma
