@@ -18,3 +18,17 @@ def find_modules(module_path):
     elif module_path.is_dir():
         pyfiles = glob.glob('{}/**/*.py'.format(module_path), recursive=True)
         yield from (Path(pyfile) for pyfile in pyfiles)
+
+
+def filter_paths(paths, excluded_paths):
+    """Filter out path matching one of excluded_paths glob
+
+    Args:
+        paths: path to filter.
+        excluded_paths: List for glob of modules to exclude.
+
+    Returns: An iterable of paths Python modules (i.e. *py files).
+    """
+    excluded = set(Path(f) for excluded_path in excluded_paths
+                   for f in glob.glob(excluded_path, recursive=True))
+    return set(paths) - excluded
