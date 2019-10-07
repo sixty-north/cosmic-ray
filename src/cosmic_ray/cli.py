@@ -1,4 +1,4 @@
-"""This is the command-line program for cosmic ray. 
+"""This is the command-line program for cosmic ray.
 
 Here we manage command-line parsing and launching of the internal machinery that does mutation testing.
 """
@@ -27,7 +27,8 @@ from cosmic_ray.mutating import apply_mutation
 from cosmic_ray.progress import report_progress
 from cosmic_ray.version import __version__
 from cosmic_ray.work_db import WorkDB, use_db
-from cosmic_ray.work_item import WorkItem, WorkItemJsonEncoder
+from cosmic_ray.work_item import WorkItem, WorkItemJsonEncoder, WorkResult, \
+    WorkerOutcome, TestOutcome
 
 log = logging.getLogger()
 
@@ -145,7 +146,8 @@ def handle_exec(args):
     infrastructure (e.g. worker processes) are already running.
     """
     session_file = args.get('<session-file>')
-    cosmic_ray.commands.execute(session_file)
+    with use_db(session_file, mode=WorkDB.Mode.open) as work_db:
+        cosmic_ray.commands.execute(work_db)
 
     return ExitCode.OK
 
@@ -158,11 +160,9 @@ def handle_baseline(args):
     unmutated code.
     """
     session_file = Path(args.get('<session-file>'))
-    baseline_session_file = session_file.parent / '{}.baseline{}'.format(
-        session_file.stem, session_file.suffix)
 
     # Find arbitrary work-item in input session that we can copy.
-    with use_db(session_file) as db:
+    with use_db(session_file) as db:  # type: WorkDB
         try:
             template = next(iter(db.work_items))
         except StopIteration:
@@ -173,7 +173,7 @@ def handle_baseline(args):
 
     # Copy input work-item, but tell it to use the no-op operator. Create a new
     # session containing only this work-item and execute this new session.
-    with use_db(baseline_session_file, mode=WorkDB.Mode.create) as db:
+    with use_db(mode=WorkDB.Mode.create) as db:
         db.set_config(config)
 
         db.add_work_item(
@@ -185,10 +185,18 @@ def handle_baseline(args):
                 end_pos=template.end_pos,
                 job_id=template.job_id))
 
-    # Run the single-entry session.
-    cosmic_ray.commands.execute(baseline_session_file)
+        # Run the single-entry session.
+        cosmic_ray.commands.execute(db)
 
-    return ExitCode.OK
+        result: WorkResult = next(db.results)[1]
+        if result.test_outcome == TestOutcome.KILLED:
+            print("Execution with no mutation gives those following errors:")
+            for line in result.output.split('\n'):
+                print("  >>>", line)
+            return 1
+        else:
+            print("Execution with no mutation works fine:")
+            return ExitCode.OK
 
 
 @dsc.command()

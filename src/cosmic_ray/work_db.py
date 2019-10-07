@@ -3,6 +3,7 @@
 import contextlib
 import os
 import sqlite3
+import tempfile
 from enum import Enum
 
 from .config import deserialize_config, serialize_config
@@ -262,7 +263,7 @@ def _work_result_to_row(job_id, result):
 
 
 @contextlib.contextmanager
-def use_db(path, mode=WorkDB.Mode.create):
+def use_db(path=None, mode=WorkDB.Mode.create) -> WorkDB:
     """
     Open a DB in file `path` in mode `mode` as a context manager.
 
@@ -277,8 +278,16 @@ def use_db(path, mode=WorkDB.Mode.create):
       FileNotFoundError: If `mode` is `Mode.open` and `path` does not
         exist.
     """
+    if path is None:
+        tmp_path = tempfile.mkstemp()[1]
+        path = tmp_path
+    else:
+        tmp_path = None
+
     database = WorkDB(path, mode)
     try:
         yield database
     finally:
         database.close()
+        if tmp_path:
+            os.unlink(tmp_path)
