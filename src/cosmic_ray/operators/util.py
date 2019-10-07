@@ -46,40 +46,40 @@ def dump_node(node, stdout=None):
     do_dump(node)
 
 
-class ObjTest:
+class ASTQuery:
     """
     Allowing to navigate into any object and test attribute of any object:
 
     Examples:
-    >>> ObjTest(node).parent.match(Node, type='node').ok
+    >>> ASTQuery(node).parent.match(Node, type='node').ok
 
     Test if node.parent isinstance of Node and node.parent.type == 'node'
     At each step (each '.' (dot)) you receive an ObjTest object, then
 
     Navigation:
     You can call any properties or functions of the base object
-    >>> ObjTest(node).parent.children[2].get_next_sibling()
+    >>> ASTQuery(node).parent.children[2].get_next_sibling()
 
     Test:
-    >>> ObjTest(node).match(attr='value').match(Class)
+    >>> ASTQuery(node).match(attr='value').match(Class)
     All in once:
-    >>> ObjTest(node).match(Class, attr='value')
+    >>> ASTQuery(node).match(Class, attr='value')
 
     Conditional navigation:
-    >>> ObjTest(node).IF.match(attr='intermediate').parent.FI
+    >>> ASTQuery(node).IF.match(attr='intermediate').parent.FI
 
     Final result:
-    >>> ObjTest(node).ok
-    >>> bool(ObjTest(node))
+    >>> ASTQuery(node).ok
+    >>> bool(ASTQuery(node))
 
     """
     def __init__(self, obj):
         self.obj = obj
 
-    def _clone(self, obj) -> 'ObjTest':
+    def _clone(self, obj) -> 'ASTQuery':
         return type(self)(obj)
 
-    def match(self, clazz=None, **kwargs) -> 'ObjTest':
+    def match(self, clazz=None, **kwargs) -> 'ASTQuery':
         obj = self.obj
         if obj is None:
             return self
@@ -113,7 +113,7 @@ class ObjTest:
     def __bool__(self):
         return self.ok
 
-    def __getattr__(self, item) -> 'ObjTest':
+    def __getattr__(self, item) -> 'ASTQuery':
         obj = self.obj
         if obj is None:
             return self
@@ -121,20 +121,20 @@ class ObjTest:
 
     @property
     def IF(self):
-        return ObjTestOptionnal(self.obj, obj_test=self)
+        return ASTQueryOptional(self.obj, obj_test=self)
 
-    def __call__(self, *args, **kwargs) -> 'ObjTest':
+    def __call__(self, *args, **kwargs) -> 'ASTQuery':
         if self.obj is None:
             return self
         return self._clone(self.obj(*args, **kwargs))
 
-    def __getitem__(self, item) -> 'ObjTest':
+    def __getitem__(self, item) -> 'ASTQuery':
         if self.obj is None:
             return self
         return self._clone(self.obj[item])
 
 
-class ObjTestOptionnal(ObjTest):
+class ASTQueryOptional(ASTQuery):
     def __init__(self, obj, obj_test=None):
         super().__init__(obj)
         self._initial = obj_test
