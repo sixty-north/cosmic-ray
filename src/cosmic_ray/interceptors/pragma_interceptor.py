@@ -63,11 +63,8 @@ class PragmaInterceptor(Interceptor):
             # pragma_categories is list: Exclude operators in the list
             self._pragma_cache[node] = pragma_categories
 
-        if pragma_categories is None:
-            return False
-
-        if pragma_categories is True:
-            return True
+        if isinstance(pragma_categories, bool):
+            return pragma_categories
 
         return operator.pragma_category_name in pragma_categories
 
