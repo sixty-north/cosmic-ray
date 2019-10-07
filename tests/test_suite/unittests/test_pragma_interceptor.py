@@ -40,12 +40,23 @@ class Data:
     def set_result(self, job_id, work_result: WorkResult):
         self.results[job_id] = work_result
 
+    @property
+    def merged_results(self):
+        results = ((r, self.work_items[job_id])
+                   for job_id, r in self.results.items())
+        return {
+            (w.start_pos, w.end_pos, w.occurrence):
+                (w.operator_name, r.worker_outcome)
+            for r, w in results
+        }
+
     config = {'pragma': {'filter-no-coverage': True}}
 
     operator_names = [
         'core/ReplaceTrueWithFalse',
         'core/ReplaceFalseWithTrue',
         'core/RemoveDecorator',
+        # 'core/RemoveNamedArgument',
     ]
 
     content = """
@@ -57,18 +68,10 @@ c = True  # pragma: no mutate: other
 d = 0  
 e = True  # pragma: no coverage
 
+f = f(a=1,
+      b=2,  # pragma: no mutate: named-argument
+      c=3) 
     """
-
-    @property
-    def merged_results(self):
-        results = ((r, self.work_items[job_id])
-                   for job_id, r in self.results.items())
-        return {
-            (w.start_pos, w.end_pos, w.occurrence):
-                (w.operator_name, r.worker_outcome)
-            for r, w in results
-        }
-
 
     expected = {
         # skip a
@@ -81,6 +84,8 @@ e = True  # pragma: no coverage
         ((6, 0), (7, 0), 0): ('core/RemoveDecorator', WorkerOutcome.SKIPPED),
         # skip pragma no coverage
         ((8, 4), (8, 8), 3): ('core/ReplaceTrueWithFalse', WorkerOutcome.SKIPPED),
+        # skip named-argument using target_node
+        # ((11, 6), (11, 9), 1): ('core/RemoveNamedArgument', WorkerOutcome.SKIPPED),
     }
 
 

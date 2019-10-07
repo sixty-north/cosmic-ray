@@ -35,8 +35,13 @@ class WorkDBInitVisitor(Visitor):
         self._interceptors = interceptors
 
     def visit(self, node: Node):
-        for start, stop in self.operator.mutation_positions(node):
-            self._record_work_item(node, start, stop)
+        for start_stop in self.operator.mutation_positions(node):
+            if len(start_stop) == 2:
+                (start, stop), target_node = start_stop, node
+            else:
+                start, stop, target_node = start_stop
+
+            self._record_work_item(target_node, start, stop)
         return node
 
     def _record_work_item(self, node, start_pos, end_pos):
