@@ -1,4 +1,4 @@
-from cosmic_ray.interceptors import operators_filter
+from cosmic_ray.interceptors.operators_filter import OperatorsFilterInterceptor
 from cosmic_ray.work_item import WorkItem, WorkResult, WorkerOutcome
 
 
@@ -52,5 +52,7 @@ class Data:
 
 def test_operators_filter():
     data = Data()
-    operators_filter.intercept(data, data.config)
+    interceptor = OperatorsFilterInterceptor(data)
+    interceptor.set_config(data.config)
+    interceptor.post_init()
     assert data.results == data.expected
