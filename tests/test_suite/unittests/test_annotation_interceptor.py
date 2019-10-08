@@ -1,6 +1,7 @@
 from typing import Dict
 
 import parso
+import sys
 
 from cosmic_ray.commands.init import visit_module
 from cosmic_ray.config import ConfigDict
@@ -12,8 +13,8 @@ from cosmic_ray.work_item import WorkResult, WorkItem
 
 class Data:
     def __init__(self):
-        self.results: Dict[str, WorkResult] = {}
-        self.work_items: Dict[str, WorkItem] = {}
+        self.results = {}  # type: Dict[str, WorkResult]
+        self.work_items = {}  # type: Dict[str, WorkItem]
 
     def add_work_item(self, work_item: WorkItem):
         self.work_items[work_item.job_id] = work_item
@@ -40,22 +41,38 @@ class Data:
         # 'core/StringReplacer',
     ]
 
-    content = """
-    a: int or str = 1 or 2
-    a = 1 or 2
-    b: " annotation " = 2
-    def f(a: int or float) -> str or float:
-        return a or True
-    def f(a):
-        a or False
-    """
+    if sys.version_info < (3, 6):
+        content = """
+        a = 1 or 2
+        def f(a: int or float) -> str or float:
+            return a or True
+        def f(a):
+            a or False
+        """
 
-    expected = {
-        ('core/ReplaceOrWithAnd', 0): ((2, 22), (2, 24), (None, None)),
-        ('core/ReplaceOrWithAnd', 1): ((3, 10), (3, 12), (None, None)),
-        ('core/ReplaceOrWithAnd', 2): ((6, 17), (6, 19), (None, None)),
-        ('core/ReplaceOrWithAnd', 3): ((8, 10), (8, 12), (None, None)),
-    }
+        expected = {
+            ('core/ReplaceOrWithAnd', 0): ((2, 14), (2, 16), (None, None)),
+            ('core/ReplaceOrWithAnd', 1): ((4, 21), (4, 23), (None, None)),
+            ('core/ReplaceOrWithAnd', 2): ((6, 14), (6, 16), (None, None)),
+        }
+
+    else:
+        content = """
+        a: int or str = 1 or 2
+        a = 1 or 2
+        b: " annotation " = 2
+        def f(a: int or float) -> str or float:
+            return a or True
+        def f(a):
+            a or False
+        """
+
+        expected = {
+            ('core/ReplaceOrWithAnd', 0): ((2, 26), (2, 28), (None, None)),
+            ('core/ReplaceOrWithAnd', 1): ((3, 14), (3, 16), (None, None)),
+            ('core/ReplaceOrWithAnd', 2): ((6, 21), (6, 23), (None, None)),
+            ('core/ReplaceOrWithAnd', 3): ((8, 14), (8, 16), (None, None)),
+        }
 
 
 def test_interceptor():
