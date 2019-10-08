@@ -5,6 +5,8 @@ import sys
 
 import toml
 
+from cosmic_ray.util import to_kebab_case
+
 log = logging.getLogger()
 
 
@@ -101,6 +103,18 @@ class ConfigDict(dict):
         "The configuration for the named execution engine."
         name = self.execution_engine_name
         return self['execution-engine'].get(name, ConfigDict())
+
+    @property
+    def operators(self):
+        return self.get('operators', {})
+
+    def get_operator(self, name: str):
+        name = name.rsplit('/', maxsplit=1)[-1]
+        # Rename ltE and Gte to avoid result lt-e
+        name = name.replace('LtE', 'Lte')
+        name = name.replace('GtE', 'Gte')
+        name = to_kebab_case(name)
+        return self.operators.get(name)
 
     @property
     def cloning_config(self):

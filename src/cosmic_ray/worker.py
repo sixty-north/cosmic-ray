@@ -39,7 +39,7 @@ def worker(module_path,
     incompetent - in a structured way.
 
     Args:
-        module_name: The path to the module to mutate
+        module_path: The path to the module to mutate
         python_version: The version of Python to use when interpreting the code in `module_path`.
             A string of the form "MAJOR.MINOR", e.g. "3.6" for Python 3.6.x.
         operator_name: The name of the operator plugin to use
@@ -55,7 +55,7 @@ def worker(module_path,
     """
     try:
         operator_class = cosmic_ray.plugins.get_operator(operator_name)
-        operator = operator_class(python_version)
+        operator = operator_class(python_version, {})
 
         with cosmic_ray.mutating.use_mutation(module_path, operator,
                                               occurrence) as (original_code,

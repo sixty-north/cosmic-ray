@@ -211,7 +211,7 @@ def handle_interceptors(args):
 
 @dsc.command()
 def handle_apply(args):
-    """usage: {program} apply <module-path> <operator> <occurrence>
+    """usage: {program} apply <config_file> <module-path> <operator> <occurrence>
 
     Apply the specified mutation to the files on disk. This is primarily a debugging
     tool.
@@ -225,9 +225,14 @@ def handle_apply(args):
         python_version = "{}.{}".format(sys.version_info.major,
                                         sys.version_info.minor)
 
+    config_filename = args['<config_file>']
+    config = load_config(config_filename)
+
+    op_name = args['<operator>']
+    op_config = config.get_operator(op_name)
     apply_mutation(
         Path(args['<module-path>']),
-        cosmic_ray.plugins.get_operator(args['<operator>'])(python_version),
+        cosmic_ray.plugins.get_operator(op_name)(python_version, op_config),
         int(args['<occurrence>']))
 
     return ExitCode.OK

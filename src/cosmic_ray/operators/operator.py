@@ -11,8 +11,9 @@ class Operator(ABC):
             A string of the form "MAJOR.MINOR", e.g. "3.6" for Python 3.6.x.
     """
 
-    def __init__(self, python_version):
+    def __init__(self, python_version, config):
         self._python_version = python_version
+        self.config = config or {}
 
     @property
     def python_version(self):
@@ -49,12 +50,12 @@ class Operator(ABC):
         """Examples of the mutations that this operator can make.
 
         This is primarily for testing purposes, but it could also be used for
-        docmentation.
+        documentation.
 
         Each example is a tuple of the form `(from-code, to-code, index)`. The
         `index` is optional and will be assumed to be 0 if it's not included.
         The `from-code` is a string containing some Python code prior to
-        mutation. The `to-code` is a string desribing the code after mutation.
+        mutation. The `to-code` is a string describing the code after mutation.
         `index` indicates the occurrence of the application of the operator to
         the code (i.e. for when an operator can perform multiple mutation to a
         piece of code).

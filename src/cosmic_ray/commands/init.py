@@ -100,7 +100,8 @@ def visit_module(work_db, interceptors, module_path, module_ast,
     if interceptors.pre_scan_module_path(module_path):
 
         for op_name in operator_names:
-            operator = get_operator(op_name)(config.python_version)
+            op_config = config.get_operator(op_name)
+            operator = get_operator(op_name)(config.python_version, op_config)
             visitor = WorkDBInitVisitor(module_path, op_name, work_db,
                                         operator, interceptors)
             visitor.walk(module_ast)

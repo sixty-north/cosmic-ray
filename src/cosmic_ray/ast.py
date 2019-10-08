@@ -74,3 +74,9 @@ def is_none(node):
 def is_number(node):
     "Determine if a node is a number."
     return isinstance(node, parso.python.tree.Number)
+
+
+def is_string(node):
+    "Determine if a node is a string."
+    return isinstance(node, (parso.python.tree.String,
+                             parso.python.tree.FStringStart))

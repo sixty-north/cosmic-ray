@@ -2,8 +2,11 @@
 """
 
 import logging
+from typing import Type
 
 from stevedore import driver, ExtensionManager
+
+from cosmic_ray.operators.operator import Operator
 
 log = logging.getLogger()
 
@@ -24,7 +27,7 @@ OPERATOR_PROVIDERS = {
 }
 
 
-def get_operator(name):
+def get_operator(name) -> Type[Operator]:
     """Get an operator class from a provider plugin.
 
     Attrs:

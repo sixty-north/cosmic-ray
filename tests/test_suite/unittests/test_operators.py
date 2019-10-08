@@ -11,11 +11,12 @@ from cosmic_ray.mutating import MutationVisitor
 
 
 class Sample:
-    def __init__(self, operator, from_code, to_code, index=0):
+    def __init__(self, operator, from_code, to_code, index=0, config=None):
         self.operator = operator
         self.from_code = from_code
         self.to_code = to_code
         self.index = index
+        self.config = config
 
 
 OPERATOR_PROVIDED_SAMPLES = tuple(
@@ -37,7 +38,7 @@ OPERATOR_SAMPLES = OPERATOR_PROVIDED_SAMPLES + EXTRA_SAMPLES
 @pytest.mark.parametrize('sample', OPERATOR_SAMPLES)
 def test_mutation_changes_ast(sample, python_version):
     node = parso.parse(sample.from_code)
-    visitor = MutationVisitor(sample.index, sample.operator(python_version))
+    visitor = MutationVisitor(sample.index, sample.operator(python_version, sample.config))
     mutant = visitor.walk(node)
 
     assert mutant.get_code() == sample.to_code
@@ -46,7 +47,7 @@ def test_mutation_changes_ast(sample, python_version):
 @pytest.mark.parametrize('sample', OPERATOR_SAMPLES)
 def test_no_mutation_leaves_ast_unchanged(sample, python_version):
     node = parso.parse(sample.from_code)
-    visitor = MutationVisitor(-1, sample.operator(python_version))
+    visitor = MutationVisitor(-1, sample.operator(python_version, sample.config))
     mutant = visitor.walk(node)
 
     assert mutant.get_code() == sample.from_code
