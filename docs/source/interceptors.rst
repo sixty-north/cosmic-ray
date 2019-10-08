@@ -18,7 +18,7 @@ Actually, available interceptors are:
 
 - spor
 - operators-filter
-- pragma-no-mutate
+- pragma
 
 
 spor
@@ -46,10 +46,55 @@ The list of all available operators can be show by running
 -``cosmic-ray operators``
 
 
-pragma-no-mutate
-................
-**TODO**
-not documented because a new better interceptor will be available soon.
+pragma
+......
+
+Skip all mutation:
+    This interceptor filter mutation according to pragma annotation in your source
+    comments.
+
+    ::
+
+     a = 1  # pragma: no mutate
+
+    If this example, no mutation will be performed in this line.
+
+
+Skip a specific mutation:
+    You can filter specific mutation by specifing pragma category:
+
+    ::
+
+     a = b + 3  # pragma: no mutate: number-replacer
+
+    Only `core/NumberReplacer` will be skipped, but all operators
+    `core/ReplaceBinaryOperator_Add_*` will be apply.
+
+
+Skip line marked as 'no coverage':
+    Make mutation on uncoverable code have no meaning. Then if you set in your
+    configuration file `filter-no-coverage` to true, all lines marked with
+    `# pragma: no coverage` will be filtered too.
+
+    ::
+
+     [cosmic-ray.interceptors.pragma]
+     filter-no-coverage = true
+
+
+pragma syntax:
+    - Any comment can be present before 'pragma:' declaration
+    - You can have multiple pragma family separated with double space
+      (allowing family name having multiple words)
+    - You can declare sections of pragma if the pragma name is followed
+      directly with ':'
+    - Pragma family can have an empty section set if no section is declared
+      after ':'  ex "fam:" or "fam1:  fam2
+    - Section names can have a space (two spaces indicate the end
+      of section list)
+    - Sections are separated with ',', comma directly present after the
+      previous section (no space)
+
 
 
 Writing your own plugin

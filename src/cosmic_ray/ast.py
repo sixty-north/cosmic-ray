@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 
 import parso.python.tree
 import parso.tree
+from parso.tree import Leaf
 
 
 class Visitor(ABC):
@@ -41,6 +42,28 @@ def get_ast(module_path, python_version):
         source = handle.read()
 
     return parso.parse(source, version=python_version)
+
+
+def get_comment_on_node_line(node) -> str or None:
+    """
+    From a parso node, get the comment on the node line
+    and return the comment
+    """
+
+    while not isinstance(node, Leaf):
+        node = node.children[0]
+
+    # Now we are looking for any non empty prefix before next '\n'
+    while node is not None:
+        node = node.get_next_leaf()
+        if node:
+            # don't strip '\n'
+            prefix = node.prefix.strip(" \t")
+            if prefix:
+                return prefix
+
+        if isinstance(node, parso.python.tree.Newline):
+            return node.prefix
 
 
 def is_none(node):
