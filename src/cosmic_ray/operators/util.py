@@ -27,18 +27,18 @@ def dump_node(node, stdout=None):
     write = stdout.write
 
     def do_dump(node, indent=''):
-        write(f"{indent}{type(node).__name__}({node.type}")
+        write("{}{}({}".format(indent, type(node).__name__, node.type))
         value = getattr(node, 'value', None)
         if value:
             value = value.replace('\n', '\\n')
-            write(f", '{value}'")
+            write(", '{}'".format(value))
         children = getattr(node, 'children', None)
         if children:
             write(', [\n')
             for child in children:
                 do_dump(child, indent+' '*4)
                 write(',\n')
-            write(f"{indent}]")
+            write("{}]".format(indent))
         write(')')
         if not indent:
             write('\n')
