@@ -110,6 +110,7 @@ setup(
             'spor = cosmic_ray.interceptors.spor:SporInterceptor',
             'pragma-no-mutate = cosmic_ray.interceptors.pragma_no_mutate:PragmaNoMutateInterceptor',
             'operators-filter = cosmic_ray.interceptors.operators_filter:OperatorsFilterInterceptor',
+            'annotation = cosmic_ray.interceptors.annotation_interceptor:AnnotationInterceptor',
         ],
     },
     long_description=LONG_DESCRIPTION,

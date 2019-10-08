@@ -19,6 +19,7 @@ Actually, available interceptors are:
 - spor
 - operators-filter
 - pragma-no-mutate
+- annotation
 
 
 spor
@@ -50,6 +51,17 @@ pragma-no-mutate
 ................
 **TODO**
 not documented because a new better interceptor will be available soon.
+
+
+annotation
+..........
+This interceptor remove all mutation on python annotation:
+
+::
+
+    a: int or float = 1
+    def to_str(a: int or None) -> str or None:
+        return str(b) if b else None
 
 
 Writing your own plugin
