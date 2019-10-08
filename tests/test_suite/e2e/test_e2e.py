@@ -9,8 +9,8 @@ from cosmic_ray.tools.survival_rate import survival_rate
 
 
 @pytest.fixture(scope="session")
-def example_project_root():
-    root = pathlib.Path(str(pytest.config.rootdir))
+def example_project_root(pytestconfig):
+    root = pathlib.Path(str(pytestconfig.rootdir))
     return root / ".." / "example_project"
 
 

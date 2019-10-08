@@ -15,18 +15,20 @@ from cosmic_ray.tools.survival_rate import survival_rate
 def report_html():
     """cr-html
 
-Usage: cr-html <session-file>
+Usage: cr-html [--only-completed] [--skip-success] <session-file>
 
 Print an HTML formatted report of test results.
 """
     arguments = docopt.docopt(report_html.__doc__, version='cr-rate 1.0')
     with use_db(arguments['<session-file>'], WorkDB.Mode.open) as db:
-        doc = _generate_html_report(db)
+        doc = _generate_html_report(db,
+                                    arguments['--only-completed'],
+                                    arguments['--skip-success'])
 
     print(doc.getvalue())
 
 
-def _generate_html_report(db):
+def _generate_html_report(db, only_completed, skip_success):
     # pylint: disable=too-many-statements
     doc, tag, text = Doc().tagtext()
     doc.asis('<!DOCTYPE html>')
@@ -51,9 +53,10 @@ def _generate_html_report(db):
                     with tag('p', klass='text-dark'):
                         text('Cosmic Ray Report')
 
-            completed = db.completed_work_items
-            incomplete = ((item, None) for item in db.pending_work_items)
-            all_items = chain(completed, incomplete)
+            all_items = db.completed_work_items
+            if not only_completed:
+                incomplete = ((item, None) for item in db.pending_work_items)
+                all_items = chain(all_items, incomplete)
 
             num_items = db.num_work_items
             num_complete = db.num_results
@@ -133,6 +136,8 @@ def _generate_html_report(db):
                                                 level = 'info'
                                             else:
                                                 level = 'success'
+                                                if skip_success:
+                                                    continue
                                         else:
                                             level = 'danger'
 
