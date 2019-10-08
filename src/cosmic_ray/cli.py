@@ -28,7 +28,7 @@ from cosmic_ray.progress import report_progress
 from cosmic_ray.version import __version__
 from cosmic_ray.work_db import WorkDB, use_db
 from cosmic_ray.work_item import WorkItem, WorkItemJsonEncoder, WorkResult, \
-    WorkerOutcome, TestOutcome
+    TestOutcome
 
 log = logging.getLogger()
 
@@ -148,18 +148,22 @@ def handle_exec(args):
     session_file = args.get('<session-file>')
     with use_db(session_file, mode=WorkDB.Mode.open) as work_db:
         cosmic_ray.commands.execute(work_db)
-
     return ExitCode.OK
 
 
 @dsc.command()
 def handle_baseline(args):
-    """usage: cosmic-ray baseline <session-file>
+    """usage: cosmic-ray baseline [--force] [--report] <session-file>
 
     Runs a baseline execution that executes the test suite over
     unmutated code.
     """
     session_file = Path(args.get('<session-file>'))
+    force = args.get('--force', False)
+    dump_report = args.get('--report', False)
+
+    baseline_session_file = session_file.parent / '{}.baseline{}'.format(
+        session_file.stem, session_file.suffix)
 
     # Find arbitrary work-item in input session that we can copy.
     with use_db(session_file) as db:  # type: WorkDB
@@ -171,9 +175,15 @@ def handle_baseline(args):
 
         config = db.get_config()
 
+    if force:
+        try:
+            os.unlink(baseline_session_file)
+        except OSError:
+            pass
+
     # Copy input work-item, but tell it to use the no-op operator. Create a new
     # session containing only this work-item and execute this new session.
-    with use_db(mode=WorkDB.Mode.create) as db:
+    with use_db(baseline_session_file, mode=WorkDB.Mode.create) as db:
         db.set_config(config)
 
         db.add_work_item(
@@ -190,12 +200,14 @@ def handle_baseline(args):
 
         result: WorkResult = next(db.results)[1]
         if result.test_outcome == TestOutcome.KILLED:
-            print("Execution with no mutation gives those following errors:")
-            for line in result.output.split('\n'):
-                print("  >>>", line)
+            if dump_report:
+                print("Execution with no mutation gives those following errors:")
+                for line in result.output.split('\n'):
+                    print("  >>>", line)
             return 1
         else:
-            print("Execution with no mutation works fine:")
+            if dump_report:
+                print("Execution with no mutation works fine:")
             return ExitCode.OK
 
 
@@ -287,7 +299,7 @@ def handle_worker(args):
 
     Run a worker process which performs a single mutation and test run.
     Each worker does a minimal, isolated chunk of work: it mutates the
-    <occurence>-th instance of <operator> in <module-path>, runs the test
+    <occurrence>-th instance of <operator> in <module-path>, runs the test
     suite defined in the configuration, prints the results, and exits.
 
     Normally you won't run this directly. Rather, it will be launched
