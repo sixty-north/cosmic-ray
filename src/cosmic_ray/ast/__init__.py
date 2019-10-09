@@ -1,6 +1,8 @@
 "Tools for working with parso ASTs."
 
 from abc import ABC, abstractmethod
+import io
+import sys
 
 import parso.python.tree
 import parso.tree
@@ -51,3 +53,29 @@ def is_none(node):
 def is_number(node):
     "Determine if a node is a number."
     return isinstance(node, parso.python.tree.Number)
+
+
+def dump_node(node):
+    buffer = io.StringIO()
+    write = buffer.write
+
+    def do_dump(node, indent=''):
+        write("{}{}({}".format(indent, type(node).__name__, node.type))
+        value = getattr(node, 'value', None)
+        if value:
+            value = value.replace('\n', '\\n')
+            write(", '{}'".format(value))
+        children = getattr(node, 'children', None)
+        if children:
+            write(', [\n')
+            for child in children:
+                do_dump(child, indent+' '*4)
+                write(',\n')
+            write("{}]".format(indent))
+        write(')')
+        if not indent:
+            write('\n')
+
+    do_dump(node)
+    return buffer.getvalue()
+
