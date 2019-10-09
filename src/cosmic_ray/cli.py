@@ -198,7 +198,7 @@ def handle_baseline(args):
         # Run the single-entry session.
         cosmic_ray.commands.execute(db)
 
-        result: WorkResult = next(db.results)[1]
+        result = next(db.results)[1]  # type: WorkResult
         if result.test_outcome == TestOutcome.KILLED:
             if dump_report:
                 print("Execution with no mutation gives those following errors:")
