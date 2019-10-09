@@ -2,7 +2,7 @@ from parso.tree import Node
 
 from cosmic_ray.operators.operator import Operator
 from cosmic_ray.work_db import WorkDB
-from cosmic_ray.work_item import WorkItem
+from cosmic_ray.work_item import WorkItem, WorkerOutcome, WorkResult
 
 
 class Interceptor:
@@ -31,16 +31,6 @@ class Interceptor:
         """
         pass
 
-    def pre_add_work_item(self,
-                          operator: Operator,
-                          node: Node,
-                          new_work_item: WorkItem) -> bool:
-        """Called when an operator have generate a work_item.
-        This work_item is not in db yet.
-        :return True to allow this work item to be inserted in db.
-        """
-        return True
-
     def post_add_work_item(self,
                            operator: Operator,
                            node: Node,
@@ -55,3 +45,15 @@ class Interceptor:
         Here, you can do any job in the database.
         """
         pass
+
+    def _add_work_result(self, work_item,
+                         output, worker_outcome: WorkerOutcome):
+        self.work_db.set_result(
+            work_item.job_id,
+            WorkResult(
+                output=output,
+                test_outcome=None,
+                diff=None,
+                worker_outcome=worker_outcome,
+            ),
+        )
