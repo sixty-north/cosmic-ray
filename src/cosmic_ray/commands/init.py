@@ -27,10 +27,10 @@ class WorkDBInitVisitor(Visitor):
 
     def __init__(self, module_path, op_name, work_db, operator,
                  interceptors: Interceptors):
-        self.operator: Operator = operator
+        self.operator = operator  # type: Operator
         self.module_path = module_path
         self.op_name = op_name
-        self.work_db: WorkDB = work_db
+        self.work_db = work_db  # type: WorkDB
         self.occurrence = 0
         self._interceptors = interceptors
 

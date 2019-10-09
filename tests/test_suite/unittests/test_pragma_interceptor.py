@@ -31,8 +31,8 @@ def test_pragma():
 
 class Data:
     def __init__(self):
-        self.results: Dict[str, WorkResult] = {}
-        self.work_items: Dict[str, WorkItem] = {}
+        self.results = {}  # type: Dict[str, WorkResult]
+        self.work_items = {}  # type: Dict[str, WorkItem]
 
     def add_work_item(self, work_item: WorkItem):
         self.work_items[work_item.job_id] = work_item
