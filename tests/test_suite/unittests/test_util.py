@@ -1,9 +1,10 @@
 import parso
 
-from cosmic_ray.operators.util import dump_node
+from cosmic_ray.ast import dump_node
 
 
 def test_dump_node():
     s = open(__file__).read()
     node = parso.parse(s)
-    dump_node(node)
+    d = dump_node(node)
+    assert isinstance(d, str)
