@@ -15,6 +15,7 @@ def worker(module_path,
            python_version,
            operator_name,
            occurrence,
+           operator_config,
            test_command,
            timeout):
     """Mutate the OCCURRENCE-th site for OPERATOR_NAME in MODULE_PATH, run the
@@ -44,6 +45,7 @@ def worker(module_path,
             A string of the form "MAJOR.MINOR", e.g. "3.6" for Python 3.6.x.
         operator_name: The name of the operator plugin to use
         occurrence: The occurrence of the operator to apply
+        operator_config: Configuration for this operator
         test_command: The command to execute to run the tests
         timeout: The maximum amount of time (seconds) to let the tests run
 
@@ -55,7 +57,7 @@ def worker(module_path,
     """
     try:
         operator_class = cosmic_ray.plugins.get_operator(operator_name)
-        operator = operator_class(python_version, {})
+        operator = operator_class(python_version, operator_config)
 
         with cosmic_ray.mutating.use_mutation(module_path, operator,
                                               occurrence) as (original_code,
