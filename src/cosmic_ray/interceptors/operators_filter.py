@@ -4,7 +4,7 @@ import re
 import logging
 
 from cosmic_ray.interceptors import Interceptor
-from cosmic_ray.work_item import WorkerOutcome, WorkResult
+from cosmic_ray.work_item import WorkerOutcome
 
 log = logging.getLogger()
 
@@ -32,10 +32,8 @@ class OperatorsFilterInterceptor(Interceptor):
                     item.end_pos,
                 )
 
-                self.work_db.set_result(
-                    item.job_id,
-                    WorkResult(
-                        output="Filtered operator",
-                        worker_outcome=WorkerOutcome.SKIPPED,
-                    ),
+                self._add_work_result(
+                    item,
+                    output="Filtered operator",
+                    worker_outcome=WorkerOutcome.SKIPPED,
                 )

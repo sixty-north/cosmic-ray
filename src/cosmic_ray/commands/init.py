@@ -54,12 +54,9 @@ class WorkDBInitVisitor(Visitor):
             end_pos=end_pos,
         )
 
-        if self._interceptors.pre_add_work_item(self.operator,
-                                                node, work_item):
-            self.work_db.add_work_item(work_item)
-            self._interceptors.post_add_work_item(self.operator,
-                                                  node, work_item)
-            self.occurrence += 1
+        self.work_db.add_work_item(work_item)
+        self._interceptors.post_add_work_item(self.operator, node, work_item)
+        self.occurrence += 1
 
 
 def init(module_paths, work_db: WorkDB, config: ConfigDict):
