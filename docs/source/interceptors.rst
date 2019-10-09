@@ -126,17 +126,9 @@ You can implement one or many of those methods:
     Called when we end exploring a file.
 
 
-- def pre_add_work_item(self, operator: Operator, node: Node, new_work_item: WorkItem) -> bool:
-
-    Called when an operator have generate a work_item.
-    This work_item is not in db yet.
-
-    return True to allow this work item to be inserted in db.
-
-
 - def post_add_work_item(self, operator: Operator, node: Node, new_work_item: WorkItem):
 
-    Called when a work_item id insrted in db.
+    Called when a work_item id inserted in db.
     Here, you can add a skipped result for this work item.
 
 

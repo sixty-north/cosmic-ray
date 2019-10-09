@@ -8,7 +8,7 @@ from cosmic_ray.ast import get_comment_on_node_line
 from cosmic_ray.interceptors.base import Interceptor
 from cosmic_ray.operators.operator import Operator
 from cosmic_ray.util import to_kebab_case
-from cosmic_ray.work_item import WorkItem, WorkResult, WorkerOutcome
+from cosmic_ray.work_item import WorkItem, WorkerOutcome
 
 
 class PragmaInterceptor(Interceptor):
@@ -27,18 +27,13 @@ class PragmaInterceptor(Interceptor):
     def post_add_work_item(self,
                            operator: Operator,
                            node: Node,
-                           new_work_item: WorkItem):
+                           work_item: WorkItem):
         if self._have_excluding_pragma(node, operator):
-            self._record_skipped_result_item(new_work_item.job_id)
-
-    def _record_skipped_result_item(self, job_id):
-        self.work_db.set_result(
-            job_id,
-            WorkResult(
+            self._add_work_result(
+                work_item,
                 worker_outcome=WorkerOutcome.SKIPPED,
                 output="Skipped: pragma found",
             )
-        )
 
     def _have_excluding_pragma(self, node, operator: Operator) -> bool:
         """
