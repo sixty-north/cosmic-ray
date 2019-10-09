@@ -1,4 +1,5 @@
 import parso
+import sys
 from parso.python.tree import PythonNode, Name, String, Module, Function, \
     FStringStart
 from parso.tree import Node
@@ -17,32 +18,32 @@ class StringReplacer(Operator):
         self.replace_with = self.config.get('replace-with', "COSMIC %s RAY")
 
     def mutation_positions(self, node: Node):
-            # _("abc"):
-            # gives
-            # [
-            #     Name('_'),
-            #     PythonNode('trailer', [
-            #         Operator('('),
-            #         Name('abc'),  <-- node
-            #         Operator(')'),
-            #     ]),
-            # ]
+        # _("abc"):
+        # gives
+        # [
+        #     Name('_'),
+        #     PythonNode('trailer', [
+        #         Operator('('),
+        #         Name('abc'),  <-- node
+        #         Operator(')'),
+        #     ]),
+        # ]
 
-            # self.tr("abc") gives:
-            # [
-            #     PythonNode('atom_expr', [
-            #         Name('self'),
-            #         PythonNode('trailer', [
-            #             Operator('.'),
-            #             Name('tr')
-            #         ]),
-            #         PythonNode('trailer', [
-            #             Operator('('),
-            #             Name('abc'),  <-- node
-            #             Operator(')'),
-            #         ]),
-            #     ]),
-            # ]
+        # self.tr("abc") gives:
+        # [
+        #     PythonNode('atom_expr', [
+        #         Name('self'),
+        #         PythonNode('trailer', [
+        #             Operator('.'),
+        #             Name('tr')
+        #         ]),
+        #         PythonNode('trailer', [
+        #             Operator('('),
+        #             Name('abc'),  <-- node
+        #             Operator(')'),
+        #         ]),
+        #     ]),
+        # ]
 
         if is_string(node) and not self._is_docstring(node):
             if self.filtered_functions:
@@ -99,7 +100,7 @@ class StringReplacer(Operator):
     def mutate(self, node, index):
         """Modify the numeric value on `node`."""
         if isinstance(node, String):
-            s: str = node.value
+            s = node.value
             if s.endswith(("'''", '"""')):
                 enclose_end = 3
             else:
@@ -120,7 +121,7 @@ class StringReplacer(Operator):
             return node
 
         else:
-            raise ValueError(f"Node can't be of type {type(node).__name__}")
+            raise ValueError("Node can't be of type {}".format(type(node).__name__))
 
     @classmethod
     def examples(cls):
@@ -128,7 +129,7 @@ class StringReplacer(Operator):
             'replace-with': 'XX %s',
             'filter-if-called-by': ['_', 'tr'],
         }
-        return (
+        data = [
             ('s = "abc"', 's = "XX abc"', 0, config),
             ('s = """abc"""', 's = """XX abc"""', 0, config),
             ("s = '''abc'''", "s = '''XX abc'''", 0, config),
@@ -145,12 +146,20 @@ class StringReplacer(Operator):
             ('s = u"""abc"""', 's = u"""XX abc"""', 0, config),
             ("s = u'''abc'''", "s = u'''XX abc'''", 0, config),
 
-            ('s = f"abc"', 's = f"XX abc"', 0, config),
-            ('s = f"abc {1} def"', 's = f"XX abc {1} def"', 0, config),
 
             ('f("abc")', 'f("XX abc")', 0, config),
             ('_("abc")', '_("abc")', 0, config),
             ('self.tr("abc")', 'self.tr("abc")', 0, config),
             ('"Module doc string"', '"Module doc string"', 0, config),
-            ('def f():\n    "Function doc string"', 'def f():\n    "Function doc string"', 0, config),
-        )
+            ('def f():\n    "Function doc string"',
+             'def f():\n    "Function doc string"', 0, config),
+        ]
+
+        if sys.version_info >= (3, 6):
+            # Adding fstring
+            data += [
+                ('s = f"abc"', 's = f"XX abc"', 0, config),
+                ('s = f"abc {1} def"', 's = f"XX abc {1} def"', 0, config),
+            ]
+
+        return data
