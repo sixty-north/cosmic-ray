@@ -8,6 +8,8 @@ from math import *  # noqa: F401,F403
 
 # Add mutation points for comparison operators.
 
+def _(x): return x
+
 
 def constant_number():
     return 42
@@ -37,7 +39,7 @@ def bool_if():
     if object():
         return True
 
-    raise Exception("bool_if() failed")
+    raise Exception(_("bool_if() failed"))
 
 
 def if_expression():
