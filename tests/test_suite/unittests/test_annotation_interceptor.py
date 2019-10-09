@@ -8,7 +8,7 @@ from cosmic_ray.config import ConfigDict
 from cosmic_ray.interceptors import Interceptors
 from cosmic_ray.interceptors.annotation_interceptor import \
     AnnotationInterceptor
-from cosmic_ray.work_item import WorkResult, WorkItem
+from cosmic_ray.work_item import WorkResult, WorkItem, WorkerOutcome
 
 
 class Data:
@@ -52,8 +52,10 @@ class Data:
 
         expected = {
             ('core/ReplaceOrWithAnd', 0): ((2, 14), (2, 16), (None, None)),
-            ('core/ReplaceOrWithAnd', 1): ((4, 21), (4, 23), (None, None)),
-            ('core/ReplaceOrWithAnd', 2): ((6, 14), (6, 16), (None, None)),
+            ('core/ReplaceOrWithAnd', 1): ((3, 21), (3, 23), (None, WorkerOutcome.SKIPPED)),
+            ('core/ReplaceOrWithAnd', 2): ((3, 38), (3, 40), (None, WorkerOutcome.SKIPPED)),
+            ('core/ReplaceOrWithAnd', 3): ((4, 21), (4, 23), (None, None)),
+            ('core/ReplaceOrWithAnd', 4): ((6, 14), (6, 16), (None, None)),
         }
 
     else:
@@ -68,10 +70,15 @@ class Data:
         """
 
         expected = {
-            ('core/ReplaceOrWithAnd', 0): ((2, 26), (2, 28), (None, None)),
-            ('core/ReplaceOrWithAnd', 1): ((3, 14), (3, 16), (None, None)),
-            ('core/ReplaceOrWithAnd', 2): ((6, 21), (6, 23), (None, None)),
-            ('core/ReplaceOrWithAnd', 3): ((8, 14), (8, 16), (None, None)),
+            ('core/ReplaceOrWithAnd', 0): ((2, 15), (2, 17), (None, WorkerOutcome.SKIPPED)),
+            ('core/ReplaceOrWithAnd', 1): ((2, 26), (2, 28), (None, None)),
+            ('core/ReplaceOrWithAnd', 2): ((3, 14), (3, 16), (None, None)),
+            # ('core/StringReplacer', 0): ((4, 11), (4, 25), (None, WorkerOutcome.SKIPPED)),
+
+            ('core/ReplaceOrWithAnd', 3): ((5, 21), (5, 23), (None, WorkerOutcome.SKIPPED)),
+            ('core/ReplaceOrWithAnd', 4): ((5, 38), (5, 40), (None, WorkerOutcome.SKIPPED)),
+            ('core/ReplaceOrWithAnd', 5): ((6, 21), (6, 23), (None, None)),
+            ('core/ReplaceOrWithAnd', 6): ((8, 14), (8, 16), (None, None)),
         }
 
 
