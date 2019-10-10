@@ -157,6 +157,18 @@ def handle_baseline(args):
 
     Runs a baseline execution that executes the test suite over
     unmutated code.
+
+    options:
+      --force      Force write over baseline session file
+                   if this file was already created by a previous
+                   run.
+      --report     Print the report result of this baseline run.
+                   If the job has failed, jobs's outputs will be
+                   displayed.
+
+    return code:
+        0 if the job has exited normally, else 1.
+
     """
     session_file = Path(args.get('<session-file>'))
     force = args.get('--force', False)
