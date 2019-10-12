@@ -123,6 +123,11 @@ class ConfigDict(dict):
     def badge_thresholds(self):
         return self.badge['thresholds']
 
+    @property
+    def cloning_config_workspace_type(self):
+        "The 'workspace' section of the cloning section"
+        return self.cloning_config.get('workspace_type', 'cloned_with_virtualenv')
+
 
 @contextmanager
 def _config_stream(filename):

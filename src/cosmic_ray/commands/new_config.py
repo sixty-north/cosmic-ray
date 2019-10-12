@@ -90,6 +90,7 @@ def new_config():
     config['execution-engine']['name'] = menu.show(header="Execution engine", returns="desc")
 
     config["cloning"] = ConfigDict()
+    config['cloning']['workspace_type'] = 'cloned_with_virtualenv'
     config['cloning']['method'] = 'copy'
     config['cloning']['commands'] = []
 
