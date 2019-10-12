@@ -1,4 +1,4 @@
-"""This is the command-line program for cosmic ray. 
+"""This is the command-line program for cosmic ray.
 
 Here we manage command-line parsing and launching of the internal machinery that does mutation testing.
 """
@@ -27,7 +27,8 @@ from cosmic_ray.mutating import apply_mutation
 from cosmic_ray.progress import report_progress
 from cosmic_ray.version import __version__
 from cosmic_ray.work_db import WorkDB, use_db
-from cosmic_ray.work_item import WorkItem, WorkItemJsonEncoder
+from cosmic_ray.work_item import WorkItem, WorkItemJsonEncoder, WorkResult, \
+    TestOutcome
 
 log = logging.getLogger()
 
@@ -145,24 +146,39 @@ def handle_exec(args):
     infrastructure (e.g. worker processes) are already running.
     """
     session_file = args.get('<session-file>')
-    cosmic_ray.commands.execute(session_file)
-
+    with use_db(session_file, mode=WorkDB.Mode.open) as work_db:
+        cosmic_ray.commands.execute(work_db)
     return ExitCode.OK
 
 
 @dsc.command()
 def handle_baseline(args):
-    """usage: cosmic-ray baseline <session-file>
+    """usage: cosmic-ray baseline [--force] [--report] <session-file>
 
     Runs a baseline execution that executes the test suite over
     unmutated code.
+
+    options:
+      --force      Force write over baseline session file
+                   if this file was already created by a previous
+                   run.
+      --report     Print the report result of this baseline run.
+                   If the job has failed, jobs's outputs will be
+                   displayed.
+
+    return code:
+        0 if the job has exited normally, else 1.
+
     """
     session_file = Path(args.get('<session-file>'))
+    force = args.get('--force', False)
+    dump_report = args.get('--report', False)
+
     baseline_session_file = session_file.parent / '{}.baseline{}'.format(
         session_file.stem, session_file.suffix)
 
     # Find arbitrary work-item in input session that we can copy.
-    with use_db(session_file) as db:
+    with use_db(session_file) as db:  # type: WorkDB
         try:
             template = next(iter(db.work_items))
         except StopIteration:
@@ -170,6 +186,12 @@ def handle_baseline(args):
             return ExitCode.DATA_ERR
 
         config = db.get_config()
+
+    if force:
+        try:
+            os.unlink(baseline_session_file)
+        except OSError:
+            pass
 
     # Copy input work-item, but tell it to use the no-op operator. Create a new
     # session containing only this work-item and execute this new session.
@@ -185,10 +207,20 @@ def handle_baseline(args):
                 end_pos=template.end_pos,
                 job_id=template.job_id))
 
-    # Run the single-entry session.
-    cosmic_ray.commands.execute(baseline_session_file)
+        # Run the single-entry session.
+        cosmic_ray.commands.execute(db)
 
-    return ExitCode.OK
+        result = next(db.results)[1]  # type: WorkResult
+        if result.test_outcome == TestOutcome.KILLED:
+            if dump_report:
+                print("Execution with no mutation gives those following errors:")
+                for line in result.output.split('\n'):
+                    print("  >>>", line)
+            return 1
+        else:
+            if dump_report:
+                print("Execution with no mutation works fine:")
+            return ExitCode.OK
 
 
 @dsc.command()
@@ -279,7 +311,7 @@ def handle_worker(args):
 
     Run a worker process which performs a single mutation and test run.
     Each worker does a minimal, isolated chunk of work: it mutates the
-    <occurence>-th instance of <operator> in <module-path>, runs the test
+    <occurrence>-th instance of <operator> in <module-path>, runs the test
     suite defined in the configuration, prints the results, and exits.
 
     Normally you won't run this directly. Rather, it will be launched

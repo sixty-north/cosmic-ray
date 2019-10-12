@@ -37,7 +37,7 @@ class OperatorProvider:
         return iter(_OPERATORS)
 
     def __getitem__(self, name):
-        if name == 'no_op':
+        if name == 'NoOp':
             return no_op.NoOp
         else:
             return _OPERATORS[name]
