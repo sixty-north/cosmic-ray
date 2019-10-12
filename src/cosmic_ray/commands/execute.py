@@ -30,32 +30,25 @@ def _report_progress(stream):
 
 
 @reports_progress(_report_progress)
-def execute(db_name):
-    """Execute any pending work in the database stored in `db_name`,
+def execute(work_db):
+    """Execute any pending work in the database `work_db`,
     recording the results.
 
-    This looks for any work in `db_name` which has no results, schedules it to
+    This looks for any work in `work_db` which has no results, schedules it to
     be executed, and records any results that arrive.
     """
-    try:
-        with use_db(db_name, mode=WorkDB.Mode.open) as work_db:
-            _update_progress(work_db)
-            config = work_db.get_config()
-            engine = get_execution_engine(config.execution_engine_name)
+    _update_progress(work_db)
+    config = work_db.get_config()
+    engine = get_execution_engine(config.execution_engine_name)
 
-            def on_task_complete(job_id, work_result):
-                work_db.set_result(job_id, work_result)
-                _update_progress(work_db)
-                log.info("Job %s complete", job_id)
+    def on_task_complete(job_id, work_result):
+        work_db.set_result(job_id, work_result)
+        _update_progress(work_db)
+        log.info("Job %s complete", job_id)
 
-            log.info("Beginning execution")
-            engine(
-                work_db.pending_work_items,
-                config,
-                on_task_complete=on_task_complete)
-            log.info("Execution finished")
-
-    except FileNotFoundError as exc:
-        raise FileNotFoundError(
-            str(exc).replace('Requested file', 'Corresponding database',
-                             1)) from exc
+    log.info("Beginning execution")
+    engine(
+        work_db.pending_work_items,
+        config,
+        on_task_complete=on_task_complete)
+    log.info("Execution finished")

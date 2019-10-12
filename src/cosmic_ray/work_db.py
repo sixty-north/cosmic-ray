@@ -40,7 +40,7 @@ class WorkDB:
         """
 
         if (mode == WorkDB.Mode.open) and (not os.path.exists(path)):
-            raise FileNotFoundError('Requested file {} not found'.format(path))
+            raise FileNotFoundError('Corresponding database {} not found'.format(path))
 
         self._path = path
         self._conn = sqlite3.connect(path)
@@ -280,5 +280,6 @@ def use_db(path, mode=WorkDB.Mode.create):
     database = WorkDB(path, mode)
     try:
         yield database
+
     finally:
         database.close()
