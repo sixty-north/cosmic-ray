@@ -115,6 +115,44 @@ class WorkDB:
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 ''', _work_item_to_row(work_item))
 
+    def add_work_items(self, work_items):
+        """Add multiple WorkItems.
+
+        Unlike calling `add_work_item` multiple times, performs all insertions
+        in a single transaction.
+
+        Args:
+          work_items: an iterable of WorkItem.
+        """
+        with self._conn:
+            self._conn.execute('BEGIN TRANSACTION')
+            for w_i in work_items:
+                self._conn.execute(
+                    '''
+                    INSERT INTO work_items
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    ''', _work_item_to_row(w_i))
+            if self._conn.isolation_level:
+                self._conn.execute('END TRANSACTION')
+
+    def disable_synchronisation(self):
+        """Stop committing data to disk for every transaction.
+
+        WARNING: this will cause data corruption in case system crash or power
+        off occurs!
+        """
+        with self._conn:
+            self._conn.execute('PRAGMA SYNCHRONOUS=OFF')
+
+    def enable_synchronisation(self):
+        """Re-enable committing data to disk for every transaction.
+
+        This restores the database to standard configuration with data
+        being written to disk with every transaction.
+        """
+        with self._conn:
+            self._conn.execute('PRAGMA SYNCHRONOUS=FULL')
+
     def clear(self):
         """Clear all work items from the session.
 
@@ -189,6 +227,9 @@ class WorkDB:
             self._conn.row_factory = sqlite3.Row
 
             self._conn.execute("PRAGMA foreign_keys = 1")
+
+            # journal_mode=WAL is persistent
+            self._conn.execute("PRAGMA journal_mode=WAL")
 
             self._conn.execute('''
             CREATE TABLE IF NOT EXISTS work_items
