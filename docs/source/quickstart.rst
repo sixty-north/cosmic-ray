@@ -55,6 +55,8 @@ You can specify a great deal of information in a configuration file, controlling
 things like the test execution, the execution engine, and so forth. It's
 entirely likely that the configuration created by ``cosmic-ray new-config`` won't be
 sufficient for your needs. Simply edit the config file to match your needs.
+See :ref:`Test suite<test_suite>` for explanations of some of those
+configuration options.
 
 Create a session and run tests
 ------------------------------

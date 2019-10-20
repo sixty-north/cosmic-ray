@@ -122,6 +122,18 @@ You would run ``cosmic-ray init`` like this:
 You'll notice that this creates a new file called "allele_session.sqlite".
 This is the database for your session.
 
+.. _test_suite:
+
+Test suite
+==========
+
+To be able to kill the mutants Cosmic Ray uses your test cases. But the
+mutants are not considered "more dead" when more test cases fail.
+Given that a single failing test case is sufficient to kill a mutant, it's a
+good idea to configure the test runner to exit as soon as a failing test case
+is found.
+
+For ``pytest`` and ``nose`` that can be achieved with the ``-x`` option.
 
 .. _note_separation_test_code:
 
