@@ -68,17 +68,44 @@ The first step in a full testing run, then, is to initialize a session:
 
     cosmic-ray init config.toml my_session.sqlite
 
-(Note that you don't have to use the names "config.toml" and "my_session.sqlite".
-Any names will do.)
+.. Tip::
+    You don't have to use the names ``config.toml`` and ``my_session.sqlite``.
+    Any names will do.
 
-This will also create a database file called ``my_session.sqlite``. Once this is
-created, you can start executing tests with the ``exec`` command:
+.. Note::
+    This command prepares all the mutations that will later be applied to code.
+    As such, its execution time is proportional to the amount of code and
+    the code complexitly. You can expect about 15-30s per 1kloc.
+
+This will also create a database file called ``my_session.sqlite``.
+
+To verify that the environment is sane (that the test suite passes when it is
+executed by cosmic-ray), you can run the ``baseline`` command:
+
+::
+
+    cosmic-ray baseline --report my_session.sqlite
+
+.. Tip::
+    Only one baseline can be stored in the database. If the execution failed
+    and you fixed the environment without changing the source code, you
+    can re-execute it with ``--force`` option without the need to run ``init``
+    again.
+
+If this command succeeds, you can start executing tests with the ``exec``
+command:
 
 ::
 
     cosmic-ray exec my_session.sqlite
 
 Unless there are errors, this won't print anything.
+
+.. Tip::
+    Because this command executes the provided test suite for every mutation
+    it selected, it will require many times more time to execute than the
+    whole test suite. It can be killed at any point though and restarted
+    while keepting the status of executated mutations between the runs.
 
 View the results
 ----------------
@@ -94,6 +121,10 @@ and tested), you can see the results of your session with the
 This will print out a bunch of information about the work that was
 performed, including what kinds of mutants were created, which were
 killed, and – chillingly – which survived.
+
+.. Tip::
+    You can execute ``cr-report`` while ``cosmic-ray exec`` is running to
+    view the progress the latter is making.
 
 You can also generate a handy HTML report with `cr-html`:
 
