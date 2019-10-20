@@ -21,6 +21,7 @@ Possible verbs are:
 - run
 - worker
 - apply
+- baseline
 
 Detailed information on each command can be found by running
 ``cosmic-ray help <command>`` in the terminal.
