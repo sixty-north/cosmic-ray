@@ -122,6 +122,9 @@ You would run ``cosmic-ray init`` like this:
 You'll notice that this creates a new file called "allele_session.sqlite".
 This is the database for your session.
 
+
+.. _note_separation_test_code:
+
 An important note on separating tests and production code
 ---------------------------------------------------------
 
