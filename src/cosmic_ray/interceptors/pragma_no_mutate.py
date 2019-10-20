@@ -10,7 +10,7 @@ from cosmic_ray.work_item import WorkerOutcome, WorkResult
 log = logging.getLogger()
 
 
-def intercept(work_db):
+def intercept(work_db, _):
     """Mark lines with "# pragma: no mutate" as SKIPPED
 
     For all work_item in db, if the LAST line of the working zone is marked
