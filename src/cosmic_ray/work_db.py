@@ -115,6 +115,26 @@ class WorkDB:
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 ''', _work_item_to_row(work_item))
 
+    def add_work_items(self, work_items):
+        """Add multiple WorkItems.
+
+        Unlike calling `add_work_item` multiple times, performs all insertions
+        in a single transaction.
+
+        Args:
+          work_items: an iterable of WorkItem.
+        """
+        with self._conn:
+            self._conn.execute('BEGIN TRANSACTION')
+            for w_i in work_items:
+                self._conn.execute(
+                    '''
+                    INSERT INTO work_items
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    ''', _work_item_to_row(w_i))
+            if self._conn.isolation_level:
+                self._conn.execute('END TRANSACTION')
+
     def clear(self):
         """Clear all work items from the session.
 

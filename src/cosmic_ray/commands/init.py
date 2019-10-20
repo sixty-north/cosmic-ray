@@ -27,21 +27,24 @@ class WorkDBInitVisitor(Visitor):
         self.occurrence = 0
 
     def visit(self, node):
-        for start, stop in self.operator.mutation_positions(node):
-            self._record_work_item(start, stop)
+        self.work_db.add_work_items(
+            self._get_work_item(start, stop)
+            for start, stop in self.operator.mutation_positions(node))
+
         return node
 
-    def _record_work_item(self, start_pos, end_pos):
-        self.work_db.add_work_item(
-            WorkItem(
-                job_id=uuid.uuid4().hex,
-                module_path=str(self.module_path),
-                operator_name=self.op_name,
-                occurrence=self.occurrence,
-                start_pos=start_pos,
-                end_pos=end_pos))
+    def _get_work_item(self, start_pos, end_pos):
+        ret = WorkItem(
+            job_id=uuid.uuid4().hex,
+            module_path=str(self.module_path),
+            operator_name=self.op_name,
+            occurrence=self.occurrence,
+            start_pos=start_pos,
+            end_pos=end_pos)
 
         self.occurrence += 1
+
+        return ret
 
 
 def init(module_paths, work_db, config):
