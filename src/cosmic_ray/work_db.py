@@ -190,6 +190,9 @@ class WorkDB:
 
             self._conn.execute("PRAGMA foreign_keys = 1")
 
+            # journal_mode=WAL is persistent
+            self._conn.execute("PRAGMA journal_mode=WAL")
+
             self._conn.execute('''
             CREATE TABLE IF NOT EXISTS work_items
             (module_path text,
