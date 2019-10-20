@@ -65,6 +65,7 @@ def init(module_paths, work_db, config):
     work_db.set_config(config=config)
 
     work_db.clear()
+    work_db.disable_synchronisation()
 
     for module_path in module_paths:
         module_ast = get_ast(
@@ -78,6 +79,7 @@ def init(module_paths, work_db, config):
 
     enabled_interceptors = config.sub('interceptors').get('enabled', ())
     apply_interceptors(work_db, enabled_interceptors, config)
+    work_db.enable_synchronisation()
 
 
 def apply_interceptors(work_db, enabled_interceptors, config):
