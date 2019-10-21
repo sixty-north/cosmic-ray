@@ -97,6 +97,8 @@ test. Generally speaking, you can meet both of these criteria if you
 install Cosmic Ray into and run workers from a virtual environment into
 which you've installed the modules under test.
 
+.. _running_distributed_mutation_testing:
+
 Running distributed mutation testing
 ------------------------------------
 

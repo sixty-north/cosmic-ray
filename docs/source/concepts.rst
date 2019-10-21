@@ -17,16 +17,18 @@ a specific mutation can be applied. The second role of an operator is to
 actually perform the mutation when requested.
 
 An example of an operator is
-`cosmic_ray.operators.break_continue.ReplaceBreakWithContinue`. As its name
-implies, this operator mutates code by replacing `break` with `continue`. During
+``cosmic_ray.operators.break_continue.ReplaceBreakWithContinue``. As its name
+implies, this operator mutates code by replacing ``break`` with ``continue``.
+During
 the initialization of a session, this operator identifies all of the locations
 in the code where this mutation can be applied. Then, during execution of a
-session, it actually mutates the code by replacing `break` nodes with `continue`
+session, it actually mutates the code by replacing ``break`` nodes with
+``continue``
 nodes.
 
 Operators are exposed to Cosmic Ray via plugins, and users can choose to extend
 the available operator set by providing their own operators. Operators are
-implemented as subclasses of `cosmic_ray.operators.operator.Operator`.
+implemented as subclasses of ``cosmic_ray.operators.operator.Operator``.
 
 Execution engines
 =================
@@ -73,7 +75,7 @@ documented. Each plugin can, in principle and often in practice, use their own
 specialized configuration options. We need to work on making the documentation
 of these options automatic and part of the plugin API. For detail on
 configuration options, the best place to check is currently in the
-`tests/example_project` directory.
+``tests/example_project`` directory.
 
 Sessions
 ========
@@ -95,8 +97,8 @@ Before you can do mutation testing with Cosmic Ray, you need to first initialize
 a session. You can do this using the ``init`` command. With this command you
 tell Cosmic Ray a) the name of the session, b) which module(s) you wish to
 mutate and c) the location of the test suite. For example, to mutate the package
-`allele`, using the `unittest` to run the tests in `allele_tests`, and using the
-`local` execution engine, you could first need to create a configuration like
+``allele``, using the ``unittest`` to run the tests in ``allele_tests``, and using the
+``local`` execution engine, you could first need to create a configuration like
 this:
 
 .. code-block:: ini
@@ -119,8 +121,23 @@ You would run ``cosmic-ray init`` like this:
 
     cosmic-ray init allele_config.toml allele_session.sqlite
 
-You'll notice that this creates a new file called "allele_session.sqlite".
+You'll notice that this creates a new file called ``allele_session.sqlite``.
 This is the database for your session.
+
+.. _test_suite:
+
+Test suite
+==========
+
+To be able to kill the mutants Cosmic Ray uses your test cases. But the
+mutants are not considered "more dead" when more test cases fail.
+Given that a single failing test case is sufficient to kill a mutant, it's a
+good idea to configure the test runner to exit as soon as a failing test case
+is found.
+
+For ``pytest`` and ``nose`` that can be achieved with the ``-x`` option.
+
+.. _note_separation_test_code:
 
 An important note on separating tests and production code
 ---------------------------------------------------------
@@ -174,8 +191,8 @@ summary of the entire session.
 Test commands
 =============
 
-The `test-command` field of a configuration tells Cosmic Ray how to run tests.
-Cosmic Ray runs this command from whatever directory you run the `exec` command
+The ``test-command`` field of a configuration tells Cosmic Ray how to run tests.
+Cosmic Ray runs this command from whatever directory you run the ``exec`` command
 (or, in the case of remote execution, in whatever directory the remote command
 handler is running).
 

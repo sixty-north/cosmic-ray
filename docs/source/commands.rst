@@ -21,6 +21,7 @@ Possible verbs are:
 - run
 - worker
 - apply
+- baseline
 
 Detailed information on each command can be found by running
 ``cosmic-ray help <command>`` in the terminal.
@@ -90,7 +91,7 @@ The ``init`` verb use following entries from the configuration file:
 
 
 As mentioned in
-`here <#An-important-note-on-separating-tests-and-production-code>`__,
+:ref:`here <note_separation_test_code>`,
 test directory can be handled via the ``excluded-modules`` option.
 
 The list of files that will be mutate effectively can be show by running
@@ -104,8 +105,9 @@ Command: exec
 ~~~~~~~~~~~~~
 
 The ``exec`` command is what actually runs the mutation testing. There
-is only one optional argument: ``--dist``. See `Running distributed
-mutation testing <#running-distributed-mutation-testing>`__ for details.
+is only one optional argument: ``--dist``. See
+:ref:`Running distributed mutation testing <running_distributed_mutation_testing>`
+for details.
 
 Command: dump
 ~~~~~~~~~~~~~
