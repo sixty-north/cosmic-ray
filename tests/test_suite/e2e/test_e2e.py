@@ -38,6 +38,18 @@ def test_e2e(example_project_root, config, session):
         assert rate == 0.0
 
 
+def test_baseline(example_project_root, config, session):
+    subprocess.check_call(
+        [sys.executable, "-m", "cosmic_ray.cli", "init", config,
+         str(session)],
+        cwd=str(example_project_root))
+
+    subprocess.check_call(
+        [sys.executable, "-m", "cosmic_ray.cli", "baseline",
+         str(session)],
+        cwd=str(example_project_root))
+
+
 def test_importing(example_project_root, session):
     config = "cosmic-ray.import.conf"
 
