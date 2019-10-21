@@ -196,8 +196,8 @@ Cosmic Ray runs this command from whatever directory you run the ``exec`` comman
 (or, in the case of remote execution, in whatever directory the remote command
 handler is running).
 
-Baselines and timeouts
-======================
+Timeouts
+========
 
 One difficulty mutation testing tools have to face is how to deal with
 mutations that result in infinite loops (or other pathological runtime
