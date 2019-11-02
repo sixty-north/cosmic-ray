@@ -201,9 +201,11 @@ class WorkDB:
 
     @property
     def pending_work_items(self):
-        "Iterable of all pending work items."
+        "Iterable of all pending work items. In random order."
         pending = self._conn.execute(
-            "SELECT * FROM work_items WHERE job_id NOT IN (SELECT job_id FROM results)"
+            "SELECT * FROM work_items "
+            "WHERE job_id NOT IN (SELECT job_id FROM results) "
+            "ORDER BY hex(randomblob(16))"
         )
         return (_row_to_work_item(p) for p in pending)
 
