@@ -134,6 +134,17 @@ You can also generate a handy HTML report with `cr-html`:
 
     cr-html my_session.sqlite > my_session.html
 
+Or use the ``cr-rate`` command to return error if the survival rate rose above
+a specified value:
+
+::
+
+    cr-rate --fail-over 20.5 my_session.sqlite
+
+.. Tip::
+    ``cr-rate`` can also calculate confidence intervals for the survival rate
+    when the ``cosmic-ray exec`` hasn't finished yet.
+
 A concrete example: running the ``adam`` unittests
 --------------------------------------------------
 
