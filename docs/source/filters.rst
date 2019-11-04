@@ -12,7 +12,7 @@ running. The name "filter" is actually a bit misleading since these programs cou
 simply skipping some mutations. In practice, though, the need to skip certain tests is by far the most common use of
 these programs.
 
-.. aside::
+.. note::
 
   Filter are what used to be called *interceptors*. Interceptors were more tightly integrated with the ``init`` command,
   with many of the problems that unnecessarily high coupling often brings with it. Filters are simpler and more flexible than
