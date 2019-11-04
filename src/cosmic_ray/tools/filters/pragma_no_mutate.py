@@ -1,4 +1,4 @@
-"""An interceptor that uses metadata: no mutate to determine when specific mutations
+"""A filter that uses "# pragma: no mutate" to determine when specific mutations
 should be skipped.
 """
 import logging
