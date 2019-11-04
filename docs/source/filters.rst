@@ -43,9 +43,9 @@ cr-filter-operators
 
 ``cr-filter-operators`` allows you to filter out operators according to their names. You provide the filter with a set
 of regular expressions, and any Cosmic Ray operator who's name matches a one of these expressions will be skipped
-entirely. 
+entirely.
 
-The configuration is provided through a TOML file such as a standard Cosmic Ray configuration. The expressions must be 
+The configuration is provided through a TOML file such as a standard Cosmic Ray configuration. The expressions must be
 in a list at the key "cosmic-ray.operators-filter.exclude-operators". Here's an example::
 
   [cosmic-ray.operators-filter]

@@ -30,14 +30,13 @@ assemblers to oil exploration software.
    concepts
    cloning
    commands
-   badge
    operators
    filters
    distributed
    implementation
    tests
    continuous_integration
-
+   badge
 
 
 Indices and tables
