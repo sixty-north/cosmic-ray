@@ -4,7 +4,6 @@ import uuid
 
 from cosmic_ray.ast import get_ast, Visitor
 import cosmic_ray.modules
-from cosmic_ray.plugins import get_interceptor, interceptor_names, get_operator
 from cosmic_ray.work_item import WorkItem
 
 log = logging.getLogger()

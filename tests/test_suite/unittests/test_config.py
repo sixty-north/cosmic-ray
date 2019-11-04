@@ -4,7 +4,7 @@ import io
 
 import pytest
 
-from cosmic_ray.config import ConfigDict, ConfigError, deserialize_config, load_config, serialize_config
+from cosmic_ray.config import ConfigDict, ConfigError, load_config, serialize_config
 
 
 def test_load_valid_stdin(mocker):

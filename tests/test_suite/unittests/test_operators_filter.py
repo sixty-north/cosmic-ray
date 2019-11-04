@@ -1,4 +1,4 @@
-from cosmic_ray.interceptors import operators_filter
+from cosmic_ray.tools.filters import operators_filter
 from cosmic_ray.work_item import WorkItem, WorkResult, WorkerOutcome
 
 
@@ -7,7 +7,7 @@ class Data:
     results = []
 
     config = {'exclude-operators': [
-        'Op1','Op2', 'Opregex[12]', r'(?:.[oO]m(?:p|P)lex).*'
+        'Op1', 'Op2', 'Opregex[12]', r'(?:.[oO]m(?:p|P)lex).*'
     ]}
 
     def new_work_item(self, operator_name, job_id):
@@ -52,5 +52,5 @@ class Data:
 
 def test_operators_filter():
     data = Data()
-    operators_filter.intercept(data, data.config)
+    operators_filter.OperatorsFilter().filter(data, data.config)
     assert data.results == data.expected
