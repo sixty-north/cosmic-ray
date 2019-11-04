@@ -5,6 +5,7 @@ import uuid
 from cosmic_ray.ast import get_ast, Visitor
 import cosmic_ray.modules
 from cosmic_ray.work_item import WorkItem
+from cosmic_ray.plugins import get_operator
 
 log = logging.getLogger()
 
