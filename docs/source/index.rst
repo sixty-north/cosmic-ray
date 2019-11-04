@@ -32,7 +32,7 @@ assemblers to oil exploration software.
    commands
    badge
    operators
-   interceptors
+   filters
    distributed
    implementation
    tests

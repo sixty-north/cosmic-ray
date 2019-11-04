@@ -46,11 +46,6 @@ testing:
     method = "copy"
     commands = []
 
-    [cosmic-ray.interceptors]
-    enabled = [ "spor", "pragma_no_mutate", "operators-filter",]
-
-    [cosmic-ray.operators-filter]
-
 You can specify a great deal of information in a configuration file, controlling
 things like the test execution, the execution engine, and so forth. It's
 entirely likely that the configuration created by ``cosmic-ray new-config`` won't be
