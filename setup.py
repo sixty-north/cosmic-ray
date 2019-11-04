@@ -95,6 +95,9 @@ setup(
             'cr-badge = cosmic_ray.tools.badge:generate_badge',
             'cr-rate = cosmic_ray.tools.survival_rate:format_survival_rate',
             'cr-xml = cosmic_ray.tools.xml:report_xml',
+            'cr-filter-spor = cosmic_ray.tools.filters.spor:main',
+            'cr-filter-operators = cosmic_ray.tools.filters.operators_filter:main',
+            'cr-filter-pragma = cosmic_ray.tools.filters.pragma_no_mutate:main',
         ],
         'cosmic_ray.test_runners': [
             'unittest = cosmic_ray.testing.unittest_runner:UnittestRunner',
@@ -105,11 +108,6 @@ setup(
         'cosmic_ray.execution_engines': [
             'local = cosmic_ray.execution.local:LocalExecutionEngine',
 
-        ],
-        'cosmic_ray.interceptors': [
-            'spor = cosmic_ray.interceptors.spor:intercept',
-            'pragma_no_mutate = cosmic_ray.interceptors.pragma_no_mutate:intercept',
-            'operators-filter = cosmic_ray.interceptors.operators_filter:intercept',
         ],
     },
     long_description=LONG_DESCRIPTION,

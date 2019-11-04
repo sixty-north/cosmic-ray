@@ -50,31 +50,6 @@ def operator_names():
                  for operator_name in provider)
 
 
-def get_interceptor(name):
-    """Get an interceptor by name.
-
-    Attrs:
-        name: The name of the plugin containing the interceptor.
-
-    Returns: A callable object which must accept a single `WorkDB` argument.
-    """
-    return ExtensionManager(
-        'cosmic_ray.interceptors',
-        on_load_failure_callback=_log_extension_loading_failure,
-    )[name].plugin
-
-
-def interceptor_names():
-    """Get all interceptor plugin names.
-
-    Returns: A sequence of interceptor plugin names.
-    """
-    return ExtensionManager(
-        'cosmic_ray.interceptors',
-        on_load_failure_callback=_log_extension_loading_failure,
-    ).names()
-
-
 def get_execution_engine(name):
     """Get the execution engine by name."""
     manager = driver.DriverManager(

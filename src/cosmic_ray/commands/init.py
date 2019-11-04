@@ -77,15 +77,4 @@ def init(module_paths, work_db, config):
                                         operator)
             visitor.walk(module_ast)
 
-    enabled_interceptors = config.sub('interceptors').get('enabled', ())
-    apply_interceptors(work_db, enabled_interceptors, config)
     work_db.enable_synchronisation()
-
-
-def apply_interceptors(work_db, enabled_interceptors, config):
-    """Apply each registered interceptor to the WorkDB."""
-    names = (name for name in interceptor_names() if name in enabled_interceptors)
-    for name in names:
-        sub_config = config.sub(name)
-        interceptor = get_interceptor(name)
-        interceptor(work_db, sub_config)
