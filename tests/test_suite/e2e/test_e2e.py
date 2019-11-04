@@ -49,6 +49,12 @@ def test_baseline(example_project_root, config, session):
          str(session)],
         cwd=str(example_project_root))
 
+    session_path = session.parent / "{}.baseline{}".format(session.stem, session.suffix)
+    with use_db(str(session_path), WorkDB.Mode.open) as work_db:
+        rate = survival_rate(work_db)
+        assert rate == 100.0
+
+
 
 def test_importing(example_project_root, session):
     config = "cosmic-ray.import.conf"
