@@ -270,18 +270,6 @@ def handle_execution_engines(args):
 
 
 @dsc.command()
-def handle_interceptors(args):
-    """usage: {program} interceptors
-
-    List the available interceptor plugins.
-    """
-    assert args
-    print('\n'.join(cosmic_ray.plugins.interceptor_names()))
-
-    return ExitCode.OK
-
-
-@dsc.command()
 def handle_apply(args):
     """usage: {program} apply <module-path> <operator> <occurrence>
 
