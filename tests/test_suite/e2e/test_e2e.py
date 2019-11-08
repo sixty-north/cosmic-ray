@@ -28,6 +28,10 @@ def test_e2e(example_project_root, config, session):
         cwd=str(example_project_root))
 
     subprocess.check_call(
+        ['cr-filter-spor', str(session)],
+        cwd=str(example_project_root))
+
+    subprocess.check_call(
         [sys.executable, "-m", "cosmic_ray.cli", "exec",
          str(session)],
         cwd=str(example_project_root))
