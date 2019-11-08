@@ -45,7 +45,7 @@ class FilterApp:
         logging.basicConfig(level=getattr(logging, args.verbosity))
 
         with use_db(args.session) as db:
-            filter(db, args)
+            self.filter(db, args)
 
         return ExitCode.OK
 
