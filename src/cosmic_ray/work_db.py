@@ -43,7 +43,7 @@ class WorkDB:
             raise FileNotFoundError('Corresponding database {} not found'.format(path))
 
         self._path = path
-        self._conn = sqlite3.connect(path)
+        self._conn = sqlite3.connect(str(path))
 
         self._init_db()
 
