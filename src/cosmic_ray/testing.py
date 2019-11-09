@@ -32,7 +32,7 @@ async def _run_tests(command, timeout):
         return (TestOutcome.INCOMPETENT, traceback.format_exc())
 
     try:
-        outs, errs = await asyncio.wait_for(proc.communicate(), timeout)
+        outs, _errs = await asyncio.wait_for(proc.communicate(), timeout)
 
         assert proc.returncode is not None
 

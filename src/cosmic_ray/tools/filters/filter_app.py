@@ -1,3 +1,5 @@
+"""A simple base for creating common types of work-db filters.
+"""
 import argparse
 import logging
 import sys
@@ -15,13 +17,13 @@ class FilterApp:
     as well. This provides a `main()` function that open the session's WorkDB
     and passes it to the subclass's `filter()` function.
     """
+
     def add_args(self, parser: argparse.ArgumentParser):
         """Add any arguments that the subclass needs to the parser.
 
         Args:
             parser: The ArgumentParser for command-line processing.
         """
-        pass
 
     def description(self):
         """The description of the filter.
@@ -31,14 +33,21 @@ class FilterApp:
         return None
 
     def main(self, argv=None):
+        """The main function for the app.
+
+        Args:
+            argv: Command line argument list of parse.
+        """
         if argv is None:
             argv = sys.argv[1:]
 
         parser = argparse.ArgumentParser(
             description=self.description(),
         )
-        parser.add_argument('session', help="Path to the session on which to operate")
-        parser.add_argument('--verbosity', help='Verbosity level for logging', default='WARNING')
+        parser.add_argument(
+            'session', help="Path to the session on which to operate")
+        parser.add_argument(
+            '--verbosity', help='Verbosity level for logging', default='WARNING')
         self.add_args(parser)
         args = parser.parse_args(argv)
 
@@ -49,6 +58,13 @@ class FilterApp:
 
         return ExitCode.OK
 
-    def filter(self, work_db):
-        raise NotImplementedError()
+    def filter(self, work_db, args):
+        """Apply this filter to a WorkDB.
 
+        This should modify the WorkDB in place.
+
+        Args:
+            work_db: An open WorkDB instance.
+            args: The argparse Namespace for the command line.
+        """
+        raise NotImplementedError()

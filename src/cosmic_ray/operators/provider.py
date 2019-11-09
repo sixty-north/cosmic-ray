@@ -39,5 +39,5 @@ class OperatorProvider:
     def __getitem__(self, name):
         if name == 'NoOp':
             return no_op.NoOp
-        else:
-            return _OPERATORS[name]
+
+        return _OPERATORS[name]

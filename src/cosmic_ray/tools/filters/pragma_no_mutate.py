@@ -13,6 +13,8 @@ log = logging.getLogger()
 
 
 class PragmaNoMutateFilter(FilterApp):
+    """Implements the pragma-no-mutate filter.
+    """
     def description(self):
         return __doc__
 
@@ -53,6 +55,8 @@ class PragmaNoMutateFilter(FilterApp):
 
 
 def main(argv=None):
+    """Run pragma-no-mutate filter with specified command line arguments.
+    """
     return PragmaNoMutateFilter().main(argv)
 
 

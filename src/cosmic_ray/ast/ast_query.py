@@ -1,3 +1,6 @@
+"Tools for querying ASTs."
+
+
 class ASTQuery:
     """
     Allowing to navigate into any object and test attribute of any object:
@@ -29,14 +32,16 @@ class ASTQuery:
         self.obj = obj
 
     def _clone(self, obj) -> 'ASTQuery':
+        "Clone this query."
         return type(self)(obj)
 
-    def match(self, clazz=None, **kwargs) -> 'ASTQuery':
+    def match(self, cls=None, **kwargs) -> 'ASTQuery':
+        "Check if node matches a class."
         obj = self.obj
         if obj is None:
             return self
 
-        if clazz is None or isinstance(obj, clazz):
+        if cls is None or isinstance(obj, cls):
             for k, v in kwargs.items():
                 op = None
                 k__op = k.split('__')
@@ -50,7 +55,7 @@ class ASTQuery:
                     if node_value not in v:
                         break
                 else:
-                    raise ValueError("Can't handle operator %s", op)
+                    raise ValueError("Can't handle operator {}".format(op))
             else:
                 # All is true, continue recursion
                 return self
@@ -60,6 +65,7 @@ class ASTQuery:
 
     @property
     def ok(self):
+        "Is the query ok."
         return bool(self.obj)
 
     def __bool__(self):
@@ -73,6 +79,7 @@ class ASTQuery:
 
     @property
     def IF(self):
+        "Conditional navigation."
         return ASTQueryOptional(self.obj, obj_test=self)
 
     def __call__(self, *args, **kwargs) -> 'ASTQuery':
@@ -87,18 +94,20 @@ class ASTQuery:
 
 
 class ASTQueryOptional(ASTQuery):
+    "Manages conditional navigation."
     def __init__(self, obj, obj_test=None):
         super().__init__(obj)
         self._initial = obj_test
 
     def _clone(self, obj):
         o = super()._clone(obj)
-        o._initial = self._initial
+        o._initial = self._initial  # pylint: disable=protected-access
+
         return o
 
     @property
     def FI(self):
+        "End of conditional navigation."
         if self:
-            return self._initial._clone(self.obj)
-        else:
-            return self._initial
+            return self._initial._clone(self.obj)  # pylint: disable=protected-access
+        return self._initial

@@ -5,15 +5,15 @@ import logging
 
 from stevedore import driver, ExtensionManager
 
-log = logging.getLogger()
+log = logging.getLogger()  # pylint: disable=invalid-name
 
 
-def _log_extension_loading_failure(_mgr, ep, err):
+def _log_extension_loading_failure(_mgr, extension_point, err):
     # We have to log at the `error` level here as opposed to, say, `info`
     # because logging isn't configure when we reach here. We need this infor to
     # print with the default logging settings.
     log.error('Operator provider load failure: extension-point="%s", err="%s"',
-              ep, err)
+              extension_point, err)
 
 
 OPERATOR_PROVIDERS = {

@@ -56,6 +56,7 @@ def is_number(node):
 
 
 def dump_node(node):
+    "Generate string version of node."
     buffer = io.StringIO()
     write = buffer.write
 
@@ -78,4 +79,3 @@ def dump_node(node):
 
     do_dump(node)
     return buffer.getvalue()
-

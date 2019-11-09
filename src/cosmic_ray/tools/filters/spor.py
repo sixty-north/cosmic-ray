@@ -16,6 +16,8 @@ log = logging.getLogger()
 
 
 class SporFilter(FilterApp):
+    """Implementation of spor filter.
+    """
     def description(self):
         return __doc__
 
@@ -75,6 +77,11 @@ class SporFilter(FilterApp):
 
 
 def main(argv=None):
+    """Run spor filter with specified command line args.
+
+    Args:
+        argv: Command-line arguments to use.
+    """
     return SporFilter().main(argv)
 
 
@@ -122,5 +129,3 @@ def _item_in_context(lines, item, context):
     width = stop_offset - start_offset
 
     return start_offset >= context.offset and width <= len(context.topic)
-
-

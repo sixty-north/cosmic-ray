@@ -68,7 +68,7 @@ def _is_binary_operator(node):
         if isinstance(node.parent, parso.python.tree.Param):
             return False
 
-        elif isinstance(node.parent, parso.python.tree.PythonNode):
+        if isinstance(node.parent, parso.python.tree.PythonNode):
             return node.parent.type not in _NON_BINARY_PARENTS
 
         return True

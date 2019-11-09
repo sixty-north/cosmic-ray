@@ -6,10 +6,6 @@ class Data:
     count = 0
     results = []
 
-    config = {'exclude-operators': [
-        'Op1', 'Op2', 'Opregex[12]', r'(?:.[oO]m(?:p|P)lex).*'
-    ]}
-
     def new_work_item(self, operator_name, job_id):
         self.count += 1
         return WorkItem(
@@ -52,5 +48,8 @@ class Data:
 
 def test_operators_filter():
     data = Data()
-    operators_filter.OperatorsFilter().filter(data, data.config)
+    exclude = [
+        'Op1', 'Op2', 'Opregex[12]', r'(?:.[oO]m(?:p|P)lex).*'
+    ]
+    operators_filter.OperatorsFilter()._skip_filtered(data, exclude)
     assert data.results == data.expected

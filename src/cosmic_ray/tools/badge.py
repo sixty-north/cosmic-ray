@@ -1,12 +1,14 @@
+"""Tool for creating badge.
+"""
 import os
 from logging import getLogger
 
-import docopt
 from anybadge import Badge
 
-from cosmic_ray.config import ConfigDict, load_config
+import docopt
+from cosmic_ray.config import load_config
 from cosmic_ray.tools.survival_rate import survival_rate
-from cosmic_ray.work_db import use_db, WorkDB
+from cosmic_ray.work_db import WorkDB, use_db
 
 log = getLogger()
 
@@ -42,7 +44,7 @@ options:
             thresholds=config.badge_thresholds,
         )
 
-        log.info(("Generating badge: " + config.badge_format) % percent)
+        log.info("Generating badge: " + config.badge_format, percent)  # pylint: disable=logging-not-lazy
 
         try:
             os.unlink(badge_filename)

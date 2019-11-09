@@ -54,6 +54,7 @@ _config = None
 
 @contextlib.contextmanager
 def excursion(dirname):
+    "Context manager for temporarily changing directories."
     orig = os.getcwd()
     try:
         os.chdir(dirname)

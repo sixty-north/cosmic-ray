@@ -109,18 +109,22 @@ class ConfigDict(dict):
 
     @property
     def badge(self):
+        "Badge subconfig."
         return self['badge']
 
     @property
     def badge_label(self):
+        "Badge label."
         return self.badge['label']
 
     @property
     def badge_format(self):
+        "Badge format."
         return self.badge['format']
 
     @property
     def badge_thresholds(self):
+        "Badge thresholds."
         return self.badge['thresholds']
 
 

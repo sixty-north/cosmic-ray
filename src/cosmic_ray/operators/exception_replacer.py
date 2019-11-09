@@ -2,9 +2,9 @@
 
 from parso.python.tree import Name, PythonNode
 
-from .operator import Operator
-
 from cosmic_ray.exceptions import CosmicRayTestingException
+
+from .operator import Operator
 
 
 class ExceptionReplacer(Operator):
