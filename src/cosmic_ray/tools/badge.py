@@ -37,14 +37,16 @@ options:
 
         percent = 100 - survival_rate(db)
 
+        config = config['badge']
+
         badge = Badge(
-            label=config.badge_label,
+            label=config['label'],
             value=percent,
-            value_format=config.badge_format,
-            thresholds=config.badge_thresholds,
+            value_format=config['format'],
+            thresholds=config['thresholds'],
         )
 
-        log.info("Generating badge: " + config.badge_format, percent)  # pylint: disable=logging-not-lazy
+        log.info("Generating badge: " + config['format'], percent)  # pylint: disable=logging-not-lazy
 
         try:
             os.unlink(badge_filename)

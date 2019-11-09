@@ -107,26 +107,6 @@ class ConfigDict(dict):
         "The 'cloning' section of the config."
         return self['cloning']
 
-    @property
-    def badge(self):
-        "Badge subconfig."
-        return self['badge']
-
-    @property
-    def badge_label(self):
-        "Badge label."
-        return self.badge['label']
-
-    @property
-    def badge_format(self):
-        "Badge format."
-        return self.badge['format']
-
-    @property
-    def badge_thresholds(self):
-        "Badge thresholds."
-        return self.badge['thresholds']
-
 
 @contextmanager
 def _config_stream(filename):
