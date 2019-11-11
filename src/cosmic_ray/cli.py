@@ -97,7 +97,7 @@ def init(config_file, session_file):
                 # help="The database containing the config to be displayed."
                 )
 def config(session_file):
-    """Show the configuration for in a session."""
+    """Show the configuration for a session."""
     with use_db(session_file) as database:
         cfg = database.get_config()
         print(serialize_config(cfg))
