@@ -12,9 +12,7 @@ from collections import defaultdict
 from contextlib import redirect_stdout
 from pathlib import Path
 
-import docopt
-import docopt_subcommands
-from docopt_subcommands.subcommands import Subcommands
+import click
 from exit_codes import ExitCode
 
 import cosmic_ray.commands
@@ -27,66 +25,43 @@ from cosmic_ray.mutating import apply_mutation
 from cosmic_ray.progress import report_progress
 from cosmic_ray.version import __version__
 from cosmic_ray.work_db import WorkDB, use_db
-from cosmic_ray.work_item import WorkItem, WorkItemJsonEncoder, WorkResult, \
-    TestOutcome
+from cosmic_ray.work_item import TestOutcome, WorkItem, WorkItemJsonEncoder
 
 log = logging.getLogger()
 
 
-DOC_TEMPLATE = """{program}
-
-Usage: {program} [options] <command> [<args> ...]
-
-Options:
-  -h --help           Show this screen.
-  --version           Show the program version.
-  -v --verbosity=LEVEL  Use verbose output [default: WARNING]
-
-Available commands:
-  {available_commands}
-
-See '{program} <command> -h' for help on specific commands.
-"""
+@click.group()
+@click.option('--verbosity',
+              default='WARNING',
+              help="The logging level to use.",
+              type=click.Choice(['CRITICAL', 'DEBUG', 'ERROR', 'FATAL', 'INFO', 'WARNING'],
+                                case_sensitive=True))
+@click.version_option(version=__version__)
+def cli(verbosity):
+    "Mutation testing for Python3"
+    logging_level = getattr(logging, verbosity)
+    logging.basicConfig(level=logging_level)
 
 
-class CosmicRaySubcommands(Subcommands):
-    "Subcommand handler."
-
-    def _precommand_option_handler(self, config):
-        verbosity_level = getattr(logging, config.get('--verbosity', 'WARNING'))
-
-        logging.basicConfig(
-            level=verbosity_level,
-            format='%(asctime)s %(name)s %(levelname)s %(message)s')
-
-        return super()._precommand_option_handler(config)
-
-
-dsc = CosmicRaySubcommands(
-    program='cosmic-ray',
-    version='Cosmic Ray {}'.format(__version__),
-    doc_template=DOC_TEMPLATE)
-
-
-@dsc.command()
-def handle_new_config(args):
-    """usage: cosmic-ray new-config <config-file>
-
-    Create a new config file.
+@cli.command()
+@click.argument('config_file', type=click.File('wt'))
+def new_config(config_file):
+    """Create a new config file.
     """
-    config = cosmic_ray.commands.new_config()
-    config_str = serialize_config(config)
-    with open(args['<config-file>'], mode='wt') as handle:
-        handle.write(config_str)
-
-    return ExitCode.OK
+    cfg = cosmic_ray.commands.new_config()
+    config_str = serialize_config(cfg)
+    config_file.write(config_str)
+    sys.exit(ExitCode.OK)
 
 
-@dsc.command()
-def handle_init(args):
-    """usage: cosmic-ray init <config-file> <session-file>
-
-    Initialize a mutation testing session from a configuration. This
+click.argument()
+@cli.command()
+@click.argument('config_file')
+@click.argument('session_file',
+                # help="The filename for the database in which the work order will be stored."
+                )
+def init(config_file, session_file):
+    """Initialize a mutation testing session from a configuration. This
     primarily creates a session - a database of "work to be done" -
     which describes all of the mutations and test runs that need to be
     executed for a full mutation testing run. The configuration
@@ -96,83 +71,68 @@ def handle_init(args):
     This command doesn't actually run any tests. Instead, it scans the
     modules-under-test and simply generates the work order which can be
     executed with other commands.
-
-    The `session-file` is the filename for the database in which the
-    work order will be stored.
     """
-    config_file = args['<config-file>']
+    cfg = load_config(config_file)
 
-    config = load_config(config_file)
-
-    modules = cosmic_ray.modules.find_modules(Path(config['module-path']))
-    modules = cosmic_ray.modules.filter_paths(modules, config.get('exclude-modules', ()))
+    modules = cosmic_ray.modules.find_modules(Path(cfg['module-path']))
+    modules = cosmic_ray.modules.filter_paths(
+        modules, cfg.get('exclude-modules', ()))
 
     if log.isEnabledFor(logging.INFO):
         log.info('Modules discovered:')
         per_dir = defaultdict(list)
         for m in modules:
             per_dir[m.parent].append(m.name)
-        for dir, files in per_dir.items():
-            log.info(' - %s: %s', dir, ', '.join(sorted(files)))
+        for directory, files in per_dir.items():
+            log.info(' - %s: %s', directory, ', '.join(sorted(files)))
 
-    db_name = args['<session-file>']
-
-    with use_db(db_name) as database:
-        cosmic_ray.commands.init(modules, database, config)
-
-    return ExitCode.OK
-
-
-@dsc.command()
-def handle_config(args):
-    """usage: cosmic-ray config <session-file>
-
-    Show the configuration for in a session.
-    """
-    session_file = args['<session-file>']
     with use_db(session_file) as database:
-        config = database.get_config()
-        print(serialize_config(config))
+        cosmic_ray.commands.init(modules, database, cfg)
 
-    return ExitCode.OK
+    sys.exit(ExitCode.OK)
 
 
-@dsc.command()
-def handle_exec(args):
-    """usage: cosmic-ray exec <session-file>
+@cli.command()
+@click.argument('session_file',
+                # help="The database containing the config to be displayed."
+                )
+def config(session_file):
+    """Show the configuration for in a session."""
+    with use_db(session_file) as database:
+        cfg = database.get_config()
+        print(serialize_config(cfg))
 
-    Perform the remaining work to be done in the specified session.
+    sys.exit(ExitCode.OK)
+
+
+@cli.command(name='exec')
+@click.argument('session_file')
+def handle_exec(session_file):
+    """Perform the remaining work to be done in the specified session.
     This requires that the rest of your mutation testing
     infrastructure (e.g. worker processes) are already running.
     """
-    session_file = args.get('<session-file>')
     with use_db(session_file, mode=WorkDB.Mode.open) as work_db:
         cosmic_ray.commands.execute(work_db)
-    return ExitCode.OK
+    sys.exit(ExitCode.OK)
 
 
-@dsc.command()
-def handle_baseline(args):
-    """usage: cosmic-ray baseline [--force] [--report] <session-file>
+@cli.command()
+@click.argument('session_file')
+@click.option(
+    '--force', 'force', flag_value=True,
+    default=False,
+    help="Force write over baseline session file if this file was already created by a previous run.")
+@click.option(
+    '--report', 'dump_report', flag_value=True,
+    default=False,
+    help="Print the report result of this baseline run. If the job has failed, jobs's outputs will be displayed.")
+def baseline(session_file, force, dump_report):
+    """Runs a baseline execution that executes the test suite over unmutated code.
 
-    Runs a baseline execution that executes the test suite over
-    unmutated code.
-
-    options:
-      --force      Force write over baseline session file
-                   if this file was already created by a previous
-                   run.
-      --report     Print the report result of this baseline run.
-                   If the job has failed, jobs's outputs will be
-                   displayed.
-
-    return code:
-        0 if the job has exited normally, else 1.
-
+    Exits with 0 if the job has exited normally, otherwise 1.
     """
-    session_file = Path(args.get('<session-file>'))
-    force = args.get('--force', False)
-    dump_report = args.get('--report', False)
+    session_file = Path(session_file)
 
     baseline_session_file = session_file.parent / '{}.baseline{}'.format(
         session_file.stem, session_file.suffix)
@@ -183,9 +143,9 @@ def handle_baseline(args):
             template = next(iter(db.work_items))
         except StopIteration:
             log.error('No work items in session')
-            return ExitCode.DATA_ERR
+            sys.exit(ExitCode.DATA_ERR)
 
-        config = db.get_config()
+        cfg = db.get_config()
 
     if force:
         try:
@@ -196,7 +156,7 @@ def handle_baseline(args):
     # Copy input work-item, but tell it to use the no-op operator. Create a new
     # session containing only this work-item and execute this new session.
     with use_db(baseline_session_file, mode=WorkDB.Mode.create) as db:
-        db.set_config(config)
+        db.set_config(cfg)
 
         db.add_work_item(
             WorkItem(
@@ -216,88 +176,77 @@ def handle_baseline(args):
                 print("Execution with no mutation gives those following errors:")
                 for line in result.output.split('\n'):
                     print("  >>>", line)
-            return 1
+            sys.exit(1)
         else:
             if dump_report:
                 print("Execution with no mutation works fine:")
-            return ExitCode.OK
+            sys.exit(ExitCode.OK)
 
 
-@dsc.command()
-def handle_dump(args):
-    """usage: cosmic-ray dump <session-file>
-
-    JSON dump of session data. This output is typically run through other
+@cli.command()
+@click.argument("session_file")
+def dump(session_file):
+    """JSON dump of session data. This output is typically run through other
     programs to produce reports.
 
     Each line of output is a list with two elements: a WorkItem and a
     WorkResult, both JSON-serialized. The WorkResult can be null, indicating a
     WorkItem with no results.
     """
-    session_file = args['<session-file>']
-
     with use_db(session_file, WorkDB.Mode.open) as database:
         for work_item, result in database.completed_work_items:
             print(json.dumps((work_item, result), cls=WorkItemJsonEncoder))
         for work_item in database.pending_work_items:
             print(json.dumps((work_item, None), cls=WorkItemJsonEncoder))
 
-    return ExitCode.OK
+    sys.exit(ExitCode.OK)
 
 
-@dsc.command()
-def handle_operators(args):
-    """usage: {program} operators
-
-    List the available operator plugins.
-    """
-    assert args
+@cli.command()
+def operators():
+    """List the available operator plugins."""
     print('\n'.join(cosmic_ray.plugins.operator_names()))
 
-    return ExitCode.OK
+    sys.exit(ExitCode.OK)
 
 
-@dsc.command()
-def handle_execution_engines(args):
-    """usage: {program} execution-engines
-
-    List the available execution-engine plugins.
-    """
-    assert args
+@cli.command()
+def execution_engines():
+    """List the available execution-engine plugins."""
     print('\n'.join(cosmic_ray.plugins.execution_engine_names()))
 
-    return ExitCode.OK
+    sys.exit(ExitCode.OK)
 
 
-@dsc.command()
-def handle_apply(args):
-    """usage: {program} apply <module-path> <operator> <occurrence>
-
-    Apply the specified mutation to the files on disk. This is primarily a debugging
-    tool.
-
-    options:
-      --python-version=VERSION  Python major.minor version (e.g. 3.6) of the code being mutated.
+@cli.command()
+@click.argument('module_path')
+@click.argument('operator')
+@click.argument('occurrence', type=int)
+@click.option('--python-version', help="Python major.minor version (e.g. 3.6) of the code being mutated.")
+def apply(module_path, operator, occurrence, python_version):
+    """Apply the specified mutation to the files on disk. This is primarily a debugging tool.
     """
 
-    python_version = args['--python-version']
     if python_version is None:
         python_version = "{}.{}".format(sys.version_info.major,
                                         sys.version_info.minor)
 
     apply_mutation(
-        Path(args['<module-path>']),
-        cosmic_ray.plugins.get_operator(args['<operator>'])(python_version),
-        int(args['<occurrence>']))
+        Path(module_path),
+        cosmic_ray.plugins.get_operator(operator)(python_version),
+        occurrence)
 
-    return ExitCode.OK
+    sys.exit(ExitCode.OK)
 
 
-@dsc.command()
-def handle_worker(args):
-    """usage: {program} worker [options] <module-path> <operator> <occurrence> [<config-file>]
-
-    Run a worker process which performs a single mutation and test run.
+@cli.command()
+@click.argument('module_path')
+@click.argument('operator')
+@click.argument('occurrence', type=int)
+@click.argument('config_file', required=False, default=None)
+@click.option('--keep-stdout', default=False, flag_value=True, help='Do not squelch output.')
+def worker(module_path, operator, occurrence, config_file, keep_stdout):
+    """Run a worker process which performs a single mutation and test run.
     Each worker does a minimal, isolated chunk of work: it mutates the
     <occurrence>-th instance of <operator> in <module-path>, runs the test
     suite defined in the configuration, prints the results, and exits.
@@ -305,40 +254,21 @@ def handle_worker(args):
     Normally you won't run this directly. Rather, it will be launched
     by an execution engine. However, it can be useful to run this on
     its own for testing and debugging purposes.
-
-    options:
-      --keep-stdout             Do not squelch stdout
-
     """
-    config = load_config(args.get('<config-file>'))
+    cfg = load_config(config_file)
 
     with open(os.devnull, 'w') as devnull:
-        with redirect_stdout(sys.stdout if args['--keep-stdout'] else devnull):
+        with redirect_stdout(sys.stdout if keep_stdout else devnull):
             work_item = cosmic_ray.worker.worker(
-                Path(args['<module-path>']),
-                config.python_version, args['<operator>'],
-                int(args['<occurrence>']),
-                config.test_command,
+                Path(module_path),
+                cfg.python_version, operator,
+                occurrence,
+                cfg.test_command,
                 None)
 
     sys.stdout.write(json.dumps(work_item, cls=WorkItemJsonEncoder))
 
-    return ExitCode.OK
-
-
-DOC_TEMPLATE = """{program}
-
-Usage: {program} [options] <command> [<args> ...]
-
-Options:
-  -h --help     Show this screen.
-  -v --verbose  Use verbose logging
-
-Available commands:
-  {available_commands}
-
-See '{program} help <command>' for help on specific commands.
-"""
+    sys.exit(ExitCode.OK)
 
 
 _SIGNAL_EXIT_CODE_BASE = 128
@@ -359,14 +289,7 @@ def main(argv=None):
             lambda *args: report_progress(sys.stderr))
 
     try:
-        return docopt_subcommands.main(
-            commands=dsc,
-            argv=argv,
-            doc_template=DOC_TEMPLATE,
-            exit_at_end=False)
-    except docopt.DocoptExit as exc:
-        print(exc, file=sys.stderr)
-        return ExitCode.USAGE
+        return cli(argv)
     except FileNotFoundError as exc:
         print(exc, file=sys.stderr)
         return ExitCode.NO_INPUT
@@ -382,6 +305,9 @@ def main(argv=None):
         print('Error in subprocess', file=sys.stderr)
         print(exc, file=sys.stderr)
         return exc.returncode
+    except SystemExit as exc:
+        # We intercept this here so that main() is testable.
+        return exc.code
 
 
 if __name__ == '__main__':

@@ -57,7 +57,7 @@ def lobotomize(monkeypatch):
 
 
 def test_invalid_command_line_returns_EX_USAGE():
-    assert cosmic_ray.cli.main(['init', 'foo']) == ExitCode.USAGE
+    assert cosmic_ray.cli.main(['init', 'foo']) == 2
 
 
 def test_non_existent_file_returns_EX_NOINPUT():

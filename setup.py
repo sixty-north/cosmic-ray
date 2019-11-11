@@ -33,8 +33,9 @@ LONG_DESCRIPTION = read(local_file('README.rst'), mode='rt')
 
 INSTALL_REQUIRES = [
     'astunparse',
+    'click',
     'decorator',
-    'docopt_subcommands>=3.0.0,<4.0.0',
+    'docopt',
     'exit_codes',
     'gitpython',
     'parso',
