@@ -135,24 +135,6 @@ class WorkDB:
             if self._conn.isolation_level:
                 self._conn.execute('END TRANSACTION')
 
-    def disable_synchronisation(self):
-        """Stop committing data to disk for every transaction.
-
-        WARNING: this will cause data corruption in case system crash or power
-        off occurs!
-        """
-        with self._conn:
-            self._conn.execute('PRAGMA SYNCHRONOUS=OFF')
-
-    def enable_synchronisation(self):
-        """Re-enable committing data to disk for every transaction.
-
-        This restores the database to standard configuration with data
-        being written to disk with every transaction.
-        """
-        with self._conn:
-            self._conn.execute('PRAGMA SYNCHRONOUS=FULL')
-
     def clear(self):
         """Clear all work items from the session.
 

@@ -30,6 +30,15 @@ class Visitor(ABC):
         "Called for each node in the walk."
 
 
+def ast_nodes(node):
+    "Iterable of all nodes in a tree."
+    yield node
+
+    if isinstance(node, parso.tree.BaseNode):
+        for child in node.children:
+            yield from ast_nodes(child)
+
+
 def get_ast(module_path, python_version):
     """Get the AST for the code in a file.
 
