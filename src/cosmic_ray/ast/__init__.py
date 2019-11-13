@@ -31,7 +31,13 @@ class Visitor(ABC):
 
 
 def ast_nodes(node):
-    "Iterable of all nodes in a tree."
+    """Iterable of all nodes in a tree.
+    
+    Args:
+        node: The top node in a parso tree to iterate.
+
+    Yields: All of the nodes in the tree.
+    """
     yield node
 
     if isinstance(node, parso.tree.BaseNode):
