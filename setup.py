@@ -1,35 +1,10 @@
 """Setup for Cosmic Ray.
 """
-import io
-import os
+
+from pathlib import Path
 
 from setuptools import setup, find_packages
 
-
-def local_file(*name):
-    "Find a file relative to this directory."
-    return os.path.join(os.path.dirname(__file__), *name)
-
-
-def read(name, **kwargs):
-    "Read the contents of a file."
-    with io.open(name, encoding=kwargs.get("encoding", "utf8")) as handle:
-        return handle.read()
-
-
-# This is unfortunately duplicated from scripts/cosmic_ray_tooling.py. I
-# couldn't find a way to use the original version and still have tox
-# work...hmmm...
-def read_version():
-    "Read the `(version-string, version-info)` from `src/cosmic_ray/version.py`."
-    version_file = local_file('src', 'cosmic_ray', 'version.py')
-    local_vars = {}
-    with open(version_file) as handle:
-        exec(handle.read(), {}, local_vars)  # pylint: disable=exec-used
-    return (local_vars['__version__'], local_vars['__version_info__'])
-
-
-LONG_DESCRIPTION = read(local_file('README.rst'), mode='rt')
 
 INSTALL_REQUIRES = [
     'astunparse',
@@ -49,11 +24,9 @@ INSTALL_REQUIRES = [
     'anybadge',
 ]
 
-version = read_version()[0]
-
 setup(
     name='cosmic_ray',
-    version=version,
+    version='6.0.1',
     packages=find_packages('src'),
     author='Sixty North AS',
     author_email='austin@sixty-north.com',
@@ -84,7 +57,7 @@ setup(
     # $ pip install -e .[dev,test]
     extras_require={
         'test': ['hypothesis', 'pytest', 'pytest-mock', 'tox'],
-        'dev': ['pylint', 'autopep8'],
+        'dev': ['pylint', 'autopep8', 'bumpversion'],
         'docs': ['sphinx', 'sphinx_rtd_theme'],
         'celery4_engine': ['cosmic_ray_celery4_engine'],
     },
@@ -112,5 +85,5 @@ setup(
 
         ],
     },
-    long_description=LONG_DESCRIPTION,
+    long_description=Path('README.rst').read_text(encoding='utf-8'),
 )
