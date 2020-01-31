@@ -10,6 +10,8 @@ import parso.tree
 
 class Visitor(ABC):
     """AST visitor for parso trees.
+
+    This supports both simple traversal as well as editing of the tree.
     """
 
     def walk(self, node):
@@ -27,7 +29,17 @@ class Visitor(ABC):
 
     @abstractmethod
     def visit(self, node):
-        "Called for each node in the walk."
+        """Called for each node in the walk.
+        
+        This should return a node that will replace the node argument in the AST. This can be
+        the node argument itself, a new node, or None. If None is returned, then the node is
+        removed from the tree.
+
+        Args:
+            node: The node currently being visited.
+
+        Returns: A node or `None`.
+        """
 
 
 def ast_nodes(node):
