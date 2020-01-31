@@ -64,6 +64,17 @@ cr-filter-pragma
 The ``cr-filter-pragma`` filter looks for lines in your source code containing the comment "# pragma: no mutate". Any
 mutation in a session that would mutate such a line is skipped.
 
+cr-filter-git
+-------------
+
+The ``cr-filter-git`` filter looks for edited or new lines from the given git branch. Any mutation in a session that
+would mutate other lines is skipped.
+
+By default the ``master`` branch is used, but you could define another one like this:
+
+  [cosmic-ray.git-filter]
+  branch = "rolling"
+
 Using filters
 =============
 

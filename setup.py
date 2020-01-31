@@ -99,6 +99,7 @@ setup(
             'cr-filter-spor = cosmic_ray.tools.filters.spor:main',
             'cr-filter-operators = cosmic_ray.tools.filters.operators_filter:main',
             'cr-filter-pragma = cosmic_ray.tools.filters.pragma_no_mutate:main',
+            'cr-filter-git = cosmic_ray.tools.filters.git:main',
         ],
         'cosmic_ray.test_runners': [
             'unittest = cosmic_ray.testing.unittest_runner:UnittestRunner',
