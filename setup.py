@@ -19,7 +19,7 @@ INSTALL_REQUIRES = [
     'spor>=1.1.0',
     'stevedore',
     'toml',
-    'virtualenv',
+    'virtualenv<=16.7.10',
     'yattag',
     'anybadge',
 ]

@@ -11,7 +11,7 @@ from cosmic_ray.tools.survival_rate import survival_rate
 @pytest.fixture(scope="session")
 def project_root(pytestconfig):
     root = pathlib.Path(str(pytestconfig.rootdir))
-    return root / "tests" / "fast_tests"
+    return root / ".." / "fast_tests"
 
 
 def test_fast_tests(project_root, session):
