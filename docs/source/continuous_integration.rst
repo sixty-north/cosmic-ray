@@ -25,9 +25,8 @@ Releasing a new version
 As described above, the release process for Cosmic Ray is largely automatic. In
 order to do a new release, you simply need to:
 
-1. Bump the version in ``cosmic_ray.version``. This can be a major, minor, or
-   patch bump, but the change needs to be *up*.
-2. Commit the version bump to ``master`` and push it to ``master`` on github.
+1. Bump the version with `bumpversion`.
+2. Push it to ``master`` on github.
 3. Push the changes to the ``release`` branch on github.
 
 Once the push is made to ``release``, the automated release system will take over.
