@@ -35,65 +35,36 @@ the root of the cloned repository, so you need to take this into account when
 creating the configuration.
 """
 
-import contextlib
 import logging
 import multiprocessing
 import multiprocessing.util
 import os
 
-from cosmic_ray.cloning import ClonedWorkspace
 from cosmic_ray.execution.execution_engine import ExecutionEngine
-from cosmic_ray.mutating import mutate_and_test
+from cosmic_ray.worker import Worker
 
 log = logging.getLogger(__name__)
 
 # Per-subprocess globals
-_workspace = None
-_config = None
-
-
-@contextlib.contextmanager
-def excursion(dirname):
-    "Context manager for temporarily changing directories."
-    orig = os.getcwd()
-    try:
-        os.chdir(dirname)
-        yield
-    finally:
-        os.chdir(orig)
+_worker = None
 
 
 def _initialize_worker(config):
     # pylint: disable=global-statement
-    global _workspace
-    global _config
-    assert _workspace is None
-    assert _config is None
+    global _worker
+    assert _worker is None
 
-    _config = config
+    _worker = Worker(config)
 
     log.info('Initialize local-git worker in PID %s', os.getpid())
-    _workspace = ClonedWorkspace(config.cloning_config)
-
+ 
     # Register a finalizer
     multiprocessing.util.Finalize(
-        _workspace, _workspace.cleanup, exitpriority=16)
+        _worker, _worker.cleanup, exitpriority=16)
 
 
 def _execute_work_item(work_item):
-    log.info('Executing worker in %s, PID=%s',
-             _workspace.clone_dir, os.getpid())
-
-    with excursion(_workspace.clone_dir):
-        result = mutate_and_test(
-            work_item.module_path,
-            _config.python_version,
-            work_item.operator_name,
-            work_item.occurrence,
-            _config.test_command,
-            _config.timeout)
-
-    return work_item.job_id, result
+    return _worker.execute(work_item)
 
 
 class LocalExecutionEngine(ExecutionEngine):
