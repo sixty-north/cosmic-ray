@@ -5,7 +5,7 @@ import os
 import celery
 from celery.utils.log import get_logger
 from cosmic_ray.cloning import ClonedWorkspace
-from cosmic_ray.worker import worker
+from cosmic_ray.mutating import mutate_and_test
 
 from .app import APP
 
@@ -34,7 +34,7 @@ def worker_task(work_item, config):
     """
     _ensure_workspace(config)
 
-    result = worker(
+    result = mutate_and_test(
         work_item.module_path,
         config.python_version,
         work_item.operator_name,

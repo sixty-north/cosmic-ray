@@ -13,7 +13,7 @@ import cosmic_ray.cli
 import cosmic_ray.config
 import cosmic_ray.modules
 import cosmic_ray.plugins
-import cosmic_ray.worker
+import cosmic_ray.mutating
 
 
 @pytest.fixture
@@ -52,8 +52,8 @@ def lobotomize(monkeypatch):
     # This effectively prevent init from actually trying to scan the module in the config.
     monkeypatch.setattr(cosmic_ray.modules, 'find_modules', lambda *args: [])
 
-    # Make cosmic_ray.worker.worker just return a simple empty dict.
-    monkeypatch.setattr(cosmic_ray.worker, 'worker', lambda *args: {})
+    # Make cosmic_ray.mutating.mutate_and_test just return a simple empty dict.
+    monkeypatch.setattr(cosmic_ray.mutating, 'mutate_and_test', lambda *args: {})
 
 
 def test_invalid_command_line_returns_EX_USAGE():

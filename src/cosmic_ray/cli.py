@@ -17,9 +17,9 @@ from exit_codes import ExitCode
 
 import cosmic_ray.commands
 import cosmic_ray.modules
+import cosmic_ray.mutating
 import cosmic_ray.plugins
 import cosmic_ray.testing
-import cosmic_ray.worker
 from cosmic_ray.config import load_config, serialize_config
 from cosmic_ray.mutating import apply_mutation
 from cosmic_ray.progress import report_progress
@@ -259,7 +259,7 @@ def worker(module_path, operator, occurrence, config_file, keep_stdout):
 
     with open(os.devnull, 'w') as devnull:
         with redirect_stdout(sys.stdout if keep_stdout else devnull):
-            work_item = cosmic_ray.worker.worker(
+            work_item = cosmic_ray.mutating.mutate_and_test(
                 Path(module_path),
                 cfg.python_version, operator,
                 occurrence,

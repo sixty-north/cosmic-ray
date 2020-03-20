@@ -43,7 +43,7 @@ import os
 
 from cosmic_ray.cloning import ClonedWorkspace
 from cosmic_ray.execution.execution_engine import ExecutionEngine
-from cosmic_ray.worker import worker
+from cosmic_ray.mutating import mutate_and_test
 
 log = logging.getLogger(__name__)
 
@@ -76,14 +76,16 @@ def _initialize_worker(config):
     _workspace = ClonedWorkspace(config.cloning_config)
 
     # Register a finalizer
-    multiprocessing.util.Finalize(_workspace, _workspace.cleanup, exitpriority=16)
+    multiprocessing.util.Finalize(
+        _workspace, _workspace.cleanup, exitpriority=16)
 
 
 def _execute_work_item(work_item):
-    log.info('Executing worker in %s, PID=%s', _workspace.clone_dir, os.getpid())
+    log.info('Executing worker in %s, PID=%s',
+             _workspace.clone_dir, os.getpid())
 
     with excursion(_workspace.clone_dir):
-        result = worker(
+        result = mutate_and_test(
             work_item.module_path,
             _config.python_version,
             work_item.operator_name,
