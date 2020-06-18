@@ -16,7 +16,7 @@ validates some if its internals. You can run that like this:
 
 ::
 
-    pytest test
+    pytest tests/test_suite
 
 The "adam" tests
 ----------------
