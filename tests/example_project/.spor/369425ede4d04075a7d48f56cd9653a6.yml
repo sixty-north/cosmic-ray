@@ -1,0 +1,8 @@
+context: {after: '
+
+    ', before: 'anchors."
+
+    ', offset: 64, topic: "if __name__ == \"__main__\":\n    x = 3", width: 10}
+encoding: utf-8
+file_path: adam/cli.py
+metadata: {mutate: false}

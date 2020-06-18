@@ -1,1 +1,0 @@
-{"!spor_anchor": {"file_path": "adam/cli.py", "encoding": "utf-8", "context": {"!spor_context": {"before": " anchors.\n", "after": "\n", "topic": "if __name__ == \"__main__\":\n    x = 3", "offset": 64, "width": 10}}, "metadata": {"mutate": false}}}
