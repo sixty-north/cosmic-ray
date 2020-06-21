@@ -26,7 +26,7 @@ The Celery execution engine
 The Cosmic Ray repository includes the `celery4` execution engine. This is
 provided as a plugin via the `cosmic_ray_celery4_engine` package in the
 `plugins/execution_engines/celery3` directory. This engine uses the `Celery
-distributed task queue <http://www.celeryproject.org/>`__ to spread work across
+distributed task queue <https://pypi.org/project/celery/>`__ to spread work across
 multiple nodes. (It's called "celery4" since it uses version 4 of Celery;
 version 4 will be available at some point as well).
 
