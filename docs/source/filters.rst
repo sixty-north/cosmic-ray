@@ -24,20 +24,6 @@ Filters included with Cosmic Ray
 Cosmic Ray comes with a number of filters. Remember, though, that they are nothing more than simple programs that modify
 a session in some way; it should be straightforward to write your own filters should the need arise.
 
-cr-filter-spor
---------------
-
-The ``cr-filter-spor`` filter modifies a session by skipping mutations which are indicated in a `spor
-<https://github.com/abingham/rust_spor>`_ anchored metadata repository. In short, `spor` provides a way to associated
-arbitrary metadata with ranges of code, and this metadata is stored outside of the code. As your code changes, ``spor``
-has algorithms to update the metadata (and its association with the code) automatically.
-
-
-This filter looks for anchors containing the metadata ``mutate: False``. Any code anchored with this metadata will not
-be mutated in any way by Cosmic Ray.
-
-See ``spor``'s documentation for more information on how to create and manage anchors.
-
 cr-filter-operators
 -------------------
 
@@ -74,6 +60,21 @@ By default the ``master`` branch is used, but you could define another one like 
 
   [cosmic-ray.git-filter]
   branch = "rolling"
+
+External filters
+================
+
+Other filters are defined in separate projects.
+
+cosmic-ray-spor-filter
+----------------------
+
+The ``cosmic-ray-spor-filter`` filter modifies a session by skipping mutations which are indicated in a `spor
+<https://github.com/abingham/spor>`_ anchored metadata repository. In short, `spor` provides a way to associated
+arbitrary metadata with ranges of code, and this metadata is stored outside of the code. As your code changes, ``spor``
+has algorithms to update the metadata (and its association with the code) automatically.
+
+Get more details at `the project page <https://github.com/abingham/cosmic-ray-spor-filter>`_.
 
 Using filters
 =============
