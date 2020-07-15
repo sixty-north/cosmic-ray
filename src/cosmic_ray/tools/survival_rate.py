@@ -71,10 +71,14 @@ options:
         sys.exit(1)
 
 
+def kills_count(work_db):
+    return sum(r.is_killed for _, r in work_db.results)
+
+
 def survival_rate(work_db):
-    """Calcuate the survival rate for the results in a WorkDB.
+    """Calculate the survival rate for the results in a WorkDB.
     """
-    kills = sum(r.is_killed for _, r in work_db.results)
+    kills = kills_count(work_db)
     num_results = work_db.num_results
 
     if not num_results:

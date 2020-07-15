@@ -9,7 +9,7 @@ from yattag import Doc
 
 from cosmic_ray.work_db import WorkDB, use_db
 from cosmic_ray.work_item import TestOutcome
-from cosmic_ray.tools.survival_rate import survival_rate
+from cosmic_ray.tools.survival_rate import kills_count, survival_rate
 
 
 def report_html():
@@ -89,7 +89,8 @@ def _generate_html_report(db, only_completed, skip_success):
                                         text('Complete: {} ({:.2f}%)'.format(
                                             num_complete, num_complete / num_items * 100))
                                     with tag('p'):
-                                        text('Survival rate: {:.2f}%'.format(survival_rate(db)))
+                                        num_killed = kills_count(db)
+                                        text('Survived mutants: {} ({:.2f}%)'.format(num_complete - num_killed, survival_rate(db)))
                                 else:
                                     with tag('p'):
                                         text('No jobs completed')
