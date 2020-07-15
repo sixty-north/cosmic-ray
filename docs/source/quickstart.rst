@@ -102,7 +102,7 @@ Unless there are errors, this won't print anything.
     Because this command executes the provided test suite for every mutation
     it selected, it will require many times more time to execute than the
     whole test suite. It can be killed at any point though and restarted
-    while keepting the status of executated mutations between the runs.
+    while keeping the status of executed mutations between the runs.
 
 View the results
 ----------------
