@@ -90,7 +90,7 @@ def _generate_html_report(db, only_completed, skip_success):
                                             num_complete, num_complete / num_items * 100))
                                     with tag('p'):
                                         num_killed = kills_count(db)
-                                        text('Survived mutants: {} ({:.2f}%)'.format(num_complete - num_killed, survival_rate(db)))
+                                        text('Surviving mutants: {} ({:.2f}%)'.format(num_complete - num_killed, survival_rate(db)))
                                 else:
                                     with tag('p'):
                                         text('No jobs completed')

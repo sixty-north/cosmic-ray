@@ -72,6 +72,8 @@ options:
 
 
 def kills_count(work_db):
+    """Return the number of killed mutants.
+    """
     return sum(r.is_killed for _, r in work_db.results)
 
 

@@ -58,6 +58,6 @@ options:
             print('complete: {} ({:.2f}%)'.format(
                 num_complete, num_complete / num_items * 100))
             num_killed = kills_count(db)
-            print('survived mutants: {} ({:.2f}%)'.format(num_complete - num_killed, survival_rate(db)))
+            print('surviving mutants: {} ({:.2f}%)'.format(num_complete - num_killed, survival_rate(db)))
         else:
             print('no jobs completed')
