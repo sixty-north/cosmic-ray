@@ -50,7 +50,7 @@ class OperatorsFilter(FilterApp):
         else:
             config = load_config(args.config)
 
-        exclude_operators = config.sub('filters', 'operators-filter').get('exclude-operators', ())
+        exclude_operators = config.sub('operators-filter').get('exclude-operators', ())
         self._skip_filtered(work_db, exclude_operators)
 
     def add_args(self, parser):
