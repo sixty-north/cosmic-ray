@@ -3,7 +3,7 @@
 import docopt
 
 from cosmic_ray.work_db import use_db, WorkDB
-from cosmic_ray.tools.survival_rate import survival_rate
+from cosmic_ray.tools.survival_rate import kills_count, survival_rate
 
 
 def report():
@@ -57,6 +57,7 @@ options:
         if num_complete > 0:
             print('complete: {} ({:.2f}%)'.format(
                 num_complete, num_complete / num_items * 100))
-            print('survival rate: {:.2f}%'.format(survival_rate(db)))
+            num_killed = kills_count(db)
+            print('surviving mutants: {} ({:.2f}%)'.format(num_complete - num_killed, survival_rate(db)))
         else:
             print('no jobs completed')
