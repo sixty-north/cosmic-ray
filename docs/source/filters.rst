@@ -32,9 +32,9 @@ of regular expressions, and any Cosmic Ray operator who's name matches a one of 
 entirely.
 
 The configuration is provided through a TOML file such as a standard Cosmic Ray configuration. The expressions must be
-in a list at the key "cosmic-ray.operators-filter.exclude-operators". Here's an example::
+in a list at the key "cosmic-ray.filters.operators-filter.exclude-operators". Here's an example::
 
-  [cosmic-ray.operators-filter]
+  [cosmic-ray.filters.operators-filter]
   exclude-operators = [
     "core/ReplaceComparisonOperator_Is(Not)?_(Not)?(Eq|[LG]tE?)",
     "core/ReplaceComparisonOperator_(Not)?(Eq|[LG]tE?)_Is(Not)?",
@@ -58,7 +58,7 @@ would mutate other lines is skipped.
 
 By default the ``master`` branch is used, but you could define another one like this:
 
-  [cosmic-ray.git-filter]
+  [cosmic-ray.filters.git-filter]
   branch = "rolling"
 
 External filters
