@@ -19,6 +19,9 @@ class OperatorsFilter(FilterApp):
         return __doc__
 
     def _skip_filtered(self, work_db, exclude_operators):
+        if not exclude_operators:
+            return
+
         re_exclude_operators = re.compile('|'.join('(:?%s)' % e for e in exclude_operators))
 
         for item in work_db.pending_work_items:
