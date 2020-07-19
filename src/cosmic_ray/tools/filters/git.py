@@ -82,7 +82,7 @@ class GitFilter(FilterApp):
         else:
             config = load_config(args.config)
 
-        branch = config.sub('git-filter').get('branch', 'master')
+        branch = config.sub('git', 'git-filter').get('branch', 'master')
         self._skip_filtered(work_db, branch)
 
     def add_args(self, parser):
