@@ -32,16 +32,13 @@ async def handle(request):
         "python", *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
     )
     stdout, stderr = await proc.communicate()
-    if proc.returncode == 0:
-        # TODO: error response if stdout can't be deserialized.
-        return web.json_response(json.loads(stdout))
-    else:
+
+    if proc.returncode != 0:
         output = f"[STDOUT]\n{stdout}\n\n[STDERR]{stderr}"
-        return web.json_response(
-            WorkResult(
-                worker_outcome=WorkerOutcome.ABNORMAL, output=output, test_outcome=TestOutcome.INCOMPETENT
-            ).as_dict()
-        )
+        return web.json_response(WorkResult(worker_outcome=WorkerOutcome.ABNORMAL, output=output).as_dict())
+
+    # TODO: error response if stdout can't be deserialized.
+    return web.json_response(json.loads(stdout))
 
 
 def run(port=None, path=None):

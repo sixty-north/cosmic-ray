@@ -35,57 +35,77 @@ the root of the cloned repository, so you need to take this into account when
 creating the configuration.
 """
 
+import asyncio
 import logging
-import multiprocessing
-import multiprocessing.util
-import os
+
+import aiohttp
 
 from cosmic_ray.execution.execution_engine import ExecutionEngine
-from cosmic_ray.worker import Worker
+from cosmic_ray.work_item import TestOutcome, WorkerOutcome, WorkItem, WorkResult
 
 log = logging.getLogger(__name__)
 
-# Per-subprocess globals
-_worker = None
-
-
-def _initialize_worker(config):
-    # pylint: disable=global-statement
-    global _worker
-    assert _worker is None
-
-    _worker = Worker(config)
-
-    log.info('Initialize local-git worker in PID %s', os.getpid())
- 
-    # Register a finalizer
-    multiprocessing.util.Finalize(
-        _worker, _worker.cleanup, exitpriority=16)
-
-
-def _execute_work_item(work_item):
-    return _worker.execute(work_item)
-
 
 class LocalExecutionEngine(ExecutionEngine):
-    "The local-git execution engine."
+    "The local execution engine."
 
     def __call__(self, pending_work, config, on_task_complete):
-        with multiprocessing.Pool(
-                initializer=_initialize_worker,
-                initargs=(config,)) as pool:
+        # TODO: We still have the issue that `pending_work` is a running query on the database. Will `on_task_complete`
+        # - which writes results to the database - be able to complete, or will it be blocked? Do we have to copy the
+        # pending work as we used to do?
 
-            # pylint: disable=W0511
-            # TODO: This is not optimal. The pending-work iterable could be millions
-            # or billions of elements. We don't want to copy it. We copy it right
-            # now so that we don't access the database in a separate thread (i.e.
-            # one created by imap_unoredered below). We need to find a way around
-            # this.
-            pending = list(pending_work)
+        # TODO: Will there be an event loop? Where should we ensure that there is?
+        asyncio.get_event_loop().run_until_complete(self._process(pending_work, config, on_task_complete))
 
-            results = pool.imap_unordered(
-                func=_execute_work_item,
-                iterable=pending)
+    async def _process(self, pending_work, config, on_task_complete):
+        urls = config.sub("execution-engine", "local").get("worker-urls", [])
 
-            for job_id, result in results:
-                on_task_complete(job_id, result)
+        if not urls:
+            raise ValueError("No worker URLs provided for LocalExecutionEngine")
+
+        fetchers = {}
+
+        async def handle_completed_task(task):
+            url, completed_job_id = fetchers[task]
+            try:
+                result = await task
+            except Exception as exc:
+                # TODO: Do something with the exception
+                log.error(str(exc))
+                result = WorkResult(worker_outcome=WorkerOutcome.ABNORMAL, output=str(exc))
+            finally:
+                del fetchers[task]
+                urls.append(url)
+                on_task_complete(completed_job_id, result)
+
+        for work_item in pending_work:
+            # Wait for an available URL
+            while not urls:
+                done, pending = await asyncio.wait(fetchers.keys(), return_when=asyncio.FIRST_COMPLETED)
+                for task in done:
+                    await handle_completed_task(task)
+
+            assert urls, "URL should always be available"
+
+            # Use an available URL to process the task
+            url = urls.pop()
+            fetcher = asyncio.create_task(fetch(url, work_item, config.python_version, config.test_command))
+            fetchers[fetcher] = url, work_item.job_id
+
+        # Drain the remaining work
+        for task in asyncio.as_completed(fetchers.keys()):
+            await handle_completed_task(task)
+
+
+async def fetch(url, work_item: WorkItem, python_version, test_command):
+    parameters = {
+        "module_path": work_item.module_path,
+        "operator": work_item.operator_name,
+        "occurence": work_item.occurrence,
+        "python_version": python_version,
+        "test_command": test_command,
+    }
+    async with aiohttp.request("POST", url, json=parameters) as resp:
+        data = resp.json()
+        # TODO: Account for possibility that `data` is the wrong shape.
+        return WorkResult(**data)
