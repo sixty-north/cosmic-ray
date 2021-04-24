@@ -1,74 +1,60 @@
-"""Workers handle single mutation+test runs.
+"""Workers handle HTTP requests for mutation-and-test.
+
+A worker is a simple web server that listens for requests to do a mutation-and-test. It runs the `cosmic-ray
+mutate-and-test` command to actually do the work. It then responds with the JSON-serialized WorkResult.
 """
 
-import contextlib
 import logging
-import os
+import asyncio
+import json
 
-from cosmic_ray.cloning import ClonedWorkspace
-from cosmic_ray.mutating import mutate_and_test
+
+from aiohttp import web
+
+from cosmic_ray.work_item import WorkResult, WorkerOutcome, TestOutcome
 
 log = logging.getLogger()
 
 
-class Worker:
-    """Manages a workspace and accepts mutation+test requests.
+async def handle(request):
+    args = await request.json()
+    cmd = [
+        "-m",
+        "cosmic_ray.cli",
+        "mutate-and-test",
+        args["module_path"],
+        args["operator"],
+        str(args["occurrence"]),
+        args["python_version"],
+        args["test_command"],
+    ]
+    proc = await asyncio.create_subprocess_exec(
+        "python", *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+    )
+    stdout, stderr = await proc.communicate()
+    if proc.returncode == 0:
+        # TODO: error response if stdout can't be deserialized.
+        return web.json_response(json.loads(stdout))
+    else:
+        output = f"[STDOUT]\n{stdout}\n\n[STDERR]{stderr}"
+        return web.json_response(
+            WorkResult(
+                worker_outcome=WorkerOutcome.ABNORMAL, output=output, test_outcome=TestOutcome.INCOMPETENT
+            ).as_dict()
+        )
 
-    A worker clones (e.g. via git, a file copy, or something) the code to be mutated into a private directory. It then
-    fields requests to perform a mutation+test which it fulfills by mutating the cloned code.
+
+def run(port=None, path=None):
+    """Run the worker HTTP server.
+
+    You must specify either `port` or `path`, but not both.
+
+    Args:
+        port: The TCP port on which to listen.
+        path: Path to Unix domain socket on which to listen.
     """
-
-    def __init__(self, config):
-        self._config = None
-        self._workspace = None
-
-        self.activate(config)
-
-    def activate(self, config):
-        """Create a new cloned workspace from a configuration.
-
-        This replaces any existing clone, cleaning up its resources.
-        """
-        new_workspace = ClonedWorkspace(config.cloning_config)
-
-        self.cleanup()
-
-        self._config = config
-        self._workspace = new_workspace
-
-    def cleanup(self):
-        if self._workspace is not None:
-            self._workspace.cleanup()
-
-    def execute(self, work_item):
-        """Perform a single mutation and test run.
-
-        Args:
-            work_item: A `WorkItem` describing the work to do.
-
-        Returns: A `(job-id, WorkResult)` tuple.
-        """
-        log.info('Executing worker in %s, PID=%s',
-                 self._workspace.clone_dir, os.getpid())
-
-        with excursion(self._workspace.clone_dir):
-            result = mutate_and_test(
-                work_item.module_path,
-                self._config.python_version,
-                work_item.operator_name,
-                work_item.occurrence,
-                self._config.test_command,
-                self._config.timeout)
-
-        return work_item.job_id, result
-
-
-@contextlib.contextmanager
-def excursion(dirname):
-    "Context manager for temporarily changing directories."
-    orig = os.getcwd()
-    try:
-        os.chdir(dirname)
-        yield
-    finally:
-        os.chdir(orig)
+    if port is None and path is None:
+        raise ValueError("Worker requires either a port or domain socket path")
+    app = web.Application()
+    app.add_routes([web.post("/", handle)])
+    web.run_app(app, port=port, path=path)

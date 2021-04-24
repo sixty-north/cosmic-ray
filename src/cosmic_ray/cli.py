@@ -14,12 +14,14 @@ from pathlib import Path
 
 import click
 from exit_codes import ExitCode
+from rich.logging import RichHandler
 
 import cosmic_ray.commands
 import cosmic_ray.modules
 import cosmic_ray.mutating
 import cosmic_ray.plugins
 import cosmic_ray.testing
+import cosmic_ray.worker
 from cosmic_ray.config import load_config, serialize_config
 from cosmic_ray.mutating import apply_mutation
 from cosmic_ray.progress import report_progress
@@ -31,23 +33,23 @@ log = logging.getLogger()
 
 
 @click.group()
-@click.option('--verbosity',
-              default='WARNING',
-              help="The logging level to use.",
-              type=click.Choice(['CRITICAL', 'DEBUG', 'ERROR', 'FATAL', 'INFO', 'WARNING'],
-                                case_sensitive=True))
+@click.option(
+    "--verbosity",
+    default="WARNING",
+    help="The logging level to use.",
+    type=click.Choice(["CRITICAL", "DEBUG", "ERROR", "FATAL", "INFO", "WARNING"], case_sensitive=True),
+)
 @click.version_option(version=__version__)
 def cli(verbosity):
     "Mutation testing for Python3"
     logging_level = getattr(logging, verbosity)
-    logging.basicConfig(level=logging_level)
+    logging.basicConfig(level=logging_level, handlers=[RichHandler()])
 
 
 @cli.command()
-@click.argument('config_file', type=click.File('wt'))
+@click.argument("config_file", type=click.File("wt"))
 def new_config(config_file):
-    """Create a new config file.
-    """
+    """Create a new config file."""
     cfg = cosmic_ray.commands.new_config()
     config_str = serialize_config(cfg)
     config_file.write(config_str)
@@ -55,11 +57,14 @@ def new_config(config_file):
 
 
 click.argument()
+
+
 @cli.command()
-@click.argument('config_file')
-@click.argument('session_file',
-                # help="The filename for the database in which the work order will be stored."
-                )
+@click.argument("config_file")
+@click.argument(
+    "session_file",
+    # help="The filename for the database in which the work order will be stored."
+)
 def init(config_file, session_file):
     """Initialize a mutation testing session from a configuration. This
     primarily creates a session - a database of "work to be done" -
@@ -74,17 +79,16 @@ def init(config_file, session_file):
     """
     cfg = load_config(config_file)
 
-    modules = cosmic_ray.modules.find_modules(Path(cfg['module-path']))
-    modules = cosmic_ray.modules.filter_paths(
-        modules, cfg.get('exclude-modules', ()))
+    modules = cosmic_ray.modules.find_modules(Path(cfg["module-path"]))
+    modules = cosmic_ray.modules.filter_paths(modules, cfg.get("exclude-modules", ()))
 
     if log.isEnabledFor(logging.INFO):
-        log.info('Modules discovered:')
+        log.info("Modules discovered:")
         per_dir = defaultdict(list)
         for m in modules:
             per_dir[m.parent].append(m.name)
         for directory, files in per_dir.items():
-            log.info(' - %s: %s', directory, ', '.join(sorted(files)))
+            log.info(" - %s: %s", directory, ", ".join(sorted(files)))
 
     with use_db(session_file) as database:
         cosmic_ray.commands.init(modules, database, cfg)
@@ -93,9 +97,10 @@ def init(config_file, session_file):
 
 
 @cli.command()
-@click.argument('session_file',
-                # help="The database containing the config to be displayed."
-                )
+@click.argument(
+    "session_file",
+    # help="The database containing the config to be displayed."
+)
 def config(session_file):
     """Show the configuration for a session."""
     with use_db(session_file) as database:
@@ -105,8 +110,8 @@ def config(session_file):
     sys.exit(ExitCode.OK)
 
 
-@cli.command(name='exec')
-@click.argument('session_file')
+@cli.command(name="exec")
+@click.argument("session_file")
 def handle_exec(session_file):
     """Perform the remaining work to be done in the specified session.
     This requires that the rest of your mutation testing
@@ -118,15 +123,21 @@ def handle_exec(session_file):
 
 
 @cli.command()
-@click.argument('session_file')
+@click.argument("session_file")
 @click.option(
-    '--force', 'force', flag_value=True,
+    "--force",
+    "force",
+    flag_value=True,
     default=False,
-    help="Force write over baseline session file if this file was already created by a previous run.")
+    help="Force write over baseline session file if this file was already created by a previous run.",
+)
 @click.option(
-    '--report', 'dump_report', flag_value=True,
+    "--report",
+    "dump_report",
+    flag_value=True,
     default=False,
-    help="Print the report result of this baseline run. If the job has failed, jobs's outputs will be displayed.")
+    help="Print the report result of this baseline run. If the job has failed, jobs's outputs will be displayed.",
+)
 def baseline(session_file, force, dump_report):
     """Runs a baseline execution that executes the test suite over unmutated code.
 
@@ -134,15 +145,14 @@ def baseline(session_file, force, dump_report):
     """
     session_file = Path(session_file)
 
-    baseline_session_file = session_file.parent / '{}.baseline{}'.format(
-        session_file.stem, session_file.suffix)
+    baseline_session_file = session_file.parent / "{}.baseline{}".format(session_file.stem, session_file.suffix)
 
     # Find arbitrary work-item in input session that we can copy.
     with use_db(session_file) as db:  # type: WorkDB
         try:
             template = next(iter(db.work_items))
         except StopIteration:
-            log.error('No work items in session')
+            log.error("No work items in session")
             sys.exit(ExitCode.DATA_ERR)
 
         cfg = db.get_config()
@@ -161,11 +171,13 @@ def baseline(session_file, force, dump_report):
         db.add_work_item(
             WorkItem(
                 module_path=template.module_path,
-                operator_name='core/NoOp',
+                operator_name="core/NoOp",
                 occurrence=0,
                 start_pos=template.start_pos,
                 end_pos=template.end_pos,
-                job_id=template.job_id))
+                job_id=template.job_id,
+            )
+        )
 
         # Run the single-entry session.
         cosmic_ray.commands.execute(db)
@@ -174,7 +186,7 @@ def baseline(session_file, force, dump_report):
         if result.test_outcome == TestOutcome.KILLED:
             if dump_report:
                 print("Execution with no mutation gives those following errors:")
-                for line in result.output.split('\n'):
+                for line in result.output.split("\n"):
                     print("  >>>", line)
             sys.exit(1)
         else:
@@ -205,7 +217,7 @@ def dump(session_file):
 @cli.command()
 def operators():
     """List the available operator plugins."""
-    print('\n'.join(cosmic_ray.plugins.operator_names()))
+    print("\n".join(cosmic_ray.plugins.operator_names()))
 
     sys.exit(ExitCode.OK)
 
@@ -213,39 +225,52 @@ def operators():
 @cli.command()
 def execution_engines():
     """List the available execution-engine plugins."""
-    print('\n'.join(cosmic_ray.plugins.execution_engine_names()))
+    print("\n".join(cosmic_ray.plugins.execution_engine_names()))
 
     sys.exit(ExitCode.OK)
 
 
 @cli.command()
-@click.argument('module_path')
-@click.argument('operator')
-@click.argument('occurrence', type=int)
-@click.option('--python-version', help="Python major.minor version (e.g. 3.6) of the code being mutated.")
+@click.argument("module_path")
+@click.argument("operator")
+@click.argument("occurrence", type=int)
+@click.option("--python-version", help="Python major.minor version (e.g. 3.6) of the code being mutated.")
 def apply(module_path, operator, occurrence, python_version):
-    """Apply the specified mutation to the files on disk. This is primarily a debugging tool.
-    """
+    """Apply the specified mutation to the files on disk. This is primarily a debugging tool."""
 
     if python_version is None:
-        python_version = "{}.{}".format(sys.version_info.major,
-                                        sys.version_info.minor)
+        python_version = "{}.{}".format(sys.version_info.major, sys.version_info.minor)
 
-    apply_mutation(
-        Path(module_path),
-        cosmic_ray.plugins.get_operator(operator)(python_version),
-        occurrence)
+    apply_mutation(Path(module_path), cosmic_ray.plugins.get_operator(operator)(python_version), occurrence)
 
     sys.exit(ExitCode.OK)
 
 
 @cli.command()
-@click.argument('module_path')
-@click.argument('operator')
-@click.argument('occurrence', type=int)
-@click.argument('config_file', required=False, default=None)
-@click.option('--keep-stdout', default=False, flag_value=True, help='Do not squelch output.')
-def worker(module_path, operator, occurrence, config_file, keep_stdout):
+@click.option("--port", type=int, default=None)
+@click.option("--path", default=None)
+def worker(port, path):
+    if (port is None) == (path is None):
+        log.error("You must specify exactly one of --path or --port")
+        sys.exit(ExitCode.USAGE)
+
+    try:
+        cosmic_ray.worker.run(port=port, path=path)
+    except ValueError as exc:
+        log.error(str(exc))
+        sys.exit(ExitCode.DATA_ERR)
+
+    sys.exit(ExitCode.OK)
+
+
+@cli.command()
+@click.argument("module_path")
+@click.argument("operator")
+@click.argument("occurrence", type=int)
+@click.argument("python_version")
+@click.argument("test_command")
+@click.option("--keep-stdout", default=False, flag_value=True, help="Do not squelch output.")
+def mutate_and_test(module_path, operator, occurrence, python_version, test_command, keep_stdout):
     """Run a worker process which performs a single mutation and test run.
     Each worker does a minimal, isolated chunk of work: it mutates the
     <occurrence>-th instance of <operator> in <module-path>, runs the test
@@ -255,16 +280,11 @@ def worker(module_path, operator, occurrence, config_file, keep_stdout):
     by an execution engine. However, it can be useful to run this on
     its own for testing and debugging purposes.
     """
-    cfg = load_config(config_file)
-
-    with open(os.devnull, 'w') as devnull:
+    with open(os.devnull, "w") as devnull:
         with redirect_stdout(sys.stdout if keep_stdout else devnull):
             work_item = cosmic_ray.mutating.mutate_and_test(
-                Path(module_path),
-                cfg.python_version, operator,
-                occurrence,
-                cfg.test_command,
-                None)
+                Path(module_path), python_version, operator, occurrence, test_command, None
+            )
 
     sys.stdout.write(json.dumps(work_item, cls=WorkItemJsonEncoder))
 
@@ -275,18 +295,14 @@ _SIGNAL_EXIT_CODE_BASE = 128
 
 
 def main(argv=None):
-    """ Invoke the cosmic ray evaluation.
+    """Invoke the cosmic ray evaluation.
 
     :param argv: the command line arguments
     """
-    signal.signal(
-        signal.SIGINT,
-        lambda *args: sys.exit(_SIGNAL_EXIT_CODE_BASE + signal.SIGINT))
+    signal.signal(signal.SIGINT, lambda *args: sys.exit(_SIGNAL_EXIT_CODE_BASE + signal.SIGINT))
 
-    if hasattr(signal, 'SIGINFO'):
-        signal.signal(
-            getattr(signal, 'SIGINFO'),
-            lambda *args: report_progress(sys.stderr))
+    if hasattr(signal, "SIGINFO"):
+        signal.signal(getattr(signal, "SIGINFO"), lambda *args: report_progress(sys.stderr))
 
     try:
         return cli(argv)
@@ -302,7 +318,7 @@ def main(argv=None):
             print(exc.__cause__, file=sys.stderr)
         return ExitCode.CONFIG
     except subprocess.CalledProcessError as exc:
-        print('Error in subprocess', file=sys.stderr)
+        print("Error in subprocess", file=sys.stderr)
         print(exc, file=sys.stderr)
         return exc.returncode
     except SystemExit as exc:
@@ -310,5 +326,5 @@ def main(argv=None):
         return exc.code
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

@@ -2,24 +2,16 @@
 """
 import difflib
 import traceback
+from contextlib import contextmanager
 
-import cosmic_ray.mutating
 import cosmic_ray.plugins
+from cosmic_ray.ast import Visitor, get_ast
 from cosmic_ray.testing import run_tests
 from cosmic_ray.work_item import TestOutcome, WorkerOutcome, WorkResult
 
 
-from contextlib import contextmanager
-
-from cosmic_ray.ast import get_ast, Visitor
-
 # pylint: disable=R0913
-def mutate_and_test(module_path,
-           python_version,
-           operator_name,
-           occurrence,
-           test_command,
-           timeout):
+def mutate_and_test(module_path, python_version, operator_name, occurrence, test_command, timeout):
     """Mutate the OCCURRENCE-th site for OPERATOR_NAME in MODULE_PATH, run the
     tests, and report the results.
 
@@ -60,9 +52,7 @@ def mutate_and_test(module_path,
         operator_class = cosmic_ray.plugins.get_operator(operator_name)
         operator = operator_class(python_version)
 
-        with cosmic_ray.mutating.use_mutation(module_path, operator,
-                                              occurrence) as (original_code,
-                                                              mutated_code):
+        with cosmic_ray.mutating.use_mutation(module_path, operator, occurrence) as (original_code, mutated_code):
             if mutated_code is None:
                 return WorkResult(worker_outcome=WorkerOutcome.NO_TEST)
 
@@ -71,16 +61,13 @@ def mutate_and_test(module_path,
             diff = _make_diff(original_code, mutated_code, module_path)
 
             return WorkResult(
-                output=output,
-                diff='\n'.join(diff),
-                test_outcome=test_outcome,
-                worker_outcome=WorkerOutcome.NORMAL)
+                output=output, diff="\n".join(diff), test_outcome=test_outcome, worker_outcome=WorkerOutcome.NORMAL
+            )
 
     except Exception:  # noqa # pylint: disable=broad-except
         return WorkResult(
-            output=traceback.format_exc(),
-            test_outcome=TestOutcome.INCOMPETENT,
-            worker_outcome=WorkerOutcome.EXCEPTION)
+            output=traceback.format_exc(), test_outcome=TestOutcome.INCOMPETENT, worker_outcome=WorkerOutcome.EXCEPTION
+        )
 
 
 @contextmanager
@@ -98,12 +85,11 @@ def use_mutation(module_path, operator, occurrence):
     Yields: A `(unmutated-code, mutated-code)` tuple to the with-block. If there was
         no mutation performed, the `mutated-code` is `None`.
     """
-    original_code, mutated_code = apply_mutation(module_path, operator,
-                                                 occurrence)
+    original_code, mutated_code = apply_mutation(module_path, operator, occurrence)
     try:
         yield original_code, mutated_code
     finally:
-        with module_path.open(mode='wt', encoding='utf-8') as handle:
+        with module_path.open(mode="wt", encoding="utf-8") as handle:
             handle.write(original_code)
             handle.flush()
 
@@ -127,7 +113,7 @@ def apply_mutation(module_path, operator, occurrence):
     mutated_code = None
     if visitor.mutation_applied:
         mutated_code = mutated_ast.get_code()
-        with module_path.open(mode='wt', encoding='utf-8') as handle:
+        with module_path.open(mode="wt", encoding="utf-8") as handle:
             handle.write(mutated_code)
             handle.flush()
 
@@ -170,11 +156,11 @@ class MutationVisitor(Visitor):
 def _make_diff(original_source, mutated_source, module_path):
     module_diff = ["--- mutation diff ---"]
     for line in difflib.unified_diff(
-            original_source.split('\n'),
-            mutated_source.split('\n'),
-            fromfile="a" + str(module_path),
-            tofile="b" + str(module_path),
-            lineterm=""):
+        original_source.split("\n"),
+        mutated_source.split("\n"),
+        fromfile="a" + str(module_path),
+        tofile="b" + str(module_path),
+        lineterm="",
+    ):
         module_diff.append(line)
     return module_diff
-
