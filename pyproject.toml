@@ -1,0 +1,17 @@
+[tool.black]
+line-length = 120
+exclude = '''
+/(
+    \.git
+  | \.hypothesis
+  | \.tox
+  | \.vscode
+  | \__pycache__
+  | build
+  | dist
+  | docs
+)/
+'''
+
+[tool.flake8]
+max-line-length = 120
