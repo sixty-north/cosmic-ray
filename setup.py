@@ -7,6 +7,7 @@ from setuptools import setup, find_packages
 
 
 INSTALL_REQUIRES = [
+    "aiohttp",
     "astunparse",
     "click",
     "decorator",
@@ -16,6 +17,7 @@ INSTALL_REQUIRES = [
     "parso",
     "pathlib",
     "qprompt",
+    "rich",
     "stevedore",
     "toml",
     "virtualenv<=16.7.10",
