@@ -72,7 +72,6 @@ class LocalExecutionEngine(ExecutionEngine):
             # exception from one of the tasks. We should notice this, log it, and remove the offending URL from the
             # pool.
 
-            print(type(task), task)
             url, completed_job_id = fetchers[task]
             try:
                 result = await task
