@@ -81,6 +81,7 @@ setup(
             "core = cosmic_ray.operators.provider:OperatorProvider",
         ],
         "cosmic_ray.distributors": [
+            "http = cosmic_ray.distribution.http:HttpDistributor",
             "local = cosmic_ray.distribution.local:LocalDistributor",
         ],
     },
