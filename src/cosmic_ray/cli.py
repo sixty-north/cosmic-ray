@@ -223,9 +223,9 @@ def operators():
 
 
 @cli.command()
-def execution_engines():
-    """List the available execution-engine plugins."""
-    print("\n".join(cosmic_ray.plugins.execution_engine_names()))
+def distributors():
+    """List the available distributor plugins."""
+    print("\n".join(cosmic_ray.plugins.distributor_names()))
 
     sys.exit(ExitCode.OK)
 

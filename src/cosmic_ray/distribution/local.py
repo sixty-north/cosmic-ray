@@ -1,38 +1,17 @@
-"""Cosmic Ray execution engine that runs mutations locally on git clones.
+"""Cosmic Ray distributor that sends work requests over HTTP to workers.
 
-This engine creates a pool of subprocesses, each of which execute some portion
-of work items in a session. Each of these processes creates a shallow clone of
-the git repository containing the code to be mutated/tested in a temporary
-directory. This way each process can work independently.
+This uses a list of URLs to workes, distributing work to them as they're available.
 
 ## Enabling the engine
 
-To use the local-git execution engine, set `cosmic-ray.execution-engine.name =
-"local-git"` in your Cosmic Ray configuration::
+To use the local distributor, set `cosmic-ray.distributor.name = "local"` in your Cosmic Ray configuration, and
+configure the list of worker URLs in `cosmic-ray.distributor.local.worker-urls`::
 
-    [cosmic-ray.execution-engine]
-    name = "local-git"
+    [cosmic-ray.distributor]
+    name = "local"
 
-## Specifying the source repository
-
-Each subprocess creates its own clone of a source git repository. By default,
-the engine determines which repo to use by looking for the repo dominating the
-directory in which `cosmic-ray` is executed. However, you can specify a
-different repository (e.g. a repo hosted on github) by setting the
-`cosmic-ray.execution-engine.local-git.repo-uri`::
-
-    [cosmic-ray.execution-engine.local-git]
-    repo-uri = "https://github.com/me/difference-engine-emulator"
-
-## Subprocess environment
-
-The local-git engine launches its subprocesses using the `multiprocessing`
-library. As such, the subprocesses run in an environment that is largely
-identical to that of the main `cosmic-ray` process.
-
-One major difference is the directory in which the subprocesses run. They run
-the root of the cloned repository, so you need to take this into account when
-creating the configuration.
+    [cosmic-ray.distributor.local]
+    worker-urls = ['http://localhost:9876', 'http://localhost:9877']
 """
 
 import asyncio
@@ -40,14 +19,14 @@ import logging
 
 import aiohttp
 
-from cosmic_ray.execution.execution_engine import ExecutionEngine
-from cosmic_ray.work_item import TestOutcome, WorkerOutcome, WorkItem, WorkResult, WorkItemJsonDecoder
+from cosmic_ray.distribution.distributor import Distributor
+from cosmic_ray.work_item import WorkerOutcome, WorkItem, WorkResult
 
 log = logging.getLogger(__name__)
 
 
-class LocalExecutionEngine(ExecutionEngine):
-    "The local execution engine."
+class LocalDistributor(Distributor):
+    "The local distributor."
 
     def __call__(self, pending_work, python_version, test_command, timeout, engine_config, on_task_complete):
         # TODO: We still have the issue that `pending_work` is a running query on the database. Will `on_task_complete`

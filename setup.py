@@ -80,8 +80,8 @@ setup(
         "cosmic_ray.operator_providers": [
             "core = cosmic_ray.operators.provider:OperatorProvider",
         ],
-        "cosmic_ray.execution_engines": [
-            "local = cosmic_ray.execution.local:LocalExecutionEngine",
+        "cosmic_ray.distributors": [
+            "local = cosmic_ray.distribution.local:LocalDistributor",
         ],
     },
     long_description=Path("README.rst").read_text(encoding="utf-8"),

@@ -6,7 +6,7 @@ import os.path
 import qprompt
 
 from cosmic_ray.config import ConfigDict
-from cosmic_ray.plugins import execution_engine_names
+from cosmic_ray.plugins import distributor_names
 
 
 MODULE_PATH_HELP = """The path to the module that will be mutated.
@@ -41,7 +41,7 @@ def _validate_python_version(s):
     "Return True if a string is of the form <int>.<int>, False otherwise."
     if not s:
         return True
-    toks = s.split('.')
+    toks = s.split(".")
     if len(toks) != 2:
         return False
     try:
@@ -59,38 +59,33 @@ def new_config():
     """
     config = ConfigDict()
     config["module-path"] = qprompt.ask_str(
-        "Top-level module path",
-        blk=False,
-        vld=os.path.exists,
-        hlp=MODULE_PATH_HELP)
+        "Top-level module path", blk=False, vld=os.path.exists, hlp=MODULE_PATH_HELP
+    )
 
     python_version = qprompt.ask_str(
-        'Python version (blank for auto detection)',
-        vld=_validate_python_version,
-        hlp=PYTHON_VERSION_HELP)
-    config['python-version'] = python_version
+        "Python version (blank for auto detection)", vld=_validate_python_version, hlp=PYTHON_VERSION_HELP
+    )
+    config["python-version"] = python_version
 
     timeout = qprompt.ask_str(
-        'Test execution timeout (seconds)',
+        "Test execution timeout (seconds)",
         vld=float,
         blk=False,
-        hlp="The number of seconds to let a test run before terminating it.")
-    config['timeout'] = float(timeout)
-    config['excluded-modules'] = []
+        hlp="The number of seconds to let a test run before terminating it.",
+    )
+    config["timeout"] = float(timeout)
+    config["excluded-modules"] = []
 
-    config["test-command"] = qprompt.ask_str(
-        "Test command",
-        blk=False,
-        hlp=TEST_COMMAND_HELP)
+    config["test-command"] = qprompt.ask_str("Test command", blk=False, hlp=TEST_COMMAND_HELP)
 
     menu = qprompt.Menu()
-    for at_pos, engine_name in enumerate(execution_engine_names()):
-        menu.add(str(at_pos), engine_name)
+    for at_pos, distributor_name in enumerate(distributor_names()):
+        menu.add(str(at_pos), distributor_name)
     config["execution-engine"] = ConfigDict()
-    config['execution-engine']['name'] = menu.show(header="Execution engine", returns="desc")
+    config["execution-engine"]["name"] = menu.show(header="Execution engine", returns="desc")
 
     config["cloning"] = ConfigDict()
-    config['cloning']['method'] = 'copy'
-    config['cloning']['commands'] = []
+    config["cloning"]["method"] = "copy"
+    config["cloning"]["commands"] = []
 
     return config

@@ -3,7 +3,7 @@ import os
 import logging
 
 from cosmic_ray.progress import reports_progress
-from cosmic_ray.plugins import get_execution_engine
+from cosmic_ray.plugins import get_distributor
 
 log = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ def execute(work_db):
     """
     _update_progress(work_db)
     config = work_db.get_config()
-    engine = get_execution_engine(config.execution_engine_name)
+    distributor = get_distributor(config.distributor_name)
 
     def on_task_complete(job_id, work_result):
         work_db.set_result(job_id, work_result)
@@ -43,12 +43,12 @@ def execute(work_db):
         log.info("Job %s complete", job_id)
 
     log.info("Beginning execution")
-    engine(
+    distributor(
         work_db.pending_work_items,
         config.python_version,
         config.test_command,
         config.timeout,
-        config.sub("execution-engine", config.execution_engine_name),
+        config.distributor_config,
         on_task_complete=on_task_complete,
     )
     log.info("Execution finished")

@@ -3,8 +3,8 @@
 import abc
 
 
-class ExecutionEngine(metaclass=abc.ABCMeta):
-    "Base class for execution engine plugins."
+class Distributor(metaclass=abc.ABCMeta):
+    "Base class for work distribution strategies."
 
     @abc.abstractmethod
     def __call__(self, pending_work, python_version, test_command, timeout, engine_config, on_task_complete):

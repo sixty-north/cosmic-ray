@@ -92,15 +92,15 @@ class ConfigDict(dict):
         return float(self['timeout'])
 
     @property
-    def execution_engine_name(self):
-        "The name of the execution engine to use."
-        return self['execution-engine']['name']
+    def distributor_name(self):
+        "The name of the distributor to use."
+        return self['distributor']['name']
 
     @property
-    def execution_engine_config(self):
+    def distributor_config(self):
         "The configuration for the named execution engine."
-        name = self.execution_engine_name
-        return self['execution-engine'].get(name, ConfigDict())
+        name = self.distributor_name
+        return self['distributor'].get(name, ConfigDict())
 
     @property
     def cloning_config(self):
