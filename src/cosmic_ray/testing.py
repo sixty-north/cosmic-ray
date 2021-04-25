@@ -34,9 +34,6 @@ async def run_tests(command, timeout):
         containing the output of the command.
     """
     log.info("Running test (timeout=%s): %s", timeout, command)
-    # TODO: Move this into CLI, I think.
-    # if sys.platform == "win32":
-    #   asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
 
     # We want to avoid writing pyc files in case our changes happen too fast for Python to
     # notice them. If the timestamps between two changes are too small, Python won't recompile

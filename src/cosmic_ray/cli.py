@@ -2,6 +2,8 @@
 
 Here we manage command-line parsing and launching of the internal machinery that does mutation testing.
 """
+import asyncio
+import dataclasses
 import json
 import logging
 import os
@@ -27,7 +29,7 @@ from cosmic_ray.mutating import apply_mutation
 from cosmic_ray.progress import report_progress
 from cosmic_ray.version import __version__
 from cosmic_ray.work_db import WorkDB, use_db
-from cosmic_ray.work_item import TestOutcome, WorkItem, WorkItemJsonEncoder
+from cosmic_ray.work_item import TestOutcome, WorkItem
 
 log = logging.getLogger()
 
@@ -44,6 +46,9 @@ def cli(verbosity):
     "Mutation testing for Python3"
     logging_level = getattr(logging, verbosity)
     logging.basicConfig(level=logging_level, handlers=[RichHandler()])
+
+    if sys.platform == "win32":
+        asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
 
 
 @cli.command()
@@ -205,11 +210,23 @@ def dump(session_file):
     WorkResult, both JSON-serialized. The WorkResult can be null, indicating a
     WorkItem with no results.
     """
+
+    def item_to_dict(work_item):
+        d = dataclasses.asdict(work_item)
+        d["module_path"] = str(d["module_path"])
+        return d
+
+    def result_to_dict(result):
+        d = dataclasses.asdict(result)
+        d["worker_outcome"] = d["worker_outcome"].value
+        d["test_outcome"] = d["test_outcome"].value
+        return d
+
     with use_db(session_file, WorkDB.Mode.open) as database:
         for work_item, result in database.completed_work_items:
-            print(json.dumps((work_item, result), cls=WorkItemJsonEncoder))
+            print(json.dumps((item_to_dict(work_item), result_to_dict(result))))
         for work_item in database.pending_work_items:
-            print(json.dumps((work_item, None), cls=WorkItemJsonEncoder))
+            print(json.dumps((item_to_dict(work_item), None)))
 
     sys.exit(ExitCode.OK)
 

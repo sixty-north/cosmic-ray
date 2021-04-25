@@ -2,10 +2,9 @@
 """
 import dataclasses
 import enum
-import json
 import pathlib
-from typing import List, Optional
 from pathlib import Path
+from typing import List, Optional
 
 
 class StrEnum(str, enum.Enum):
@@ -53,17 +52,6 @@ class WorkResult:
         "Whether the mutation should be considered 'killed'"
         return self.test_outcome != TestOutcome.SURVIVED
 
-    # def __eq__(self, rhs):
-    #     return self.as_dict() == rhs.as_dict()
-
-    # def __neq__(self, rhs):
-    #     return not self == rhs
-
-    # def __repr__(self):
-    #     return "<WorkResult {test_outcome}/{worker_outcome}: '{output}'>".format(
-    #         test_outcome=self._test_outcome, worker_outcome=self.worker_outcome, output=self.output
-    #     )
-
 
 @dataclasses.dataclass(frozen=True)
 class WorkItem:
@@ -87,62 +75,3 @@ class WorkItem:
 
         object.__setattr__(self, "module_path", pathlib.Path(self.module_path))
         object.__setattr__(self, "occurrence", int(self.occurrence))
-
-    # def as_dict(self):
-    #     """Get fields as a dict."""
-    #     return {
-    #         "module_path": str(self.module_path),
-    #         "operator_name": self.operator_name,
-    #         "occurrence": self.occurrence,
-    #         "start_pos": self.start_pos,
-    #         "end_pos": self.end_pos,
-    #         "job_id": self.job_id,
-    #     }
-
-    # def __eq__(self, rhs):
-    #     return self.as_dict() == rhs.as_dict()
-
-    # def __neq__(self, rhs):
-    #     return not self == rhs
-
-    # def __repr__(self):
-    #     return "<WorkItem {job_id}: ({start_pos}/{end_pos}) {occurrence} - {operator} ({module})>".format(
-    #         job_id=self.job_id,
-    #         start_pos=self.start_pos,
-    #         end_pos=self.end_pos,
-    #         occurrence=self.occurrence,
-    #         operator=self.operator_name,
-    #         module=self.module_path,
-    #     )
-
-
-class WorkItemJsonEncoder(json.JSONEncoder):
-    "Custom JSON encoder for workitems and workresults."
-
-    def default(self, o):  # pylint: disable=E0202
-        if isinstance(o, WorkItem):
-            return {"_type": "WorkItem", "values": o.as_dict()}
-
-        if isinstance(o, WorkResult):
-            return {"_type": "WorkResult", "values": o.as_dict()}
-
-        return super().default(o)
-
-
-class WorkItemJsonDecoder(json.JSONDecoder):
-    "Custom JSON decoder for WorkItems and WorkResults."
-
-    def __init__(self):
-        json.JSONDecoder.__init__(self, object_hook=self._decode_work_items)
-
-    @staticmethod
-    def _decode_work_items(obj):
-        if (obj.get("_type") == "WorkItem") and ("values" in obj):
-            values = obj["values"]
-            return WorkItem(**values)
-
-        if (obj.get("_type") == "WorkResult") and ("values" in obj):
-            values = obj["values"]
-            return WorkResult(**values)
-
-        return obj
