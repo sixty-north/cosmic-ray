@@ -3,15 +3,17 @@
 import difflib
 import traceback
 from contextlib import contextmanager
+import logging
 
 import cosmic_ray.plugins
 from cosmic_ray.ast import Visitor, get_ast
 from cosmic_ray.testing import run_tests
 from cosmic_ray.work_item import TestOutcome, WorkerOutcome, WorkResult
 
+log = logging.getLogger(__name__)
 
 # pylint: disable=R0913
-def mutate_and_test(module_path, python_version, operator_name, occurrence, test_command, timeout):
+async def mutate_and_test(module_path, python_version, operator_name, occurrence, test_command, timeout) -> WorkResult:
     """Mutate the OCCURRENCE-th site for OPERATOR_NAME in MODULE_PATH, run the
     tests, and report the results.
 
@@ -56,7 +58,7 @@ def mutate_and_test(module_path, python_version, operator_name, occurrence, test
             if mutated_code is None:
                 return WorkResult(worker_outcome=WorkerOutcome.NO_TEST)
 
-            test_outcome, output = run_tests(test_command, timeout)
+            test_outcome, output = await run_tests(test_command, timeout)
 
             diff = _make_diff(original_code, mutated_code, module_path)
 
@@ -85,6 +87,7 @@ def use_mutation(module_path, operator, occurrence):
     Yields: A `(unmutated-code, mutated-code)` tuple to the with-block. If there was
         no mutation performed, the `mutated-code` is `None`.
     """
+    # TODO: Could/should use async?
     original_code, mutated_code = apply_mutation(module_path, operator, occurrence)
     try:
         yield original_code, mutated_code
@@ -105,6 +108,7 @@ def apply_mutation(module_path, operator, occurrence):
     Returns: A `(unmutated-code, mutated-code)` tuple to the with-block. If there was
         no mutation performed, the `mutated-code` is `None`.
     """
+    log.info("Applying mutation: path=%s, op=%s, occurrence=%s", module_path, operator, occurrence)
     module_ast = get_ast(module_path, python_version=operator.python_version)
     original_code = module_ast.get_code()
     visitor = MutationVisitor(occurrence, operator)

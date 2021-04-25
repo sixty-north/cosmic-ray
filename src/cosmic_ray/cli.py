@@ -282,11 +282,11 @@ def mutate_and_test(module_path, operator, occurrence, python_version, test_comm
     """
     with open(os.devnull, "w") as devnull:
         with redirect_stdout(sys.stdout if keep_stdout else devnull):
-            work_item = cosmic_ray.mutating.mutate_and_test(
+            work_result = cosmic_ray.mutating.mutate_and_test(
                 Path(module_path), python_version, operator, occurrence, test_command, None
             )
 
-    sys.stdout.write(json.dumps(work_item, cls=WorkItemJsonEncoder))
+    sys.stdout.write(json.dumps(work_result.as_dict()))
 
     sys.exit(ExitCode.OK)
 

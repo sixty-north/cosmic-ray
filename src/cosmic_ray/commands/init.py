@@ -14,9 +14,7 @@ log = logging.getLogger()
 def all_work_items(module_paths, operator_names, python_version):
     "Iterable of all WorkItems for the given inputs."
     for module_path in module_paths:
-        module_ast = get_ast(
-            module_path, python_version=python_version)
-
+        module_ast = get_ast(module_path, python_version=python_version)
 
         for op_name in operator_names:
             operator = get_operator(op_name)(python_version)
@@ -24,12 +22,14 @@ def all_work_items(module_paths, operator_names, python_version):
             for node in ast_nodes(module_ast):
                 for start_pos, end_pos in operator.mutation_positions(node):
                     yield WorkItem(
+                        # TODO: What if we used path/operator-name/occurrence to make the job-id?
                         job_id=uuid.uuid4().hex,
                         module_path=str(module_path),
                         operator_name=op_name,
                         occurrence=occurrence,
                         start_pos=start_pos,
-                        end_pos=end_pos)
+                        end_pos=end_pos,
+                    )
 
                     occurrence += 1
 
@@ -52,8 +52,4 @@ def init(module_paths, work_db: WorkDB, config):
     work_db.set_config(config=config)
 
     work_db.clear()
-    work_db.add_work_items(
-        all_work_items(
-            module_paths, 
-            operator_names, 
-            config.python_version))
+    work_db.add_work_items(all_work_items(module_paths, operator_names, config.python_version))

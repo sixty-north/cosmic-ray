@@ -1,11 +1,13 @@
 "Support for running tests in a subprocess."
 
 import asyncio
+import logging
 import os
-import sys
 import traceback
 
 from cosmic_ray.work_item import TestOutcome
+
+log = logging.getLogger(__name__)
 
 # We use an asyncio-subprocess-based approach here instead of a simple
 # subprocess.run()-based approach because there are problems with timeouts and
@@ -15,45 +17,7 @@ from cosmic_ray.work_item import TestOutcome
 # work on all platforms.
 
 
-async def _run_tests(command, timeout):
-    # We want to avoid writing pyc files in case our changes happen too fast for Python to
-    # notice them. If the timestamps between two changes are too small, Python won't recompile
-    # the source.
-    env = dict(os.environ)
-    env['PYTHONDONTWRITEBYTECODE'] = '1'
-
-    try:
-        proc = await asyncio.create_subprocess_shell(
-            command,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.STDOUT,
-            env=env)
-    except Exception:  # pylint: disable=W0703
-        return (TestOutcome.INCOMPETENT, traceback.format_exc())
-
-    try:
-        outs, _errs = await asyncio.wait_for(proc.communicate(), timeout)
-
-        assert proc.returncode is not None
-
-        if proc.returncode == 0:
-            return (TestOutcome.SURVIVED, outs.decode('utf-8'))
-        else:
-            return (TestOutcome.KILLED, outs.decode('utf-8'))
-
-    except asyncio.TimeoutError:
-        proc.terminate()
-        return (TestOutcome.KILLED, 'timeout')
-        
-    except Exception:  # pylint: disable=W0703
-        proc.terminate()
-        return (TestOutcome.INCOMPETENT, traceback.format_exc())
-
-    finally:
-        await proc.wait()
-
-
-def run_tests(command, timeout=None):
+async def run_tests(command, timeout):
     """Run test command in a subprocess.
 
     If the command exits with status 0, then we assume that all tests passed. If
@@ -69,11 +33,41 @@ def run_tests(command, timeout=None):
     Return: A tuple `(TestOutcome, output)` where the `output` is a string
         containing the output of the command.
     """
+    log.info("Running test (timeout=%s): %s", timeout, command)
+    # TODO: Move this into CLI, I think.
+    # if sys.platform == "win32":
+    #   asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
 
-    if sys.platform == "win32":
-        asyncio.set_event_loop_policy(
-            asyncio.WindowsProactorEventLoopPolicy())
+    # We want to avoid writing pyc files in case our changes happen too fast for Python to
+    # notice them. If the timestamps between two changes are too small, Python won't recompile
+    # the source.
+    env = dict(os.environ)
+    env["PYTHONDONTWRITEBYTECODE"] = "1"
 
-    result = asyncio.get_event_loop().run_until_complete(
-        _run_tests(command, timeout))
-    return result
+    try:
+        proc = await asyncio.create_subprocess_shell(
+            command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.STDOUT, env=env
+        )
+    except Exception:  # pylint: disable=W0703
+        return (TestOutcome.INCOMPETENT, traceback.format_exc())
+
+    try:
+        outs, _errs = await asyncio.wait_for(proc.communicate(), timeout)
+
+        assert proc.returncode is not None
+
+        if proc.returncode == 0:
+            return (TestOutcome.SURVIVED, outs.decode("utf-8"))
+        else:
+            return (TestOutcome.KILLED, outs.decode("utf-8"))
+
+    except asyncio.TimeoutError:
+        proc.terminate()
+        return (TestOutcome.KILLED, "timeout")
+
+    except Exception:  # pylint: disable=W0703
+        proc.terminate()
+        return (TestOutcome.INCOMPETENT, traceback.format_exc())
+
+    finally:
+        await proc.wait()

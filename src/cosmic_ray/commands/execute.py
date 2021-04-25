@@ -22,10 +22,7 @@ def _update_progress(work_db):
 def _report_progress(stream):
     for db_name, progress_message in _progress_messages.items():
         session = os.path.splitext(db_name)[0]
-        print(
-            "{session} : {progress_message}".format(
-                session=session, progress_message=progress_message),
-            file=stream)
+        print("{session} : {progress_message}".format(session=session, progress_message=progress_message), file=stream)
 
 
 @reports_progress(_report_progress)
@@ -48,6 +45,10 @@ def execute(work_db):
     log.info("Beginning execution")
     engine(
         work_db.pending_work_items,
-        config,
-        on_task_complete=on_task_complete)
+        config.python_version,
+        config.test_command,
+        config.timeout,
+        config.sub("execution-engine", config.execution_engine_name),
+        on_task_complete=on_task_complete,
+    )
     log.info("Execution finished")

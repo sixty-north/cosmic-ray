@@ -5,40 +5,35 @@ mutate-and-test` command to actually do the work. It then responds with the JSON
 """
 
 import logging
-import asyncio
-import json
-
 
 from aiohttp import web
 
-from cosmic_ray.work_item import WorkResult, WorkerOutcome, TestOutcome
+from cosmic_ray.mutating import mutate_and_test
+from pathlib import Path
 
 log = logging.getLogger()
 
 
 async def handle(request):
     args = await request.json()
-    cmd = [
-        "-m",
-        "cosmic_ray.cli",
-        "mutate-and-test",
-        args["module_path"],
-        args["operator"],
-        str(args["occurrence"]),
-        args["python_version"],
-        args["test_command"],
-    ]
-    proc = await asyncio.create_subprocess_exec(
-        "python", *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+    result = await mutate_and_test(
+        module_path=Path(args["module_path"]),
+        python_version=args["python_version"],
+        operator_name=args["operator"],
+        occurrence=args["occurrence"],
+        test_command=args["test_command"],
+        timeout=args["timeout"],
     )
-    stdout, stderr = await proc.communicate()
+    # TODO: Deal with exceptions. There generally won't be any, so we can just return an abnormal result if there it.
 
-    if proc.returncode != 0:
-        output = f"[STDOUT]\n{stdout}\n\n[STDERR]{stderr}"
-        return web.json_response(WorkResult(worker_outcome=WorkerOutcome.ABNORMAL, output=output).as_dict())
-
-    # TODO: error response if stdout can't be deserialized.
-    return web.json_response(json.loads(stdout))
+    return web.json_response(
+        {
+            "worker_outcome": result.worker_outcome.value,
+            "output": result.output,
+            "test_outcome": result.test_outcome.value if result.test_outcome is not None else None,
+            "diff": result.diff,
+        }
+    )
 
 
 def run(port=None, path=None):

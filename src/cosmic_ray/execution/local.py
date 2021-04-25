@@ -41,7 +41,7 @@ import logging
 import aiohttp
 
 from cosmic_ray.execution.execution_engine import ExecutionEngine
-from cosmic_ray.work_item import TestOutcome, WorkerOutcome, WorkItem, WorkResult
+from cosmic_ray.work_item import TestOutcome, WorkerOutcome, WorkItem, WorkResult, WorkItemJsonDecoder
 
 log = logging.getLogger(__name__)
 
@@ -49,16 +49,18 @@ log = logging.getLogger(__name__)
 class LocalExecutionEngine(ExecutionEngine):
     "The local execution engine."
 
-    def __call__(self, pending_work, config, on_task_complete):
+    def __call__(self, pending_work, python_version, test_command, timeout, engine_config, on_task_complete):
         # TODO: We still have the issue that `pending_work` is a running query on the database. Will `on_task_complete`
         # - which writes results to the database - be able to complete, or will it be blocked? Do we have to copy the
         # pending work as we used to do?
 
         # TODO: Will there be an event loop? Where should we ensure that there is?
-        asyncio.get_event_loop().run_until_complete(self._process(pending_work, config, on_task_complete))
+        asyncio.get_event_loop().run_until_complete(
+            self._process(pending_work, python_version, test_command, timeout, engine_config, on_task_complete)
+        )
 
-    async def _process(self, pending_work, config, on_task_complete):
-        urls = config.sub("execution-engine", "local").get("worker-urls", [])
+    async def _process(self, pending_work, python_version, test_command, timeout, config, on_task_complete):
+        urls = config.get("worker-urls", [])
 
         if not urls:
             raise ValueError("No worker URLs provided for LocalExecutionEngine")
@@ -66,12 +68,17 @@ class LocalExecutionEngine(ExecutionEngine):
         fetchers = {}
 
         async def handle_completed_task(task):
+            # TODO: If one of the URLs we've got is bad (i.e. no worker is running on it), that will result in an
+            # exception from one of the tasks. We should notice this, log it, and remove the offending URL from the
+            # pool.
+
+            print(type(task), task)
             url, completed_job_id = fetchers[task]
             try:
                 result = await task
             except Exception as exc:
                 # TODO: Do something with the exception
-                log.error(str(exc))
+                log.exception("Error fetching result")
                 result = WorkResult(worker_outcome=WorkerOutcome.ABNORMAL, output=str(exc))
             finally:
                 del fetchers[task]
@@ -89,23 +96,30 @@ class LocalExecutionEngine(ExecutionEngine):
 
             # Use an available URL to process the task
             url = urls.pop()
-            fetcher = asyncio.create_task(fetch(url, work_item, config.python_version, config.test_command))
+            fetcher = asyncio.create_task(fetch(url, work_item, python_version, test_command, timeout))
             fetchers[fetcher] = url, work_item.job_id
 
         # Drain the remaining work
-        for task in asyncio.as_completed(fetchers.keys()):
+        done, pending = await asyncio.wait(fetchers.keys(), return_when=asyncio.ALL_COMPLETED)
+        for task in done:
             await handle_completed_task(task)
 
 
-async def fetch(url, work_item: WorkItem, python_version, test_command):
+async def fetch(url, work_item: WorkItem, python_version, test_command, timeout):
     parameters = {
-        "module_path": work_item.module_path,
+        "module_path": str(work_item.module_path),
         "operator": work_item.operator_name,
-        "occurence": work_item.occurrence,
+        "occurrence": work_item.occurrence,
         "python_version": python_version,
         "test_command": test_command,
+        "timeout": timeout,
     }
     async with aiohttp.request("POST", url, json=parameters) as resp:
-        data = resp.json()
+        result = await resp.json()
         # TODO: Account for possibility that `data` is the wrong shape.
-        return WorkResult(**data)
+        return WorkResult(
+            worker_outcome=result["worker_outcome"],
+            output=result["output"],
+            test_outcome=result["test_outcome"],
+            diff=result["diff"],
+        )
