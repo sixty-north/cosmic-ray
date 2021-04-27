@@ -109,11 +109,7 @@ this:
     timeout = 10
     exclude-modules = []
     test-command = python -m unittest allele_tests
-    execution-enging.name = "local"
-
-    [cosmic-ray.cloning]
-    method = 'copy'
-    commands = []
+    distributor.name = "local"
 
 You would run ``cosmic-ray init`` like this:
 

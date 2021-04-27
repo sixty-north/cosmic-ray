@@ -100,11 +100,6 @@ class ConfigDict(dict):
         name = self.distributor_name
         return self["distributor"].get(name, ConfigDict())
 
-    @property
-    def cloning_config(self):
-        "The 'cloning' section of the config."
-        return self["cloning"]
-
 
 @contextmanager
 def _config_stream(filename):

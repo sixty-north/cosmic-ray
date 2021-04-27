@@ -28,7 +28,6 @@ assemblers to oil exploration software.
    quickstart
    theory
    concepts
-   cloning
    commands
    operators
    filters

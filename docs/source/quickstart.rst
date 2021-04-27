@@ -38,13 +38,7 @@ testing:
     timeout = 10
     exclude-modules = []
     test-command = "python -m unittest discover tests"
-
-    [cosmic-ray.execution-engine]
-    name = "local"
-
-    [cosmic-ray.cloning]
-    method = "copy"
-    commands = []
+    distributor.name = "local"
 
 You can specify a great deal of information in a configuration file, controlling
 things like the test execution, the execution engine, and so forth. It's
