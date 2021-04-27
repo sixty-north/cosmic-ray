@@ -11,7 +11,6 @@ INSTALL_REQUIRES = [
     "astunparse",
     "click",
     "decorator",
-    "docopt",
     "exit_codes",
     "gitpython",
     "parso",
