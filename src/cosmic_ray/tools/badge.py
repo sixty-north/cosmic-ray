@@ -5,7 +5,7 @@ from logging import getLogger
 
 from anybadge import Badge
 
-import docopt
+import click
 from cosmic_ray.config import load_config
 from cosmic_ray.tools.survival_rate import survival_rate
 from cosmic_ray.work_db import WorkDB, use_db
@@ -13,44 +13,32 @@ from cosmic_ray.work_db import WorkDB, use_db
 log = getLogger()
 
 
-def generate_badge():
-    """cr-badge
+@click.command()
+@click.argument("config_file", type=click.Path(exists=True, dir_okay=False, readable=True))
+@click.argument("badge_file", type=click.Path(dir_okay=False, writable=True))
+@click.argument("session_file", type=click.Path(exists=True, dir_okay=False, readable=True))
+def generate_badge(config_file, badge_file, session_file):
+    """Generate badge file."""
 
-Usage: cr-badge [--config <config_file>]  <badge_file> <session-file>
-
-Generate badge file.
-
-options:
-    --config <config_file> Configuration file to use instead of session configuration
-"""
-
-    arguments = docopt.docopt(generate_badge.__doc__, version='cr-format 0.1')
-    config_file = arguments['--config']
-    badge_filename = arguments['<badge_file>']
-
-    with use_db(arguments['<session-file>'], WorkDB.Mode.open) as db:
-        assert isinstance(db, WorkDB)
-        if config_file:
-            config = load_config(config_file)
-        else:
-            config = db.get_config()
+    with use_db(session_file, WorkDB.Mode.open) as db:
+        config = load_config(config_file)
 
         percent = 100 - survival_rate(db)
 
-        config = config['badge']
+        config = config["badge"]
 
         badge = Badge(
-            label=config['label'],
+            label=config["label"],
             value=percent,
-            value_format=config['format'],
-            thresholds=config['thresholds'],
+            value_format=config["format"],
+            thresholds=config["thresholds"],
         )
 
-        log.info("Generating badge: " + config['format'], percent)  # pylint: disable=logging-not-lazy
+        log.info("Generating badge: " + config["format"], percent)  # pylint: disable=logging-not-lazy
 
         try:
-            os.unlink(badge_filename)
+            os.unlink(badge_file)
         except OSError:
             pass
 
-        badge.write_badge(badge_filename)
+        badge.write_badge(badge_file)
