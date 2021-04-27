@@ -21,14 +21,13 @@ def config_file(tmpdir):
     return str(tmpdir.join("config.toml"))
 
 
-def _make_config(test_command="python -m unittest discover tests", timeout=100, engine="local"):
+def _make_config(test_command="python -m unittest discover tests", timeout=100, distributor="local"):
     return {
         "module-path": "foo.py",
         "timeout": timeout,
         "test-command": test_command,
-        "execution-engine": {"name": engine},
+        "distributor": {"name": distributor},
         "exclude-modules": [],
-        "cloning": {"method": "copy"},
     }
 
 

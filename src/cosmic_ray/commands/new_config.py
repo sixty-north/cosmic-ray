@@ -81,11 +81,7 @@ def new_config():
     menu = qprompt.Menu()
     for at_pos, distributor_name in enumerate(distributor_names()):
         menu.add(str(at_pos), distributor_name)
-    config["execution-engine"] = ConfigDict()
-    config["execution-engine"]["name"] = menu.show(header="Execution engine", returns="desc")
-
-    config["cloning"] = ConfigDict()
-    config["cloning"]["method"] = "copy"
-    config["cloning"]["commands"] = []
+    config["distributor"] = ConfigDict()
+    config["distributor"]["name"] = menu.show(header="Distributor", returns="desc")
 
     return config

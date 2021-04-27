@@ -1,6 +1,6 @@
 """Cosmic Ray distributor that runs tests sequentially and locally.
 
-## Enabling the engine
+## Enabling the distributor
 
 To use the local distributor, set `cosmic-ray.distributor.name = "local"` in your Cosmic Ray configuration.
 
@@ -23,7 +23,7 @@ class LocalDistributor(Distributor):
     def __call__(self, *args, **kwargs):
         asyncio.get_event_loop().run_until_complete(self._process(*args, **kwargs))
 
-    async def _process(self, pending_work, python_version, test_command, timeout, engine_config, on_task_complete):
+    async def _process(self, pending_work, python_version, test_command, timeout, distributor_config, on_task_complete):
         for work_item in pending_work:
             result = await mutate_and_test(
                 module_path=work_item.module_path,

@@ -17,7 +17,7 @@ Then start your worker::
 Note that if you are using the "copy" cloning method, then you need to start the worker in the directory where you want
 it to execute.
 
-Then you need to specify "celery4" as your `cosmic-ray.execution-engine.name` in your configuration.
+Then you need to specify "celery4" as your `cosmic-ray.distributor.name` in your configuration.
 
 After that, everything should work! For more details/inspiration, see the Cosmic Ray
 end-to-end test suite.

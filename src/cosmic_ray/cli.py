@@ -294,7 +294,7 @@ def mutate_and_test(module_path, operator, occurrence, python_version, test_comm
     suite defined in the configuration, prints the results, and exits.
 
     Normally you won't run this directly. Rather, it will be launched
-    by an execution engine. However, it can be useful to run this on
+    by an distributor. However, it can be useful to run this on
     its own for testing and debugging purposes.
     """
     with open(os.devnull, "w") as devnull:

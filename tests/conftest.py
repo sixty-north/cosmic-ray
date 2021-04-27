@@ -29,7 +29,7 @@ def pytest_addoption(parser):
 
 
 def pytest_generate_tests(metafunc):
-    "Resolve the 'engine' and 'tester' fixtures."
+    "Resolve the 'distributor' and 'tester' fixtures."
     if "distributor" in metafunc.fixturenames:
         metafunc.parametrize("distributor", set(metafunc.config.getoption("--e2e-distributor")))
 

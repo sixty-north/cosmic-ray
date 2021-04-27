@@ -2,7 +2,7 @@
 
 This uses a list of URLs to workes, distributing work to them as they're available.
 
-## Enabling the engine
+## Enabling the distributor 
 
 To use the local distributor, set `cosmic-ray.distributor.name = "http"` in your Cosmic Ray configuration, and
 configure the list of worker URLs in `cosmic-ray.distributor.http.worker-urls`::
@@ -40,7 +40,7 @@ class HttpDistributor(Distributor):
         urls = config.get("worker-urls", [])
 
         if not urls:
-            raise ValueError("No worker URLs provided for LocalExecutionEngine")
+            raise ValueError("No worker URLs provided for LocalDistributor")
 
         fetchers = {}
 

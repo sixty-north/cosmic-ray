@@ -107,13 +107,13 @@ configuration. For example, instead of a "local" configuration like this:
 
 ::
 
-    execution-engine.name = "local"
+    distributor.name = "local"
 
 You would use the name "celery4" like this:
 
 ::
 
-    execution-engine.name = "celery4"
+    distributor.name = "celery4"
 
 With this configuration in place, you then need to do an `init` to create a
 session followed by `exec` to run the tests:

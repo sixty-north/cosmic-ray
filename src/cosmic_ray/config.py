@@ -22,18 +22,17 @@ def load_config(filename=None):
             filename = handle.name
             return deserialize_config(handle.read())
     except (OSError, toml.TomlDecodeError, UnicodeDecodeError) as exc:
-        raise ConfigError(
-            'Error loading configuration from {}'.format(filename)) from exc
+        raise ConfigError("Error loading configuration from {}".format(filename)) from exc
 
 
-def deserialize_config(sz) -> 'ConfigDict':
+def deserialize_config(sz) -> "ConfigDict":
     "Parse a serialized config into a ConfigDict."
-    return toml.loads(sz, _dict=ConfigDict)['cosmic-ray']
+    return toml.loads(sz, _dict=ConfigDict)["cosmic-ray"]
 
 
 def serialize_config(config):
     "Return the serialized form of `config`."
-    return toml.dumps({'cosmic-ray': config})
+    return toml.dumps({"cosmic-ray": config})
 
 
 class ConfigError(Exception):
@@ -49,8 +48,8 @@ class ConfigValueError(ConfigError, ValueError):
 
 
 class ConfigDict(dict):
-    """A dictionary subclass that contains the application configuration.
-    """
+    """A dictionary subclass that contains the application configuration."""
+
     def __getitem__(self, key):
         try:
             return super().__getitem__(key)
@@ -75,37 +74,36 @@ class ConfigDict(dict):
 
         Returns: A string of the form "MAJOR.MINOR", e.g. "3.6".
         """
-        v = self.get('python-version', '')
-        if v == '':
+        v = self.get("python-version", "")
+        if v == "":
             v = "{}.{}".format(sys.version_info.major, sys.version_info.minor)
         return v
 
     @property
     def test_command(self):
-        """The command to run to execute tests.
-        """
-        return self['test-command']
+        """The command to run to execute tests."""
+        return self["test-command"]
 
     @property
     def timeout(self):
         "The timeout (seconds) for tests."
-        return float(self['timeout'])
+        return float(self["timeout"])
 
     @property
     def distributor_name(self):
         "The name of the distributor to use."
-        return self['distributor']['name']
+        return self["distributor"]["name"]
 
     @property
     def distributor_config(self):
-        "The configuration for the named execution engine."
+        "The configuration for the named distributor."
         name = self.distributor_name
-        return self['distributor'].get(name, ConfigDict())
+        return self["distributor"].get(name, ConfigDict())
 
     @property
     def cloning_config(self):
         "The 'cloning' section of the config."
-        return self['cloning']
+        return self["cloning"]
 
 
 @contextmanager
@@ -115,10 +113,10 @@ def _config_stream(filename):
     If `filename` is `None` or '-' then stream will be `sys.stdin`. Otherwise,
     it's the open file handle for the filename.
     """
-    if filename is None or filename == '-':
-        log.info('Reading config from stdin')
+    if filename is None or filename == "-":
+        log.info("Reading config from stdin")
         yield sys.stdin
     else:
-        with open(filename, mode='rt') as handle:
-            log.info('Reading config from %r', filename)
+        with open(filename, mode="rt") as handle:
+            log.info("Reading config from %r", filename)
             yield handle
