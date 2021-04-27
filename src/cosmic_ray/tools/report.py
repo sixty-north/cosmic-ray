@@ -1,63 +1,55 @@
 "Tool for printing reports on mutation testing sessions."
 
-import docopt
+import click
 
 from cosmic_ray.work_db import use_db, WorkDB
 from cosmic_ray.tools.survival_rate import kills_count, survival_rate
 
 
-def report():
-    """cr-report
+@click.command()
+@click.option("--show-output/--no-show-output", default=False, help="Display output of test executions")
+@click.option("--show-diff/--no-show-diff", default=False, help="Display diff of mutants")
+@click.option("--show-pending/--no-show-pending", default=False, help="Display results for incomplete tasks")
+@click.argument("session-file", type=click.Path(dir_okay=False, readable=True, exists=True))
+def report(show_output, show_diff, show_pending, session_file):
+    """Print a nicely formatted report of test results and some basic statistics."""
 
-Usage: cr-report [--show-output] [--show-diff] [--show-pending] <session-file>
-
-Print a nicely formatted report of test results and some basic statistics.
-
-options:
-    --show-output   Display output of test executions
-    --show-diff     Display diff of mutants
-    --show-pending  Display results for incomplete tasks
-"""
-
-    arguments = docopt.docopt(report.__doc__, version='cr-format 0.1')
-    show_pending = arguments['--show-pending']
-    show_output = arguments['--show-output']
-    show_diff = arguments['--show-diff']
-
-    with use_db(arguments['<session-file>'], WorkDB.Mode.open) as db:
+    with use_db(session_file, WorkDB.Mode.open) as db:
         for work_item, result in db.completed_work_items:
-            print('{} {} {} {}'.format(work_item.job_id, work_item.module_path,
-                                       work_item.operator_name,
-                                       work_item.occurrence))
+            print(
+                "{} {} {} {}".format(
+                    work_item.job_id, work_item.module_path, work_item.operator_name, work_item.occurrence
+                )
+            )
 
-            print('worker outcome: {}, test outcome: {}'.format(
-                result.worker_outcome, result.test_outcome))
+            print("worker outcome: {}, test outcome: {}".format(result.worker_outcome, result.test_outcome))
 
             if show_output:
-                print('=== OUTPUT ===')
+                print("=== OUTPUT ===")
                 print(result.output)
-                print('==============')
+                print("==============")
 
             if show_diff:
-                print('=== DIFF ===')
+                print("=== DIFF ===")
                 print(result.diff)
-                print('============')
+                print("============")
 
         if show_pending:
             for work_item in db.pending_work_items:
-                print('{} {} {} {}'.format(
-                    work_item.job_id, work_item.module_path,
-                    work_item.operator_name, work_item.occurrence))
+                print(
+                    "{} {} {} {}".format(
+                        work_item.job_id, work_item.module_path, work_item.operator_name, work_item.occurrence
+                    )
+                )
 
         num_items = db.num_work_items
         num_complete = db.num_results
 
-        print('total jobs: {}'.format(num_items))
+        print("total jobs: {}".format(num_items))
 
         if num_complete > 0:
-            print('complete: {} ({:.2f}%)'.format(
-                num_complete, num_complete / num_items * 100))
+            print("complete: {} ({:.2f}%)".format(num_complete, num_complete / num_items * 100))
             num_killed = kills_count(db)
-            print('surviving mutants: {} ({:.2f}%)'.format(num_complete - num_killed, survival_rate(db)))
+            print("surviving mutants: {} ({:.2f}%)".format(num_complete - num_killed, survival_rate(db)))
         else:
-            print('no jobs completed')
+            print("no jobs completed")
