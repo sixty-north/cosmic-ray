@@ -299,11 +299,13 @@ def mutate_and_test(module_path, operator, occurrence, python_version, test_comm
     """
     with open(os.devnull, "w") as devnull:
         with redirect_stdout(sys.stdout if keep_stdout else devnull):
-            work_result = cosmic_ray.mutating.mutate_and_test(
-                Path(module_path), python_version, operator, occurrence, test_command, None
+            work_result = asyncio.get_event_loop().run_until_complete(
+                cosmic_ray.mutating.mutate_and_test(
+                    Path(module_path), python_version, operator, occurrence, test_command, None
+                )
             )
 
-    sys.stdout.write(json.dumps(work_result.as_dict()))
+    sys.stdout.write(json.dumps(dataclasses.asdict(work_result)))
 
     sys.exit(ExitCode.OK)
 
