@@ -106,6 +106,7 @@ async def send_request(url, work_item: WorkItem, python_version, test_command, t
         "test_command": test_command,
         "timeout": timeout,
     }
+    log.info("Sending HTTP request to %s", url)
     async with aiohttp.request("POST", url, json=parameters) as resp:
         result = await resp.json()
         # TODO: Account for possibility that `data` is the wrong shape.
