@@ -13,20 +13,25 @@ configure the list of worker URLs in `cosmic-ray.distributor.http.worker-urls`::
     [cosmic-ray.distributor.http]
     worker-urls = ['http://localhost:9876', 'http://localhost:9877']
 """
-
 import asyncio
 import logging
+from pathlib import Path
 
 import aiohttp
-
+from aiohttp import web
 from cosmic_ray.distribution.distributor import Distributor
+from cosmic_ray.mutating import mutate_and_test
 from cosmic_ray.work_item import WorkerOutcome, WorkItem, WorkResult
 
 log = logging.getLogger(__name__)
 
 
 class HttpDistributor(Distributor):
-    "The http distributor."
+    """The http distributor.
+
+    This forwards mutate-and-test requests to HTTP servers which do the actual work and
+    return the results.
+    """
 
     def __call__(self, *args, **kwargs):
         # TODO: We still have the issue that `pending_work` is a running query on the database. Will `on_task_complete`
@@ -72,7 +77,7 @@ class HttpDistributor(Distributor):
 
             # Use an available URL to process the task
             url = urls.pop()
-            fetcher = asyncio.create_task(fetch(url, work_item, python_version, test_command, timeout))
+            fetcher = asyncio.create_task(send_request(url, work_item, python_version, test_command, timeout))
             fetchers[fetcher] = url, work_item.job_id
 
         # Drain the remaining work
@@ -81,7 +86,18 @@ class HttpDistributor(Distributor):
             await handle_completed_task(task)
 
 
-async def fetch(url, work_item: WorkItem, python_version, test_command, timeout):
+async def send_request(url, work_item: WorkItem, python_version, test_command, timeout):
+    """Sends a mutate-and-test request to a worker.
+
+    Args:
+        url: The URL of the worker.
+        work_item: The `WorkItem` representing the work to be done.
+        python_version: The version of python - MAJ.MIN.PATCH - to use for the code.
+        test_command: The command that the worker should use to run the tests.
+        timeout: The maximum number of seconds to spend running the test.
+
+    Returns: A `WorkResult`.
+    """
     parameters = {
         "module_path": str(work_item.module_path),
         "operator": work_item.operator_name,
@@ -99,3 +115,42 @@ async def fetch(url, work_item: WorkItem, python_version, test_command, timeout)
             test_outcome=result["test_outcome"],
             diff=result["diff"],
         )
+
+
+async def handle_mutate_and_test(request):
+    """HTTP endpoint handler for requests to mutate-and-test."""
+    args = await request.json()
+    result = await mutate_and_test(
+        module_path=Path(args["module_path"]),
+        python_version=args["python_version"],
+        operator_name=args["operator"],
+        occurrence=args["occurrence"],
+        test_command=args["test_command"],
+        timeout=args["timeout"],
+    )
+    # TODO: Deal with exceptions. There generally won't be any, so we can just return an abnormal result if there it.
+
+    return web.json_response(
+        {
+            "worker_outcome": result.worker_outcome.value,
+            "output": result.output,
+            "test_outcome": result.test_outcome.value if result.test_outcome is not None else None,
+            "diff": result.diff,
+        }
+    )
+
+
+def run_worker(port=None, path=None):
+    """Run the worker HTTP server.
+
+    You must specify either `port` or `path`, but not both.
+
+    Args:
+        port: The TCP port on which to listen.
+        path: Path to Unix domain socket on which to listen.
+    """
+    if port is None and path is None:
+        raise ValueError("Worker requires either a port or domain socket path")
+    app = web.Application()
+    app.add_routes([web.post("/", handle_mutate_and_test)])
+    web.run_app(app, port=port, path=path)

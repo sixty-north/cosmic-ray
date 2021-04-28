@@ -23,13 +23,13 @@ import cosmic_ray.modules
 import cosmic_ray.mutating
 import cosmic_ray.plugins
 import cosmic_ray.testing
-import cosmic_ray.worker
+import cosmic_ray.distribution.http
 from cosmic_ray.config import load_config, serialize_config
 from cosmic_ray.mutating import apply_mutation
 from cosmic_ray.progress import report_progress
 from cosmic_ray.version import __version__
 from cosmic_ray.work_db import WorkDB, use_db
-from cosmic_ray.work_item import TestOutcome, WorkItem, WorkResult
+from cosmic_ray.work_item import TestOutcome, WorkItem
 
 log = logging.getLogger()
 
@@ -187,7 +187,7 @@ def baseline(session_file, force, dump_report):
         # Run the single-entry session.
         cosmic_ray.commands.execute(db)
 
-        result = next(db.results)[1]  # type: WorkResult
+        result = next(db.results)[1]
         if result.test_outcome == TestOutcome.KILLED:
             if dump_report:
                 print("Execution with no mutation gives those following errors:")
@@ -264,15 +264,16 @@ def apply(module_path, operator, occurrence, python_version):
 
 
 @cli.command()
-@click.option("--port", type=int, default=None)
-@click.option("--path", default=None)
-def worker(port, path):
+@click.option("--port", type=int, default=None, help="The port on which to listen for requests")
+@click.option("--path", default=None, help="Path to Unix domain socket on which to listen for requests")
+def http_worker(port, path):
+    """Run an HTTP worker for the 'http' distributor."""
     if (port is None) == (path is None):
         log.error("You must specify exactly one of --path or --port")
         sys.exit(ExitCode.USAGE)
 
     try:
-        cosmic_ray.worker.run(port=port, path=path)
+        cosmic_ray.distribution.http.run_worker(port=port, path=path)
     except ValueError as exc:
         log.error(str(exc))
         sys.exit(ExitCode.DATA_ERR)
