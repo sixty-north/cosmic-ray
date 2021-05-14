@@ -40,7 +40,7 @@ class WorkDB:
         """
 
         if (mode == WorkDB.Mode.open) and (not os.path.exists(path)):
-            raise FileNotFoundError('Corresponding database {} not found'.format(path))
+            raise FileNotFoundError("Corresponding database {} not found".format(path))
 
         self._path = path
         self._conn = sqlite3.connect(str(path))
@@ -58,32 +58,6 @@ class WorkDB:
         Derived from the constructor arguments.
         """
         return self._path
-
-    def set_config(self, config):
-        """Set (replace) the configuration for the session.
-
-        Args:
-          config: Configuration object
-        """
-        with self._conn:
-            self._conn.execute("DELETE FROM config")
-            self._conn.execute('INSERT INTO config VALUES(?)',
-                               (serialize_config(config),))
-
-    def get_config(self):
-        """Get the work parameters (if set) for the session.
-
-        Returns: a Configuration object.
-
-        Raises:
-          ValueError: If is no config set for the session.
-        """
-        rows = list(self._conn.execute("SELECT * FROM config"))
-        if not rows:
-            raise ValueError("work-db has no config")
-        (config_str,) = rows[0]
-
-        return deserialize_config(config_str)
 
     @property
     def work_items(self):
@@ -110,10 +84,12 @@ class WorkDB:
         """
         with self._conn:
             self._conn.execute(
-                '''
+                """
                 INSERT INTO work_items
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                ''', _work_item_to_row(work_item))
+                """,
+                _work_item_to_row(work_item),
+            )
 
     def add_work_items(self, work_items):
         """Add multiple WorkItems.
@@ -125,15 +101,17 @@ class WorkDB:
           work_items: an iterable of WorkItem.
         """
         with self._conn:
-            self._conn.execute('BEGIN TRANSACTION')
+            self._conn.execute("BEGIN TRANSACTION")
             for w_i in work_items:
                 self._conn.execute(
-                    '''
+                    """
                     INSERT INTO work_items
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                    ''', _work_item_to_row(w_i))
+                    """,
+                    _work_item_to_row(w_i),
+                )
             if self._conn.isolation_level:
-                self._conn.execute('END TRANSACTION')
+                self._conn.execute("END TRANSACTION")
 
     def clear(self):
         """Clear all work items from the session.
@@ -141,8 +119,8 @@ class WorkDB:
         This removes any associated results as well.
         """
         with self._conn:
-            self._conn.execute('DELETE FROM results')
-            self._conn.execute('DELETE FROM work_items')
+            self._conn.execute("DELETE FROM results")
+            self._conn.execute("DELETE FROM work_items")
 
     @property
     def results(self):
@@ -150,7 +128,7 @@ class WorkDB:
         cur = self._conn.cursor()
         rows = cur.execute("SELECT * FROM results")
         for row in rows:
-            yield (row['job_id'], _row_to_work_result(row))
+            yield (row["job_id"], _row_to_work_result(row))
 
     @property
     def num_results(self):
@@ -173,13 +151,14 @@ class WorkDB:
         with self._conn:
             try:
                 self._conn.execute(
-                    '''
+                    """
                     REPLACE INTO results
                     VALUES (?, ?, ?, ?, ?)
-                    ''', _work_result_to_row(job_id, result))
+                    """,
+                    _work_result_to_row(job_id, result),
+                )
             except sqlite3.IntegrityError as exc:
-                raise KeyError('Can not add result with job-id {}'.format(
-                    job_id)) from exc
+                raise KeyError("Can not add result with job-id {}".format(job_id)) from exc
 
     @property
     def pending_work_items(self):
@@ -194,11 +173,8 @@ class WorkDB:
     @property
     def completed_work_items(self):
         "Iterable of `(work-item, result)`s for all completed items."
-        completed = self._conn.execute(
-            "SELECT * FROM work_items, results WHERE work_items.job_id == results.job_id"
-        )
-        return ((_row_to_work_item(result), _row_to_work_result(result))
-                for result in completed)
+        completed = self._conn.execute("SELECT * FROM work_items, results WHERE work_items.job_id == results.job_id")
+        return ((_row_to_work_item(result), _row_to_work_result(result)) for result in completed)
 
     # @property
     # def num_pending_work_items(self):
@@ -215,7 +191,8 @@ class WorkDB:
             # journal_mode=WAL is persistent
             self._conn.execute("PRAGMA journal_mode=WAL")
 
-            self._conn.execute('''
+            self._conn.execute(
+                """
             CREATE TABLE IF NOT EXISTS work_items
             (module_path text,
              operator text,
@@ -225,9 +202,11 @@ class WorkDB:
              end_line int,
              end_col int,
              job_id text primary key)
-            ''')
+            """
+            )
 
-            self._conn.execute('''
+            self._conn.execute(
+                """
             CREATE TABLE IF NOT EXISTS results
             (worker_outcome text,
              output text,
@@ -236,22 +215,26 @@ class WorkDB:
              job_id text primary key,
              FOREIGN KEY(job_id) REFERENCES work_items(job_id)
             )
-            ''')
+            """
+            )
 
-            self._conn.execute('''
+            self._conn.execute(
+                """
             CREATE TABLE IF NOT EXISTS config
             (config text)
-            ''')
+            """
+            )
 
 
 def _row_to_work_item(row):
     return WorkItem(
-        module_path=row['module_path'],
-        operator_name=row['operator'],
-        occurrence=row['occurrence'],
-        start_pos=(row['start_line'], row['start_col']),
-        end_pos=(row['end_line'], row['end_col']),
-        job_id=row['job_id'])
+        module_path=row["module_path"],
+        operator_name=row["operator"],
+        occurrence=row["occurrence"],
+        start_pos=(row["start_line"], row["start_col"]),
+        end_pos=(row["end_line"], row["end_col"]),
+        job_id=row["job_id"],
+    )
 
 
 def _work_item_to_row(work_item):
@@ -263,18 +246,20 @@ def _work_item_to_row(work_item):
         work_item.start_pos[1],
         work_item.end_pos[0],
         work_item.end_pos[1],
-        work_item.job_id)
+        work_item.job_id,
+    )
 
 
 def _row_to_work_result(row):
-    test_outcome = row['test_outcome']
+    test_outcome = row["test_outcome"]
     test_outcome = None if test_outcome is None else TestOutcome(test_outcome)
 
     return WorkResult(
-        worker_outcome=WorkerOutcome(row['worker_outcome']),
-        output=row['output'],
+        worker_outcome=WorkerOutcome(row["worker_outcome"]),
+        output=row["output"],
         test_outcome=test_outcome,
-        diff=row['diff'])
+        diff=row["diff"],
+    )
 
 
 def _work_result_to_row(job_id, result):
@@ -283,7 +268,8 @@ def _work_result_to_row(job_id, result):
         result.output,
         None if result.test_outcome is None else result.test_outcome.value,
         result.diff,
-        job_id)
+        job_id,
+    )
 
 
 @contextlib.contextmanager

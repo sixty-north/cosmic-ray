@@ -25,7 +25,9 @@ def test_fast_tests(project_root, session):
         [sys.executable, "-m", "cosmic_ray.cli", "init", "cr.conf", str(session)], cwd=str(project_root)
     )
 
-    subprocess.check_call([sys.executable, "-m", "cosmic_ray.cli", "exec", str(session)], cwd=str(project_root))
+    subprocess.check_call(
+        [sys.executable, "-m", "cosmic_ray.cli", "exec", "cr.conf", str(session)], cwd=str(project_root)
+    )
 
     session_path = project_root / session
     with use_db(str(session_path), WorkDB.Mode.open) as work_db:

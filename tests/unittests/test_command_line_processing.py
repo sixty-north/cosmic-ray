@@ -57,15 +57,20 @@ def test_invalid_command_line_returns_EX_USAGE():
     assert cosmic_ray.cli.main(["init", "foo"]) == 2
 
 
-def test_non_existent_file_returns_EX_NOINPUT():
-    assert cosmic_ray.cli.main(["exec", "foo.session"]) == ExitCode.NO_INPUT
+def test_non_existent_session_file_returns_EX_NOINPUT(local_unittest_config):
+    assert cosmic_ray.cli.main(["exec", str(local_unittest_config), "foo.session"]) == ExitCode.NO_INPUT
+
+
+def test_non_existent_config_file_returns_EX_NOINPUT(session, local_unittest_config):
+    cosmic_ray.cli.main(["init", local_unittest_config, str(session)])
+    assert cosmic_ray.cli.main(["exec", "no-such-file", str(session)]) == ExitCode.CONFIG
 
 
 @pytest.mark.skip("need to sort this API out")
-def test_unreadable_file_returns_EX_PERM(tmpdir):
+def test_unreadable_file_returns_EX_PERM(tmpdir, local_unittest_config):
     p = tmpdir.ensure("bogus.session.sqlite")
     p.chmod(stat.S_IRUSR)
-    assert cosmic_ray.cli.main(["exec", str(p.realpath())]) == ExitCode.NO_PERM
+    assert cosmic_ray.cli.main(["exec", local_unittest_config, str(p.realpath())]) == ExitCode.NO_PERM
 
 
 def test_new_config_success_returns_EX_OK(monkeypatch, config_file):
@@ -75,21 +80,6 @@ def test_new_config_success_returns_EX_OK(monkeypatch, config_file):
 
 
 # NOTE: We have integration tests for the happy-path for many commands, so we don't cover them explicitly here.
-
-
-def test_config_success_returns_EX_OK(lobotomize, local_unittest_config, session):
-    cosmic_ray.cli.main(["init", local_unittest_config, str(session)])
-
-    cfg_stream = io.StringIO()
-    with contextlib.redirect_stdout(cfg_stream):
-        errcode = cosmic_ray.cli.main(["config", str(session)])
-    assert errcode == ExitCode.OK
-
-    with open(local_unittest_config, mode="rt") as handle:
-        config_str = handle.read()
-        orig_cfg = cosmic_ray.config.deserialize_config(config_str)
-    stored_cfg = cosmic_ray.config.deserialize_config(cfg_stream.getvalue())
-    assert orig_cfg == stored_cfg
 
 
 def test_dump_success_returns_EX_OK(lobotomize, local_unittest_config, session):

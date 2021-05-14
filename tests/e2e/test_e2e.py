@@ -26,7 +26,9 @@ def test_e2e(example_project_root, config, session):
         [sys.executable, "-m", "cosmic_ray.cli", "init", config, str(session)], cwd=str(example_project_root)
     )
 
-    subprocess.check_call([sys.executable, "-m", "cosmic_ray.cli", "exec", str(session)], cwd=str(example_project_root))
+    subprocess.check_call(
+        [sys.executable, "-m", "cosmic_ray.cli", "exec", config, str(session)], cwd=str(example_project_root)
+    )
 
     session_path = example_project_root / session
     with use_db(str(session_path), WorkDB.Mode.open) as work_db:
@@ -40,7 +42,7 @@ def test_baseline(example_project_root, config, session):
     )
 
     subprocess.check_call(
-        [sys.executable, "-m", "cosmic_ray.cli", "baseline", str(session)], cwd=str(example_project_root)
+        [sys.executable, "-m", "cosmic_ray.cli", "baseline", config, str(session)], cwd=str(example_project_root)
     )
 
     session_path = session.parent / "{}.baseline{}".format(session.stem, session.suffix)
@@ -75,17 +77,3 @@ def test_empty___init__(example_project_root, session):
     with use_db(str(session_path), WorkDB.Mode.open) as work_db:
         rate = survival_rate(work_db)
         assert rate == 0.0
-
-
-def test_config_command(example_project_root, session):
-    config = "cosmic-ray.import.conf"
-
-    subprocess.check_call(
-        [sys.executable, "-m", "cosmic_ray.cli", "init", config, str(session)],
-        cwd=str(example_project_root),
-    )
-
-    subprocess.check_call(
-        [sys.executable, "-m", "cosmic_ray.cli", "config", str(session)],
-        cwd=str(example_project_root),
-    )

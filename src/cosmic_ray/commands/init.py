@@ -34,7 +34,7 @@ def all_work_items(module_paths, operator_names, python_version):
                     occurrence += 1
 
 
-def init(module_paths, work_db: WorkDB, config):
+def init(module_paths, work_db: WorkDB, python_version):
     """Clear and initialize a work-db with work items.
 
     Any existing data in the work-db will be cleared and replaced with entirely
@@ -44,12 +44,9 @@ def init(module_paths, work_db: WorkDB, config):
     Args:
       module_paths: iterable of pathlib.Paths of modules to mutate.
       work_db: A `WorkDB` instance into which the work orders will be saved.
-      config: The configuration for the new session.
     """
 
     operator_names = list(cosmic_ray.plugins.operator_names())
 
-    work_db.set_config(config=config)
-
     work_db.clear()
-    work_db.add_work_items(all_work_items(module_paths, operator_names, config.python_version))
+    work_db.add_work_items(all_work_items(module_paths, operator_names, python_version))

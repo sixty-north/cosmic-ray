@@ -96,38 +96,28 @@ def init(config_file, session_file):
             log.info(" - %s: %s", directory, ", ".join(sorted(files)))
 
     with use_db(session_file) as database:
-        cosmic_ray.commands.init(modules, database, cfg)
-
-    sys.exit(ExitCode.OK)
-
-
-@cli.command()
-@click.argument(
-    "session_file",
-    # help="The database containing the config to be displayed."
-)
-def config(session_file):
-    """Show the configuration for a session."""
-    with use_db(session_file) as database:
-        cfg = database.get_config()
-        print(serialize_config(cfg))
+        cosmic_ray.commands.init(modules, database, cfg.python_version)
 
     sys.exit(ExitCode.OK)
 
 
 @cli.command(name="exec")
+@click.argument("config_file")
 @click.argument("session_file")
-def handle_exec(session_file):
+def handle_exec(config_file, session_file):
     """Perform the remaining work to be done in the specified session.
     This requires that the rest of your mutation testing
     infrastructure (e.g. worker processes) are already running.
     """
+    cfg = load_config(config_file)
+
     with use_db(session_file, mode=WorkDB.Mode.open) as work_db:
-        cosmic_ray.commands.execute(work_db)
+        cosmic_ray.commands.execute(work_db, cfg)
     sys.exit(ExitCode.OK)
 
 
 @cli.command()
+@click.argument("config_file")
 @click.argument("session_file")
 @click.option(
     "--force",
@@ -143,12 +133,13 @@ def handle_exec(session_file):
     default=False,
     help="Print the report result of this baseline run. If the job has failed, jobs's outputs will be displayed.",
 )
-def baseline(session_file, force, dump_report):
+def baseline(config_file, session_file, force, dump_report):
     """Runs a baseline execution that executes the test suite over unmutated code.
 
     Exits with 0 if the job has exited normally, otherwise 1.
     """
     session_file = Path(session_file)
+    cfg = load_config(config_file)
 
     baseline_session_file = session_file.parent / "{}.baseline{}".format(session_file.stem, session_file.suffix)
 
@@ -160,8 +151,6 @@ def baseline(session_file, force, dump_report):
             log.error("No work items in session")
             sys.exit(ExitCode.DATA_ERR)
 
-        cfg = db.get_config()
-
     if force:
         try:
             os.unlink(baseline_session_file)
@@ -171,8 +160,6 @@ def baseline(session_file, force, dump_report):
     # Copy input work-item, but tell it to use the no-op operator. Create a new
     # session containing only this work-item and execute this new session.
     with use_db(baseline_session_file, mode=WorkDB.Mode.create) as db:
-        db.set_config(cfg)
-
         db.add_work_item(
             WorkItem(
                 module_path=template.module_path,
@@ -185,7 +172,7 @@ def baseline(session_file, force, dump_report):
         )
 
         # Run the single-entry session.
-        cosmic_ray.commands.execute(db)
+        cosmic_ray.commands.execute(db, cfg)
 
         result = next(db.results)[1]
         if result.test_outcome == TestOutcome.KILLED:

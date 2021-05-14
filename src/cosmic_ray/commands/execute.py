@@ -1,9 +1,10 @@
 "Implementation of the 'execute' command."
-import os
 import logging
+import os
 
-from cosmic_ray.progress import reports_progress
+from cosmic_ray.config import ConfigDict
 from cosmic_ray.plugins import get_distributor
+from cosmic_ray.progress import reports_progress
 
 log = logging.getLogger(__name__)
 
@@ -26,7 +27,7 @@ def _report_progress(stream):
 
 
 @reports_progress(_report_progress)
-def execute(work_db):
+def execute(work_db, config: ConfigDict):
     """Execute any pending work in the database `work_db`,
     recording the results.
 
@@ -34,7 +35,6 @@ def execute(work_db):
     be executed, and records any results that arrive.
     """
     _update_progress(work_db)
-    config = work_db.get_config()
     distributor = get_distributor(config.distributor_name)
 
     def on_task_complete(job_id, work_result):
