@@ -1,6 +1,6 @@
-===========
-Explanation
-===========
+========================
+Explanations and How-tos
+========================
 
 .. toctree::
    :maxdepth: 1
@@ -9,3 +9,5 @@ Explanation
    concepts
    filters
    implementation
+   operators
+   distributed

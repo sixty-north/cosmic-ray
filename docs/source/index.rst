@@ -23,12 +23,6 @@ assemblers to oil exploration software.
 
    tutorial/index
    explanation/index
-   commands
-   operators
-   distributed
-   tests
-   continuous_integration
-   badge
    reference/index
 
 
