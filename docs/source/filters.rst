@@ -12,12 +12,6 @@ running. The name "filter" is actually a bit misleading since these programs cou
 simply skipping some mutations. In practice, though, the need to skip certain tests is by far the most common use of
 these programs.
 
-.. note::
-
-  Filter are what used to be called *interceptors*. Interceptors were more tightly integrated with the ``init`` command,
-  with many of the problems that unnecessarily high coupling often brings with it. Filters are simpler and more flexible than
-  interceptors with no loss in power.
-
 Filters included with Cosmic Ray
 ================================
 
@@ -70,7 +64,7 @@ cosmic-ray-spor-filter
 ----------------------
 
 The ``cosmic-ray-spor-filter`` filter modifies a session by skipping mutations which are indicated in a `spor
-<https://github.com/abingham/spor>`_ anchored metadata repository. In short, `spor` provides a way to associated
+<https://github.com/abingham/spor>`_ anchored metadata repository. In short, ``spor`` provides a way to associated
 arbitrary metadata with ranges of code, and this metadata is stored outside of the code. As your code changes, ``spor``
 has algorithms to update the metadata (and its association with the code) automatically.
 
