@@ -2,10 +2,13 @@
 
 This uses a list of URLs to workes, distributing work to them as they're available.
 
-## Enabling the distributor 
+Enabling the distributor
+========================
 
-To use the local distributor, set `cosmic-ray.distributor.name = "http"` in your Cosmic Ray configuration, and
-configure the list of worker URLs in `cosmic-ray.distributor.http.worker-urls`::
+To use the local distributor, set ``cosmic-ray.distributor.name = "http"`` in your Cosmic Ray configuration, and
+configure the list of worker URLs in ``cosmic-ray.distributor.http.worker-urls``:
+
+.. code-block::
 
     [cosmic-ray.distributor]
     name = "http"

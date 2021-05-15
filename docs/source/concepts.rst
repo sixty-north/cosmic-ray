@@ -28,16 +28,16 @@ nodes.
 
 Operators are exposed to Cosmic Ray via plugins, and users can choose to extend
 the available operator set by providing their own operators. Operators are
-implemented as subclasses of ``cosmic_ray.operators.operator.Operator``.
+implemented as subclasses of :class:`cosmic_ray.operators.operator.Operator`.
 
-Execution engines
-=================
+Distributors
+============
 
-*Execution engines* determine the context in which tests are executed. The
-primary examples of execution engines are the *local* and *celery4* engines. The
-local engine executes tests on the local machine; the celery4 engine distributes
-tests to remote workers using the Celery (v4) system. Other kinds of engines
-might run tests on a cloud service or using other task distribution technology.
+*Distrobutors* determine the context in which tests are executed. The primary examples of distributors are
+:class:`cosmic_ray.distribution.local.LocalDistributor` and :class:`cosmic_ray.distribution.http.HttpDistributor`. The
+local engine executes tests on the local machine; the celery4 engine distributes tests to remote workers using the
+Celery (v4) system. Other kinds of engines might run tests on a cloud service or using other task distribution
+technology.
 
 Execution engines have broad control over how they execute tests. During the
 execution phase they are given a sequence of pending mutations to execute, and

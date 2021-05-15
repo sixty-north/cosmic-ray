@@ -1,8 +1,11 @@
 """Cosmic Ray distributor that runs tests sequentially and locally.
 
-## Enabling the distributor
+Enabling the distributor
+========================
 
-To use the local distributor, set `cosmic-ray.distributor.name = "local"` in your Cosmic Ray configuration.
+To use the local distributor, set ``cosmic-ray.distributor.name = "local"`` in your Cosmic Ray configuration:
+
+.. code-block::
 
     [cosmic-ray.distributor]
     name = "local"

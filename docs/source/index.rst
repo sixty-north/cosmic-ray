@@ -21,7 +21,6 @@ assemblers to oil exploration software.
    :maxdepth: 1
    :caption: Contents
 
-   installation
    tutorial/index
    theory
    concepts
