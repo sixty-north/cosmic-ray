@@ -17,15 +17,12 @@ functionality.
 Cosmic Ray has been successfully used on a wide variety of projects ranging from
 assemblers to oil exploration software.
 
-**This documentation is a bit out of date, but we're working to get it in good order!**
-
-
 .. toctree::
    :maxdepth: 1
    :caption: Contents
 
    installation
-   quickstart
+   tutorial/index
    theory
    concepts
    commands

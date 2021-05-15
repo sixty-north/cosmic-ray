@@ -7,7 +7,7 @@
 
 The simplest way to install Cosmic Ray is with ``pip``:
 
-::
+.. code-block::
 
     pip install cosmic_ray
 
@@ -17,17 +17,9 @@ From source
 ===========
 
 If you want to install Cosmic Ray from source you need to use
-``setup.py``:
+``setup.py``. Run this from the root of the Cosmic Ray repository:
 
-::
+.. code-block::
 
-    python setup.py install
+    pip install .
 
-Virtual environments
---------------------
-
-You'll often want to install Cosmic Ray into its own virtual environment. In
-earlier versions we suggested installing Cosmic Ray into the same environment as
-the project being tested, but that's no longer the case. In recent versions,
-Cosmic Ray will create temporary virtual environments for the code under test,
-so the environments for Cosmic Ray and the code under test are safely separated.
