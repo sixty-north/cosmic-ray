@@ -33,6 +33,7 @@ assemblers to oil exploration software.
    tests
    continuous_integration
    badge
+   reference/index
 
 
 Indices and tables

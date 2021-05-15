@@ -17,7 +17,7 @@ a specific mutation can be applied. The second role of an operator is to
 actually perform the mutation when requested.
 
 An example of an operator is
-``cosmic_ray.operators.break_continue.ReplaceBreakWithContinue``. As its name
+:mod:`cosmic_ray.operators.break_continue`. As its name
 implies, this operator mutates code by replacing ``break`` with ``continue``.
 During
 the initialization of a session, this operator identifies all of the locations

@@ -6,6 +6,8 @@ def extend_name(suffix):
 
     Example:
 
+    .. code-block::
+
         @extend_name('_Foo')
         class Class:
             pass
@@ -14,8 +16,8 @@ def extend_name(suffix):
     """
 
     def dec(cls):
-        name = '{}{}'.format(cls.__name__, suffix)
-        setattr(cls, '__name__', name)
+        name = "{}{}".format(cls.__name__, suffix)
+        setattr(cls, "__name__", name)
         return cls
 
     return dec
