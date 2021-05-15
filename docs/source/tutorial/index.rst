@@ -5,36 +5,58 @@ Cosmic Ray Tutorial
 This tutorial will walk you through the steps needed to install, configure, and run Cosmic
 Ray. 
 
-Cloning Cosmic Ray
-==================
-
-The tutorial will use code and tests provided in the Cosmic Ray test suite, so you'll need to 
-clone the Cosmic Ray git repository:
-
-.. code-block::
-
-    git clone https://github.com/sixty-north/cosmic-ray
-
-This will create a directory called 'cosmic-ray' in the directory from which you run the command. For the rest of this
-tutorial we'll refer to this new directory as ``REPO``.
-
-.. note::
-
-    When using ``REPO`` in example shell code, we'll use ``$REPO``. This means you can set the ``REPO`` environment
-    variable and then run our commands verbatim in many shells. For example, if we want you to change
-    to the ``REPO/tests`` directory, we'll use ``cd $REPO/tests``.
-
 Installation
 ============
 
-You'll also need to install Cosmic Ray and its dependencies. For this tutorial, you should install
-the lastest released version with pip:
+First you'll need to install Cosmic Ray. The simplest (and generally best) way to do this is with ``pip``:
 
 .. code-block::
 
     pip install cosmic-ray
 
 You'll generally want to do this in a virtual environment, but it's not required.
+
+Source module and tests
+=======================
+
+Mutation testing works by making small mutations to the *code under test* (CUT) and then running a test suite
+over the mutated code. For this tutorial, then, we'll need to create our CUT and a test suite for it.
+
+You should create a new directory which will contain the CUT, the tests, and eventually the Cosmic Ray configuration.
+For the rest of this tutorial we'll refer to this new directory as ``ROOT`` (or ``$ROOT`` if we're showing shell code). 
+
+Now create the file ``ROOT/mod.py`` with these contents:
+
+.. literalinclude:: mod.1.py
+
+This file contains your code under test, i.e. the code that Cosmic Ray will mutate. It's clearly very simple, and it has
+very few opportunities for mutation, but it's sufficient for this tutorial. In fact, having simple code like this will
+make it easier to see what Cosmic Ray is doing without getting bogged down by scale.
+
+Next create the file ``ROOT/test_mod.py`` with these contents:
+
+.. literalinclude:: test_mod.1.py
+
+This contains the test suite for ``mod.py``. Cosmic Ray will not mutate this code. Rather, it will run this test suite
+for every mutation that it creates.
+
+Before moving on, let's make sure that the test suite works correctly:
+
+.. code-block::
+
+    python -m unittest test_mod.py
+
+This should show that all tests pass:
+
+.. code-block::
+
+    .
+    ----------------------------------------------------------------------
+    Ran 1 test in 0.000s
+
+    OK    
+
+If you see one test passing like this, then you're ready to continue!
 
 Creating a configuration
 ========================
@@ -57,17 +79,17 @@ To create your config for this tutorial, do this:
 
 .. code-block:: 
 
-    cd $REPO/tests/resources/example_project
+    cd $ROOT
     cosmic-ray new-config tutorial.toml
 
 This will ask you a series of questions. Anwer them like this:
 
 .. code-block::
 
-    [?] Top-level module path: adam
+    [?] Top-level module path: mod.py
     [?] Python version (blank for auto detection): 
     [?] Test execution timeout (seconds): 10
-    [?] Test command: python -m unittest tests
+    [?] Test command: python -m unittest test_mod.py
     -- MENU: Distributor --
       (0) http
       (1) local
@@ -85,15 +107,15 @@ Configuration contents
 Let's examine the contents of this file before moving on. On line 1 we define the 'cosmic-ray' key in the TOML
 structure; this key will contain all Cosmic Ray configuration information.
 
-On line 2 we set the 'module-path' key to the string "adam":
+On line 2 we set the 'module-path' key to the string "mod.py":
 
 .. literalinclude:: tutorial.toml.1
     :lines: 2
     :language: toml
 
-This tells Cosmic Ray that we're going to be mutating the module - and in this case, the *package* - called "adam". Every
-Cosmic Ray configuration refers to a single top-level module that will be mutated, and in this case we're telling Cosmic Ray
-to mutate the "adam" module, contained in the "adam" directory.
+This tells Cosmic Ray that we're going to be mutating the module in the file ``mod.py``. Every Cosmic Ray configuration
+refers to a single top-level module that will be mutated, and in this case we're telling Cosmic Ray to mutate the
+``mod`` module, contained in the file ``mod.py``.
 
 On line 3 we tell Cosmic Ray which version of Python to use when mutating the code:
 
@@ -130,7 +152,7 @@ Line 6 is one of the most critical lines in the configuration. This tells Cosmic
     :language: toml
 
 In this case, our test suite uses the standard `unittest testing framework
-<https://docs.python.org/3/library/unittest.html>`_, and the tests are in the ``tests`` directory.
+<https://docs.python.org/3/library/unittest.html>`_, and the tests are in the file ``test_mod.py``.
 
 The last two lines tell Cosmic Ray which "distributor" to use:
 
@@ -138,9 +160,9 @@ The last two lines tell Cosmic Ray which "distributor" to use:
     :lines: 8-9
     :language: toml
 
-A distributor controls how mutation-and-test jobs are assigned to one or more workers so that they can (potentitally)
-run in parallel. In this case we're using the default 'local' distributor which only runs one mutation at a time. There
-are other, more sophisticated distributors which we discuss elsewhere.
+A distributor controls how mutation jobs are assigned to one or more workers so that they can (potentially) run in
+parallel. In this case we're using the default 'local' distributor which only runs one mutation at a time. There are
+other, more sophisticated distributors which we discuss elsewhere.
 
 Create a session and run tests
 ==============================
