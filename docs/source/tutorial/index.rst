@@ -22,7 +22,7 @@ Source module and tests
 Mutation testing works by making small mutations to the *code under test* (CUT) and then running a test suite
 over the mutated code. For this tutorial, then, we'll need to create our CUT and a test suite for it.
 
-You should create a new directory which will contain the CUT, the tests, and eventually the Cosmic Ray configuration.
+You should create a new directory which will contain the CUT, the tests, and eventually the Cosmic Ray data.
 For the rest of this tutorial we'll refer to this new directory as ``ROOT`` (or ``$ROOT`` if we're showing shell code). 
 
 Now create the file ``ROOT/mod.py`` with these contents:
@@ -61,9 +61,9 @@ If you see one test passing like this, then you're ready to continue!
 Creating a configuration
 ========================
 
-Before you do run any mutation tests, you need to create a *configuration file*.
-A configuration is TOML file that specifies the modules you want to mutate, the
-test scripts to use, and so forth. A configuration is used to create a session,
+Before you do run any mutation tests, you need to create a *configuration*.
+A configuration is a TOML file that specifies the modules you want to mutate, the
+test scripts to use, and so forth. A configuration is used to create a *session*,
 something we'll look at in the next section.
 
 The ``new-config`` command
@@ -117,6 +117,13 @@ This tells Cosmic Ray that we're going to be mutating the module in the file ``m
 refers to a single top-level module that will be mutated, and in this case we're telling Cosmic Ray to mutate the
 ``mod`` module, contained in the file ``mod.py``.
 
+.. note::
+
+    The 'module-path' is a *path* to a file or directory, not the name of the module of package. If it's a file then
+    Cosmic Ray will treat it as a single module, but if it's a directory then Cosmic Ray will treat it as a package.
+
+    When working on a package, Cosmic Ray will apply mutations to all submodules in the package.
+
 On line 3 we tell Cosmic Ray which version of Python to use when mutating the code:
 
 .. literalinclude:: tutorial.toml.1
@@ -145,7 +152,7 @@ Next, line 5 tells Cosmic Ray which modules to exclude from mutation:
 In this case we're not excluding any, but there may be times when you need to skip certain modules, e.g. because 
 you know that you don't have sufficient tests for them at the moment.
 
-Line 6 is one of the most critical lines in the configuration. This tells Cosmic Ray how to run you test suite:
+Line 6 is one of the most critical lines in the configuration. This tells Cosmic Ray how to run your test suite:
 
 .. literalinclude:: tutorial.toml.1
     :lines: 6
@@ -164,8 +171,8 @@ A distributor controls how mutation jobs are assigned to one or more workers so 
 parallel. In this case we're using the default 'local' distributor which only runs one mutation at a time. There are
 other, more sophisticated distributors which we discuss elsewhere.
 
-Create a session and run tests
-==============================
+Create a session and baseline
+=============================
 
 Cosmic Ray uses a notion of *sessions* to encompass a full mutation testing
 suite. Since mutation testing runs can take a long time, and since you might
@@ -204,7 +211,7 @@ You can use the ``baseline`` command to check that the test suite passes on unmu
 
 This should report that the tests pass:
 
-.. code-block::
+.. code-block:: text
 
     Execution with no mutation works fine.
 
@@ -218,71 +225,101 @@ You'll also see that there is a new ``tutorial.baseline.sqlite`` database contai
     again.
 
 
-If this command succeeds, you can start executing tests with the ``exec``
-command:
+If this command succeeds, then you're ready to start mutating code and testing it!
 
-::
+Examining the session with cr-report
+====================================
 
-    cosmic-ray exec my_session.sqlite
+Our session file, ``tutorial.sqlite``, is essentially a list of mutations that Cosmic Ray will perform on the
+code under test. We haven't actually tested any mutants, so none of our mutations have testing results yet. With
+that in mind, let's examine the contents of our session with the ``cr-report`` program:
 
-Unless there are errors, this won't print anything.
+.. code-block::
 
-.. Tip::
-    Because this command executes the provided test suite for every mutation
-    it selected, it will require many times more time to execute than the
-    whole test suite. It can be killed at any point though and restarted
-    while keeping the status of executed mutations between the runs.
+    cr-report tutorial.sqlite --show-pending
 
-View the results
-----------------
+This will produce output like this (though note that the test IDs will be different):
 
-Once the execution is complete (i.e., all mutations have been performed
-and tested), you can see the results of your session with the
-``cr-report`` command:
+.. code-block::
 
-::
+    574ac31ac7d14169a8dc45d988803e69 mod.py core/NumberReplacer 1
+    8f0e988866f447d085ce9887e6e900e5 mod.py core/NumberReplacer 0
+    total jobs: 2
+    no jobs completed
 
-    cr-report my_session.sqlite
+This is telling us that Cosmic Ray detected two mutations that it can make to our code, both using the
+mutation operator "core/NumberReplacer". Without going into details, this means that Cosmic Ray has found
+one or more numeric literals in our code, and it plans to make two mutations to those numbers. We can see in our
+code that there is only one numeric literal, the value returned from ``func()`` on line 2:
 
-This will print out a bunch of information about the work that was
-performed, including what kinds of mutants were created, which were
-killed, and – chillingly – which survived.
+.. literalinclude:: mod.1.py
+    :linenos:
+    :emphasize-lines: 2
 
-.. Tip::
-    You can execute ``cr-report`` while ``cosmic-ray exec`` is running to
-    view the progress the latter is making.
+So Cosmic Ray is going to mutate that number in two ways, running the test suite each time. 
+
+The ``cr-report`` tool is useful for examining sessions, and it's main purpose is to give you summary reports after an
+entire session has been executed, which we'll do in the next step.
+
+Execution
+=========
+
+Now that you've initialized and baselined your session, it's time to start making mutants and testing them. We do this
+with the ``exec`` command. ``exec`` looks in your session file, ``tutorial.sqlite``, for any mutations which were
+detected in the ``init`` phase that don't yet have results. For each of these, it performs the specified mutation
+and runs the test suite.
+
+As we saw, we only have two mutations to make, and our test suite is very small. As a result the ``exec`` command will
+run quite quickly:
+
+.. code-block::
+
+    cosmic-ray exec tutorial.toml tutorial.sqlite
+
+This should produce no output. 
+
+.. note::
+
+    The module and test suite for this tutorial are "toys" by design. As such, they run very quickly. Most real-world
+    modules and test suites are much more substantial and require much longer to run. For example, if a test suite takes
+    10 seconds to run and Cosmic Ray finds 1000 mutations, a full ``exec`` will take 10 x 1000 = 10,000 seconds, or
+    about 2.7 hours. 
+
+Reporting the results
+=====================
+
+Assuming it ran correctly, we can now use ``cr-report`` to see the updated state of our session:
+
+.. code-block::
+
+    cr-report tutorial.sqlite --show-pending
+
+This time we see that both mutations were made, tests were run for each, and both were "killed":
+
+.. code-block::
+
+    8f0e988866f447d085ce9887e6e900e5 mod.py core/NumberReplacer 0
+    worker outcome: normal, test outcome: killed
+    574ac31ac7d14169a8dc45d988803e69 mod.py core/NumberReplacer 1
+    worker outcome: normal, test outcome: killed
+    total jobs: 2
+    complete: 2 (100.00%)
+    surviving mutants: 0 (0.00%)
+
+.. tip::
+
+    You don't have to wait for ``exec`` to complete to generate a report. If you have a long-running session and want to
+    see your progress, you can execute ``cr-report`` while ``cosmic-ray exec`` is running to view the progress the
+    latter is making.
+
+HTML reports
+------------
 
 You can also generate a handy HTML report with `cr-html`:
 
 ::
 
-    cr-html my_session.sqlite > my_session.html
+    cr-html tutorial.sqlite > report.html
 
-Or use the ``cr-rate`` command to return error if the survival rate rose above
-a specified value:
-
-::
-
-    cr-rate --fail-over 20.5 my_session.sqlite
-
-.. Tip::
-    ``cr-rate`` can also calculate confidence intervals for the survival rate
-    when the ``cosmic-ray exec`` hasn't finished yet.
-
-A concrete example: running the ``adam`` unittests
---------------------------------------------------
-
-Cosmic Ray includes a number of unit tests which perform mutations
-against a simple package called ``adam``. As a way of test driving Cosmic
-Ray, you can run these tests, too, like this:
-
-::
-
-    cd test_project
-    cosmic-ray -v INFO init cosmic-ray.unittest.local.conf example-session.sqlite
-    cosmic-ray -v INFO exec example-session.sqlite
-    cr-report example-session.sqlite
-
-In this case we're passing the ``-v INFO`` flag to the ``init`` and ``exec``
-commands so that you can see what Cosmic Ray is doing. If everything goes
-as expected, the ``cr-report`` command will report a 0% survival rate.
+You can then open ``report.html`` in your browser to see the details. One nice feature of these HTML reports is
+that they show the actual mutation that was used.
