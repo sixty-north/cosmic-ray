@@ -22,13 +22,10 @@ assemblers to oil exploration software.
    :caption: Contents
 
    tutorial/index
-   theory
-   concepts
+   explanation/index
    commands
    operators
-   filters
    distributed
-   implementation
    tests
    continuous_integration
    badge
