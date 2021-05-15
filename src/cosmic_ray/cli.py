@@ -183,7 +183,7 @@ def baseline(config_file, session_file, force, dump_report):
             sys.exit(1)
         else:
             if dump_report:
-                print("Execution with no mutation works fine:")
+                print("Execution with no mutation works fine.")
             sys.exit(ExitCode.OK)
 
 
