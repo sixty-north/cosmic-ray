@@ -1,6 +1,8 @@
-========
-Tutorial
-========
+.. _basic tutorial:
+
+====================
+Tutorial: The basics
+====================
 
 This tutorial will walk you through the steps needed to install, configure, and run Cosmic
 Ray. 

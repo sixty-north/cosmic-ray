@@ -106,7 +106,7 @@ Creating the operator class
 
 The initial layout for our package is like this:
 
-::
+.. code-block:: text
 
     setup.py
     example/

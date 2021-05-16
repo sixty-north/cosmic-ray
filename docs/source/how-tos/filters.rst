@@ -12,6 +12,22 @@ running. The name "filter" is actually a bit misleading since these programs cou
 simply skipping some mutations. In practice, though, the need to skip certain tests is by far the most common use of
 these programs.
 
+Using filters
+=============
+
+Generally speaking, filters will be run immediately after running ``cosmic-ray init``. It's up to you to decide which to
+run, and often they will be run along with ``init`` in a batch script or CI configuration.
+
+For example, if you wanted to apply the ``cr-filter-pragma`` filter to your session, you could do something like this:
+
+.. code-block:: bash
+
+  cosmic-ray init cr.conf session.sqlite
+  cr-filter-pragma session.sqlite
+
+The ``init`` would first create a session where *all* mutation would be run, and then the ``cr-filter-pragma`` call
+would mark as skipped all mutations which are on a line with the pragma comment.
+
 Filters included with Cosmic Ray
 ================================
 
@@ -26,7 +42,9 @@ of regular expressions, and any Cosmic Ray operator who's name matches a one of 
 entirely.
 
 The configuration is provided through a TOML file such as a standard Cosmic Ray configuration. The expressions must be
-in a list at the key "cosmic-ray.filters.operators-filter.exclude-operators". Here's an example::
+in a list at the key "cosmic-ray.filters.operators-filter.exclude-operators". Here's an example:
+
+.. code-block:: toml
 
   [cosmic-ray.filters.operators-filter]
   exclude-operators = [
@@ -52,6 +70,8 @@ would mutate other lines is skipped.
 
 By default the ``master`` branch is used, but you could define another one like this:
 
+.. code-block:: toml
+
   [cosmic-ray.filters.git-filter]
   branch = "rolling"
 
@@ -70,16 +90,3 @@ has algorithms to update the metadata (and its association with the code) automa
 
 Get more details at `the project page <https://github.com/abingham/cosmic-ray-spor-filter>`_.
 
-Using filters
-=============
-
-Generally speaking, filters will be run immediately after running ``cosmic-ray init``. It's up to you to decide which to
-run, and often they will be run along with ``init`` in a batch script or CI configuration.
-
-For example, if you wanted to apply the ``cr-filter-pragma`` filter to your session, you could do something like this::
-
-  cosmic-ray init cr.conf session.sqlite
-  cr-filter-pragma session.sqlite
-
-The ``init`` would first create a session where *all* mutation would be run, and then the ``cr-filter-pragma`` call
-would mark as skipped all mutations which are on a line with the pragma comment.

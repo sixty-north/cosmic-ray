@@ -1,6 +1,6 @@
-==========================================================
- HttPDistributor: Distributed, concurrent mutation testing
-==========================================================
+==================================================
+Tutorial: Distributed, concurrent mutation testing
+==================================================
 
 One of the main practical challenges to mutation testing is that it can
 take a long time. Even on moderately sized projects, you might need
@@ -36,7 +36,7 @@ A sample project
 ----------------
 
 To demonstrate ``HttpDistributor`` we'll need a sample module and test suite. We'll use a very simple set
-of code, as we did in the main tutorial.
+of code, as we did in :ref:`the basic tutorial <basic tutorial>`.
 
 Create a new directory to hold this code. We'll refer to this directory as ``ROOT``.
 
@@ -298,3 +298,11 @@ workers on other machines, you'll need to use some other mechanism. But very oft
 on a single machine is a huge gain for mutation testing. Mutation testing time will scale down linearly with the number
 of workers you run, so running 4 workers on your system will - within certain limits - let you run your mutation testing
 4 times faster.
+
+Alternatives to HttpDistributor
+===============================
+
+If ``HttpDistributor`` doesn't meet your needs, Cosmic Ray allows you to write your own distributor and use it as a
+plugin. You might want to write a distributor plugin using `Celery
+<https://docs.celeryproject.org/en/stable/getting-started/introduction.html>`_, for example, to take advantage of its
+sophisticated message bus.

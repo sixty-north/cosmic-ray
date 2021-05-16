@@ -67,10 +67,12 @@ edit it for completeness.
 In many Cosmic Ray examples we'll use the name "config.toml" for configurations. You are not required to use this name,
 however. You can use any file name you want for your configurations.
 
-**IMPORTANT**: The full set of configuration options are not currently well documented. Each plugin can, in principle
-and often in practice, use their own specialized configuration options. We need to work on making the documentation of
-these options automatic and part of the plugin API. For detail on configuration options, the best place to check is
-currently in the ``tests/example_project`` directory.
+.. important::
+
+    The full set of configuration options are not currently well documented. Each plugin can, in principle and often in
+    practice, use their own specialized configuration options. We need to work on making the documentation of these
+    options automatic and part of the plugin API. For detail on configuration options, the best place to check is
+    currently in the ``tests/example_project`` directory.
 
 Sessions
 ========
@@ -123,22 +125,21 @@ For ``pytest`` and ``nose`` that can be achieved with the ``-x`` option.
 
 .. _note_separation_test_code:
 
-An important note on separating tests and production code
----------------------------------------------------------
+.. admonition:: An important note on separating tests and production code
 
-Cosmic Ray has a relatively simple view of how to mutate modules. Fundamentally, it will attempt to mutate any and all
-code in a module. This means that if you have test code in the same module as your code under test, Cosmic Ray will
-happily mutate the test code along with the production code. This is probably not what you want.
+    Cosmic Ray has a relatively simple view of how to mutate modules. Fundamentally, it will attempt to mutate any and all
+    code in a module. This means that if you have test code in the same module as your code under test, Cosmic Ray will
+    happily mutate the test code along with the production code. This is probably not what you want.
 
-The best way to avoid this problem is to keep your test code in separate modules from your production code. This way you
-can tell Cosmic Ray precisely what to mutate.
+    The best way to avoid this problem is to keep your test code in separate modules from your production code. This way you
+    can tell Cosmic Ray precisely what to mutate.
 
-Ideally, your test code will be in a different package from your production code. This way you can tell Cosmic Ray to
-mutate an entire package without needing to filter anything out. However, if your test code is in the same package as
-your production code (a common configuration), you can use the ``exclude-modules`` setting in your configuration to
-prevent mutation of your tests.
+    Ideally, your test code will be in a different package from your production code. This way you can tell Cosmic Ray to
+    mutate an entire package without needing to filter anything out. However, if your test code is in the same package as
+    your production code (a common configuration), you can use the ``exclude-modules`` setting in your configuration to
+    prevent mutation of your tests.
 
-Given the choice, though, we recommend keeping your tests outside of the package for your code under test.
+    Given the choice, though, we recommend keeping your tests outside of the package for your code under test.
 
 Executing tests
 ---------------
@@ -146,7 +147,7 @@ Executing tests
 Once a session has been initialized, you can start executing tests by using the ``exec`` command. This command
 needs the config and the session you provided to ``init``:
 
-::
+.. code-block:: bash
 
     cosmic-ray exec config.toml session.sqlite
 
@@ -157,7 +158,7 @@ Viewing the results
 
 Once your tests have completed, you can view the results using the ``cr-report`` command:
 
-::
+.. code-block:: bash
 
     cr-report test_session.sqlite
 
