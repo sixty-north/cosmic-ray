@@ -98,7 +98,6 @@ configuration like this:
 
     [cosmic-ray]
     module-path = "allele"
-    python-version = ""
     timeout = 10
     exclude-modules = []
     test-command = python -m unittest allele_tests

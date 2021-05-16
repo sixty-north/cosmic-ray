@@ -13,7 +13,7 @@ from cosmic_ray.work_item import TestOutcome, WorkerOutcome, WorkResult
 log = logging.getLogger(__name__)
 
 # pylint: disable=R0913
-async def mutate_and_test(module_path, python_version, operator_name, occurrence, test_command, timeout) -> WorkResult:
+async def mutate_and_test(module_path, operator_name, occurrence, test_command, timeout) -> WorkResult:
     """Mutate the OCCURRENCE-th site for OPERATOR_NAME in MODULE_PATH, run the
     tests, and report the results.
 
@@ -37,8 +37,6 @@ async def mutate_and_test(module_path, python_version, operator_name, occurrence
 
     Args:
         module_name: The path to the module to mutate
-        python_version: The version of Python to use when interpreting the code in `module_path`.
-            A string of the form "MAJOR.MINOR", e.g. "3.6" for Python 3.6.x.
         operator_name: The name of the operator plugin to use
         occurrence: The occurrence of the operator to apply
         test_command: The command to execute to run the tests
@@ -52,7 +50,7 @@ async def mutate_and_test(module_path, python_version, operator_name, occurrence
     """
     try:
         operator_class = cosmic_ray.plugins.get_operator(operator_name)
-        operator = operator_class(python_version)
+        operator = operator_class()
 
         with cosmic_ray.mutating.use_mutation(module_path, operator, occurrence) as (original_code, mutated_code):
             if mutated_code is None:
@@ -109,7 +107,7 @@ def apply_mutation(module_path, operator, occurrence):
         no mutation performed, the `mutated-code` is `None`.
     """
     log.info("Applying mutation: path=%s, op=%s, occurrence=%s", module_path, operator, occurrence)
-    module_ast = get_ast(module_path, python_version=operator.python_version)
+    module_ast = get_ast(module_path)
     original_code = module_ast.get_code()
     visitor = MutationVisitor(occurrence, operator)
     mutated_ast = visitor.walk(module_ast)

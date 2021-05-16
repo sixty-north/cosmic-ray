@@ -25,28 +25,30 @@ OPERATOR_PROVIDED_SAMPLES = tuple(
 )
 
 EXTRA_SAMPLES = tuple(
-    Sample(*args) for args in (
+    Sample(*args)
+    for args in (
         # Make sure unary and binary op mutators don't pick up the wrong kinds of operators
-        (ReplaceUnaryOperator_USub_UAdd, 'x + 1', 'x + 1'),
-        (ReplaceBinaryOperator_Add_Mul, '+1', '+1'),
-    ))
+        (ReplaceUnaryOperator_USub_UAdd, "x + 1", "x + 1"),
+        (ReplaceBinaryOperator_Add_Mul, "+1", "+1"),
+    )
+)
 
 OPERATOR_SAMPLES = OPERATOR_PROVIDED_SAMPLES + EXTRA_SAMPLES
 
 
-@pytest.mark.parametrize('sample', OPERATOR_SAMPLES)
-def test_mutation_changes_ast(sample, python_version):
+@pytest.mark.parametrize("sample", OPERATOR_SAMPLES)
+def test_mutation_changes_ast(sample):
     node = parso.parse(sample.from_code)
-    visitor = MutationVisitor(sample.index, sample.operator(python_version))
+    visitor = MutationVisitor(sample.index, sample.operator())
     mutant = visitor.walk(node)
 
     assert mutant.get_code() == sample.to_code
 
 
-@pytest.mark.parametrize('sample', OPERATOR_SAMPLES)
-def test_no_mutation_leaves_ast_unchanged(sample, python_version):
+@pytest.mark.parametrize("sample", OPERATOR_SAMPLES)
+def test_no_mutation_leaves_ast_unchanged(sample):
     node = parso.parse(sample.from_code)
-    visitor = MutationVisitor(-1, sample.operator(python_version))
+    visitor = MutationVisitor(-1, sample.operator())
     mutant = visitor.walk(node)
 
     assert mutant.get_code() == sample.from_code

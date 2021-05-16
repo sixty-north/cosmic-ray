@@ -45,7 +45,6 @@ def execute(work_db, config: ConfigDict):
     log.info("Beginning execution")
     distributor(
         work_db.pending_work_items,
-        config.python_version,
         config.test_command,
         config.timeout,
         config.distributor_config,

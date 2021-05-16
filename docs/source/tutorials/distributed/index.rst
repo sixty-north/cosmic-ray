@@ -54,9 +54,9 @@ Finally, we'll create a configuration, ``ROOT/config.toml``:
     :linenos:
 
 This config is similar to others that we've looked at, with the major difference that it specifies the use of the 'http'
-distributor rather than 'local'. On line 9 we set "cosmic-ray.distributor.name" to "http". 
+distributor rather than 'local'. On line 8 we set "cosmic-ray.distributor.name" to "http". 
 
-Then on line 12 we set the "cosmic-ray.distributor.http.worker-urls" setting to a list containing a URL. This is the
+Then on line 11 we set the "cosmic-ray.distributor.http.worker-urls" setting to a list containing a URL. This is the
 address at which a *worker* will be listening for mutation requests. This configuration only specifies a single worker,
 but we can put as many workers here as we want.
 
@@ -183,9 +183,9 @@ both workers URLs:
 
 .. literalinclude:: config.2.toml
     :linenos:
-    :emphasize-lines: 12
+    :emphasize-lines: 11
 
-On line 12 we now list the endpoints for both workers.
+On line 11 we now list the endpoints for both workers.
 
 Running the tests
 -----------------

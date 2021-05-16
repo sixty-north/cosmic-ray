@@ -11,13 +11,13 @@ from cosmic_ray.work_db import WorkDB
 log = logging.getLogger()
 
 
-def all_work_items(module_paths, operator_names, python_version):
+def all_work_items(module_paths, operator_names):
     "Iterable of all WorkItems for the given inputs."
     for module_path in module_paths:
-        module_ast = get_ast(module_path, python_version=python_version)
+        module_ast = get_ast(module_path)
 
         for op_name in operator_names:
-            operator = get_operator(op_name)(python_version)
+            operator = get_operator(op_name)()
             occurrence = 0
             for node in ast_nodes(module_ast):
                 for start_pos, end_pos in operator.mutation_positions(node):
@@ -34,7 +34,7 @@ def all_work_items(module_paths, operator_names, python_version):
                     occurrence += 1
 
 
-def init(module_paths, work_db: WorkDB, python_version):
+def init(module_paths, work_db: WorkDB):
     """Clear and initialize a work-db with work items.
 
     Any existing data in the work-db will be cleared and replaced with entirely
@@ -49,4 +49,4 @@ def init(module_paths, work_db: WorkDB, python_version):
     operator_names = list(cosmic_ray.plugins.operator_names())
 
     work_db.clear()
-    work_db.add_work_items(all_work_items(module_paths, operator_names, python_version))
+    work_db.add_work_items(all_work_items(module_paths, operator_names))

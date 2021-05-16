@@ -67,19 +67,6 @@ class ConfigDict(dict):
         return d
 
     @property
-    def python_version(self):
-        """Get the configured Python version.
-
-        If this is not set in the config, then it defaults to the version of the current runtime.
-
-        Returns: A string of the form "MAJOR.MINOR", e.g. "3.6".
-        """
-        v = self.get("python-version", "")
-        if v == "":
-            v = "{}.{}".format(sys.version_info.major, sys.version_info.minor)
-        return v
-
-    @property
     def test_command(self):
         """The command to run to execute tests."""
         return self["test-command"]

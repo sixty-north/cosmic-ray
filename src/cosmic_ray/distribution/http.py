@@ -44,7 +44,7 @@ class HttpDistributor(Distributor):
         # TODO: Will there be an event loop? Where should we ensure that there is?
         asyncio.get_event_loop().run_until_complete(self._process(*args, **kwargs))
 
-    async def _process(self, pending_work, python_version, test_command, timeout, config, on_task_complete):
+    async def _process(self, pending_work, test_command, timeout, config, on_task_complete):
         urls = config.get("worker-urls", [])
 
         if not urls:
@@ -80,7 +80,7 @@ class HttpDistributor(Distributor):
 
             # Use an available URL to process the task
             url = urls.pop()
-            fetcher = asyncio.create_task(send_request(url, work_item, python_version, test_command, timeout))
+            fetcher = asyncio.create_task(send_request(url, work_item, test_command, timeout))
             fetchers[fetcher] = url, work_item.job_id
 
         # Drain the remaining work
@@ -89,13 +89,12 @@ class HttpDistributor(Distributor):
             await handle_completed_task(task)
 
 
-async def send_request(url, work_item: WorkItem, python_version, test_command, timeout):
+async def send_request(url, work_item: WorkItem, test_command, timeout):
     """Sends a mutate-and-test request to a worker.
 
     Args:
         url: The URL of the worker.
         work_item: The `WorkItem` representing the work to be done.
-        python_version: The version of python - MAJ.MIN.PATCH - to use for the code.
         test_command: The command that the worker should use to run the tests.
         timeout: The maximum number of seconds to spend running the test.
 
@@ -105,7 +104,6 @@ async def send_request(url, work_item: WorkItem, python_version, test_command, t
         "module_path": str(work_item.module_path),
         "operator": work_item.operator_name,
         "occurrence": work_item.occurrence,
-        "python_version": python_version,
         "test_command": test_command,
         "timeout": timeout,
     }
@@ -126,7 +124,6 @@ async def handle_mutate_and_test(request):
     args = await request.json()
     result = await mutate_and_test(
         module_path=Path(args["module_path"]),
-        python_version=args["python_version"],
         operator_name=args["operator"],
         occurrence=args["occurrence"],
         test_command=args["test_command"],

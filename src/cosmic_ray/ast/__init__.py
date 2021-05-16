@@ -30,7 +30,7 @@ class Visitor(ABC):
     @abstractmethod
     def visit(self, node):
         """Called for each node in the walk.
-        
+
         This should return a node that will replace the node argument in the AST. This can be
         the node argument itself, a new node, or None. If None is returned, then the node is
         removed from the tree.
@@ -44,7 +44,7 @@ class Visitor(ABC):
 
 def ast_nodes(node):
     """Iterable of all nodes in a tree.
-    
+
     Args:
         node: The top node in a parso tree to iterate.
 
@@ -57,24 +57,23 @@ def ast_nodes(node):
             yield from ast_nodes(child)
 
 
-def get_ast(module_path, python_version):
+def get_ast(module_path):
     """Get the AST for the code in a file.
 
     Args:
         module_path: pathlib.Path to the file containing the code.
-        python_version: Python version as a "MAJ.MIN" string.
 
     Returns: The parso parse tree for the code in `module_path`.
     """
-    with module_path.open(mode='rt', encoding='utf-8') as handle:
+    with module_path.open(mode="rt", encoding="utf-8") as handle:
         source = handle.read()
 
-    return parso.parse(source, version=python_version)
+    return parso.parse(source)
 
 
 def is_none(node):
     "Determine if a node is the `None` keyword."
-    return isinstance(node, parso.python.tree.Keyword) and node.value == 'None'
+    return isinstance(node, parso.python.tree.Keyword) and node.value == "None"
 
 
 def is_number(node):
@@ -87,22 +86,22 @@ def dump_node(node):
     buffer = io.StringIO()
     write = buffer.write
 
-    def do_dump(node, indent=''):
+    def do_dump(node, indent=""):
         write("{}{}({}".format(indent, type(node).__name__, node.type))
-        value = getattr(node, 'value', None)
+        value = getattr(node, "value", None)
         if value:
-            value = value.replace('\n', '\\n')
+            value = value.replace("\n", "\\n")
             write(", '{}'".format(value))
-        children = getattr(node, 'children', None)
+        children = getattr(node, "children", None)
         if children:
-            write(', [\n')
+            write(", [\n")
             for child in children:
-                do_dump(child, indent+' '*4)
-                write(',\n')
+                do_dump(child, indent + " " * 4)
+                write(",\n")
             write("{}]".format(indent))
-        write(')')
+        write(")")
         if not indent:
-            write('\n')
+            write("\n")
 
     do_dump(node)
     return buffer.getvalue()

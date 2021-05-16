@@ -96,7 +96,7 @@ def init(config_file, session_file):
             log.info(" - %s: %s", directory, ", ".join(sorted(files)))
 
     with use_db(session_file) as database:
-        cosmic_ray.commands.init(modules, database, cfg.python_version)
+        cosmic_ray.commands.init(modules, database)
 
     sys.exit(ExitCode.OK)
 
@@ -238,14 +238,10 @@ def distributors():
 @click.argument("module_path")
 @click.argument("operator")
 @click.argument("occurrence", type=int)
-@click.option("--python-version", help="Python major.minor version (e.g. 3.6) of the code being mutated.")
-def apply(module_path, operator, occurrence, python_version):
+def apply(module_path, operator, occurrence):
     """Apply the specified mutation to the files on disk. This is primarily a debugging tool."""
 
-    if python_version is None:
-        python_version = "{}.{}".format(sys.version_info.major, sys.version_info.minor)
-
-    apply_mutation(Path(module_path), cosmic_ray.plugins.get_operator(operator)(python_version), occurrence)
+    apply_mutation(Path(module_path), cosmic_ray.plugins.get_operator(operator)(), occurrence)
 
     sys.exit(ExitCode.OK)
 
@@ -272,10 +268,9 @@ def http_worker(port, path):
 @click.argument("module_path")
 @click.argument("operator")
 @click.argument("occurrence", type=int)
-@click.argument("python_version")
 @click.argument("test_command")
 @click.option("--keep-stdout", default=False, flag_value=True, help="Do not squelch output.")
-def mutate_and_test(module_path, operator, occurrence, python_version, test_command, keep_stdout):
+def mutate_and_test(module_path, operator, occurrence, test_command, keep_stdout):
     """Run a worker process which performs a single mutation and test run.
     Each worker does a minimal, isolated chunk of work: it mutates the
     <occurrence>-th instance of <operator> in <module-path>, runs the test
@@ -288,9 +283,7 @@ def mutate_and_test(module_path, operator, occurrence, python_version, test_comm
     with open(os.devnull, "w") as devnull:
         with redirect_stdout(sys.stdout if keep_stdout else devnull):
             work_result = asyncio.get_event_loop().run_until_complete(
-                cosmic_ray.mutating.mutate_and_test(
-                    Path(module_path), python_version, operator, occurrence, test_command, None
-                )
+                cosmic_ray.mutating.mutate_and_test(Path(module_path), operator, occurrence, test_command, None)
             )
 
     sys.stdout.write(json.dumps(dataclasses.asdict(work_result)))

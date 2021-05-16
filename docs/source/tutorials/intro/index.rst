@@ -126,38 +126,29 @@ refers to a single top-level module that will be mutated, and in this case we're
 
     When working on a package, Cosmic Ray will apply mutations to all submodules in the package.
 
-On line 3 we tell Cosmic Ray which version of Python to use when mutating the code:
+Line 3 tells Cosmic Ray the maximium amount of time to let a test run before it's considered a failure:
 
 .. literalinclude:: tutorial.toml.1
     :lines: 3
-    :language: toml
-
-Normally you'll want to leave this blank as we do here. This instructs Cosmic Ray to use the version of the 
-Python environment in which Cosmic Ray is executing. 
-
-Line 4 tells Cosmic Ray the maximium amount of time to let a test run before it's considered a failure:
-
-.. literalinclude:: tutorial.toml.1
-    :lines: 4
     :language: toml
 
 In this case, we're telling Cosmic Ray to kill a test if it runs longer than 10 seconds. This timeout is important because
 some mutations can cause the tests to go into an infinite loop. Without timeout we'd never exit the test! It's important to 
 set this timeout such that it's long enough for all legitimate tests.
 
-Next, line 5 tells Cosmic Ray which modules to exclude from mutation:
+Next, line 4 tells Cosmic Ray which modules to exclude from mutation:
 
 .. literalinclude:: tutorial.toml.1
-    :lines: 5
+    :lines: 4
     :language: toml
 
 In this case we're not excluding any, but there may be times when you need to skip certain modules, e.g. because 
 you know that you don't have sufficient tests for them at the moment.
 
-Line 6 is one of the most critical lines in the configuration. This tells Cosmic Ray how to run your test suite:
+Line 5 is one of the most critical lines in the configuration. This tells Cosmic Ray how to run your test suite:
 
 .. literalinclude:: tutorial.toml.1
-    :lines: 6
+    :lines: 5
     :language: toml
 
 In this case, our test suite uses the standard `unittest testing framework
@@ -166,7 +157,7 @@ In this case, our test suite uses the standard `unittest testing framework
 The last two lines tell Cosmic Ray which "distributor" to use:
 
 .. literalinclude:: tutorial.toml.1
-    :lines: 8-9
+    :lines: 7-8
     :language: toml
 
 A distributor controls how mutation jobs are assigned to one or more workers so that they can (potentially) run in
@@ -179,6 +170,14 @@ Create a session and baseline
 Cosmic Ray uses a notion of *sessions* to encompass a full mutation testing
 suite. Since mutation testing runs can take a long time, and since you might
 need to stop and start them, sessions store data about the progress of a run.
+
+.. note::
+
+    Most Cosmic Ray commands allow you to increase their "verbosity" via the command line. This will make them print out
+    more information about what they're doing. 
+
+    Try adding "--verbosity INFO" to the command you run if you more details about
+    what's going on!
 
 Initializing a session
 ----------------------

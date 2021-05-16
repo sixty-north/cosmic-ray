@@ -4,20 +4,7 @@ from abc import ABC, abstractmethod
 
 
 class Operator(ABC):
-    """The mutation operator base class.
-
-    Args:
-        python_version: The version of Python to use when interpreting the code in ``module_path``.
-            A string of the form "MAJOR.MINOR", e.g. "3.6" for Python 3.6.x.
-    """
-
-    def __init__(self, python_version):
-        self._python_version = python_version
-
-    @property
-    def python_version(self):
-        "Python major.minor version as a string."
-        return self._python_version
+    """The mutation operator base class."""
 
     @abstractmethod
     def mutation_positions(self, node):
