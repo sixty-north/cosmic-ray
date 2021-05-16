@@ -48,6 +48,7 @@ setup(
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Topic :: Software Development :: Testing",
     ],
+    python_requires="~=3.5",
     platforms="any",
     include_package_data=True,
     install_requires=INSTALL_REQUIRES,
