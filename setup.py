@@ -58,7 +58,7 @@ setup(
     # $ pip install -e .[dev,test]
     extras_require={
         "test": ["hypothesis", "pytest", "pytest-mock"],
-        "dev": ["flake8", "black", "bumpversion"],
+        "dev": ["flake8", "black", "bumpversion", "twine"],
         "docs": ["sphinx", "sphinx_rtd_theme"],
         "celery4_engine": ["cosmic_ray_celery4_engine"],
     },
