@@ -6,7 +6,7 @@ def extend_name(suffix):
 
     Example:
 
-    .. code-block::
+    .. code-block:: python
 
         @extend_name('_Foo')
         class Class:

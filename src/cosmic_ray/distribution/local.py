@@ -5,7 +5,7 @@ Enabling the distributor
 
 To use the local distributor, set ``cosmic-ray.distributor.name = "local"`` in your Cosmic Ray configuration:
 
-.. code-block::
+.. code-block:: toml
 
     [cosmic-ray.distributor]
     name = "local"

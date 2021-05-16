@@ -66,7 +66,7 @@ Starting a worker
 Before Cosmic Ray can send requests to a worker, we need to start it. From the ``ROOT`` directory, start a worker using the
 ``http-worker`` command:
 
-.. code-block::
+.. code-block:: bash
 
     cd $ROOT
     cosmic-ray --verbosity INFO http-worker --port 9876
@@ -75,7 +75,7 @@ The ``--verbosity INFO`` argument configures the worker's logging to show more m
 argument instructs it to listen for requests on port 9876, the same port we specified in the 'worker-urls' list in our
 configuration. The worker will tell you that it's waiting to process requests on port 9876:
 
-.. code-block::
+.. code-block:: bash
 
     ======== Running on http://0.0.0.0:9876 ========
     (Press CTRL+C to quit)    
@@ -87,14 +87,14 @@ We need to leave the worker running in its own terminal, so for these next steps
 
 First we need to initialize a new Cosmic Ray session:
 
-.. code-block::
+.. code-block:: bash
 
     cd $ROOT
     cosmic-ray init config.toml session.sqlite
 
 Once the session is created, we can execute the tests:
 
-.. code-block::
+.. code-block:: bash
 
     cosmic-ray exec config.toml session.sqlite
 
@@ -102,7 +102,7 @@ This should execute very quickly. The most important thing to note is that our w
 and testing actually occurred. If you switch back to the terminal hosting your worker, you should see that it 
 produced output something like this:
 
-.. code-block::
+.. code-block:: bash
 
     [05/16/21 11:31:10] INFO     INFO:cosmic_ray.mutating:Applying mutation: path=mod.py,                                mutating.py:111
                                  op=<cosmic_ray.operators.number_replacer.NumberReplacer object at 0x10d2b9550>,                        
@@ -144,7 +144,7 @@ mutations would interfere with one another. So we need to make sure each worker 
 
 For this example, we'll manually copy the files around:
 
-.. code-block::
+.. code-block:: bash
 
     cd $ROOT
     mkdir worker1
@@ -161,14 +161,14 @@ Starting the workers
 
 Now we can start the workers. Remember that each will run in its own terminal. In one terminal, start the first worker:
 
-.. code-block::
+.. code-block:: bash
 
     cd $ROOT/worker1
     cosmic-ray --verbosity INFO http-worker --port 9876
 
 Then in another terminal start a second worker:
 
-.. code-block::
+.. code-block:: bash
 
     cd $ROOT/worker2
     cosmic-ray --verbosity INFO http-worker --port 9877
@@ -192,20 +192,20 @@ Running the tests
 
 We're now ready to run the tests. Go back to ``ROOT`` and re-initialize your session:
 
-.. code-block::
+.. code-block:: bash
 
     cd $ROOT
     cosmic-ray init config.toml session.sqlite
 
 Finally, we can execute the tests:
 
-.. code-block::
+.. code-block:: bash
 
     cosmic-ray exec config.toml session.sqlite
 
 If you run ``cr-report`` you should see that two tests were run and that there were no survivors:
 
-.. code-block::
+.. code-block:: bash
 
     $ cr-report session.sqlite
     e4e56a71a059466f861d62c987988efe mod.py core/NumberReplacer 0
@@ -251,7 +251,7 @@ To use ``cr-http-workers`` we first need a git repository, so we'll create one f
 
 Here's how to initialize the git repository:
 
-.. code-block::
+.. code-block:: bash
 
     cd $ROOT
     git init
@@ -264,7 +264,7 @@ Running the workers
 
 Once the git repo is initialized, we can start the workers:
 
-.. code-block::
+.. code-block:: bash
 
     cr-http-workers config.toml .
 
@@ -280,7 +280,7 @@ Running the tests
 
 Once the workers are running, running the tests just involves the standard ``init`` and ``exec`` commands:
 
-.. code-block::
+.. code-block:: bash
 
     cd $ROOT
     cosmic-ray init config.toml session.sqlite

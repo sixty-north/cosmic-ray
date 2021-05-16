@@ -42,13 +42,13 @@ for every mutation that it creates.
 
 Before moving on, let's make sure that the test suite works correctly:
 
-.. code-block::
+.. code-block:: bash
 
     python -m unittest test_mod.py
 
 This should show that all tests pass:
 
-.. code-block::
+.. code-block:: bash
 
     .
     ----------------------------------------------------------------------
@@ -77,14 +77,14 @@ answers.
 
 To create your config for this tutorial, do this:
 
-.. code-block:: 
+.. code-block:: bash
 
     cd $ROOT
     cosmic-ray new-config tutorial.toml
 
 This will ask you a series of questions. Anwer them like this:
 
-.. code-block::
+.. code-block:: text
 
     [?] Top-level module path: mod.py
     [?] Python version (blank for auto detection): 
@@ -183,7 +183,7 @@ Initializing a session
 
 The first step in a full testing run, then, is to initialize a session:
 
-.. code-block::
+.. code-block:: bash
 
     cosmic-ray init tutorial.toml tutorial.sqlite
 
@@ -205,7 +205,7 @@ essentially useless.
 
 You can use the ``baseline`` command to check that the test suite passes on unmutated code:
 
-.. code-block::
+.. code-block:: bash
 
     cosmic-ray baseline --report tutorial.toml tutorial.sqlite
 
@@ -234,13 +234,13 @@ Our session file, ``tutorial.sqlite``, is essentially a list of mutations that C
 code under test. We haven't actually tested any mutants, so none of our mutations have testing results yet. With
 that in mind, let's examine the contents of our session with the ``cr-report`` program:
 
-.. code-block::
+.. code-block:: bash
 
     cr-report tutorial.sqlite --show-pending
 
 This will produce output like this (though note that the test IDs will be different):
 
-.. code-block::
+.. code-block:: text
 
     574ac31ac7d14169a8dc45d988803e69 mod.py core/NumberReplacer 1
     8f0e988866f447d085ce9887e6e900e5 mod.py core/NumberReplacer 0
@@ -272,7 +272,7 @@ and runs the test suite.
 As we saw, we only have two mutations to make, and our test suite is very small. As a result the ``exec`` command will
 run quite quickly:
 
-.. code-block::
+.. code-block:: bash
 
     cosmic-ray exec tutorial.toml tutorial.sqlite
 
@@ -290,13 +290,13 @@ Reporting the results
 
 Assuming it ran correctly, we can now use ``cr-report`` to see the updated state of our session:
 
-.. code-block::
+.. code-block:: bash
 
     cr-report tutorial.sqlite --show-pending
 
 This time we see that both mutations were made, tests were run for each, and both were "killed":
 
-.. code-block::
+.. code-block:: text
 
     8f0e988866f447d085ce9887e6e900e5 mod.py core/NumberReplacer 0
     worker outcome: normal, test outcome: killed
