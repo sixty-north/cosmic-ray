@@ -54,9 +54,9 @@ Finally, we'll create a configuration, ``ROOT/config.toml``:
     :linenos:
 
 This config is similar to others that we've looked at, with the major difference that it specifies the use of the 'http'
-distributor rather than 'local'. On line 7 we set "cosmic-ray.distributor.name" to "http". 
+distributor rather than 'local'. On line 9 we set "cosmic-ray.distributor.name" to "http". 
 
-Then on line 11 we set the "cosmic-ray.distributor.http.worker-urls" setting to a list containing a URL. This is the
+Then on line 12 we set the "cosmic-ray.distributor.http.worker-urls" setting to a list containing a URL. This is the
 address at which a *worker* will be listening for mutation requests. This configuration only specifies a single worker,
 but we can put as many workers here as we want.
 
@@ -130,8 +130,8 @@ In the previous example we only ran a single worker process, so from a concurren
 using the 'local' distributor. Before we can run multiple workers, though, we need to consider what resources each worker 
 requires. Ultimately, each worker needs two things:
 
-* An HTTP endpoint
-* A copy of the code under test that it can modify
+- An HTTP endpoint
+- A copy of the code under test that it can modify
 
 In this example we'll create the unique endpoints by giving each worker its own port. In principle, though, workers may be
 running on entirely different machines on a network.
@@ -140,7 +140,7 @@ Distinct copies of the code
 ---------------------------
 
 Cosmic Ray mutation works by actually modifying the code on disk. As such, multiple workers can't share a single copy of the code; their
-changes would interfere with one another. So we need to make sure each worker has a copy of the code under test.
+mutations would interfere with one another. So we need to make sure each worker has a copy of the code under test.
 
 For this example, we'll manually copy the files around:
 
@@ -220,7 +220,7 @@ Likewise, if you look at the terminals for your two workers, you should see that
 a mutation test.
 
 That's really all there is to distributed mutation testing with ``HttpDistributor``. You simply start as many workers as you
-need, specify their endpoints in your configuration. 
+need, specifying their endpoints in your configuration. 
 
 .. important::
 
@@ -233,7 +233,7 @@ It's extremely common for the code under test (and the tests themselves) to be i
 way to create the isolated copies of the code that each worker requires is to clone this git repository. Once the
 mutation testing is done, these clones can be deleted.
 
-To simplify this process Cosmic Ray provides ``cr-http-workers``. ``cr-http-workers`` reads your configuration to
+To simplify this process Cosmic Ray provides ``cr-http-workers``. This program reads your configuration to
 determine how many workers to start, and you provide it with a git repository to clone. For each 'worker-url' in your
 configuration it will clone the git repository and start a worker in that clone. You can then run ``exec`` to distribute
 work to those workers. Once the testing is over, you can kill ``cr-http-workers`` and it will clean up the workers and

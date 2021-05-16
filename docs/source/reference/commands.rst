@@ -106,7 +106,7 @@ Command: exec
 
 The ``exec`` command is what actually runs the mutation testing. There
 is only one optional argument: ``--dist``. See
-:ref:`Running distributed mutation testing <running_distributed_mutation_testing>`
+:ref:`Running distributed mutation testing <../explanation/distributed/index.rst>`
 for details.
 
 Command: dump
