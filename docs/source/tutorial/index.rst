@@ -10,7 +10,7 @@ Installation
 
 First you'll need to install Cosmic Ray. The simplest (and generally best) way to do this is with ``pip``:
 
-.. code-block::
+.. code-block:: shell
 
     pip install cosmic-ray
 
