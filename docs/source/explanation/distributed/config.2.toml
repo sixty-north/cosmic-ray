@@ -1,0 +1,12 @@
+[cosmic-ray]
+module-path = "mod.py"
+python-version = ""
+timeout = 10.0
+excluded-modules = []
+test-command = "python -m unittest test_mod.py"
+
+[cosmic-ray.distributor]
+name = "http"
+
+[cosmic-ray.distributor.http]
+worker-urls = ["http://localhost:9876", "http://localhost:9877"]

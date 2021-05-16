@@ -10,4 +10,4 @@ Explanations and How-tos
    filters
    implementation
    operators
-   distributed
+   distributed/index

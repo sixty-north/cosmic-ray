@@ -6,4 +6,7 @@ excluded-modules = []
 test-command = "python -m unittest test_mod.py"
 
 [cosmic-ray.distributor]
-name = "local"
+name = "http"
+
+[cosmic-ray.distributor.http]
+worker-urls = ["http://localhost:9876"]

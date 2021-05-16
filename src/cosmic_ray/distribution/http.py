@@ -48,7 +48,7 @@ class HttpDistributor(Distributor):
         urls = config.get("worker-urls", [])
 
         if not urls:
-            raise ValueError("No worker URLs provided for LocalDistributor")
+            raise ValueError("No worker URLs provided for HttpDistributor")
 
         fetchers = {}
 
