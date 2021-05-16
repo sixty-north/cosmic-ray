@@ -5,8 +5,7 @@ Reference
 .. toctree::
    :maxdepth: 1
 
-   distributors
-   operators
+   api/modules
    commands
    tests
    continuous_integration

@@ -6,5 +6,6 @@ How-tos
    :maxdepth: 1
 
    filters
+   distributor
    implementation
    operators

@@ -15,16 +15,14 @@ class ZeroIterationForLoop(Operator):
             yield (expr.start_pos, expr.end_pos)
 
     def mutate(self, node, index):
-        """Modify the For loop to evaluate to None"""
+        "Modify the For loop to evaluate to None"
         assert index == 0
         assert isinstance(node, ForStmt)
 
-        empty_list = parso.parse(' []')
+        empty_list = parso.parse(" []")
         node.children[3] = empty_list
         return node
 
     @classmethod
     def examples(cls):
-        return (
-            ('for i in rang(1,2): pass', 'for i in []: pass'),
-        )
+        return (("for i in rang(1,2): pass", "for i in []: pass"),)

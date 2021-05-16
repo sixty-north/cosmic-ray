@@ -12,6 +12,8 @@ class Timer:
 
     Generally use it like this:
 
+    .. code-block::
+
         with Timer() as t:
             do_something()
         print(t.elapsed())
@@ -22,8 +24,7 @@ class Timer:
         self.reset()
 
     def reset(self):
-        """Set the elapsed time back to 0.
-        """
+        """Set the elapsed time back to 0."""
         self._start = datetime.datetime.now()
 
     @property

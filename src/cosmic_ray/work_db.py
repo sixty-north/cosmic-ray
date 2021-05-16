@@ -124,7 +124,7 @@ class WorkDB:
 
     @property
     def results(self):
-        "An iterable of all `(job-id, WorkResult)`s."
+        "An iterable of all ``(job-id, WorkResult)``\ s."
         cur = self._conn.cursor()
         rows = cur.execute("SELECT * FROM results")
         for row in rows:
@@ -172,7 +172,7 @@ class WorkDB:
 
     @property
     def completed_work_items(self):
-        "Iterable of `(work-item, result)`s for all completed items."
+        "Iterable of ``(work-item, result)``\ s for all completed items."
         completed = self._conn.execute("SELECT * FROM work_items, results WHERE work_items.job_id == results.job_id")
         return ((_row_to_work_item(result), _row_to_work_result(result)) for result in completed)
 
