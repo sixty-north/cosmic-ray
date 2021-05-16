@@ -1,5 +1,5 @@
-cosmic_ray
-==========
+Cosmic Ray API
+==============
 
 .. toctree::
    :maxdepth: 4

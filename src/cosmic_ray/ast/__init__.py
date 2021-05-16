@@ -38,7 +38,8 @@ class Visitor(ABC):
         Args:
             node: The node currently being visited.
 
-        Returns: A node or `None`.
+        Returns:
+            A node or `None`.
         """
 
 
@@ -48,7 +49,8 @@ def ast_nodes(node):
     Args:
         node: The top node in a parso tree to iterate.
 
-    Yields: All of the nodes in the tree.
+    Yields:
+        All of the nodes in the tree.
     """
     yield node
 
@@ -63,7 +65,8 @@ def get_ast(module_path):
     Args:
         module_path: pathlib.Path to the file containing the code.
 
-    Returns: The parso parse tree for the code in `module_path`.
+    Returns:
+        The parso parse tree for the code in `module_path`.
     """
     with module_path.open(mode="rt", encoding="utf-8") as handle:
         source = handle.read()

@@ -42,10 +42,12 @@ async def mutate_and_test(module_path, operator_name, occurrence, test_command, 
         test_command: The command to execute to run the tests
         timeout: The maximum amount of time (seconds) to let the tests run
 
-    Returns: A WorkResult
+    Returns:
+        A WorkResult
 
-    Raises: This will generally not raise any exceptions. Rather, exceptions
-        will be reported using the 'exception' result-type in the return value.
+    Raises:
+        This will generally not raise any exceptions. Rather, exceptions will
+        be reported using the 'exception' result-type in the return value.
 
     """
     try:
@@ -82,8 +84,9 @@ def use_mutation(module_path, operator, occurrence):
         operator: The `Operator` instance to use.
         occurrence: The occurrence of the operator to apply.
 
-    Yields: A `(unmutated-code, mutated-code)` tuple to the with-block. If there was
-        no mutation performed, the `mutated-code` is `None`.
+    Yields:
+        A `(unmutated-code, mutated-code)` tuple to the with-block. If there was no
+        mutation performed, the `mutated-code` is `None`.
     """
     # TODO: Could/should use async?
     original_code, mutated_code = apply_mutation(module_path, operator, occurrence)
@@ -103,7 +106,8 @@ def apply_mutation(module_path, operator, occurrence):
         operator: The `operator` instance to use.
         occurrence: The occurrence of the operator to apply.
 
-    Returns: A `(unmutated-code, mutated-code)` tuple to the with-block. If there was
+    Returns:
+        A `(unmutated-code, mutated-code)` tuple to the with-block. If there was
         no mutation performed, the `mutated-code` is `None`.
     """
     log.info("Applying mutation: path=%s, op=%s, occurrence=%s", module_path, operator, occurrence)

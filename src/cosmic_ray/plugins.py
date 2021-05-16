@@ -26,10 +26,11 @@ OPERATOR_PROVIDERS = {
 def get_operator(name):
     """Get an operator class from a provider plugin.
 
-    Attrs:
+    Args:
         name: The name of the operator class.
 
-    Returns: The operator *class object* (i.e. not an instance).
+    Returns:
+        The operator *class object* (i.e. not an instance).
     """
     sep = name.index("/")
     provider_name = name[:sep]
@@ -42,7 +43,8 @@ def get_operator(name):
 def operator_names():
     """Get all operator names.
 
-    Returns: A sequence of operator names.
+    Returns:
+        A sequence of operator names.
     """
     return tuple(
         "{}/{}".format(provider_name, operator_name)
@@ -66,7 +68,8 @@ def get_distributor(name):
 def distributor_names():
     """Get all distributor plugin names.
 
-    Returns: A sequence of distributor names.
+    Returns:
+        A sequence of distributor names.
     """
     return ExtensionManager(
         "cosmic_ray.distributors",
