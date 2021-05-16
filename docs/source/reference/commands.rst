@@ -104,10 +104,7 @@ The list of files that will be mutate effectively can be show by running
 Command: exec
 ~~~~~~~~~~~~~
 
-The ``exec`` command is what actually runs the mutation testing. There
-is only one optional argument: ``--dist``. See
-:ref:`Running distributed mutation testing <../explanation/distributed/index.rst>`
-for details.
+The ``exec`` command is what actually runs the mutation testing.
 
 Command: dump
 ~~~~~~~~~~~~~
