@@ -107,7 +107,7 @@ class WorkDB:
 
     @property
     def results(self):
-        "An iterable of all ``(job-id, WorkResult)``\s."
+        "An iterable of all ``(job-id, WorkResult)``\\s."
         with self._session.begin() as session:
             for result in session.query(WorkResultStorage).all():
                 yield result.job_id, _work_result_from_storage(result)
@@ -147,7 +147,7 @@ class WorkDB:
 
     @property
     def completed_work_items(self):
-        "Iterable of ``(work-item, result)``\s for all completed items."
+        "Iterable of ``(work-item, result)``\\s for all completed items."
         with self._session.begin() as session:
             results = session.query(WorkItemStorage, WorkResultStorage).where(
                 WorkItemStorage.job_id == WorkResultStorage.job_id
