@@ -28,7 +28,7 @@ from cosmic_ray.config import load_config, serialize_config
 from cosmic_ray.mutating import apply_mutation
 from cosmic_ray.progress import report_progress
 from cosmic_ray.version import __version__
-from cosmic_ray.work_db import WorkDB, use_db
+from cosmic_ray.work_db import use_db, WorkDB
 from cosmic_ray.work_item import TestOutcome, WorkItem
 
 log = logging.getLogger()

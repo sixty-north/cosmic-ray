@@ -151,26 +151,6 @@ def test_new_work_items_are_pending(work_db):
         work_db.add_work_item(item)
 
 
-def test_work_items_are_returned_in_random_order(work_db):
-    # estimation of survival rate converges much faster if the jobs are
-    # executed in random order, this test checks that the order is random
-    items = [
-        WorkItem(
-            "path_{}".format(idx), "operator_{}".format(idx), idx, (idx, idx), (idx, idx + 1), "job_id_{}".format(idx)
-        )
-        for idx in range(10)
-    ]
-    for i in items:
-        work_db.add_work_item(i)
-
-    # ten items can be in 10 factorial different orderings
-    # so probability that all ten of them will have the same ordering is one in
-    # (10!)**9 =~ 3.959e65 (218 bit)
-    draws = (list(work_db.pending_work_items) for _ in range(10))
-    first = next(draws)
-    assert any(first != i for i in draws)
-
-
 def test_adding_result_clears_pending(work_db):
     items = [
         WorkItem(

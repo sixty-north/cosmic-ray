@@ -4,7 +4,7 @@ import dataclasses
 import enum
 import pathlib
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 
 class StrEnum(str, enum.Enum):
@@ -36,7 +36,7 @@ class WorkResult:
     worker_outcome: WorkerOutcome
     output: Optional[str] = None
     test_outcome: Optional[TestOutcome] = None
-    diff: Optional[List[str]] = None
+    diff: Optional[str] = None
 
     def __post_init__(self):
         if self.worker_outcome is None:
@@ -60,8 +60,8 @@ class WorkItem:
     module_path: Path
     operator_name: str
     occurrence: int
-    start_pos: int
-    end_pos: int
+    start_pos: Tuple[int, int]
+    end_pos: Tuple[int, int]
     job_id: str
 
     # pylint: disable=R0913

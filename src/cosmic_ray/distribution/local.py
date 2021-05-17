@@ -26,7 +26,7 @@ class LocalDistributor(Distributor):
     def __call__(self, *args, **kwargs):
         asyncio.get_event_loop().run_until_complete(self._process(*args, **kwargs))
 
-    async def _process(self, pending_work, test_command, timeout, distributor_config, on_task_complete):
+    async def _process(self, pending_work, test_command, timeout, _distributor_config, on_task_complete):
         for work_item in pending_work:
             result = await mutate_and_test(
                 module_path=work_item.module_path,

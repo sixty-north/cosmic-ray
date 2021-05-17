@@ -1,11 +1,13 @@
 """Implementation of the WorkDB."""
 
 import contextlib
-import os
-import sqlite3
-from enum import Enum
+from pathlib import Path
 
-from .config import deserialize_config, serialize_config
+from sqlalchemy import Column, Enum, ForeignKey, Integer, String, Text, create_engine, event
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm.session import sessionmaker
+
 from .work_item import TestOutcome, WorkerOutcome, WorkItem, WorkResult
 
 
@@ -31,33 +33,34 @@ class WorkDB:
 
         Args:
           path: The path to the DB file.
-          mode: The mode in which to open the DB. See the `Mode` enum for
-            details.
 
         Raises:
           FileNotFoundError: If `mode` is `Mode.open` and `path` does not
             exist.
         """
-
-        if (mode == WorkDB.Mode.open) and (not os.path.exists(path)):
-            raise FileNotFoundError("Corresponding database {} not found".format(path))
-
         self._path = path
-        self._conn = sqlite3.connect(str(path))
+        if mode == WorkDB.Mode.open and (not Path(path).exists()):
+            raise FileNotFoundError("File does not exist: {}".format(path))
 
-        self._init_db()
+        self._engine = create_engine("sqlite:///{}".format(path))
+
+        def enable_foreign_keys(dbapi_con, con_rec):
+            dbapi_con.execute("pragma foreign_keys=ON")
+
+        event.listen(self._engine, "connect", enable_foreign_keys)
+        Base.metadata.create_all(self._engine)
+        self._session = sessionmaker(self._engine)
 
     def close(self):
         """Close the database."""
-        self._conn.close()
+        pass
 
-    @property
     def name(self):
         """A name for this database.
 
         Derived from the constructor arguments.
         """
-        return self._path
+        return str(self._path)
 
     @property
     def work_items(self):
@@ -65,76 +68,55 @@ class WorkDB:
 
         This includes both WorkItems with and without results.
         """
-        cur = self._conn.cursor()
-        rows = cur.execute("SELECT * FROM work_items")
-        for row in rows:
-            yield _row_to_work_item(row)
+        with self._session.begin() as session:
+            return tuple(_work_item_from_storage(work_item) for work_item in session.query(WorkItemStorage).all())
 
     @property
     def num_work_items(self):
         """The number of work items."""
-        count = self._conn.execute("SELECT COUNT(*) FROM work_items")
-        return list(count)[0][0]
+        with self._session.begin() as session:
+            return session.query(WorkItemStorage).count()
 
     def add_work_item(self, work_item):
-        """Add a WorkItems.
+        """Add a :class:`WorkItem`.
 
         Args:
-          work_item: A WorkItem.
+          work_item: A ``WorkItem``.
         """
-        with self._conn:
-            self._conn.execute(
-                """
-                INSERT INTO work_items
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                _work_item_to_row(work_item),
-            )
+        self.add_work_items((work_item,))
 
     def add_work_items(self, work_items):
         """Add multiple WorkItems.
 
-        Unlike calling `add_work_item` multiple times, performs all insertions
-        in a single transaction.
-
         Args:
           work_items: an iterable of WorkItem.
         """
-        with self._conn:
-            self._conn.execute("BEGIN TRANSACTION")
-            for w_i in work_items:
-                self._conn.execute(
-                    """
-                    INSERT INTO work_items
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                    """,
-                    _work_item_to_row(w_i),
-                )
-            if self._conn.isolation_level:
-                self._conn.execute("END TRANSACTION")
+        storage = (_work_item_to_storage(work_item) for work_item in work_items)
+
+        with self._session.begin() as session:
+            session.add_all(storage)
 
     def clear(self):
         """Clear all work items from the session.
 
         This removes any associated results as well.
         """
-        with self._conn:
-            self._conn.execute("DELETE FROM results")
-            self._conn.execute("DELETE FROM work_items")
+        with self._session.begin() as session:
+            session.query(WorkResultStorage).delete()
+            session.query(WorkItemStorage).delete()
 
     @property
     def results(self):
-        "An iterable of all ``(job-id, WorkResult)``\ s."
-        cur = self._conn.cursor()
-        rows = cur.execute("SELECT * FROM results")
-        for row in rows:
-            yield (row["job_id"], _row_to_work_result(row))
+        "An iterable of all ``(job-id, WorkResult)``\s."
+        with self._session.begin() as session:
+            for result in session.query(WorkResultStorage).all():
+                yield result.job_id, _work_result_from_storage(result)
 
     @property
     def num_results(self):
         """The number of results."""
-        count = self._conn.execute("SELECT COUNT(*) FROM results")
-        return list(count)[0][0]
+        with self._session.begin() as session:
+            return session.query(WorkResultStorage).count()
 
     def set_result(self, job_id, result):
         """Set the result for a job.
@@ -148,128 +130,37 @@ class WorkDB:
         Raises:
            KeyError: If there is no work-item with a matching job-id.
         """
-        with self._conn:
-            try:
-                self._conn.execute(
-                    """
-                    REPLACE INTO results
-                    VALUES (?, ?, ?, ?, ?)
-                    """,
-                    _work_result_to_row(job_id, result),
-                )
-            except sqlite3.IntegrityError as exc:
-                raise KeyError("Can not add result with job-id {}".format(job_id)) from exc
+        try:
+            with self._session.begin() as session:
+                storage = _work_result_to_storage(result, job_id)
+                session.merge(storage)
+        except IntegrityError:
+            raise KeyError("Unable to add results for job-id {}. No matching WorkItem.".format(job_id))
 
     @property
     def pending_work_items(self):
         "Iterable of all pending work items. In random order."
-        pending = self._conn.execute(
-            "SELECT * FROM work_items "
-            "WHERE job_id NOT IN (SELECT job_id FROM results) "
-            "ORDER BY hex(randomblob(16))"
-        )
-        return (_row_to_work_item(p) for p in pending)
+        with self._session.begin() as session:
+            completed_job_ids = session.query(WorkResultStorage.job_id)
+            pending = session.query(WorkItemStorage).where(~WorkItemStorage.job_id.in_(completed_job_ids))
+            return tuple(_work_item_from_storage(work_item) for work_item in pending)
 
     @property
     def completed_work_items(self):
-        "Iterable of ``(work-item, result)``\ s for all completed items."
-        completed = self._conn.execute("SELECT * FROM work_items, results WHERE work_items.job_id == results.job_id")
-        return ((_row_to_work_item(result), _row_to_work_result(result)) for result in completed)
-
-    # @property
-    # def num_pending_work_items(self):
-    #     "The number of pending WorkItems in the session."
-    #     count = self._conn.execute("SELECT COUNT(*) FROM work_items WHERE job_id NOT IN (SELECT job_id FROM results)")
-    #     return count[0][0]
-
-    def _init_db(self):
-        with self._conn:
-            self._conn.row_factory = sqlite3.Row
-
-            self._conn.execute("PRAGMA foreign_keys = 1")
-
-            # journal_mode=WAL is persistent
-            self._conn.execute("PRAGMA journal_mode=WAL")
-
-            self._conn.execute(
-                """
-            CREATE TABLE IF NOT EXISTS work_items
-            (module_path text,
-             operator text,
-             occurrence int,
-             start_line int,
-             start_col int,
-             end_line int,
-             end_col int,
-             job_id text primary key)
-            """
+        "Iterable of ``(work-item, result)``\s for all completed items."
+        with self._session.begin() as session:
+            results = session.query(WorkItemStorage, WorkResultStorage).where(
+                WorkItemStorage.job_id == WorkResultStorage.job_id
+            )
+            return tuple(
+                (_work_item_from_storage(work_item), _work_result_from_storage(result)) for work_item, result in results
             )
 
-            self._conn.execute(
-                """
-            CREATE TABLE IF NOT EXISTS results
-            (worker_outcome text,
-             output text,
-             test_outcome text,
-             diff text,
-             job_id text primary key,
-             FOREIGN KEY(job_id) REFERENCES work_items(job_id)
-            )
-            """
-            )
-
-            self._conn.execute(
-                """
-            CREATE TABLE IF NOT EXISTS config
-            (config text)
-            """
-            )
-
-
-def _row_to_work_item(row):
-    return WorkItem(
-        module_path=row["module_path"],
-        operator_name=row["operator"],
-        occurrence=row["occurrence"],
-        start_pos=(row["start_line"], row["start_col"]),
-        end_pos=(row["end_line"], row["end_col"]),
-        job_id=row["job_id"],
-    )
-
-
-def _work_item_to_row(work_item):
-    return (
-        str(work_item.module_path),
-        work_item.operator_name,
-        work_item.occurrence,
-        work_item.start_pos[0],
-        work_item.start_pos[1],
-        work_item.end_pos[0],
-        work_item.end_pos[1],
-        work_item.job_id,
-    )
-
-
-def _row_to_work_result(row):
-    test_outcome = row["test_outcome"]
-    test_outcome = None if test_outcome is None else TestOutcome(test_outcome)
-
-    return WorkResult(
-        worker_outcome=WorkerOutcome(row["worker_outcome"]),
-        output=row["output"],
-        test_outcome=test_outcome,
-        diff=row["diff"],
-    )
-
-
-def _work_result_to_row(job_id, result):
-    return (
-        result.worker_outcome.value,  # should never be None
-        result.output,
-        None if result.test_outcome is None else result.test_outcome.value,
-        result.diff,
-        job_id,
-    )
+    # # @property
+    # # def num_pending_work_items(self):
+    # #     "The number of pending WorkItems in the session."
+    # #     count = self._conn.execute("SELECT COUNT(*) FROM work_items WHERE job_id NOT IN (SELECT job_id FROM results)")
+    # #     return count[0][0]
 
 
 @contextlib.contextmanager
@@ -281,8 +172,6 @@ def use_db(path, mode=WorkDB.Mode.create):
 
     Args:
       path: The path to the DB file.
-      mode: The mode in which to open the DB. See the `Mode` enum for
-        details.
 
     Raises:
       FileNotFoundError: If `mode` is `Mode.open` and `path` does not
@@ -294,3 +183,72 @@ def use_db(path, mode=WorkDB.Mode.create):
 
     finally:
         database.close()
+
+
+Base = declarative_base()
+
+
+class WorkItemStorage(Base):
+    __tablename__ = "work_items"
+
+    job_id = Column(String, primary_key=True)
+    module_path = Column(String)
+    operator_name = Column(String)
+    occurrence = Column(Integer)
+    start_pos_row = Column(Integer)
+    start_pos_col = Column(Integer)
+    end_pos_row = Column(Integer)
+    end_pos_col = Column(Integer)
+
+
+class WorkResultStorage(Base):
+    __tablename__ = "work_results"
+
+    worker_outcome = Column(Enum(WorkerOutcome))
+    output = Column(Text, nullable=True)
+    test_outcome = Column(Enum(TestOutcome), nullable=True)
+    diff = Column(Text, nullable=True)
+    job_id = Column(String, ForeignKey("work_items.job_id"), primary_key=True)
+
+
+def _work_item_from_storage(work_item: WorkItemStorage):
+    return WorkItem(
+        module_path=Path(work_item.module_path),
+        operator_name=work_item.operator_name,
+        occurrence=work_item.occurrence,
+        start_pos=(work_item.start_pos_row, work_item.start_pos_col),
+        end_pos=(work_item.end_pos_row, work_item.end_pos_col),
+        job_id=work_item.job_id,
+    )
+
+
+def _work_item_to_storage(work_item: WorkItem):
+    return WorkItemStorage(
+        job_id=work_item.job_id,
+        module_path=str(work_item.module_path),
+        operator_name=work_item.operator_name,
+        occurrence=work_item.occurrence,
+        start_pos_row=work_item.start_pos[0],
+        start_pos_col=work_item.start_pos[1],
+        end_pos_row=work_item.end_pos[0],
+        end_pos_col=work_item.end_pos[1],
+    )
+
+
+def _work_result_to_storage(result: WorkResult, job_id):
+    return WorkResultStorage(
+        worker_outcome=result.worker_outcome,
+        output=result.output,
+        test_outcome=result.test_outcome,
+        diff=result.diff,
+        job_id=job_id,
+    )
+
+
+def _work_result_from_storage(result: WorkResultStorage):
+    return WorkResult(
+        worker_outcome=result.worker_outcome,
+        output=result.output,
+        test_outcome=result.test_outcome,
+        diff=result.diff,
+    )

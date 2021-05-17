@@ -17,6 +17,7 @@ INSTALL_REQUIRES = [
     "pathlib",
     "qprompt",
     "rich",
+    "sqlalchemy",
     "stevedore",
     "toml",
     "virtualenv<=16.7.10",
