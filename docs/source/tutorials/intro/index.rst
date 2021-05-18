@@ -64,7 +64,7 @@ Creating a configuration
 ========================
 
 Before you do run any mutation tests, you need to create a *configuration*.
-A configuration is a TOML file that specifies the modules you want to mutate, the
+A configuration is a `TOML <https://toml.io/>`_ file that specifies the modules you want to mutate, the
 test scripts to use, and so forth. A configuration is used to create a *session*,
 something we'll look at in the next section.
 
