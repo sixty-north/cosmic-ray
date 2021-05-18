@@ -44,16 +44,15 @@ class WorkDB:
 
         self._engine = create_engine("sqlite:///{}".format(path))
 
-        def enable_foreign_keys(dbapi_con, con_rec):
+        def enable_foreign_keys(dbapi_con, _con_rec):
             dbapi_con.execute("pragma foreign_keys=ON")
 
         event.listen(self._engine, "connect", enable_foreign_keys)
         Base.metadata.create_all(self._engine)
-        self._session = sessionmaker(self._engine)
+        self._session_maker = sessionmaker(self._engine)
 
     def close(self):
         """Close the database."""
-        pass
 
     def name(self):
         """A name for this database.
@@ -68,13 +67,13 @@ class WorkDB:
 
         This includes both WorkItems with and without results.
         """
-        with self._session.begin() as session:
+        with self._session_maker.begin() as session:
             return tuple(_work_item_from_storage(work_item) for work_item in session.query(WorkItemStorage).all())
 
     @property
     def num_work_items(self):
         """The number of work items."""
-        with self._session.begin() as session:
+        with self._session_maker.begin() as session:
             return session.query(WorkItemStorage).count()
 
     def add_work_item(self, work_item):
@@ -93,7 +92,7 @@ class WorkDB:
         """
         storage = (_work_item_to_storage(work_item) for work_item in work_items)
 
-        with self._session.begin() as session:
+        with self._session_maker.begin() as session:
             session.add_all(storage)
 
     def clear(self):
@@ -101,21 +100,21 @@ class WorkDB:
 
         This removes any associated results as well.
         """
-        with self._session.begin() as session:
+        with self._session_maker.begin() as session:
             session.query(WorkResultStorage).delete()
             session.query(WorkItemStorage).delete()
 
     @property
     def results(self):
         "An iterable of all ``(job-id, WorkResult)``\\s."
-        with self._session.begin() as session:
+        with self._session_maker.begin() as session:
             for result in session.query(WorkResultStorage).all():
                 yield result.job_id, _work_result_from_storage(result)
 
     @property
     def num_results(self):
         """The number of results."""
-        with self._session.begin() as session:
+        with self._session_maker.begin() as session:
             return session.query(WorkResultStorage).count()
 
     def set_result(self, job_id, result):
@@ -131,7 +130,7 @@ class WorkDB:
            KeyError: If there is no work-item with a matching job-id.
         """
         try:
-            with self._session.begin() as session:
+            with self._session_maker.begin() as session:
                 storage = _work_result_to_storage(result, job_id)
                 session.merge(storage)
         except IntegrityError:
@@ -140,7 +139,7 @@ class WorkDB:
     @property
     def pending_work_items(self):
         "Iterable of all pending work items. In random order."
-        with self._session.begin() as session:
+        with self._session_maker.begin() as session:
             completed_job_ids = session.query(WorkResultStorage.job_id)
             pending = session.query(WorkItemStorage).where(~WorkItemStorage.job_id.in_(completed_job_ids))
             return tuple(_work_item_from_storage(work_item) for work_item in pending)
@@ -148,19 +147,13 @@ class WorkDB:
     @property
     def completed_work_items(self):
         "Iterable of ``(work-item, result)``\\s for all completed items."
-        with self._session.begin() as session:
+        with self._session_maker.begin() as session:
             results = session.query(WorkItemStorage, WorkResultStorage).where(
                 WorkItemStorage.job_id == WorkResultStorage.job_id
             )
             return tuple(
                 (_work_item_from_storage(work_item), _work_result_from_storage(result)) for work_item, result in results
             )
-
-    # # @property
-    # # def num_pending_work_items(self):
-    # #     "The number of pending WorkItems in the session."
-    # #     count = self._conn.execute("SELECT COUNT(*) FROM work_items WHERE job_id NOT IN (SELECT job_id FROM results)")
-    # #     return count[0][0]
 
 
 @contextlib.contextmanager
@@ -189,6 +182,7 @@ Base = declarative_base()
 
 
 class WorkItemStorage(Base):
+    "Database model for WorkItem."
     __tablename__ = "work_items"
 
     job_id = Column(String, primary_key=True)
@@ -202,6 +196,7 @@ class WorkItemStorage(Base):
 
 
 class WorkResultStorage(Base):
+    "Database model for WorkResult."
     __tablename__ = "work_results"
 
     worker_outcome = Column(Enum(WorkerOutcome))
