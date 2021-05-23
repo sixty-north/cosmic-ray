@@ -1,22 +1,38 @@
+import subprocess
+import sys
+
 from cosmic_ray.tools.filters import operators_filter
-from cosmic_ray.work_item import WorkItem, WorkResult, WorkerOutcome
+from cosmic_ray.work_item import ResolvedMutationSpec, WorkerOutcome, WorkItem, WorkResult
 
 
-class Data:
+def test_smoke_test_on_initialized_session(initialized_session):
+    command = [sys.executable, "-m", "cosmic_ray.tools.filters.operators_filter", str(initialized_session)]
 
+    subprocess.check_call(command, cwd=str(initialized_session.parent))
+
+
+def test_smoke_test_on_execd_session(execd_session):
+    command = [sys.executable, "-m", "cosmic_ray.tools.filters.operators_filter", str(execd_session)]
+
+    subprocess.check_call(command, cwd=str(execd_session.parent))
+
+
+class FakeWorkDB:
     def __init__(self):
         self.count = 0
         self.results = []
 
     def new_work_item(self, operator_name, job_id):
         self.count += 1
-        return WorkItem(
-            module_path="{}.py".format(self.count),
-            operator_name=operator_name,
-            occurrence=self.count,
-            start_pos=(self.count, self.count),
-            end_pos=(self.count+1, self.count+1),
-            job_id=job_id,
+        return WorkItem.single(
+            job_id,
+            ResolvedMutationSpec(
+                module_path="{}.py".format(self.count),
+                operator_name=operator_name,
+                occurrence=self.count,
+                start_pos=(self.count, self.count),
+                end_pos=(self.count + 1, self.count + 1),
+            ),
         )
 
     @property
@@ -63,23 +79,21 @@ class Data:
 
 
 def test_operators_filter():
-    data = Data()
-    exclude = [
-        'Op1', 'Op2', 'Opregex[12]', r'(?:.[oO]m(?:p|P)lex).*'
-    ]
+    data = FakeWorkDB()
+    exclude = ["Op1", "Op2", "Opregex[12]", r"(?:.[oO]m(?:p|P)lex).*"]
     operators_filter.OperatorsFilter()._skip_filtered(data, exclude)
     assert data.results == data.expected_after_filter
 
 
 def test_operators_filter_empty_excludes():
-    data = Data()
+    data = FakeWorkDB()
     exclude = []
     operators_filter.OperatorsFilter()._skip_filtered(data, exclude)
     assert data.results == []
 
 
 def test_operators_filter_all_excluded():
-    data = Data()
+    data = FakeWorkDB()
     exclude = [r"."]
     operators_filter.OperatorsFilter()._skip_filtered(data, exclude)
     assert data.results == data.expected_all_filtered

@@ -16,11 +16,7 @@ def report(show_output, show_diff, show_pending, session_file):
 
     with use_db(session_file, WorkDB.Mode.open) as db:
         for work_item, result in db.completed_work_items:
-            print(
-                "{} {} {} {}".format(
-                    work_item.job_id, work_item.module_path, work_item.operator_name, work_item.occurrence
-                )
-            )
+            display_work_item(work_item)
 
             print("worker outcome: {}, test outcome: {}".format(result.worker_outcome, result.test_outcome))
 
@@ -36,11 +32,7 @@ def report(show_output, show_diff, show_pending, session_file):
 
         if show_pending:
             for work_item in db.pending_work_items:
-                print(
-                    "{} {} {} {}".format(
-                        work_item.job_id, work_item.module_path, work_item.operator_name, work_item.occurrence
-                    )
-                )
+                display_work_item(work_item)
 
         num_items = db.num_work_items
         num_complete = db.num_results
@@ -53,3 +45,13 @@ def report(show_output, show_diff, show_pending, session_file):
             print("surviving mutants: {} ({:.2f}%)".format(num_complete - num_killed, survival_rate(db)))
         else:
             print("no jobs completed")
+
+
+def display_work_item(work_item):
+    print("[job-id] {}".format(work_item.job_id))
+    for mutation in work_item.mutations:
+        print("{} {} {}".format(mutation.module_path, mutation.operator_name, mutation.occurrence))
+
+
+if __name__ == "__main__":
+    report()  # no-qa: no-value-for-parameter

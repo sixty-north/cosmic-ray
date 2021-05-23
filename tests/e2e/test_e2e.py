@@ -21,6 +21,7 @@ def config(tester, distributor):
     return config
 
 
+@pytest.mark.slow
 def test_e2e(example_project_root, config, session):
     subprocess.check_call(
         [sys.executable, "-m", "cosmic_ray.cli", "init", config, str(session)], cwd=str(example_project_root)
@@ -38,15 +39,10 @@ def test_e2e(example_project_root, config, session):
 
 def test_baseline(example_project_root, config, session):
     subprocess.check_call(
-        [sys.executable, "-m", "cosmic_ray.cli", "init", config, str(session)], cwd=str(example_project_root)
-    )
-
-    subprocess.check_call(
         [sys.executable, "-m", "cosmic_ray.cli", "baseline", config, str(session)], cwd=str(example_project_root)
     )
 
-    session_path = session.parent / "{}.baseline{}".format(session.stem, session.suffix)
-    with use_db(str(session_path), WorkDB.Mode.open) as work_db:
+    with use_db(str(session), WorkDB.Mode.open) as work_db:
         rate = survival_rate(work_db)
         assert rate == 100.0
 

@@ -24,7 +24,7 @@ import aiohttp
 from aiohttp import web
 from cosmic_ray.distribution.distributor import Distributor
 from cosmic_ray.mutating import mutate_and_test
-from cosmic_ray.work_item import WorkerOutcome, WorkItem, WorkResult
+from cosmic_ray.work_item import MutationSpec, WorkerOutcome, WorkItem, WorkResult
 
 log = logging.getLogger(__name__)
 
@@ -101,9 +101,14 @@ async def send_request(url, work_item: WorkItem, test_command, timeout):
     Returns: A `WorkResult`.
     """
     parameters = {
-        "module_path": str(work_item.module_path),
-        "operator": work_item.operator_name,
-        "occurrence": work_item.occurrence,
+        "mutations": [
+            {
+                "module_path": str(mutation.module_path),
+                "operator": mutation.operator_name,
+                "occurrence": mutation.occurrence,
+            }
+            for mutation in work_item.mutations
+        ],
         "test_command": test_command,
         "timeout": timeout,
     }
@@ -123,9 +128,14 @@ async def handle_mutate_and_test(request):
     """HTTP endpoint handler for requests to mutate-and-test."""
     args = await request.json()
     result = await mutate_and_test(
-        module_path=Path(args["module_path"]),
-        operator_name=args["operator"],
-        occurrence=args["occurrence"],
+        mutations=[
+            MutationSpec(
+                module_path=Path(mutation["module_path"]),
+                operator_name=mutation["operator"],
+                occurrence=mutation["occurrence"],
+            )
+            for mutation in args["mutations"]
+        ],
         test_command=args["test_command"],
         timeout=args["timeout"],
     )

@@ -5,10 +5,10 @@ from pathlib import Path
 
 from sqlalchemy import Column, Enum, ForeignKey, Integer, String, Text, create_engine, event
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.orm.session import sessionmaker
 
-from .work_item import TestOutcome, WorkerOutcome, WorkItem, WorkResult
+from .work_item import ResolvedMutationSpec, TestOutcome, WorkResult, WorkerOutcome, WorkItem
 
 
 class WorkDB:
@@ -53,6 +53,9 @@ class WorkDB:
 
     def close(self):
         """Close the database."""
+        # TODO: We don't really need this any more. Should we just remove it? Similarly, is there any need
+        # for use_db()? It seems possible that we'll eventually move back to needing an explicit close()
+        # call, so I'm a bit hesitant to remove this.
 
     def name(self):
         """A name for this database.
@@ -102,6 +105,7 @@ class WorkDB:
         """
         with self._session_maker.begin() as session:
             session.query(WorkResultStorage).delete()
+            session.query(MutationSpecStorage).delete()
             session.query(WorkItemStorage).delete()
 
     @property
@@ -186,6 +190,12 @@ class WorkItemStorage(Base):
     __tablename__ = "work_items"
 
     job_id = Column(String, primary_key=True)
+    mutations = relationship("MutationSpecStorage", back_populates="work_item")
+
+
+class MutationSpecStorage(Base):
+    "Database model for MutationSpecs"
+    __tablename__ = "mutation_specs"
     module_path = Column(String)
     operator_name = Column(String)
     occurrence = Column(Integer)
@@ -193,6 +203,8 @@ class WorkItemStorage(Base):
     start_pos_col = Column(Integer)
     end_pos_row = Column(Integer)
     end_pos_col = Column(Integer)
+    job_id = Column(String, ForeignKey("work_items.job_id"), primary_key=True)
+    work_item = relationship("WorkItemStorage", back_populates="mutations")
 
 
 class WorkResultStorage(Base):
@@ -206,13 +218,32 @@ class WorkResultStorage(Base):
     job_id = Column(String, ForeignKey("work_items.job_id"), primary_key=True)
 
 
+def _mutation_spec_from_storage(mutation_spec: MutationSpecStorage):
+    return ResolvedMutationSpec(
+        module_path=Path(mutation_spec.module_path),
+        operator_name=mutation_spec.operator_name,
+        occurrence=mutation_spec.occurrence,
+        start_pos=(mutation_spec.start_pos_row, mutation_spec.start_pos_col),
+        end_pos=(mutation_spec.end_pos_row, mutation_spec.end_pos_col),
+    )
+
+
+def _mutation_spec_to_storage(mutation_spec: ResolvedMutationSpec, job_id: str):
+    return MutationSpecStorage(
+        job_id=job_id,
+        module_path=str(mutation_spec.module_path),
+        operator_name=mutation_spec.operator_name,
+        occurrence=mutation_spec.occurrence,
+        start_pos_row=mutation_spec.start_pos[0],
+        start_pos_col=mutation_spec.start_pos[1],
+        end_pos_row=mutation_spec.end_pos[0],
+        end_pos_col=mutation_spec.end_pos[1],
+    )
+
+
 def _work_item_from_storage(work_item: WorkItemStorage):
     return WorkItem(
-        module_path=Path(work_item.module_path),
-        operator_name=work_item.operator_name,
-        occurrence=work_item.occurrence,
-        start_pos=(work_item.start_pos_row, work_item.start_pos_col),
-        end_pos=(work_item.end_pos_row, work_item.end_pos_col),
+        mutations=tuple(_mutation_spec_from_storage(s) for s in work_item.mutations),
         job_id=work_item.job_id,
     )
 
@@ -220,13 +251,7 @@ def _work_item_from_storage(work_item: WorkItemStorage):
 def _work_item_to_storage(work_item: WorkItem):
     return WorkItemStorage(
         job_id=work_item.job_id,
-        module_path=str(work_item.module_path),
-        operator_name=work_item.operator_name,
-        occurrence=work_item.occurrence,
-        start_pos_row=work_item.start_pos[0],
-        start_pos_col=work_item.start_pos[1],
-        end_pos_row=work_item.end_pos[0],
-        end_pos_col=work_item.end_pos[1],
+        mutations=[_mutation_spec_to_storage(mutation, work_item.job_id) for mutation in work_item.mutations],
     )
 
 

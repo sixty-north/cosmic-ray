@@ -126,48 +126,28 @@ def handle_exec(config_file, session_file):
     default=False,
     help="Force write over baseline session file if this file was already created by a previous run.",
 )
-@click.option(
-    "--report",
-    "dump_report",
-    flag_value=True,
-    default=False,
-    help="Print the report result of this baseline run. If the job has failed, jobs's outputs will be displayed.",
-)
-def baseline(config_file, session_file, force, dump_report):
+def baseline(config_file, session_file, force):
     """Runs a baseline execution that executes the test suite over unmutated code.
+
+    The results of the run are saved in `session_file`.
 
     Exits with 0 if the job has exited normally, otherwise 1.
     """
     session_file = Path(session_file)
     cfg = load_config(config_file)
 
-    baseline_session_file = session_file.parent / "{}.baseline{}".format(session_file.stem, session_file.suffix)
-
-    # Find arbitrary work-item in input session that we can copy.
-    with use_db(session_file) as db:  # type: WorkDB
-        try:
-            template = next(iter(db.work_items))
-        except StopIteration:
-            log.error("No work items in session")
-            sys.exit(ExitCode.DATA_ERR)
-
     if force:
         try:
-            os.unlink(baseline_session_file)
+            os.unlink(session_file)
         except OSError:
             pass
 
-    # Copy input work-item, but tell it to use the no-op operator. Create a new
-    # session containing only this work-item and execute this new session.
-    with use_db(baseline_session_file, mode=WorkDB.Mode.create) as db:
+    with use_db(session_file, mode=WorkDB.Mode.create) as db:
+        db.clear()
         db.add_work_item(
             WorkItem(
-                module_path=template.module_path,
-                operator_name="core/NoOp",
-                occurrence=0,
-                start_pos=template.start_pos,
-                end_pos=template.end_pos,
-                job_id=template.job_id,
+                mutations=[],
+                job_id="baseline",
             )
         )
 
@@ -176,14 +156,13 @@ def baseline(config_file, session_file, force, dump_report):
 
         result = next(db.results)[1]
         if result.test_outcome == TestOutcome.KILLED:
-            if dump_report:
-                print("Execution with no mutation gives those following errors:")
-                for line in result.output.split("\n"):
-                    print("  >>>", line)
+            message = ["Baseline failed. Execution with no mutation gives those following errors:"]
+            for line in result.output.split("\n"):
+                message.append("  >>> {}".format(line))
+            log.error("\n".join(message))
             sys.exit(1)
         else:
-            if dump_report:
-                print("Execution with no mutation works fine.")
+            log.info("Baseline passed. Execution with no mutation works fine.")
             sys.exit(ExitCode.OK)
 
 
@@ -200,7 +179,8 @@ def dump(session_file):
 
     def item_to_dict(work_item):
         d = dataclasses.asdict(work_item)
-        d["module_path"] = str(d["module_path"])
+        for m in d["mutations"]:
+            m["module_path"] = str(m["module_path"])
         return d
 
     def result_to_dict(result):

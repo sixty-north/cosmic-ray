@@ -1,69 +1,81 @@
 """Support for making mutations to source code.
 """
+import contextlib
 import difflib
+from itertools import chain
 import traceback
 from contextlib import contextmanager
 import logging
+from typing import Iterable
 
 import cosmic_ray.plugins
 from cosmic_ray.ast import Visitor, get_ast
 from cosmic_ray.testing import run_tests
-from cosmic_ray.work_item import TestOutcome, WorkerOutcome, WorkResult
+from cosmic_ray.work_item import MutationSpec, TestOutcome, WorkerOutcome, WorkResult
 
 log = logging.getLogger(__name__)
 
 # pylint: disable=R0913
-async def mutate_and_test(module_path, operator_name, occurrence, test_command, timeout) -> WorkResult:
-    """Mutate the OCCURRENCE-th site for OPERATOR_NAME in MODULE_PATH, run the
-    tests, and report the results.
+async def mutate_and_test(mutations: Iterable[MutationSpec], test_command, timeout) -> WorkResult:
+    """Apply a sequence of mutations, run thest tests, and reports the results.
 
-    This is fundamentally the single-mutation-and-test-run implementation at the heart
-    of Cosmic Ray.
+    This is fundamentally the mutation(s)-and-test-run implementation at the heart of Cosmic Ray.
 
-    There are three high-level ways that a worker can finish. First, it could
-    fail exceptionally, meaning that some uncaught exception made its way from
-    some part of the operation to terminate the function. This function will
+    There are three high-level ways that a worker can finish. First, it could fail exceptionally, meaning that some
+    uncaught exception made its way from some part of the operation to terminate the function. This function will
     intercept all exceptions and return it in a non-exceptional structure.
 
-    Second, the mutation testing machinery may determine that there is no
-    OCCURENCE-th instance for OPERATOR_NAME in the module under test. In this
-    case there is no way to report a test result (i.e. killed, survived, or
-    incompetent) so a special value is returned indicating that no mutation is
-    possible.
+    Second, the mutation machinery may determines that - for any of the mutations - there is mutation to be made (e.g.
+    the 'occurrence' is too high).  In this case there is no way to report a test result (i.e. killed, survived, or
+    incompetent) so a special value is returned indicating that no mutation is possible.
 
-    Finally, and hopefully normally, the worker will find that it can run a
-    test. It will do so and report back the result - killed, survived, or
-    incompetent - in a structured way.
+    Finally, and hopefully normally, the worker will find that it can run a test. It will do so and report back the
+    result - killed, survived, or incompetent - in a structured way.
 
     Args:
-        module_name: The path to the module to mutate
-        operator_name: The name of the operator plugin to use
-        occurrence: The occurrence of the operator to apply
+        mutations: An iterable of ``MutationSpec``\\s describing the mutations to make.
         test_command: The command to execute to run the tests
         timeout: The maximum amount of time (seconds) to let the tests run
 
     Returns:
-        A WorkResult
+        A ``WorkResult``.
 
     Raises:
-        This will generally not raise any exceptions. Rather, exceptions will
-        be reported using the 'exception' result-type in the return value.
+        This will generally not raise any exceptions. Rather, exceptions will be reported using the 'exception'
+        result-type in the return value.
 
     """
     try:
-        operator_class = cosmic_ray.plugins.get_operator(operator_name)
-        operator = operator_class()
+        with contextlib.ExitStack() as stack:
+            file_changes = {}
+            for mutation in mutations:
+                operator_class = cosmic_ray.plugins.get_operator(mutation.operator_name)
+                operator = operator_class()
+                (previous_code, mutated_code) = stack.enter_context(
+                    cosmic_ray.mutating.use_mutation(mutation.module_path, operator, mutation.occurrence)
+                )
 
-        with cosmic_ray.mutating.use_mutation(module_path, operator, occurrence) as (original_code, mutated_code):
-            if mutated_code is None:
-                return WorkResult(worker_outcome=WorkerOutcome.NO_TEST)
+                # If there's no mutated code, then no mutation was possible.
+                if mutated_code is None:
+                    return WorkResult(
+                        worker_outcome=WorkerOutcome.NO_TEST,
+                    )
+
+                original_code, _ = file_changes.get(mutation.module_path, (previous_code, mutated_code))
+                file_changes[mutation.module_path] = original_code, mutated_code
 
             test_outcome, output = await run_tests(test_command, timeout)
 
-            diff = _make_diff(original_code, mutated_code, module_path)
+            diffs = [
+                _make_diff(original_code, mutated_code, module_path)
+                for module_path, (original_code, mutated_code) in file_changes.items()
+            ]
 
             return WorkResult(
-                output=output, diff="\n".join(diff), test_outcome=test_outcome, worker_outcome=WorkerOutcome.NORMAL
+                output=output,
+                diff="\n".join(chain(*diffs)),
+                test_outcome=test_outcome,
+                worker_outcome=WorkerOutcome.NORMAL,
             )
 
     except Exception:  # noqa # pylint: disable=broad-except

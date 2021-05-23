@@ -29,9 +29,7 @@ class LocalDistributor(Distributor):
     async def _process(self, pending_work, test_command, timeout, _distributor_config, on_task_complete):
         for work_item in pending_work:
             result = await mutate_and_test(
-                module_path=work_item.module_path,
-                operator_name=work_item.operator_name,
-                occurrence=work_item.occurrence,
+                mutations=work_item.mutations,
                 test_command=test_command,
                 timeout=timeout,
             )

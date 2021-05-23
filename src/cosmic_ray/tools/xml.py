@@ -50,9 +50,11 @@ def _create_xml_report(db):
 def _create_element_from_work_item(work_item):
     sub_elem = xml.etree.ElementTree.Element("testcase")
 
-    sub_elem.set("classname", work_item.job_id)
-    sub_elem.set("line", str(work_item.start_pos[0]))
-    sub_elem.set("file", str(work_item.module_path))
+    for mutation in work_item.mutations:
+        mutation_elem = xml.etree.ElementTree.Element("mutation")
+        mutation_elem.set("classname", work_item.job_id)
+        mutation_elem.set("line", str(mutation.start_pos[0]))
+        mutation_elem.set("file", str(mutation.module_path))
 
     return sub_elem
 
@@ -78,3 +80,7 @@ def _evaluation_success(result):
         TestOutcome.SURVIVED,
         TestOutcome.INCOMPETENT,
     }
+
+
+if __name__ == "__main__":
+    report_xml()  # no-qa: no-value-for-parameter

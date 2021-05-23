@@ -1,37 +1,41 @@
 "Implementation of the 'init' command."
 import logging
+from typing import Iterable
 import uuid
 
 from cosmic_ray.ast import get_ast, ast_nodes
 import cosmic_ray.modules
-from cosmic_ray.work_item import WorkItem
+from cosmic_ray.work_item import MutationSpec, ResolvedMutationSpec, WorkItem
 from cosmic_ray.plugins import get_operator
 from cosmic_ray.work_db import WorkDB
 
 log = logging.getLogger()
 
 
-def all_work_items(module_paths, operator_names):
+def _all_work_items(module_paths, operator_names) -> Iterable[WorkItem]:
     "Iterable of all WorkItems for the given inputs."
     for module_path in module_paths:
         module_ast = get_ast(module_path)
 
         for op_name in operator_names:
             operator = get_operator(op_name)()
-            occurrence = 0
-            for node in ast_nodes(module_ast):
-                for start_pos, end_pos in operator.mutation_positions(node):
-                    yield WorkItem(
-                        # TODO: What if we used path/operator-name/occurrence to make the job-id?
-                        job_id=uuid.uuid4().hex,
-                        module_path=str(module_path),
-                        operator_name=op_name,
-                        occurrence=occurrence,
-                        start_pos=start_pos,
-                        end_pos=end_pos,
-                    )
 
-                    occurrence += 1
+            positions = (
+                (start_pos, end_pos)
+                for node in ast_nodes(module_ast)
+                for start_pos, end_pos in operator.mutation_positions(node)
+            )
+
+            for occurrence, (start_pos, end_pos) in enumerate(positions):
+                mutation = ResolvedMutationSpec(
+                    module_path=str(module_path),
+                    operator_name=op_name,
+                    occurrence=occurrence,
+                    start_pos=start_pos,
+                    end_pos=end_pos,
+                )
+
+                yield WorkItem.single(job_id=uuid.uuid4().hex, mutation=mutation)
 
 
 def init(module_paths, work_db: WorkDB):
@@ -49,4 +53,4 @@ def init(module_paths, work_db: WorkDB):
     operator_names = list(cosmic_ray.plugins.operator_names())
 
     work_db.clear()
-    work_db.add_work_items(all_work_items(module_paths, operator_names))
+    work_db.add_work_items(_all_work_items(module_paths, operator_names))

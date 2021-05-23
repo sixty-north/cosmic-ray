@@ -4,7 +4,7 @@ import dataclasses
 import enum
 import pathlib
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Optional, Tuple
 
 
 class StrEnum(str, enum.Enum):
@@ -54,18 +54,30 @@ class WorkResult:
 
 
 @dataclasses.dataclass(frozen=True)
-class WorkItem:
-    """Description of the work for a single mutation and test run."""
-
+class MutationSpec:
+    "Description of a single mutation."
     module_path: Path
     operator_name: str
     occurrence: int
-    start_pos: Tuple[int, int]
-    end_pos: Tuple[int, int]
-    job_id: str
 
     # pylint: disable=R0913
     def __post_init__(self):
+        object.__setattr__(self, "module_path", pathlib.Path(self.module_path))
+        object.__setattr__(self, "occurrence", int(self.occurrence))
+
+
+# TODO: I'm suspicious of this distinction between MutationSpec and ResolvedMutationSpec. We only really need
+# it because the data we send to distributors doesn't include  start_/end_pos, and I wanted to make that
+# clear. Am I being hoodwinked by type annotations? Should I just stop worrying and merge them?
+@dataclasses.dataclass(frozen=True)
+class ResolvedMutationSpec(MutationSpec):
+    "A MutationSpec with the location of the mutation resolved."
+    start_pos: Tuple[int, int]
+    end_pos: Tuple[int, int]
+
+    # pylint: disable=R0913
+    def __post_init__(self):
+        super().__post_init__()
         if self.start_pos[0] > self.end_pos[0]:
             raise ValueError("Start line must not be after end line")
 
@@ -73,5 +85,27 @@ class WorkItem:
             if self.start_pos[1] >= self.end_pos[1]:
                 raise ValueError("End position must come after start position.")
 
-        object.__setattr__(self, "module_path", pathlib.Path(self.module_path))
-        object.__setattr__(self, "occurrence", int(self.occurrence))
+
+@dataclasses.dataclass(frozen=True)
+class WorkItem:
+    """A collection (possibly empty) of mutations to perform for a single test.
+
+    This ability to perform more than one mutation for a single test run is how we support
+    higher-order mutations.
+    """
+
+    job_id: str
+    mutations: Tuple[ResolvedMutationSpec]
+
+    @classmethod
+    def single(cls, job_id, mutation: ResolvedMutationSpec):
+        """Construct a WorkItem with a single mutation.
+
+        Args:
+            job_id: The ID of the job.
+            mutation: The single mutation for the WorkItem.
+
+        Returns:
+            A new `WorkItem` instance.
+        """
+        return cls(job_id, (mutation,))
