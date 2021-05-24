@@ -66,9 +66,9 @@ class MutationSpec:
         object.__setattr__(self, "occurrence", int(self.occurrence))
 
 
-# TODO: I'm suspicious of this distinction between MutationSpec and ResolvedMutationSpec. We only really need
-# it because the data we send to distributors doesn't include  start_/end_pos, and I wanted to make that
-# clear. Am I being hoodwinked by type annotations? Should I just stop worrying and merge them?
+# TODO: I'm suspicious of this distinction between MutationSpec and ResolvedMutationSpec. We only really need it because
+# the data we send to distributors doesn't include  start_/end_pos, and I wanted to make that clear. Am I being
+# hoodwinked by type annotations? Should I just stop worrying and merge them?
 @dataclasses.dataclass(frozen=True)
 class ResolvedMutationSpec(MutationSpec):
     "A MutationSpec with the location of the mutation resolved."

@@ -55,6 +55,7 @@ def _create_element_from_work_item(work_item):
         mutation_elem.set("classname", work_item.job_id)
         mutation_elem.set("line", str(mutation.start_pos[0]))
         mutation_elem.set("file", str(mutation.module_path))
+        sub_elem.append(mutation_elem)
 
     return sub_elem
 
