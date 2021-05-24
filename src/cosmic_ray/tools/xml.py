@@ -84,4 +84,4 @@ def _evaluation_success(result):
 
 
 if __name__ == "__main__":
-    report_xml()  # no-qa: no-value-for-parameter
+    report_xml()  # pylint: disable=no-value-for-parameter
