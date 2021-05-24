@@ -27,7 +27,7 @@ INSTALL_REQUIRES = [
 
 setup(
     name="cosmic_ray",
-    version="8.1.3",
+    version="8.1.4",
     packages=find_packages("src"),
     author="Sixty North AS",
     author_email="austin@sixty-north.com",
