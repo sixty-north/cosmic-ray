@@ -43,6 +43,7 @@ jobs:
     needs: test
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/release')
     steps:
+      - uses: actions/checkout@v2
       - name: Set up Python 3.9
         uses: actions/setup-python@v2
         with:
