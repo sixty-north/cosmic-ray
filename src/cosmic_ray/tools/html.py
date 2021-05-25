@@ -55,17 +55,14 @@ def _generate_html_report(db, only_completed, skip_success):
                 incomplete = ((item, None) for item in db.pending_work_items)
                 all_items = chain(all_items, incomplete)
 
-            num_items = db.num_work_items
-            num_complete = db.num_results
-
             with tag("div", klass="container"):
 
                 # Summary info
-                _generate_summary(db)
+                _generate_summary(doc, db)
 
                 # Job list
 
-                _generate_job_list(db, skip_success)
+                _generate_job_list(doc, db, skip_success)
 
             with tag("script"):
                 doc.attr(src="https://code.jquery.com/jquery-3.3.1.slim.min.js")
@@ -121,8 +118,8 @@ def _generate_html_report(db, only_completed, skip_success):
     return doc
 
 
-def _generate_job_list(db, skip_success):
-    doc, tag, text = Doc().tagtext()
+def _generate_job_list(doc, db, skip_success):
+    doc, tag, text = doc.tagtext()
     with tag("div", klass="mb-1", id="job_list___accordion"):
         with tag("div", klass="card"):
             with tag(
@@ -169,11 +166,11 @@ def _generate_job_list(db, skip_success):
                     # Job item
                     all_items = db.completed_work_items
                     for index, (work_item, result) in enumerate(all_items, start=1):
-                        _generate_work_item_card(index, work_item, result, skip_success)
+                        _generate_work_item_card(doc, index, work_item, result, skip_success)
 
 
-def _generate_work_item_card(index, work_item, result, skip_success):
-    doc, tag, text = Doc().tagtext()
+def _generate_work_item_card(doc, index, work_item, result, skip_success):
+    doc, tag, text = doc.tagtext()
     if result is not None:
         if result.is_killed:
             if result.test_outcome == TestOutcome.INCOMPETENT:
@@ -263,8 +260,8 @@ def _generate_work_item_card(index, work_item, result, skip_success):
                                     text(result.output)
 
 
-def _generate_summary(db):
-    doc, tag, text = Doc().tagtext()
+def _generate_summary(doc, db):
+    doc, tag, text = doc.tagtext()
     num_items = db.num_work_items
     num_complete = db.num_results
 

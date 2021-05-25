@@ -8,6 +8,7 @@ from setuptools import setup, find_packages
 
 INSTALL_REQUIRES = [
     "aiohttp",
+    "anybadge",
     "astunparse",
     "click",
     "decorator",
@@ -22,7 +23,6 @@ INSTALL_REQUIRES = [
     "toml",
     "virtualenv<=16.7.10",
     "yattag",
-    "anybadge",
 ]
 
 setup(
