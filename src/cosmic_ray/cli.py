@@ -11,8 +11,9 @@ import signal
 import subprocess
 import sys
 from collections import defaultdict
-from contextlib import redirect_stdout
+from contextlib import contextmanager, redirect_stdout
 from pathlib import Path
+import tempfile
 
 import click
 from exit_codes import ExitCode
@@ -118,39 +119,52 @@ def handle_exec(config_file, session_file):
 
 @cli.command()
 @click.argument("config_file")
-@click.argument("session_file")
+@click.option(
+    "--session-file",
+    type=click.Path(dir_okay=False, writable=True, path_type=Path),
+    help="Path to session file. If not provided, a temp file is used.",
+)
 def baseline(config_file, session_file):
     """Runs a baseline execution that executes the test suite over unmutated code.
 
-    The results of the run are saved in `session_file`.
+    If ``--session-file`` is provided, the session used for baselining is stored in that file. Otherwise,
+    the session is stored in a temporary file which is deleted after the baselining.
 
     Exits with 0 if the job has exited normally, otherwise 1.
     """
-    session_file = Path(session_file)
     cfg = load_config(config_file)
 
-    with use_db(session_file, mode=WorkDB.Mode.create) as db:
-        db.clear()
-        db.add_work_item(
-            WorkItem(
-                mutations=[],
-                job_id="baseline",
-            )
-        )
-
-        # Run the single-entry session.
-        cosmic_ray.commands.execute(db, cfg)
-
-        result = next(db.results)[1]
-        if result.test_outcome == TestOutcome.KILLED:
-            message = ["Baseline failed. Execution with no mutation gives those following errors:"]
-            for line in result.output.split("\n"):
-                message.append("  >>> {}".format(line))
-            log.error("\n".join(message))
-            sys.exit(1)
+    @contextmanager
+    def path_or_temp(path):
+        if path is None:
+            with tempfile.TemporaryDirectory() as tmpdir:
+                yield Path(tmpdir) / "session.sqlite"
         else:
-            log.info("Baseline passed. Execution with no mutation works fine.")
-            sys.exit(ExitCode.OK)
+            yield path
+
+    with path_or_temp(session_file) as session_path:
+        with use_db(session_path, mode=WorkDB.Mode.create) as db:
+            db.clear()
+            db.add_work_item(
+                WorkItem(
+                    mutations=[],
+                    job_id="baseline",
+                )
+            )
+
+            # Run the single-entry session.
+            cosmic_ray.commands.execute(db, cfg)
+
+            result = next(db.results)[1]
+            if result.test_outcome == TestOutcome.KILLED:
+                message = ["Baseline failed. Execution with no mutation gives those following errors:"]
+                for line in result.output.split("\n"):
+                    message.append("  >>> {}".format(line))
+                log.error("\n".join(message))
+                sys.exit(1)
+            else:
+                log.info("Baseline passed. Execution with no mutation works fine.")
+                sys.exit(ExitCode.OK)
 
 
 @cli.command()

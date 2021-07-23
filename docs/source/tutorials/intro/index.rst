@@ -207,7 +207,7 @@ You can use the ``baseline`` command to check that the test suite passes on unmu
 
 .. code-block:: bash
 
-    cosmic-ray --verbosity=INFO baseline tutorial.toml tutorial_baseline.sqlite
+    cosmic-ray --verbosity=INFO baseline tutorial.toml
 
 This should report that the tests pass, something like this:
 
@@ -219,8 +219,6 @@ This should report that the tests pass, something like this:
                         INFO     INFO:cosmic_ray.commands.execute:Job baseline complete                                                                                                                                   execute.py:43
                         INFO     INFO:cosmic_ray.commands.execute:Execution finished                                                                                                                                      execute.py:53
                         INFO     INFO:root:Baseline passed. Execution with no mutation works fine.       
-
-You'll also see that there is a new ``tutorial_baseline.sqlite`` database containing the results of the baselining.
 
 If this command succeeds, then you're ready to start mutating code and testing it!
 
