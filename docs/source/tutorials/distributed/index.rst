@@ -80,6 +80,10 @@ configuration. The worker will tell you that it's waiting to process requests on
     ======== Running on http://0.0.0.0:9876 ========
     (Press CTRL+C to quit)    
 
+Note that your worker must be running in the same directory as you would normally the tests from. In this case, we're
+expecting the tests to be run in ``$ROOT``, so make sure your worker is running in that directory. Generally speaking,
+the worker doesn't do much more than mutate the code on disk and run the test command you've specified in your config.
+
 Running the tests
 -----------------
 
@@ -139,8 +143,9 @@ running on entirely different machines on a network.
 Distinct copies of the code
 ---------------------------
 
-Cosmic Ray mutation works by actually modifying the code on disk. As such, multiple workers can't share a single copy of the code; their
-mutations would interfere with one another. So we need to make sure each worker has a copy of the code under test.
+As mentioned earlier, Cosmic Ray mutation works by actually modifying the code on disk. As such, multiple workers can't
+share a single copy of the code; their mutations would interfere with one another. So we need to make sure each worker
+has a copy of the code under test.
 
 For this example, we'll manually copy the files around:
 
