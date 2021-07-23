@@ -80,7 +80,7 @@ configuration. The worker will tell you that it's waiting to process requests on
     ======== Running on http://0.0.0.0:9876 ========
     (Press CTRL+C to quit)    
 
-Note that your worker must be running in the same directory as you would normally the tests from. In this case, we're
+Note that your worker must be running in the same directory as you would normally run the tests from. In this case, we're
 expecting the tests to be run in ``$ROOT``, so make sure your worker is running in that directory. Generally speaking,
 the worker doesn't do much more than mutate the code on disk and run the test command you've specified in your config.
 
