@@ -84,12 +84,11 @@ To create your config for this tutorial, do this:
     cd $ROOT
     cosmic-ray new-config tutorial.toml
 
-This will ask you a series of questions. Anwer them like this:
+This will ask you a series of questions. Answer them like this:
 
 .. code-block:: text
 
     [?] Top-level module path: mod.py
-    [?] Python version (blank for auto detection): 
     [?] Test execution timeout (seconds): 10
     [?] Test command: python -m unittest test_mod.py
     -- MENU: Distributor --
@@ -208,23 +207,20 @@ You can use the ``baseline`` command to check that the test suite passes on unmu
 
 .. code-block:: bash
 
-    cosmic-ray baseline --report tutorial.toml tutorial.sqlite
+    cosmic-ray --verbosity=INFO baseline tutorial.toml tutorial_baseline.sqlite
 
-This should report that the tests pass:
+This should report that the tests pass, something like this:
 
 .. code-block:: text
 
-    Execution with no mutation works fine.
+    [07/23/21 10:00:20] INFO     INFO:root:Reading config from 'tutorial.toml'                                                                                                                                            config.py:103
+                        INFO     INFO:cosmic_ray.commands.execute:Beginning execution                                                                                                                                     execute.py:45
+                        INFO     INFO:cosmic_ray.testing:Running test (timeout=10.0): python -m unittest test_mod.py                                                                                                      testing.py:36
+                        INFO     INFO:cosmic_ray.commands.execute:Job baseline complete                                                                                                                                   execute.py:43
+                        INFO     INFO:cosmic_ray.commands.execute:Execution finished                                                                                                                                      execute.py:53
+                        INFO     INFO:root:Baseline passed. Execution with no mutation works fine.       
 
-You'll also see that there is a new ``tutorial.baseline.sqlite`` database containing the results of the baselining.
-
-.. tip::
-
-    Only one baseline can be stored in the baseline database. If the execution failed
-    and you fixed the environment without changing the source code, you
-    can re-baseline it with ``--force`` option without the need to run ``init``
-    again.
-
+You'll also see that there is a new ``tutorial_baseline.sqlite`` database containing the results of the baselining.
 
 If this command succeeds, then you're ready to start mutating code and testing it!
 
@@ -243,8 +239,9 @@ This will produce output like this (though note that the test IDs will be differ
 
 .. code-block:: text
 
-    574ac31ac7d14169a8dc45d988803e69 mod.py core/NumberReplacer 1
-    8f0e988866f447d085ce9887e6e900e5 mod.py core/NumberReplacer 0
+    mod.py core/NumberReplacer 0
+    [job-id] 929a563b613242b48dae0f2de74ad2af
+    mod.py core/NumberReplacer 1
     total jobs: 2
     no jobs completed
 
@@ -299,13 +296,15 @@ This time we see that both mutations were made, tests were run for each, and bot
 
 .. code-block:: text
 
-    8f0e988866f447d085ce9887e6e900e5 mod.py core/NumberReplacer 0
+    [job-id] f168ef23dff24b75846a730858fe0111
+    mod.py core/NumberReplacer 0
     worker outcome: normal, test outcome: killed
-    574ac31ac7d14169a8dc45d988803e69 mod.py core/NumberReplacer 1
+    [job-id] 929a563b613242b48dae0f2de74ad2af
+    mod.py core/NumberReplacer 1
     worker outcome: normal, test outcome: killed
     total jobs: 2
     complete: 2 (100.00%)
-    surviving mutants: 0 (0.00%)
+    surviving mutants: 0 (0.00%)   
 
 .. tip::
 

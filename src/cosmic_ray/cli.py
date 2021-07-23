@@ -119,14 +119,7 @@ def handle_exec(config_file, session_file):
 @cli.command()
 @click.argument("config_file")
 @click.argument("session_file")
-@click.option(
-    "--force",
-    "force",
-    flag_value=True,
-    default=False,
-    help="Force write over baseline session file if this file was already created by a previous run.",
-)
-def baseline(config_file, session_file, force):
+def baseline(config_file, session_file):
     """Runs a baseline execution that executes the test suite over unmutated code.
 
     The results of the run are saved in `session_file`.
@@ -135,12 +128,6 @@ def baseline(config_file, session_file, force):
     """
     session_file = Path(session_file)
     cfg = load_config(config_file)
-
-    if force:
-        try:
-            os.unlink(session_file)
-        except OSError:
-            pass
 
     with use_db(session_file, mode=WorkDB.Mode.create) as db:
         db.clear()
