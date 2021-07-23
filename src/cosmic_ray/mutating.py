@@ -52,7 +52,7 @@ async def mutate_and_test(mutations: Iterable[MutationSpec], test_command, timeo
                 operator_class = cosmic_ray.plugins.get_operator(mutation.operator_name)
                 operator = operator_class()
                 (previous_code, mutated_code) = stack.enter_context(
-                    cosmic_ray.mutating.use_mutation(mutation.module_path, operator, mutation.occurrence)
+                    use_mutation(mutation.module_path, operator, mutation.occurrence)
                 )
 
                 # If there's no mutated code, then no mutation was possible.
