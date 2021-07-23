@@ -1,4 +1,4 @@
 """Cosmic Ray version info."""
 
-__version__ = "8.3.0"
+__version__ = "8.3.1"
 __version_info__ = tuple(__version__.split('.'))
