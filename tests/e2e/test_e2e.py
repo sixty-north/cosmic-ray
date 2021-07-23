@@ -37,14 +37,22 @@ def test_e2e(example_project_root, config, session):
         assert rate == 0.0
 
 
-def test_baseline(example_project_root, config, session):
+def test_baseline_with_explicit_session_file(example_project_root, config, session):
     subprocess.check_call(
-        [sys.executable, "-m", "cosmic_ray.cli", "baseline", config, str(session)], cwd=str(example_project_root)
+        [sys.executable, "-m", "cosmic_ray.cli", "baseline", config, "--session-file", session],
+        cwd=str(example_project_root),
     )
 
     with use_db(str(session), WorkDB.Mode.open) as work_db:
         rate = survival_rate(work_db)
         assert rate == 100.0
+
+
+def test_baseline_with_temp_session_file(example_project_root, config):
+    subprocess.check_call(
+        [sys.executable, "-m", "cosmic_ray.cli", "baseline", config],
+        cwd=str(example_project_root),
+    )
 
 
 def test_importing(example_project_root, session):
