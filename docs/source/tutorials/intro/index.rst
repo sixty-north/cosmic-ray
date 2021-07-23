@@ -18,6 +18,17 @@ First you'll need to install Cosmic Ray. The simplest (and generally best) way t
 
 You'll generally want to do this in a virtual environment, but it's not required.
 
+Installation from source
+------------------------
+
+If you need to install Cosmic Ray from source, first change to the directorying containing ``setup.py``. Then run::
+
+    pip install .
+
+Or, if you want to `install from source in "editable" mode <https://pip.pypa.io/en/stable/cli/pip_install/#cmdoption-e>`_, you can use the ``-e` flag::
+
+    pip install -e .
+
 Source module and tests
 =======================
 
