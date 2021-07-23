@@ -239,6 +239,7 @@ This will produce output like this (though note that the test IDs will be differ
 
 .. code-block:: text
 
+    [job-id] f168ef23dff24b75846a730858fe0111
     mod.py core/NumberReplacer 0
     [job-id] 929a563b613242b48dae0f2de74ad2af
     mod.py core/NumberReplacer 1
