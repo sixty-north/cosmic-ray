@@ -72,6 +72,7 @@ class HttpDistributor(Distributor):
         for work_item in pending_work:
             # Wait for an available URL
             while not urls:
+                assert fetchers.keys()
                 done, pending = await asyncio.wait(fetchers.keys(), return_when=asyncio.FIRST_COMPLETED)
                 for task in done:
                     await handle_completed_task(task)
@@ -84,9 +85,10 @@ class HttpDistributor(Distributor):
             fetchers[fetcher] = url, work_item.job_id
 
         # Drain the remaining work
-        done, pending = await asyncio.wait(fetchers.keys(), return_when=asyncio.ALL_COMPLETED)
-        for task in done:
-            await handle_completed_task(task)
+        if fetchers.keys():
+            done, pending = await asyncio.wait(fetchers.keys(), return_when=asyncio.ALL_COMPLETED)
+            for task in done:
+                await handle_completed_task(task)
 
 
 async def send_request(url, work_item: WorkItem, test_command, timeout):
