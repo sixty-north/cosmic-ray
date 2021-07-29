@@ -50,9 +50,36 @@ in a list at the key "cosmic-ray.filters.operators-filter.exclude-operators". He
   exclude-operators = [
     "core/ReplaceComparisonOperator_Is(Not)?_(Not)?(Eq|[LG]tE?)",
     "core/ReplaceComparisonOperator_(Not)?(Eq|[LG]tE?)_Is(Not)?",
-    "core/ReplaceComparisonOperator_[LG]tE_Eq",
-    "core/ReplaceComparisonOperator_[LG]t_NotEq",
+    "core/ReplaceComparisonOperator_LtE_Eq",
+    "core/ReplaceComparisonOperator_Lt_NotEq",
   ]
+
+The first regular expression here is skipping the following operators:
+
+- core/ReplaceComparisonOperator_Is_Eq
+- core/ReplaceComparisonOperator_Is_Lt
+- core/ReplaceComparisonOperator_Is_LtE
+- core/ReplaceComparisonOperator_Is_Gt
+- core/ReplaceComparisonOperator_Is_GtE
+- core/ReplaceComparisonOperator_Is_NotEq
+- core/ReplaceComparisonOperator_Is_NotLt
+- core/ReplaceComparisonOperator_Is_NotLtE
+- core/ReplaceComparisonOperator_Is_NotGt
+- core/ReplaceComparisonOperator_Is_NotGtE
+- core/ReplaceComparisonOperator_IsNot_Eq
+- core/ReplaceComparisonOperator_IsNot_Lt
+- core/ReplaceComparisonOperator_IsNot_LtE
+- core/ReplaceComparisonOperator_IsNot_Gt
+- core/ReplaceComparisonOperator_IsNot_GtE
+- core/ReplaceComparisonOperator_IsNot_NotEq
+- core/ReplaceComparisonOperator_IsNot_NotLt
+- core/ReplaceComparisonOperator_IsNot_NotLtE
+- core/ReplaceComparisonOperator_IsNot_NotGt
+- core/ReplaceComparisonOperator_IsNot_NotGtE
+
+While all of the entries in `operators-filter.exclude-operators` are treated as regular expressions, you don't need to
+us "fancy" regular expression features in them. As in the last two entries in the example above, you can do matching
+against an exact string; these are still regular expressions, albeit simple ones.
 
 For a list of all operators in your Cosmic Ray installation, run ``cosmic-ray operators``.
 
