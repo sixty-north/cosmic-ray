@@ -307,6 +307,18 @@ This should produce no output.
     10 seconds to run and Cosmic Ray finds 1000 mutations, a full ``exec`` will take 10 x 1000 = 10,000 seconds, or
     about 2.7 hours. 
 
+Committing before `exec`
+------------------------
+
+If you're using revision control with your code (you are, right?!), you should consider committing your changes before
+running `exec`. While it's not strictly necessary to do this in simple cases, it's often important to commit if
+you're using tools like `cr-http-workers` that rely on fetching code from a repository. 
+
+Also, while Cosmic Ray is designed to be robust in the face of exceptions and crashes, there is always the possibility
+that Cosmic Ray won't correctly undo a mutation. Remember, it makes mutations directly on disk, so if a mutation is
+not correctly undone, and if you haven't committed your changes prior to testing, you run the risk of introducing
+a mutation into you code accidentally.
+
 Reporting the results
 =====================
 
