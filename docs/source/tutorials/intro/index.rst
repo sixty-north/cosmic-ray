@@ -207,6 +207,20 @@ The first step in a full testing run, then, is to initialize a session:
 This will create a database file called ``tutorial.sqlite``. There is a record in the database for each mutation that
 Cosmic Ray will perform, and Cosmic Ray will associate testing results with these records as it executes.
 
+When does `init` need to be run?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+`init` completely rewrites the session file you tell it to use, so you should not re-run `init` on a session that
+contains any results that you want to keep. At the same time, if you change your configuration in a way that alters
+which tests are run and which mutations are made, then you should re-initialize your session.
+
+Generally speaking, if you change the 'module-path', 'timeout', 'excluded-modules', or 'test-command' parts of your
+configuration, or if you change any of the filters you use, then you need to re-initialize your session and start over.
+Any of these changes can affect the operations that the subsequent `exec` command will run.
+
+Similarly, you need to create a new session with `init` whenever your code-under-test changes. This is necessary because
+changes to the CUT will affect which mutations are made.
+
 Baselining
 ----------
 
