@@ -218,8 +218,9 @@ Generally speaking, if you change the 'module-path', 'timeout', 'excluded-module
 configuration, or if you change any of the filters you use, then you need to re-initialize your session and start over.
 Any of these changes can affect the operations that the subsequent `exec` command will run.
 
-Similarly, you need to create a new session with `init` whenever your code-under-test changes. This is necessary because
-changes to the CUT will affect which mutations are made.
+Similarly, you need to create a new session with `init` whenever your code-under-test or your tests themselves change.
+This is necessary because changes to the CUT will affect which mutations are made and changes to the tests affect which
+tests are run.
 
 Baselining
 ----------
