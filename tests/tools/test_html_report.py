@@ -18,12 +18,12 @@ def options(request):
 
 
 def test_smoke_test_on_initialized_session(initialized_session, options):
-    command = [sys.executable, "-m", "cosmic_ray.tools.html"] + options + [str(initialized_session)]
+    command = [sys.executable, "-m", "cosmic_ray.tools.html"] + options + [str(initialized_session.session)]
 
-    subprocess.check_call(command, cwd=str(initialized_session.parent))
+    subprocess.check_call(command, cwd=str(initialized_session.session.parent))
 
 
 def test_smoke_test_on_execd_session(execd_session, options):
-    command = [sys.executable, "-m", "cosmic_ray.tools.html"] + options + [str(execd_session)]
+    command = [sys.executable, "-m", "cosmic_ray.tools.html"] + options + [str(execd_session.session)]
 
-    subprocess.check_call(command, cwd=str(execd_session.parent))
+    subprocess.check_call(command, cwd=str(execd_session.session.parent))

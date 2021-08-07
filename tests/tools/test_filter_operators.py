@@ -6,15 +6,27 @@ from cosmic_ray.work_item import ResolvedMutationSpec, WorkerOutcome, WorkItem, 
 
 
 def test_smoke_test_on_initialized_session(initialized_session):
-    command = [sys.executable, "-m", "cosmic_ray.tools.filters.operators_filter", str(initialized_session)]
+    command = [
+        sys.executable,
+        "-m",
+        "cosmic_ray.tools.filters.operators_filter",
+        str(initialized_session.session),
+        str(initialized_session.config),
+    ]
 
-    subprocess.check_call(command, cwd=str(initialized_session.parent))
+    subprocess.check_call(command, cwd=str(initialized_session.session.parent))
 
 
 def test_smoke_test_on_execd_session(execd_session):
-    command = [sys.executable, "-m", "cosmic_ray.tools.filters.operators_filter", str(execd_session)]
+    command = [
+        sys.executable,
+        "-m",
+        "cosmic_ray.tools.filters.operators_filter",
+        str(execd_session.session),
+        str(execd_session.config),
+    ]
 
-    subprocess.check_call(command, cwd=str(execd_session.parent))
+    subprocess.check_call(command, cwd=str(execd_session.session.parent))
 
 
 class FakeWorkDB:

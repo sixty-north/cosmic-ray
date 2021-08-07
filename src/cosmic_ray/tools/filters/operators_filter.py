@@ -1,14 +1,14 @@
 """An filter that removes operators based on regular expressions.
 """
-from argparse import Namespace
 import logging
 import re
 import sys
+from argparse import ArgumentParser, Namespace
 
-from cosmic_ray.config import ConfigDict, load_config
+from cosmic_ray.config import load_config
+from cosmic_ray.tools.filters.filter_app import FilterApp
 from cosmic_ray.work_db import WorkDB
 from cosmic_ray.work_item import WorkerOutcome, WorkResult
-from cosmic_ray.tools.filters.filter_app import FilterApp
 
 log = logging.getLogger()
 
@@ -51,15 +51,13 @@ class OperatorsFilter(FilterApp):
     def filter(self, work_db: WorkDB, args: Namespace):
         """Mark as skipped all work item with filtered operator"""
 
-        config = ConfigDict()
-        if args.config is not None:
-            config = load_config(args.config)
+        config = load_config(args.config)
 
         exclude_operators = config.sub("filters", "operators-filter").get("exclude-operators", ())
         self._skip_filtered(work_db, exclude_operators)
 
-    def add_args(self, parser):
-        parser.add_argument("--config", help="Config file to use")
+    def add_args(self, parser: ArgumentParser):
+        parser.add_argument("config", help="Config file to use")
 
 
 def main(argv=None):
