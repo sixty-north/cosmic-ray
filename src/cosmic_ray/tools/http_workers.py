@@ -47,7 +47,7 @@ async def run(config_file, repo_url, location):
             for idx, (option, value) in enumerate(worker_args)
         ]
 
-        await asyncio.gather([await proc.communicate() for proc in procs])
+        await asyncio.gather(*[proc.communicate() for proc in procs])
 
 
 @click.command(help=__doc__)
