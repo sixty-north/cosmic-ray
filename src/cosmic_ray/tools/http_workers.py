@@ -7,7 +7,9 @@ provide the configured URLs.
 """
 
 import asyncio
+import contextlib
 import logging
+import shutil
 import tempfile
 from pathlib import Path
 
@@ -21,7 +23,7 @@ log = logging.getLogger()
 
 
 async def run(config_file, repo_url, location):
-    """Start the configured workers on the own git clones.
+    """Start the configured workers in their own git clones.
 
     Args:
         config_file: The Cosmic Ray configuration file describing the distributor URLs.
@@ -36,15 +38,13 @@ async def run(config_file, repo_url, location):
     if not worker_args:
         log.warning("No valid worker URLs found in config %s", config_file)
 
-    with tempfile.TemporaryDirectory() as root:
-        for idx, _ in enumerate(worker_args):
-            _create_clone(repo_url, Path(root) / str(idx))
-
+    with contextlib.ExitStack() as stack:
         procs = [
             await asyncio.create_subprocess_shell(
-                f"cosmic-ray --verbosity INFO http-worker {option} {value}", cwd=Path(root) / str(idx) / location
+                f"cosmic-ray --verbosity INFO http-worker {option} {value}",
+                cwd=stack.enter_context(_create_clone(repo_url)) / location,
             )
-            for idx, (option, value) in enumerate(worker_args)
+            for option, value in worker_args
         ]
 
         await asyncio.gather(*[proc.communicate() for proc in procs])
@@ -59,13 +59,39 @@ def main(config_file, repo_url, location):
     asyncio.get_event_loop().run_until_complete(run(config_file, repo_url, location))
 
 
-def _create_clone(source_repo_url, destination_dir):
-    url = yarl.URL(source_repo_url)
-    if url.scheme == "":
-        url = yarl.URL.build(scheme="file", path=str(Path(url.path).resolve()))
+@contextlib.contextmanager
+def _create_clone(source_repo_url):
+    """Clone a git repository into a temporary directory.
 
-    log.info("Cloning %s to %s", url, destination_dir)
-    git.Repo.clone_from(str(url), destination_dir, depth=1)
+    This is a context-manager that yields the directory used for the clone::
+
+        with _create_clone('http://github.com/sixty-north/cosmic-ray') as clone_dir:
+            . . .
+
+    This attempts to clean up the clone directory after the context ends. NB: that there are
+    known problems with this on Windows, so it's possible that the directory will not be
+    removed.
+    """
+    # Normally I'd use the context manager tempfile.TemporaryDirectory, but that has problems
+    # on windows: https://github.com/sixty-north/cosmic-ray/issues/521
+
+    root = tempfile.mkdtemp()
+
+    try:
+        destination_dir = Path(root)
+        url = yarl.URL(source_repo_url)
+        if url.scheme == "":
+            url = yarl.URL.build(scheme="file", path=str(Path(url.path).resolve()))
+
+        log.info("Cloning %s to %s", url, destination_dir)
+        git.Repo.clone_from(str(url), destination_dir, depth=1)
+
+        yield destination_dir
+    finally:
+        try:
+            shutil.rmtree(root)
+        except (RecursionError, PermissionError):
+            log.warning(f'Unable to remove directory: {root}')
 
 
 LOCALHOST_ADDRESSES = (
