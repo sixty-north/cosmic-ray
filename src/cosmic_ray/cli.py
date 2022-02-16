@@ -86,7 +86,7 @@ def init(config_file, session_file):
     cfg = load_config(config_file)
 
     modules = cosmic_ray.modules.find_modules(Path(cfg["module-path"]))
-    modules = cosmic_ray.modules.filter_paths(modules, cfg.get("exclude-modules", ()))
+    modules = cosmic_ray.modules.filter_paths(modules, cfg.get("excluded-modules", ()))
 
     if log.isEnabledFor(logging.INFO):
         log.info("Modules discovered:")

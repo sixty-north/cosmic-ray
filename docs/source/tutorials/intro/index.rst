@@ -153,7 +153,8 @@ Next, line 4 tells Cosmic Ray which modules to exclude from mutation:
     :language: toml
 
 In this case we're not excluding any, but there may be times when you need to skip certain modules, e.g. because 
-you know that you don't have sufficient tests for them at the moment.
+you know that you don't have sufficient tests for them at the moment. This parameter expects glob-patterns, so to exclude
+files that end with ``_test.py`` recursively for example, you would add ``"**/*_test.py"``.
 
 Line 5 is one of the most critical lines in the configuration. This tells Cosmic Ray how to run your test suite:
 
