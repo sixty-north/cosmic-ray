@@ -15,7 +15,6 @@ INSTALL_REQUIRES = [
     "exit_codes",
     "gitpython",
     "parso",
-    "pathlib",
     "qprompt",
     "rich",
     "sqlalchemy",
