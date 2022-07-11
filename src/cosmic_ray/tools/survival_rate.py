@@ -17,7 +17,7 @@ SUPPORTED_Z_SCORES = {800: 1.282, 900: 1.645, 950: 1.960, 980: 2.326, 990: 2.576
 @click.option(
     "--confidence",
     type=click.Choice(sorted([str(z / 10) for z in SUPPORTED_Z_SCORES])),
-    default=95,
+    default='95.0',
     help="Specify the confidence levels for estimates",
 )
 @click.option(
@@ -67,3 +67,7 @@ def survival_rate(work_db):
         return 0
 
     return (1 - kills / num_results) * 100
+
+
+if __name__ == '__main__':
+    format_survival_rate()
