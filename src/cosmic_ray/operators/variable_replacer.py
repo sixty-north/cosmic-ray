@@ -51,7 +51,7 @@ class VariableReplacer(Operator):
             # for cause_variable='x' and effect_variable='y'
             ('j = x + z\ny = x + z', 'j = x + z\ny = -2 + z'),
             # for cause_variable='x' and effect_variable='j',
-            ('j = x + z\ny = x + z', 'j = 1 + z\ny = -2 + z'),
+            ('j = x + z\ny = x + z', 'j = 1 + z\ny = x + z'),
             # for cause_variable='x'
             ('y = 2*x + 10 + j + x**2', 'y=2*10 + 10 + j + -4**2'),
         )
