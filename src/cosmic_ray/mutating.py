@@ -12,7 +12,7 @@ import cosmic_ray.plugins
 from cosmic_ray.ast import Visitor, get_ast
 from cosmic_ray.testing import run_tests
 from cosmic_ray.work_item import MutationSpec, TestOutcome, WorkerOutcome, WorkResult
-
+from cosmic_ray.operators.variable_replacer import VariableReplacer
 log = logging.getLogger(__name__)
 
 # pylint: disable=R0913
@@ -51,6 +51,11 @@ async def mutate_and_test(mutations: Iterable[MutationSpec], test_command, timeo
             for mutation in mutations:
                 operator_class = cosmic_ray.plugins.get_operator(mutation.operator_name)
                 operator = operator_class()
+                # TODO: Store mutations in DB, extract, and then apply
+                # if operator_class == VariableReplacer:
+                #     operator = operator_class("x")
+                # else:
+
                 (previous_code, mutated_code) = stack.enter_context(
                     use_mutation(mutation.module_path, operator, mutation.occurrence)
                 )

@@ -3,7 +3,6 @@ from .operator import Operator
 from parso.python.tree import Name, Number
 from random import randint
 
-
 class VariableReplacer(Operator):
     """An operator that replaces usages of named variables."""
 
@@ -17,11 +16,10 @@ class VariableReplacer(Operator):
         effect variable."""
 
         if isinstance(node, Name) and node.value == self.cause_variable:
-
             # Confirm that name node is used on right hand side of the expression
             expr_node = node.search_ancestor('expr_stmt')
             if expr_node:
-                cause_variables = expr_node.get_rhs().children
+                cause_variables = list(self._get_causes_from_expr_node(expr_node))
                 if node in cause_variables:
                     mutation_position = (node.start_pos, node.end_pos)
 
@@ -43,6 +41,23 @@ class VariableReplacer(Operator):
 
         return Number(start_pos=node.start_pos, value=str(randint(-100, 100)))
 
+    def _get_causes_from_expr_node(self, expr_node):
+        rhs = expr_node.get_rhs().children
+        return self._flatten_expr(rhs)
+
+    def _flatten_expr(self, expr):
+        for item in expr:
+            # Convert PythonNode to list of its children
+            try:
+                item_to_flatten = item.children
+            except AttributeError:
+                item_to_flatten = item
+            #
+            try:
+                yield from self._flatten_expr(item_to_flatten)
+            except TypeError:
+                yield item_to_flatten
+
     @classmethod
     def examples(cls):
         return (
@@ -55,3 +70,4 @@ class VariableReplacer(Operator):
             # for cause_variable='x'
             ('y = 2*x + 10 + j + x**2', 'y=2*10 + 10 + j + -4**2'),
         )
+

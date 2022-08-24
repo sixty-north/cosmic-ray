@@ -87,6 +87,11 @@ class ConfigDict(dict):
         name = self.distributor_name
         return self["distributor"].get(name, ConfigDict())
 
+    @property
+    def operators_config(self):
+        return self["operators"]
+
+
 
 @contextmanager
 def _config_stream(filename):

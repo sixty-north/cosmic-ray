@@ -97,7 +97,7 @@ def init(config_file, session_file):
             log.info(" - %s: %s", directory, ", ".join(sorted(files)))
 
     with use_db(session_file) as database:
-        cosmic_ray.commands.init(modules, database)
+        cosmic_ray.commands.init(modules, database, cfg.operators_config)
 
     sys.exit(ExitCode.OK)
 
