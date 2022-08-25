@@ -1,9 +1,10 @@
 """Implementation of the WorkDB."""
 
 import contextlib
+import json
 from pathlib import Path
 
-from sqlalchemy import Column, Enum, ForeignKey, Integer, String, Text, create_engine, event
+from sqlalchemy import Column, Enum, ForeignKey, Integer, JSON, String, Text, create_engine, event
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.orm.session import sessionmaker
@@ -94,7 +95,6 @@ class WorkDB:
           work_items: an iterable of WorkItem.
         """
         storage = (_work_item_to_storage(work_item) for work_item in work_items)
-
         with self._session_maker.begin() as session:
             session.add_all(storage)
 
@@ -198,6 +198,7 @@ class MutationSpecStorage(Base):
     __tablename__ = "mutation_specs"
     module_path = Column(String)
     operator_name = Column(String)
+    operator_args = Column(JSON)
     occurrence = Column(Integer)
     start_pos_row = Column(Integer)
     start_pos_col = Column(Integer)
@@ -222,6 +223,7 @@ def _mutation_spec_from_storage(mutation_spec: MutationSpecStorage):
     return ResolvedMutationSpec(
         module_path=Path(mutation_spec.module_path),
         operator_name=mutation_spec.operator_name,
+        operator_args=json.loads(mutation_spec.operator_args),
         occurrence=mutation_spec.occurrence,
         start_pos=(mutation_spec.start_pos_row, mutation_spec.start_pos_col),
         end_pos=(mutation_spec.end_pos_row, mutation_spec.end_pos_col),
@@ -233,6 +235,7 @@ def _mutation_spec_to_storage(mutation_spec: ResolvedMutationSpec, job_id: str):
         job_id=job_id,
         module_path=str(mutation_spec.module_path),
         operator_name=mutation_spec.operator_name,
+        operator_args=json.dumps(mutation_spec.operator_args),
         occurrence=mutation_spec.occurrence,
         start_pos_row=mutation_spec.start_pos[0],
         start_pos_col=mutation_spec.start_pos[1],
