@@ -49,7 +49,10 @@ async def mutate_and_test(mutations: Iterable[ResolvedMutationSpec], test_comman
             file_changes = {}
             for mutation in mutations:
                 operator_class = cosmic_ray.plugins.get_operator(mutation.operator_name)
-                operator_args = mutation.operator_args
+                try:
+                    operator_args = mutation.operator_args
+                except AttributeError:
+                    operator_args = {}
                 operator = operator_class(**operator_args)
 
                 (previous_code, mutated_code) = stack.enter_context(
