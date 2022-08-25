@@ -84,7 +84,10 @@ def init(config_file, session_file):
     executed with other commands.
     """
     cfg = load_config(config_file)
-
+    try:
+        operators_cfg = cfg.operators_config
+    except KeyError:
+        operators_cfg = None
     modules = cosmic_ray.modules.find_modules(Path(cfg["module-path"]))
     modules = cosmic_ray.modules.filter_paths(modules, cfg.get("excluded-modules", ()))
 
@@ -97,7 +100,7 @@ def init(config_file, session_file):
             log.info(" - %s: %s", directory, ", ".join(sorted(files)))
 
     with use_db(session_file) as database:
-        cosmic_ray.commands.init(modules, database, cfg.operators_config)
+        cosmic_ray.commands.init(modules, database, operators_cfg)
 
     sys.exit(ExitCode.OK)
 

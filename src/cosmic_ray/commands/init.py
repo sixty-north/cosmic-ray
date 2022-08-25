@@ -25,24 +25,28 @@ def _all_work_items(module_paths, operator_cfgs) -> Iterable[WorkItem]:
                 operator_args = operator_cfg["args"]
 
             for args in operator_args:
-                operator = get_operator(operator_name)(**args)
-
-                positions = (
-                    (start_pos, end_pos)
-                    for node in ast_nodes(module_ast)
-                    for start_pos, end_pos in operator.mutation_positions(node)
-                )
-
-                for occurrence, (start_pos, end_pos) in enumerate(positions):
-                    mutation = ResolvedMutationSpec(
-                        module_path=str(module_path),
-                        operator_name=operator_name,
-                        operator_args=args,
-                        occurrence=occurrence,
-                        start_pos=start_pos,
-                        end_pos=end_pos,
+                try:
+                    operator = get_operator(operator_name)(**args)
+                except TypeError:
+                    # Operator can't be loaded because it requires args, try next type
+                    continue
+                else:
+                    positions = (
+                        (start_pos, end_pos)
+                        for node in ast_nodes(module_ast)
+                        for start_pos, end_pos in operator.mutation_positions(node)
                     )
-                    yield WorkItem.single(job_id=uuid.uuid4().hex, mutation=mutation)
+
+                    for occurrence, (start_pos, end_pos) in enumerate(positions):
+                        mutation = ResolvedMutationSpec(
+                            module_path=str(module_path),
+                            operator_name=operator_name,
+                            operator_args=args,
+                            occurrence=occurrence,
+                            start_pos=start_pos,
+                            end_pos=end_pos,
+                        )
+                        yield WorkItem.single(job_id=uuid.uuid4().hex, mutation=mutation)
 
 
 def init(module_paths, work_db: WorkDB, operators_cfgs=None):
