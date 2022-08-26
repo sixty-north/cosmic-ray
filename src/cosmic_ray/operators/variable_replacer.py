@@ -1,7 +1,8 @@
 """Implementation of the variable-replacement operator."""
 from .operator import Operator
-from parso.python.tree import Name, Number
+from parso.python.tree import Name, Number, ExprStmt, Leaf
 from random import randint
+from typing import Iterable
 
 class VariableReplacer(Operator):
     """An operator that replaces usages of named variables."""
@@ -15,31 +16,33 @@ class VariableReplacer(Operator):
         specified, then only mutate usages of the cause variable in definitions of the
         effect variable."""
 
-        if isinstance(node, Name) and node.value == self.cause_variable:
+        if isinstance(node, ExprStmt):
             # Confirm that name node is used on right hand side of the expression
-            expr_node = node.search_ancestor('expr_stmt')
-            if expr_node:
-                cause_variables = list(self._get_causes_from_expr_node(expr_node))
-                if node in cause_variables:
-                    mutation_position = (node.start_pos, node.end_pos)
+            cause_variables = list(self._get_causes_from_expr_node(node))
+            cause_variable_names =  [cause_variable.value for cause_variable in cause_variables]
+            if self.cause_variable in cause_variable_names:
+                mutation_position = (node.start_pos, node.end_pos)
 
-                    # If an effect variable is specified, confirm that it appears on left hand
-                    # side of the expression
-                    if self.effect_variable:
-                        effect_variable_names = [v.value for v in expr_node.get_defined_names()]
-                        if self.effect_variable in effect_variable_names:
-                            yield mutation_position
-
-                    # If no effect variable is specified, any occurrence of the cause variable
-                    # on the right hand side of an expression can be mutated
-                    else:
+                # If an effect variable is specified, confirm that it appears on left hand
+                # side of the expression
+                if self.effect_variable:
+                    effect_variable_names = [v.value for v in node.get_defined_names()]
+                    if self.effect_variable in effect_variable_names:
                         yield mutation_position
+
+                # If no effect variable is specified, any occurrence of the cause variable
+                # on the right hand side of an expression can be mutated
+                else:
+                    yield mutation_position
 
     def mutate(self, node, index):
         """Replace cause variable with random constant."""
-        assert isinstance(node, Name)
-
-        return Number(start_pos=node.start_pos, value=str(randint(-100, 100)))
+        assert isinstance(node, ExprStmt)
+        # Find all occurrences of the cause node in the ExprStatement and replace with a random number
+        rhs = node.get_rhs()
+        new_rhs = self._replace_named_variable_in_expr(rhs, self.cause_variable)
+        node.children[2] = new_rhs
+        return node
 
     def _get_causes_from_expr_node(self, expr_node):
         rhs = expr_node.get_rhs().children
@@ -57,6 +60,19 @@ class VariableReplacer(Operator):
                 yield from self._flatten_expr(item_to_flatten)
             except TypeError:
                 yield item_to_flatten
+
+    def _replace_named_variable_in_expr(self, node, variable_name):
+        if isinstance(node, Leaf):
+            if node.value == variable_name:
+                return Number(start_pos=node.start_pos, value=str(randint(-100, 100)))
+            else:
+                return node
+
+        updated_child_nodes = []
+        for child_node in node.children:
+            updated_child_nodes.append(self._replace_named_variable_in_expr(child_node, variable_name))
+        node.children = updated_child_nodes
+        return node
 
     @classmethod
     def examples(cls):
