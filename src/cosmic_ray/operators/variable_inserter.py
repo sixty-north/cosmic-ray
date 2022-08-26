@@ -4,8 +4,8 @@ import random
 import parso.python.tree
 
 from .operator import Operator
-from parso.python.tree import Name, Number, PythonNode
-from random import randint
+from parso.python.tree import Name, PythonNode
+
 
 class VariableInserter(Operator):
     """An operator that replaces adds usages of named variables to particular statements."""
@@ -15,9 +15,9 @@ class VariableInserter(Operator):
         self.effect_variable = effect_variable
 
     def mutation_positions(self, node):
-        """Mutate usages of the specified cause variable. If an effect variable is also
-        specified, then only mutate usages of the cause variable in definitions of the
-        effect variable."""
+        """Find expressions or terms that define the effect variable. These nodes can be
+           mutated to introduce an effect of the cause variable.
+        """
         if isinstance(node, PythonNode) and (node.type == "arith_expr" or node.type == "term"):
             expr_node = node.search_ancestor('expr_stmt')
             if expr_node:
@@ -29,7 +29,7 @@ class VariableInserter(Operator):
                         yield (node.start_pos, node.end_pos)
 
     def mutate(self, node, index):
-        """Replace cause variable with random constant."""
+        """Join the node with cause variable using a randomly sampled arithmetic operator."""
         assert isinstance(node, PythonNode)
         assert (node.type == "arith_expr" or node.type == "term")
 
@@ -65,13 +65,9 @@ class VariableInserter(Operator):
     @classmethod
     def examples(cls):
         return (
-            # for cause_variable='x'
-            ('y = x + z', 'y = 10 + z'),
-            # for cause_variable='x' and effect_variable='y'
-            ('j = x + z\ny = x + z', 'j = x + z\ny = -2 + z'),
-            # for cause_variable='x' and effect_variable='j',
-            ('j = x + z\ny = x + z', 'j = 1 + z\ny = x + z'),
-            # for cause_variable='x'
-            ('y = 2*x + 10 + j + x**2', 'y=2*10 + 10 + j + -4**2'),
+            # for cause_variable='j', effect_variable='y
+            ('y = x + z', 'y = x + z * j'),
+            # for cause_variable='x' and effect_variable='j'
+            ('j = x + z\ny = x + z', 'j = x + z + x\ny = x + z'),
         )
 
