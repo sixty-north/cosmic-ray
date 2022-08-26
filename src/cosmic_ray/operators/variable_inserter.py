@@ -21,7 +21,6 @@ class VariableInserter(Operator):
         if isinstance(node, PythonNode) and (node.type == "arith_expr" or node.type == "term"):
             expr_node = node.search_ancestor('expr_stmt')
             if expr_node:
-                print("VI", expr_node, node)
                 effect_variable_names = [v.value for v in expr_node.get_defined_names()]
                 if self.effect_variable in effect_variable_names:
                     cause_variables = list(self._get_causes_from_expr_node(expr_node))
