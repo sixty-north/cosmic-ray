@@ -28,8 +28,11 @@ def _all_work_items(module_paths, operator_cfgs) -> Iterable[WorkItem]:
                 try:
                     operator = get_operator(operator_name)(**args)
                 except TypeError:
-                    # Operator can't be loaded because it requires args, try next type
-                    continue
+                    if not operator_args:
+                        continue
+                    else:
+                        raise Exception(
+                            f"Operator arguments {args} could not be assigned to {operator_name}.")
                 else:
                     positions = (
                         (start_pos, end_pos)
