@@ -19,10 +19,7 @@ def _all_work_items(module_paths, operator_cfgs) -> Iterable[WorkItem]:
 
         for operator_cfg in operator_cfgs:
             operator_name = operator_cfg["name"]
-            if "args" not in operator_cfg:
-                operator_args = [{}]
-            else:
-                operator_args = operator_cfg["args"]
+            operator_args = operator_cfg.get('args', [{}])
 
             for args in operator_args:
                 try:
