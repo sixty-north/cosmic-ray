@@ -3,6 +3,7 @@
 from parso.python.tree import Keyword
 
 from .operator import Operator
+from .example import Example
 
 # pylint: disable=E1101
 
@@ -26,5 +27,5 @@ class KeywordReplacementOperator(Operator):
     @classmethod
     def examples(cls):
         return (
-            (cls.from_keyword, cls.to_keyword),
+            Example(cls.from_keyword, cls.to_keyword),
         )

@@ -9,6 +9,7 @@ import parso.python.tree
 from ..ast import is_none, is_number
 from .operator import Operator
 from .util import extend_name
+from .example import Example
 
 
 class ComparisonOperators(Enum):
@@ -53,7 +54,7 @@ def _create_operator(from_op, to_op):
         @classmethod
         def examples(cls):
             return (
-                ('x {} y'.format(from_op.value), 'x {} y'.format(to_op.value)),
+                Example('x {} y'.format(from_op.value), 'x {} y'.format(to_op.value)),
             )
 
     return ReplaceComparisonOperator

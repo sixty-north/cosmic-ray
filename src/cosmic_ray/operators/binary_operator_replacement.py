@@ -8,7 +8,7 @@ import parso
 
 from .operator import Operator
 from .util import extend_name
-
+from .example import Example
 
 class BinaryOperators(Enum):
     "All binary operators that we mutate."
@@ -47,7 +47,7 @@ def _create_replace_binary_operator(from_op, to_op):
         @classmethod
         def examples(cls):
             return (
-                ('x {} y'.format(from_op.value), 'x {} y'.format(to_op.value)),
+                Example('x {} y'.format(from_op.value), 'x {} y'.format(to_op.value)),
             )
 
     return ReplaceBinaryOperator

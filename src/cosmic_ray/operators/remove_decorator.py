@@ -3,7 +3,7 @@
 from parso.python.tree import Decorator
 
 from .operator import Operator
-
+from .example import Example
 
 class RemoveDecorator(Operator):
     """An operator that removes decorators."""
@@ -19,8 +19,8 @@ class RemoveDecorator(Operator):
     @classmethod
     def examples(cls):
         return (
-            ('@foo\ndef bar(): pass', 'def bar(): pass'),
-            ('@first\n@second\ndef bar(): pass', '@second\ndef bar(): pass'),
-            ('@first\n@second\ndef bar(): pass', '@first\ndef bar(): pass', 1),
-            ('@first\n@second\n@third\ndef bar(): pass', '@first\n@third\ndef bar(): pass', 1),
+            Example('@foo\ndef bar(): pass', 'def bar(): pass'),
+            Example('@first\n@second\ndef bar(): pass', '@second\ndef bar(): pass'),
+            Example('@first\n@second\ndef bar(): pass', '@first\ndef bar(): pass', occurrence=1),
+            Example('@first\n@second\n@third\ndef bar(): pass', '@first\n@third\ndef bar(): pass', occurrence=1),
         )

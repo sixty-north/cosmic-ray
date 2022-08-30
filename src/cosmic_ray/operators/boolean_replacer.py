@@ -5,6 +5,7 @@ import parso.python.tree
 
 from .keyword_replacer import KeywordReplacementOperator
 from .operator import Operator
+from .example import Example
 
 
 class ReplaceTrueWithFalse(KeywordReplacementOperator):
@@ -29,7 +30,7 @@ class ReplaceAndWithOr(KeywordReplacementOperator):
 
     @classmethod
     def examples(cls):
-        return (("x and y", "x or y"),)
+        return (Example("x and y", "x or y"),)
 
 
 class ReplaceOrWithAnd(KeywordReplacementOperator):
@@ -40,7 +41,7 @@ class ReplaceOrWithAnd(KeywordReplacementOperator):
 
     @classmethod
     def examples(cls):
-        return (("x or y", "x and y"),)
+        return (Example("x or y", "x and y"),)
 
 
 class AddNot(Operator):
@@ -84,8 +85,8 @@ class AddNot(Operator):
     @classmethod
     def examples(cls):
         return (
-            ("if True or False: pass", "if not True or False: pass"),
-            ("A if B else C", "A if not B else C"),
-            ("assert isinstance(node, ast.Break)", "assert not isinstance(node, ast.Break)"),
-            ("while True: pass", "while not True: pass"),
+            Example("if True or False: pass", "if not True or False: pass"),
+            Example("A if B else C", "A if not B else C"),
+            Example("assert isinstance(node, ast.Break)", "assert not isinstance(node, ast.Break)"),
+            Example("while True: pass", "while not True: pass"),
         )

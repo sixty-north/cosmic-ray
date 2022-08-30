@@ -1,10 +1,11 @@
 """Implementation of the variable-inserter operator."""
 import random
-
 import parso.python.tree
 
-from .operator import Operator
 from parso.python.tree import Name, PythonNode
+
+from .operator import Operator
+from .example import Example
 
 
 class VariableInserter(Operator):
@@ -64,9 +65,9 @@ class VariableInserter(Operator):
     @classmethod
     def examples(cls):
         return (
-            # for cause_variable='j', effect_variable='y
-            ('y = x + z', 'y = x + z * j'),
-            # for cause_variable='x' and effect_variable='j'
-            ('j = x + z\ny = x + z', 'j = x + z + x\ny = x + z'),
+            Example('y = x + z', 'y = x + z * j',
+                    operator_args={'cause_variable': 'j', 'effect_variable': 'y'}),
+            Example('j = x + z\ny = x + z', 'j = x + z + x\ny = x + z',
+                    operator_args={'cause_variable': 'x', 'effect_variable': 'j'}),
         )
 

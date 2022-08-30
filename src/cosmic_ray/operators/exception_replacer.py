@@ -5,7 +5,7 @@ from parso.python.tree import Name, PythonNode
 from cosmic_ray.exceptions import CosmicRayTestingException
 
 from .operator import Operator
-
+from .example import Example
 
 class ExceptionReplacer(Operator):
     """An operator that modifies exception handlers."""
@@ -37,19 +37,19 @@ class ExceptionReplacer(Operator):
     @classmethod
     def examples(cls):
         return (
-            (
+            Example(
                 "try: raise OSError\nexcept OSError: pass",
                 "try: raise OSError\nexcept {}: pass".format(CosmicRayTestingException.__name__),
             ),
-            (
+            Example(
                 "try: raise OSError\nexcept (OSError, ValueError): pass",
                 "try: raise OSError\nexcept (OSError, {}): pass".format(CosmicRayTestingException.__name__),
-                1,
+                occurrence=1,
             ),
-            (
+            Example(
                 "try: raise OSError\nexcept (OSError, ValueError, KeyError): pass",
                 "try: raise OSError\nexcept (OSError, {}, KeyError): pass".format(CosmicRayTestingException.__name__),
-                1,
+                occurrence=1,
             ),
-            ("try: pass\nexcept: pass", "try: pass\nexcept: pass"),
+            Example("try: pass\nexcept: pass", "try: pass\nexcept: pass"),
         )

@@ -1,8 +1,9 @@
 """Implementation of the variable-replacement operator."""
 from .operator import Operator
-from parso.python.tree import Name, Number, ExprStmt, Leaf
+from .example import Example
+from parso.python.tree import Number, ExprStmt, Leaf
 from random import randint
-from typing import Iterable
+
 
 class VariableReplacer(Operator):
     """An operator that replaces usages of named variables."""
@@ -77,13 +78,12 @@ class VariableReplacer(Operator):
     @classmethod
     def examples(cls):
         return (
-            # for cause_variable='x'
-            ('y = x + z', 'y = 10 + z'),
-            # for cause_variable='x' and effect_variable='y'
-            ('j = x + z\ny = x + z', 'j = x + z\ny = -2 + z'),
-            # for cause_variable='x' and effect_variable='j',
-            ('j = x + z\ny = x + z', 'j = 1 + z\ny = x + z'),
-            # for cause_variable='x'
-            ('y = 2*x + 10 + j + x**2', 'y=2*10 + 10 + j + -4**2'),
+            Example('y = x + z', 'y = 10 + z', operator_args={'cause_variable': 'x'}),
+            Example('j = x + z\ny = x + z', 'j = x + z\ny = -2 + z',
+                    operator_args={'cause_variable': 'x', 'effect_variable': 'y'}),
+            Example('j = x + z\ny = x + z', 'j = 1 + z\ny = x + z',
+                    operator_args={'cause_variable': 'x','effect_variable': 'j'}),
+            Example('y = 2*x + 10 + j + x**2', 'y=2*10 + 10 + j + -4**2',
+                    operator_args={'cause_variable': 'x'}),
         )
 
