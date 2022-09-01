@@ -89,7 +89,8 @@ class ConfigDict(dict):
 
     @property
     def operators_config(self):
-        return self["operators"]
+        """The configuration for specified operators."""
+        return self.get("operators", None)
 
 
 

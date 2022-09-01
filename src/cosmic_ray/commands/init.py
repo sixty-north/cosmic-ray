@@ -25,7 +25,7 @@ def _all_work_items(module_paths, operator_cfgs) -> Iterable[WorkItem]:
                 try:
                     operator = get_operator(operator_name)(**args)
                 except TypeError:
-                    if not operator_args:
+                    if not args:
                         continue
                     else:
                         raise Exception(

@@ -84,10 +84,7 @@ def init(config_file, session_file):
     executed with other commands.
     """
     cfg = load_config(config_file)
-    try:
-        operators_cfg = cfg.operators_config
-    except KeyError:
-        operators_cfg = None
+    operators_cfg = cfg.operators_config
     modules = cosmic_ray.modules.find_modules(Path(cfg["module-path"]))
     modules = cosmic_ray.modules.filter_paths(modules, cfg.get("excluded-modules", ()))
 
