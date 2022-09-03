@@ -4,7 +4,7 @@ import dataclasses
 import enum
 import pathlib
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Dict
 
 
 class StrEnum(str, enum.Enum):
@@ -74,6 +74,7 @@ class ResolvedMutationSpec(MutationSpec):
     "A MutationSpec with the location of the mutation resolved."
     start_pos: Tuple[int, int]
     end_pos: Tuple[int, int]
+    operator_args: Optional[Dict] = None
 
     # pylint: disable=R0913
     def __post_init__(self):
@@ -84,6 +85,9 @@ class ResolvedMutationSpec(MutationSpec):
         if self.start_pos[0] == self.end_pos[0]:
             if self.start_pos[1] >= self.end_pos[1]:
                 raise ValueError("End position must come after start position.")
+
+        # if not hasattr(self, "operator_args"):
+        object.__setattr__(self, "operator_args", self.operator_args)
 
 
 @dataclasses.dataclass(frozen=True)

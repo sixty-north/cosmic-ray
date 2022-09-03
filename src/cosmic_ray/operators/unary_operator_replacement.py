@@ -8,7 +8,7 @@ from parso.python.tree import Keyword, Operator, PythonNode
 
 from . import operator
 from .util import extend_name
-
+from .example import Example
 
 class UnaryOperators(Enum):
     "All unary operators that we mutate."
@@ -60,7 +60,7 @@ def _create_replace_unary_operators(from_op, to_op):
                 to_code = ' ' + to_code
 
             return (
-                (from_code, to_code),
+                Example(from_code, to_code),
             )
 
     return ReplaceUnaryOperator

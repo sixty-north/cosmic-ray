@@ -11,12 +11,11 @@ from typing import Iterable
 import cosmic_ray.plugins
 from cosmic_ray.ast import Visitor, get_ast
 from cosmic_ray.testing import run_tests
-from cosmic_ray.work_item import MutationSpec, TestOutcome, WorkerOutcome, WorkResult
-
+from cosmic_ray.work_item import ResolvedMutationSpec, TestOutcome, WorkerOutcome, WorkResult
 log = logging.getLogger(__name__)
 
 # pylint: disable=R0913
-async def mutate_and_test(mutations: Iterable[MutationSpec], test_command, timeout) -> WorkResult:
+async def mutate_and_test(mutations: Iterable[ResolvedMutationSpec], test_command, timeout) -> WorkResult:
     """Apply a sequence of mutations, run thest tests, and reports the results.
 
     This is fundamentally the mutation(s)-and-test-run implementation at the heart of Cosmic Ray.
@@ -50,7 +49,12 @@ async def mutate_and_test(mutations: Iterable[MutationSpec], test_command, timeo
             file_changes = {}
             for mutation in mutations:
                 operator_class = cosmic_ray.plugins.get_operator(mutation.operator_name)
-                operator = operator_class()
+                try:
+                    operator_args = mutation.operator_args
+                except AttributeError:
+                    operator_args = {}
+                operator = operator_class(**operator_args)
+
                 (previous_code, mutated_code) = stack.enter_context(
                     use_mutation(mutation.module_path, operator, mutation.occurrence)
                 )

@@ -39,15 +39,15 @@ class Operator(ABC):
         """Examples of the mutations that this operator can make.
 
         This is primarily for testing purposes, but it could also be used for
-        docmentation.
+        documentation.
 
-        Each example is a tuple of the form `(from-code, to-code, index)`. The
-        `index` is optional and will be assumed to be 0 if it's not included.
-        The `from-code` is a string containing some Python code prior to
-        mutation. The `to-code` is a string desribing the code after mutation.
-        `index` indicates the occurrence of the application of the operator to
-        the code (i.e. for when an operator can perform multiple mutation to a
-        piece of code).
+        Each example takes the following arguments:
+            pre_mutation_code: code prior to applying the mutation.
+            post_mutation_code: code after (successfully) applying the mutation.
+            occurrence: the index of the occurrence to which the mutation is
+                        applied (optional, default=0).
+            operator_args: a dictionary of arguments to be **-unpacked to the
+                           operator (optional, default={}).
 
-        Returns: An iterable of example tuples.
+        Returns: An iterable of Examples.
         """

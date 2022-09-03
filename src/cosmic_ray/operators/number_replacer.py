@@ -5,6 +5,7 @@ import parso
 
 from ..ast import is_number
 from .operator import Operator
+from .example import Example
 
 # List of offsets that we apply to numbers in the AST. Each index into the list
 # corresponds to single mutation.
@@ -34,10 +35,10 @@ class NumberReplacer(Operator):
     @classmethod
     def examples(cls):
         return (
-            ('x = 1', 'x = 2'),
-            ('x = 1', 'x = 0', 1),
-            ('x = 4.2', 'x = 5.2'),
-            ('x = 4.2', 'x = 3.2', 1),
-            ('x = 1j', 'x = (1+1j)'),
-            ('x = 1j', 'x = (-1+1j)', 1),
+            Example('x = 1', 'x = 2'),
+            Example('x = 1', 'x = 0', occurrence=1),
+            Example('x = 4.2', 'x = 5.2'),
+            Example('x = 4.2', 'x = 3.2', occurrence=1),
+            Example('x = 1j', 'x = (1+1j)'),
+            Example('x = 1j', 'x = (-1+1j)', occurrence=1),
         )

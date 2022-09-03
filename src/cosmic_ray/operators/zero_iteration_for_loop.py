@@ -4,7 +4,7 @@ import parso
 from parso.python.tree import ForStmt
 
 from .operator import Operator
-
+from .example import Example
 
 class ZeroIterationForLoop(Operator):
     """An operator that modified for-loops to have zero iterations."""
@@ -25,4 +25,4 @@ class ZeroIterationForLoop(Operator):
 
     @classmethod
     def examples(cls):
-        return (("for i in rang(1,2): pass", "for i in []: pass"),)
+        return (Example("for i in rang(1,2): pass", "for i in []: pass"),)

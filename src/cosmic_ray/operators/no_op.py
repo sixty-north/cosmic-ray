@@ -1,7 +1,7 @@
 "Implementation of the no-op operator."
 
 from .operator import Operator
-
+from .example import Example
 
 class NoOp(Operator):
     """An operator that makes no changes.
@@ -20,7 +20,7 @@ class NoOp(Operator):
     @classmethod
     def examples(cls):
         return (
-            ('@foo\ndef bar(): pass', '@foo\ndef bar(): pass'),
-            ('def bar(): pass', 'def bar(): pass'),
-            ('1 + 1', '1 + 1'),
+            Example('@foo\ndef bar(): pass', '@foo\ndef bar(): pass'),
+            Example('def bar(): pass', 'def bar(): pass'),
+            Example('1 + 1', '1 + 1'),
         )
