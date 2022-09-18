@@ -35,7 +35,7 @@ EXTRA_SAMPLES = tuple(
 OPERATOR_SAMPLES = OPERATOR_PROVIDED_SAMPLES + EXTRA_SAMPLES
 
 
-@pytest.mark.parametrize("sample", OPERATOR_SAMPLES)
+@pytest.mark.parametrize("sample", OPERATOR_SAMPLES, ids=lambda s: str(s.operator.__name__))
 def test_mutation_changes_ast(sample):
     node = parso.parse(sample.example.pre_mutation_code)
     visitor = MutationVisitor(sample.example.occurrence,
