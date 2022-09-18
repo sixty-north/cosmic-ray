@@ -4,7 +4,7 @@ import dataclasses
 import enum
 import pathlib
 from pathlib import Path
-from typing import Optional, Tuple, Dict
+from typing import Any, Optional, Tuple, Dict
 
 
 class StrEnum(str, enum.Enum):
@@ -59,35 +59,21 @@ class MutationSpec:
     module_path: Path
     operator_name: str
     occurrence: int
+    start_pos: Tuple[int, int]
+    end_pos: Tuple[int, int]
+    operator_args: Dict[str, Any] = dataclasses.field(default_factory=dict)
 
     # pylint: disable=R0913
     def __post_init__(self):
         object.__setattr__(self, "module_path", pathlib.Path(self.module_path))
         object.__setattr__(self, "occurrence", int(self.occurrence))
 
-
-# TODO: I'm suspicious of this distinction between MutationSpec and ResolvedMutationSpec. We only really need it because
-# the data we send to distributors doesn't include  start_/end_pos, and I wanted to make that clear. Am I being
-# hoodwinked by type annotations? Should I just stop worrying and merge them?
-@dataclasses.dataclass(frozen=True)
-class ResolvedMutationSpec(MutationSpec):
-    "A MutationSpec with the location of the mutation resolved."
-    start_pos: Tuple[int, int]
-    end_pos: Tuple[int, int]
-    operator_args: Optional[Dict] = None
-
-    # pylint: disable=R0913
-    def __post_init__(self):
-        super().__post_init__()
         if self.start_pos[0] > self.end_pos[0]:
             raise ValueError("Start line must not be after end line")
 
         if self.start_pos[0] == self.end_pos[0]:
             if self.start_pos[1] >= self.end_pos[1]:
                 raise ValueError("End position must come after start position.")
-
-        # if not hasattr(self, "operator_args"):
-        object.__setattr__(self, "operator_args", self.operator_args)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -99,10 +85,10 @@ class WorkItem:
     """
 
     job_id: str
-    mutations: Tuple[ResolvedMutationSpec]
+    mutations: Tuple[MutationSpec]
 
     @classmethod
-    def single(cls, job_id, mutation: ResolvedMutationSpec):
+    def single(cls, job_id, mutation: MutationSpec):
         """Construct a WorkItem with a single mutation.
 
         Args:

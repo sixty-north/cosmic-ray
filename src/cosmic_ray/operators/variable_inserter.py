@@ -1,11 +1,10 @@
 """Implementation of the variable-inserter operator."""
 import random
-import parso.python.tree
 
+import parso.python.tree
 from parso.python.tree import Name, PythonNode
 
-from .operator import Operator
-from .example import Example
+from .operator import Argument, Example, Operator
 
 
 class VariableInserter(Operator):
@@ -15,12 +14,19 @@ class VariableInserter(Operator):
         self.cause_variable = cause_variable
         self.effect_variable = effect_variable
 
+    @classmethod
+    def arguments(cls):
+        return (
+            Argument("cause_variable", "The cause variable"),
+            Argument("effect_variable", "The effect variable"),
+        )
+
     def mutation_positions(self, node):
         """Find expressions or terms that define the effect variable. These nodes can be
-           mutated to introduce an effect of the cause variable.
+        mutated to introduce an effect of the cause variable.
         """
         if isinstance(node, PythonNode) and (node.type == "arith_expr" or node.type == "term"):
-            expr_node = node.search_ancestor('expr_stmt')
+            expr_node = node.search_ancestor("expr_stmt")
             if expr_node:
                 effect_variable_names = [v.value for v in expr_node.get_defined_names()]
                 if self.effect_variable in effect_variable_names:
@@ -31,9 +37,9 @@ class VariableInserter(Operator):
     def mutate(self, node, index):
         """Join the node with cause variable using a randomly sampled arithmetic operator."""
         assert isinstance(node, PythonNode)
-        assert (node.type == "arith_expr" or node.type == "term")
+        assert node.type == "arith_expr" or node.type == "term"
 
-        arith_operator = random.choice(['+', '*', '-'])
+        arith_operator = random.choice(["+", "*", "-"])
         arith_operator_node_start_pos = self._iterate_col(node.end_pos)
         cause_node_start_pos = self._iterate_col(arith_operator_node_start_pos)
         arith_operator_node = parso.python.tree.Operator(arith_operator, start_pos=arith_operator_node_start_pos)
@@ -65,9 +71,10 @@ class VariableInserter(Operator):
     @classmethod
     def examples(cls):
         return (
-            Example('y = x + z', 'y = x + z * j',
-                    operator_args={'cause_variable': 'j', 'effect_variable': 'y'}),
-            Example('j = x + z\ny = x + z', 'j = x + z + x\ny = x + z',
-                    operator_args={'cause_variable': 'x', 'effect_variable': 'j'}),
+            Example("y = x + z", "y = x + z * j", operator_args={"cause_variable": "j", "effect_variable": "y"}),
+            Example(
+                "j = x + z\ny = x + z",
+                "j = x + z + x\ny = x + z",
+                operator_args={"cause_variable": "x", "effect_variable": "j"},
+            ),
         )
-

@@ -89,8 +89,14 @@ class ConfigDict(dict):
 
     @property
     def operators_config(self):
-        """The configuration for specified operators."""
-        return self.get("operators", None)
+        """The configuration for specified operators.
+        
+        This is a dict mapping operator names to dicts which represent keyword-arguments
+        for parameterizing an operator. Each keyword arg dict is a single parameterization
+        of the operator, and each parameterized operator will be executed once for each
+        parameterization.
+        """
+        return self.get("operators", {})
 
 
 

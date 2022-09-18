@@ -1,36 +1,35 @@
 """This module contains mutation operators which replace one
 comparison operator with another.
 """
-from enum import Enum
 import itertools
+from enum import Enum
 
 import parso.python.tree
 
 from ..ast import is_none, is_number
-from .operator import Operator
+from .operator import Example, Operator
 from .util import extend_name
-from .example import Example
 
 
 class ComparisonOperators(Enum):
     "All comparison operators that we mutate."
-    Eq = '=='
-    NotEq = '!='
-    Lt = '<'
-    LtE = '<='
-    Gt = '>'
-    GtE = '>='
-    Is = 'is'
-    IsNot = 'is not'
+    Eq = "=="
+    NotEq = "!="
+    Lt = "<"
+    LtE = "<="
+    Gt = ">"
+    GtE = ">="
+    Is = "is"
+    IsNot = "is not"
 
 
 def _create_operator(from_op, to_op):
-    @extend_name('_{}_{}'.format(from_op.name, to_op.name))
+    @extend_name("_{}_{}".format(from_op.name, to_op.name))
     class ReplaceComparisonOperator(Operator):
         "An operator that replaces {} with {}".format(from_op.name, to_op.name)
 
         def mutation_positions(self, node):
-            if node.type == 'comparison':
+            if node.type == "comparison":
                 # Every other child starting at 1 is a comparison operator of some sort
                 for _, comparison_op in self._mutation_points(node):
                     yield (comparison_op.start_pos, comparison_op.end_pos)
@@ -39,7 +38,7 @@ def _create_operator(from_op, to_op):
             points = list(itertools.islice(self._mutation_points(node), index, index + 1))
             assert len(points) == 1
             op_idx, _ = points[0]
-            mutated_comparison_op = parso.parse(' ' + to_op.value)
+            mutated_comparison_op = parso.parse(" " + to_op.value)
             node.children[op_idx * 2 + 1] = mutated_comparison_op
             return node
 
@@ -53,18 +52,15 @@ def _create_operator(from_op, to_op):
 
         @classmethod
         def examples(cls):
-            return (
-                Example('x {} y'.format(from_op.value), 'x {} y'.format(to_op.value)),
-            )
+            return (Example("x {} y".format(from_op.value), "x {} y".format(to_op.value)),)
 
     return ReplaceComparisonOperator
 
 
 # Build all of the binary replacement operators
 _OPERATORS = tuple(
-    _create_operator(from_op, to_op)
-    for from_op, to_op
-    in itertools.permutations(ComparisonOperators, 2))
+    _create_operator(from_op, to_op) for from_op, to_op in itertools.permutations(ComparisonOperators, 2)
+)
 
 # Inject the operators into the module namespace
 for op_cls in _OPERATORS:
@@ -85,14 +81,16 @@ _RHS_IS_NONE_OPS = {
 }
 
 # This determines the allowed to mutations when the RHS is a number
-_RHS_IS_INTEGER_OPS = set([
-    ComparisonOperators.Eq,
-    ComparisonOperators.NotEq,
-    ComparisonOperators.Lt,
-    ComparisonOperators.LtE,
-    ComparisonOperators.Gt,
-    ComparisonOperators.GtE,
-])
+_RHS_IS_INTEGER_OPS = set(
+    [
+        ComparisonOperators.Eq,
+        ComparisonOperators.NotEq,
+        ComparisonOperators.Lt,
+        ComparisonOperators.LtE,
+        ComparisonOperators.Gt,
+        ComparisonOperators.GtE,
+    ]
+)
 
 
 def _allowed(to_op, from_op, rhs):

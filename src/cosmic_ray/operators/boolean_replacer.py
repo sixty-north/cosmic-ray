@@ -4,8 +4,7 @@
 import parso.python.tree
 
 from .keyword_replacer import KeywordReplacementOperator
-from .operator import Operator
-from .example import Example
+from .operator import Example, Operator
 
 
 class ReplaceTrueWithFalse(KeywordReplacementOperator):

@@ -8,27 +8,26 @@ from parso.python.tree import Keyword, Operator, PythonNode
 
 from . import operator
 from .util import extend_name
-from .example import Example
+
 
 class UnaryOperators(Enum):
     "All unary operators that we mutate."
-    UAdd = '+'
-    USub = '-'
-    Invert = '~'
-    Not = 'not '
+    UAdd = "+"
+    USub = "-"
+    Invert = "~"
+    Not = "not "
     Nothing = None
 
 
 def _create_replace_unary_operators(from_op, to_op):
     if to_op.value is None:
-        suffix = '_Delete_{}'.format(from_op.name)
+        suffix = "_Delete_{}".format(from_op.name)
     else:
-        suffix = '_{}_{}'.format(from_op.name, to_op.name)
+        suffix = "_{}_{}".format(from_op.name, to_op.name)
 
     @extend_name(suffix)
     class ReplaceUnaryOperator(operator.Operator):
-        "An operator that replaces unary {} with unary {}.".format(
-            from_op.name, to_op.name)
+        "An operator that replaces unary {} with unary {}.".format(from_op.name, to_op.name)
 
         def mutation_positions(self, node):
             if _is_unary_operator(node):
@@ -44,39 +43,43 @@ def _create_replace_unary_operators(from_op, to_op):
                 # This is a bit goofy since it can result in "return not x"
                 # becoming "return  x" (i.e. with two spaces). But it's correct
                 # enough.
-                node.children[0].value = ''
+                node.children[0].value = ""
             else:
                 node.children[0].value = to_op.value
             return node
 
         @classmethod
         def examples(cls):
-            from_code = '{}1'.format(from_op.value)
+            from_code = "{}1".format(from_op.value)
             to_code = from_code[len(from_op.value):]
 
             if to_op is not UnaryOperators.Nothing:
                 to_code = to_op.value + to_code
             elif from_op is UnaryOperators.Not:
-                to_code = ' ' + to_code
+                to_code = " " + to_code
 
-            return (
-                Example(from_code, to_code),
-            )
+            return (operator.Example(from_code, to_code),)
 
     return ReplaceUnaryOperator
 
 
 def _is_factor(node):
-    return (isinstance(node, PythonNode)
-            and node.type in {'factor', 'not_test'} and len(node.children) > 0
-            and isinstance(node.children[0], Operator))
+    return (
+        isinstance(node, PythonNode)
+        and node.type in {"factor", "not_test"}
+        and len(node.children) > 0
+        and isinstance(node.children[0], Operator)
+    )
 
 
 def _is_not_test(node):
-    return (isinstance(node, PythonNode) and node.type == 'not_test'
-            and len(node.children) > 0
-            and isinstance(node.children[0], Keyword)
-            and node.children[0].value == 'not')
+    return (
+        isinstance(node, PythonNode)
+        and node.type == "not_test"
+        and len(node.children) > 0
+        and isinstance(node.children[0], Keyword)
+        and node.children[0].value == "not"
+    )
 
 
 def _is_unary_operator(node):
@@ -102,7 +105,9 @@ def _prohibited(from_op, to_op):
 _MUTATION_OPERATORS = tuple(
     _create_replace_unary_operators(from_op, to_op)
     for (from_op, to_op) in permutations(UnaryOperators, 2)
-    if from_op.value is not None if not _prohibited(from_op, to_op))
+    if from_op.value is not None
+    if not _prohibited(from_op, to_op)
+)
 
 for op_cls in _MUTATION_OPERATORS:
     globals()[op_cls.__name__] = op_cls

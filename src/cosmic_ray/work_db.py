@@ -9,7 +9,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.orm.session import sessionmaker
 
-from .work_item import ResolvedMutationSpec, TestOutcome, WorkResult, WorkerOutcome, WorkItem
+from .work_item import MutationSpec, TestOutcome, WorkResult, WorkerOutcome, WorkItem
 
 
 class WorkDB:
@@ -220,7 +220,7 @@ class WorkResultStorage(Base):
 
 
 def _mutation_spec_from_storage(mutation_spec: MutationSpecStorage):
-    return ResolvedMutationSpec(
+    return MutationSpec(
         module_path=Path(mutation_spec.module_path),
         operator_name=mutation_spec.operator_name,
         operator_args=json.loads(mutation_spec.operator_args),
@@ -230,7 +230,7 @@ def _mutation_spec_from_storage(mutation_spec: MutationSpecStorage):
     )
 
 
-def _mutation_spec_to_storage(mutation_spec: ResolvedMutationSpec, job_id: str):
+def _mutation_spec_to_storage(mutation_spec: MutationSpec, job_id: str):
     return MutationSpecStorage(
         job_id=job_id,
         module_path=str(mutation_spec.module_path),

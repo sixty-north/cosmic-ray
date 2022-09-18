@@ -4,52 +4,73 @@ from typing import Iterable
 import uuid
 from cosmic_ray.ast import get_ast, ast_nodes
 import cosmic_ray.modules
-from cosmic_ray.work_item import ResolvedMutationSpec, WorkItem
-from cosmic_ray.plugins import get_operator
+from cosmic_ray.work_item import MutationSpec, WorkItem
+import cosmic_ray.plugins
 from cosmic_ray.work_db import WorkDB
 
 log = logging.getLogger()
 
 
+def _operators(operator_cfgs):
+    """Find all Operator instances that should be used for the session.
+
+    Args:
+        operator_cfgs (Mapping[str, Iterable[Mapping[str, Any]]]): Mapping
+            of operator names to arguments sets for that operator. Each
+            argument set for an operator will result in an instance of the
+            operator.
+
+    Yields:
+        operators: tuples of (operator name, argument dict, operator instance).
+
+    Raises:
+        TypeError: The arguments supplied to an operator are invalid.
+    """
+    # TODO: Can/should we check for operator arguments which don't correspond to
+    # *any* known operator?
+
+    for operator_name in cosmic_ray.plugins.operator_names():
+        operator_class = cosmic_ray.plugins.get_operator(operator_name)
+        if not operator_class.arguments():
+            if operator_name in operator_cfgs:
+                raise TypeError(f"Arguments provided for operator {operator_name} which accepts no arguments")
+
+            yield operator_name, {}, operator_class()
+        else:
+            for operator_args in operator_cfgs.get(operator_name, ()):
+                yield operator_name, operator_args, operator_class(**operator_args)
+
+
 def _all_work_items(module_paths, operator_cfgs) -> Iterable[WorkItem]:
-    "Iterable of all WorkItems for the given inputs."
+    """Iterable of all WorkItems for the given inputs.
+
+    Raises:
+        TypeError: If an operator is provided with a parameterization it can't use.
+    """
 
     for module_path in module_paths:
         module_ast = get_ast(module_path)
 
-        for operator_cfg in operator_cfgs:
-            operator_name = operator_cfg["name"]
-            operator_args = operator_cfg.get('args', [{}])
+        for operator_name, operator_args, operator in _operators(operator_cfgs):
+            positions = (
+                (start_pos, end_pos)
+                for node in ast_nodes(module_ast)
+                for start_pos, end_pos in operator.mutation_positions(node)
+            )
 
-            for args in operator_args:
-                try:
-                    operator = get_operator(operator_name)(**args)
-                except TypeError:
-                    if not args:
-                        continue
-                    else:
-                        raise Exception(
-                            f"Operator arguments {args} could not be assigned to {operator_name}.")
-                else:
-                    positions = (
-                        (start_pos, end_pos)
-                        for node in ast_nodes(module_ast)
-                        for start_pos, end_pos in operator.mutation_positions(node)
-                    )
-
-                    for occurrence, (start_pos, end_pos) in enumerate(positions):
-                        mutation = ResolvedMutationSpec(
-                            module_path=str(module_path),
-                            operator_name=operator_name,
-                            operator_args=args,
-                            occurrence=occurrence,
-                            start_pos=start_pos,
-                            end_pos=end_pos,
-                        )
-                        yield WorkItem.single(job_id=uuid.uuid4().hex, mutation=mutation)
+            for occurrence, (start_pos, end_pos) in enumerate(positions):
+                mutation = MutationSpec(
+                    module_path=str(module_path),
+                    operator_name=operator_name,
+                    operator_args=operator_args,
+                    occurrence=occurrence,
+                    start_pos=start_pos,
+                    end_pos=end_pos,
+                )
+                yield WorkItem.single(job_id=uuid.uuid4().hex, mutation=mutation)
 
 
-def init(module_paths, work_db: WorkDB, operators_cfgs=None):
+def init(module_paths, work_db: WorkDB, operator_cfgs):
     """Clear and initialize a work-db with work items.
 
     Any existing data in the work-db will be cleared and replaced with entirely
@@ -59,10 +80,11 @@ def init(module_paths, work_db: WorkDB, operators_cfgs=None):
     Args:
       module_paths: iterable of pathlib.Paths of modules to mutate.
       work_db: A `WorkDB` instance into which the work orders will be saved.
-      operators_cfgs: A list of dictionaries representing operator configurations.
-    """
-    if not operators_cfgs:
-        operators_cfgs = [{'name': name} for name in list(cosmic_ray.plugins.operator_names())]
+      operator_cfgs: A dict mapping operator names to parameterization dicts.
 
+    Raises:
+        TypeError: Arguments provided for an operator are invalid.
+    """
+    # By default each operator will be parameterized with an empty dict.
     work_db.clear()
-    work_db.add_work_items(_all_work_items(module_paths, operators_cfgs))
+    work_db.add_work_items(_all_work_items(module_paths, operator_cfgs))

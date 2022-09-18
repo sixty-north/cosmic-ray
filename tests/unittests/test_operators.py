@@ -7,7 +7,7 @@ import parso
 from cosmic_ray.plugins import get_operator, operator_names
 from cosmic_ray.operators.unary_operator_replacement import ReplaceUnaryOperator_USub_UAdd
 from cosmic_ray.operators.binary_operator_replacement import ReplaceBinaryOperator_Add_Mul
-from cosmic_ray.operators.example import Example
+from cosmic_ray.operators.operator import Example
 from cosmic_ray.mutating import MutationVisitor
 
 

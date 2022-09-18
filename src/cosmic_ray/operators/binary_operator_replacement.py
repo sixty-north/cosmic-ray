@@ -1,36 +1,35 @@
 """Implementation of the binary-operator-replacement operator.
 """
 
-from enum import Enum
 import itertools
+from enum import Enum
 
 import parso
 
-from .operator import Operator
+from .operator import Example, Operator
 from .util import extend_name
-from .example import Example
+
 
 class BinaryOperators(Enum):
     "All binary operators that we mutate."
-    Add = '+'
-    Sub = '-'
-    Mul = '*'
-    Div = '/'
-    FloorDiv = '//'
-    Mod = '%'
-    Pow = '**'
-    RShift = '>>'
-    LShift = '<<'
-    BitOr = '|'
-    BitAnd = '&'
-    BitXor = '^'
+    Add = "+"
+    Sub = "-"
+    Mul = "*"
+    Div = "/"
+    FloorDiv = "//"
+    Mod = "%"
+    Pow = "**"
+    RShift = ">>"
+    LShift = "<<"
+    BitOr = "|"
+    BitAnd = "&"
+    BitXor = "^"
 
 
 def _create_replace_binary_operator(from_op, to_op):
-    @extend_name('_{}_{}'.format(from_op.name, to_op.name))
+    @extend_name("_{}_{}".format(from_op.name, to_op.name))
     class ReplaceBinaryOperator(Operator):
-        "An operator that replaces binary {} with binary {}.".format(
-            from_op.name, to_op.name)
+        "An operator that replaces binary {} with binary {}.".format(from_op.name, to_op.name)
 
         def mutation_positions(self, node):
             if _is_binary_operator(node):
@@ -46,20 +45,20 @@ def _create_replace_binary_operator(from_op, to_op):
 
         @classmethod
         def examples(cls):
-            return (
-                Example('x {} y'.format(from_op.value), 'x {} y'.format(to_op.value)),
-            )
+            return (Example("x {} y".format(from_op.value), "x {} y".format(to_op.value)),)
 
     return ReplaceBinaryOperator
 
 
 # Parent types of operators which indicate that the operator isn't binary.
-_NON_BINARY_PARENTS = set((
-    'factor',       # unary operators, e.g. -1
-    'argument',     # extended function definitions, e.g. def foo(*args)
-    'star_expr',    # destructuring, e.g. a, *b = x
-    'import_from',  # star import, e.g. from module import *
-))
+_NON_BINARY_PARENTS = set(
+    (
+        "factor",  # unary operators, e.g. -1
+        "argument",  # extended function definitions, e.g. def foo(*args)
+        "star_expr",  # destructuring, e.g. a, *b = x
+        "import_from",  # star import, e.g. from module import *
+    )
+)
 
 
 def _is_binary_operator(node):
@@ -78,9 +77,8 @@ def _is_binary_operator(node):
 
 # Build all of the binary replacement operators
 _MUTATION_OPERATORS = tuple(
-    _create_replace_binary_operator(from_op, to_op)
-    for from_op, to_op
-    in itertools.permutations(BinaryOperators, 2))
+    _create_replace_binary_operator(from_op, to_op) for from_op, to_op in itertools.permutations(BinaryOperators, 2)
+)
 
 # Inject operators into module namespace
 for op_cls in _MUTATION_OPERATORS:

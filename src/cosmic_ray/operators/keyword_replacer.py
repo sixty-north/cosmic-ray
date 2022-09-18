@@ -2,15 +2,13 @@
 
 from parso.python.tree import Keyword
 
-from .operator import Operator
-from .example import Example
+from .operator import Example, Operator
 
 # pylint: disable=E1101
 
 
 class KeywordReplacementOperator(Operator):
-    """A base class for operators that replace one keyword with another
-    """
+    """A base class for operators that replace one keyword with another"""
 
     def mutation_positions(self, node):
         if isinstance(node, Keyword):
@@ -26,6 +24,4 @@ class KeywordReplacementOperator(Operator):
 
     @classmethod
     def examples(cls):
-        return (
-            Example(cls.from_keyword, cls.to_keyword),
-        )
+        return (Example(cls.from_keyword, cls.to_keyword),)

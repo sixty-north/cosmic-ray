@@ -3,8 +3,8 @@
 import parso
 from parso.python.tree import ForStmt
 
-from .operator import Operator
-from .example import Example
+from .operator import Example, Operator
+
 
 class ZeroIterationForLoop(Operator):
     """An operator that modified for-loops to have zero iterations."""

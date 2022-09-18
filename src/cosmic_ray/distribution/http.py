@@ -135,6 +135,12 @@ async def handle_mutate_and_test(request):
                 module_path=Path(mutation["module_path"]),
                 operator_name=mutation["operator"],
                 occurrence=mutation["occurrence"],
+                # TODO: These are not really used, but we have to provide
+                # them because MutationSpec requires them. This is the genesis of the old
+                # distinction between MutationSpec and ResolvedMutationSpec. How should we
+                # really address this?
+                start_pos=(0, 0),
+                end_pos=(0, 1),
             )
             for mutation in args["mutations"]
         ],

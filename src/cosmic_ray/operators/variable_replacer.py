@@ -1,8 +1,9 @@
 """Implementation of the variable-replacement operator."""
-from .operator import Operator
-from .example import Example
-from parso.python.tree import Number, ExprStmt, Leaf
 from random import randint
+
+from parso.python.tree import ExprStmt, Leaf, Number
+
+from .operator import Argument, Example, Operator
 
 
 class VariableReplacer(Operator):
@@ -12,6 +13,13 @@ class VariableReplacer(Operator):
         self.cause_variable = cause_variable
         self.effect_variable = effect_variable
 
+    @classmethod
+    def arguments(cls):
+        return (
+            Argument("cause_variable", "The cause variable"),
+            Argument("effect_variable", "The effect variable"),
+        )
+
     def mutation_positions(self, node):
         """Mutate usages of the specified cause variable. If an effect variable is also
         specified, then only mutate usages of the cause variable in definitions of the
@@ -20,7 +28,7 @@ class VariableReplacer(Operator):
         if isinstance(node, ExprStmt):
             # Confirm that name node is used on right hand side of the expression
             cause_variables = list(self._get_causes_from_expr_node(node))
-            cause_variable_names =  [cause_variable.value for cause_variable in cause_variables]
+            cause_variable_names = [cause_variable.value for cause_variable in cause_variables]
             if self.cause_variable in cause_variable_names:
                 mutation_position = (node.start_pos, node.end_pos)
 
@@ -78,12 +86,16 @@ class VariableReplacer(Operator):
     @classmethod
     def examples(cls):
         return (
-            Example('y = x + z', 'y = 10 + z', operator_args={'cause_variable': 'x'}),
-            Example('j = x + z\ny = x + z', 'j = x + z\ny = -2 + z',
-                    operator_args={'cause_variable': 'x', 'effect_variable': 'y'}),
-            Example('j = x + z\ny = x + z', 'j = 1 + z\ny = x + z',
-                    operator_args={'cause_variable': 'x','effect_variable': 'j'}),
-            Example('y = 2*x + 10 + j + x**2', 'y=2*10 + 10 + j + -4**2',
-                    operator_args={'cause_variable': 'x'}),
+            Example("y = x + z", "y = 10 + z", operator_args={"cause_variable": "x"}),
+            Example(
+                "j = x + z\ny = x + z",
+                "j = x + z\ny = -2 + z",
+                operator_args={"cause_variable": "x", "effect_variable": "y"},
+            ),
+            Example(
+                "j = x + z\ny = x + z",
+                "j = 1 + z\ny = x + z",
+                operator_args={"cause_variable": "x", "effect_variable": "j"},
+            ),
+            Example("y = 2*x + 10 + j + x**2", "y=2*10 + 10 + j + -4**2", operator_args={"cause_variable": "x"}),
         )
-
