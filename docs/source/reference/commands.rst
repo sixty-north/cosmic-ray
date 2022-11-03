@@ -80,14 +80,14 @@ code. It has the following optional arguments:
 
 The ``init`` verb use following entries from the configuration file:
 
-- ``[cosmic-ray] exclude-modules = []``: Exclude modules matching those glob
+- ``[cosmic-ray] excluded-modules = []``: Exclude modules matching those glob
   patterns from mutation. Use ``glob.glob`` syntax.
 
   Sample for django projects:
 
   ::
 
-   exclude-modules = ["*/tests/*", "*/migrations/*"]
+   excluded-modules = ["*/tests/*", "*/migrations/*"]
 
 
 As mentioned in

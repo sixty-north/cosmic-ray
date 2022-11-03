@@ -27,7 +27,7 @@ def _make_config(test_command="python -m unittest discover tests", timeout=100, 
         "timeout": timeout,
         "test-command": test_command,
         "distributor": {"name": distributor},
-        "exclude-modules": [],
+        "excluded-modules": [],
     }
 
 

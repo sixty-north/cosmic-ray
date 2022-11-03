@@ -99,7 +99,7 @@ configuration like this:
     [cosmic-ray]
     module-path = "allele"
     timeout = 10
-    exclude-modules = []
+    excluded-modules = []
     test-command = python -m unittest allele_tests
     distributor.name = "local"
 
@@ -135,7 +135,7 @@ For ``pytest`` and ``nose`` that can be achieved with the ``-x`` option.
 
     Ideally, your test code will be in a different package from your production code. This way you can tell Cosmic Ray to
     mutate an entire package without needing to filter anything out. However, if your test code is in the same package as
-    your production code (a common configuration), you can use the ``exclude-modules`` setting in your configuration to
+    your production code (a common configuration), you can use the ``excluded-modules`` setting in your configuration to
     prevent mutation of your tests.
 
     Given the choice, though, we recommend keeping your tests outside of the package for your code under test.
