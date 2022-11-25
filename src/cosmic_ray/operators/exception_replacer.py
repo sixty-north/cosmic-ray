@@ -31,6 +31,8 @@ class ExceptionReplacer(Operator):
 
         atom = node.children[1]
         test_list = atom.children[1]
+        if isinstance(test_list, Name):
+            return (test_list,)
         return test_list.children[::2]
 
     @classmethod
@@ -39,6 +41,10 @@ class ExceptionReplacer(Operator):
             Example(
                 "try: raise OSError\nexcept OSError: pass",
                 "try: raise OSError\nexcept {}: pass".format(CosmicRayTestingException.__name__),
+            ),
+            Example(
+                "try: raise OSError\nexcept (OSError): pass",
+                "try: raise OSError\nexcept ({}): pass".format(CosmicRayTestingException.__name__),
             ),
             Example(
                 "try: raise OSError\nexcept (OSError, ValueError): pass",
