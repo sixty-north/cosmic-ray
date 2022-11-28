@@ -1,14 +1,15 @@
 """Tests for the various mutation operators.
 """
+import parso
 import pytest
 
-import parso
-
-from cosmic_ray.plugins import get_operator, operator_names
-from cosmic_ray.operators.unary_operator_replacement import ReplaceUnaryOperator_USub_UAdd
+from cosmic_ray.mutating import MutationVisitor
 from cosmic_ray.operators.binary_operator_replacement import ReplaceBinaryOperator_Add_Mul
 from cosmic_ray.operators.operator import Example
-from cosmic_ray.mutating import MutationVisitor
+from cosmic_ray.operators.unary_operator_replacement import ReplaceUnaryOperator_USub_UAdd
+from cosmic_ray.operators.variable_inserter import VariableInserter
+from cosmic_ray.operators.variable_replacer import VariableReplacer
+from cosmic_ray.plugins import get_operator, operator_names
 
 
 class Sample:
@@ -36,10 +37,12 @@ OPERATOR_SAMPLES = OPERATOR_PROVIDED_SAMPLES + EXTRA_SAMPLES
 
 
 @pytest.mark.parametrize("sample", OPERATOR_SAMPLES, ids=lambda s: str(s.operator.__name__))
-def test_mutation_changes_ast(sample):
+def test_mutation_changes_ast(sample: Sample):
+    if sample.operator in {VariableReplacer, VariableInserter}:
+        pytest.xfail(f"{sample.operator} tests fail because they produce random output.")
+
     node = parso.parse(sample.example.pre_mutation_code)
-    visitor = MutationVisitor(sample.example.occurrence,
-                              sample.operator(**sample.example.operator_args))
+    visitor = MutationVisitor(sample.example.occurrence, sample.operator(**sample.example.operator_args))
     mutant = visitor.walk(node)
 
     assert mutant.get_code() == sample.example.post_mutation_code
