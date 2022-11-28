@@ -5,7 +5,7 @@ name: Python package
 
 on:
   push:
-    branches: [master]
+    branches: ["*"]
   create:
     tags: ["release/*"]
   pull_request:
@@ -16,12 +16,12 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9]
+        python-version: [3.7, 3.8, 3.9, "3.10", 3.11]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
@@ -43,9 +43,9 @@ jobs:
     needs: test
     if: startsWith(github.ref, 'refs/tags/release')
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Python 3.9
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: 3.9
       - name: Install pypa/build
