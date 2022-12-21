@@ -85,7 +85,9 @@ def init(config_file, session_file):
     """
     cfg = load_config(config_file)
     operators_cfg = cfg.operators_config
-    modules = cosmic_ray.modules.find_modules(Path(cfg["module-path"]))
+
+    module_paths = [Path(cfg["module-path"])] if isinstance(cfg["module-path"], str) else map(Path, cfg["module-path"])
+    modules = cosmic_ray.modules.find_modules(module_paths)
     modules = cosmic_ray.modules.filter_paths(modules, cfg.get("excluded-modules", ()))
 
     if log.isEnabledFor(logging.INFO):

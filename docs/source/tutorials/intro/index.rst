@@ -136,6 +136,8 @@ refers to a single top-level module that will be mutated, and in this case we're
 
     When working on a package, Cosmic Ray will apply mutations to all submodules in the package.
 
+    Additionally, the 'module-path' can be a list of directories or files: `module-path = ["file1.py", "some_directory"]`
+
 Line 3 tells Cosmic Ray the maximium amount of time to let a test run before it's considered a failure:
 
 .. literalinclude:: tutorial.toml.1
