@@ -1,3 +1,4 @@
+import os
 import pathlib
 import subprocess
 import sys
@@ -81,3 +82,18 @@ def test_empty___init__(example_project_root, session):
     with use_db(str(session_path), WorkDB.Mode.open) as work_db:
         rate = survival_rate(work_db)
         assert rate == 0.0
+
+
+def test_inexisting(example_project_root, session):
+    config = "cosmic-ray.inexisting.conf"
+
+    result = subprocess.run(
+        [sys.executable, "-m", "cosmic_ray.cli", "init", config, str(session)],
+        cwd=str(example_project_root),
+        encoding="utf-8",
+        capture_output=True,
+    )
+
+    assert result.returncode == 66
+    assert result.stdout == ""
+    assert result.stderr == "Could not find module path example/unknown_file.py" + os.linesep

@@ -14,6 +14,8 @@ def find_modules(module_paths):
         An iterable of paths Python modules (i.e. \\*py files).
     """
     for module_path in module_paths:
+        if not module_path.exists():
+            raise FileNotFoundError("Could not find module path {}".format(module_path))
         if module_path.is_file():
             if module_path.suffix == ".py":
                 yield module_path
