@@ -40,7 +40,7 @@ def test_e2e(example_project_root, config, session):
 
 def test_baseline_with_explicit_session_file(example_project_root, config, session):
     subprocess.check_call(
-        [sys.executable, "-m", "cosmic_ray.cli", "baseline", config, "--session-file", session],
+        [sys.executable, "-m", "cosmic_ray.cli", "baseline", str(config), "--session-file", str(session)],
         cwd=str(example_project_root),
     )
 
@@ -51,7 +51,7 @@ def test_baseline_with_explicit_session_file(example_project_root, config, sessi
 
 def test_baseline_with_temp_session_file(example_project_root, config):
     subprocess.check_call(
-        [sys.executable, "-m", "cosmic_ray.cli", "baseline", config],
+        [sys.executable, "-m", "cosmic_ray.cli", "baseline", str(config)],
         cwd=str(example_project_root),
     )
 
@@ -74,7 +74,7 @@ def test_empty___init__(example_project_root, session):
     config = "cosmic-ray.empty.conf"
 
     subprocess.check_call(
-        [sys.executable, "-m", "cosmic_ray.cli", "init", config, str(session)],
+        [sys.executable, "-m", "cosmic_ray.cli", "init", str(config), str(session)],
         cwd=str(example_project_root),
     )
 
@@ -88,7 +88,7 @@ def test_inexisting(example_project_root, session):
     config = "cosmic-ray.inexisting.conf"
 
     result = subprocess.run(
-        [sys.executable, "-m", "cosmic_ray.cli", "init", config, str(session)],
+        [sys.executable, "-m", "cosmic_ray.cli", "init", str(config), str(session)],
         cwd=str(example_project_root),
         encoding="utf-8",
         capture_output=True,
