@@ -1,4 +1,6 @@
 from pathlib import Path
+
+import pytest
 from cosmic_ray.modules import find_modules, filter_paths
 
 
@@ -31,9 +33,11 @@ def test_finding_module_py_dot_py_using_dots(data_dir):
     assert expected == results
 
 
-def test_finding_modules_py_dot_py_using_slashes(data_dir):
-    results = sorted(find_modules([data_dir / 'a' / 'py']))
-    assert [] == results
+def test_finding_modules_with_missing_file(data_dir):
+    path = data_dir / 'a' / 'inexisting_file.py'
+    with pytest.raises(FileNotFoundError) as exc_info:
+        tuple(find_modules((data_dir / 'a', path, data_dir / 'a' / 'c')))
+    assert str(exc_info.value) == "Could not find module path {}".format(path)
 
 
 def test_finding_modules_py_dot_py_using_slashes_with_full_filename(data_dir):
