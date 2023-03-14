@@ -1,12 +1,6 @@
 """adam.adam_2
 """
 
-# pylint: disable=C0111
-
-import ctypes
-import functools
-import operator
-
 
 def trigger_infinite_loop():
     result = None

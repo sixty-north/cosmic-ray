@@ -68,26 +68,20 @@ def test_set_multiple_results_works(work_db):
 def test_num_work_items(work_db):
     count = 10
     for idx in range(count):
-        work_db.add_work_item(
-            WorkItem.single(f"job_id_{idx}", MutationSpec("path", "operator", 0, (0, 0), (0, 1)))
-        )
+        work_db.add_work_item(WorkItem.single(f"job_id_{idx}", MutationSpec("path", "operator", 0, (0, 0), (0, 1))))
     assert work_db.num_work_items == count
 
 
 def test_clear_removes_work_items(work_db):
     for idx in range(10):
-        work_db.add_work_item(
-            WorkItem.single(f"job_id_{idx}", MutationSpec("path", "operator", 0, (0, 0), (0, 1)))
-        )
+        work_db.add_work_item(WorkItem.single(f"job_id_{idx}", MutationSpec("path", "operator", 0, (0, 0), (0, 1))))
     work_db.clear()
     assert work_db.num_work_items == 0
 
 
 def test_clear_work_items_removes_results(work_db):
     for idx in range(10):
-        work_db.add_work_item(
-            WorkItem.single(f"job_id_{idx}", MutationSpec("path", "operator", 0, (0, 0), (0, 1)))
-        )
+        work_db.add_work_item(WorkItem.single(f"job_id_{idx}", MutationSpec("path", "operator", 0, (0, 0), (0, 1))))
         work_db.set_result(f"job_id_{idx}", WorkResult(WorkerOutcome.NORMAL))
 
     work_db.clear()

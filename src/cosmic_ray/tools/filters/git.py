@@ -7,7 +7,6 @@ import subprocess
 import sys
 from argparse import Namespace
 from collections import defaultdict
-from functools import lru_cache
 from pathlib import Path
 
 from cosmic_ray.config import ConfigDict, load_config

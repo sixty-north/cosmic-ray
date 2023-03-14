@@ -28,14 +28,15 @@ class ASTQuery:
     >>> bool(ASTQuery(node))
 
     """
+
     def __init__(self, obj):
         self.obj = obj
 
-    def _clone(self, obj) -> 'ASTQuery':
+    def _clone(self, obj) -> "ASTQuery":
         "Clone this query."
         return type(self)(obj)
 
-    def match(self, cls=None, **kwargs) -> 'ASTQuery':
+    def match(self, cls=None, **kwargs) -> "ASTQuery":
         "Check if node matches a class."
         obj = self.obj
         if obj is None:
@@ -44,14 +45,14 @@ class ASTQuery:
         if cls is None or isinstance(obj, cls):
             for k, v in kwargs.items():
                 op = None
-                k__op = k.split('__')
+                k__op = k.split("__")
                 if len(k__op) == 2:
                     k, op = k__op
                 node_value = getattr(obj, k)
                 if op is None:
                     if node_value != v:
                         break
-                elif op == 'in':
+                elif op == "in":
                     if node_value not in v:
                         break
                 else:
@@ -71,7 +72,7 @@ class ASTQuery:
     def __bool__(self):
         return self.ok
 
-    def __getattr__(self, item) -> 'ASTQuery':
+    def __getattr__(self, item) -> "ASTQuery":
         obj = self.obj
         if obj is None:
             return self
@@ -82,12 +83,12 @@ class ASTQuery:
         "Conditional navigation."
         return ASTQueryOptional(self.obj, obj_test=self)
 
-    def __call__(self, *args, **kwargs) -> 'ASTQuery':
+    def __call__(self, *args, **kwargs) -> "ASTQuery":
         if self.obj is None:
             return self
         return self._clone(self.obj(*args, **kwargs))
 
-    def __getitem__(self, item) -> 'ASTQuery':
+    def __getitem__(self, item) -> "ASTQuery":
         if self.obj is None:
             return self
         return self._clone(self.obj[item])
@@ -95,6 +96,7 @@ class ASTQuery:
 
 class ASTQueryOptional(ASTQuery):
     "Manages conditional navigation."
+
     def __init__(self, obj, obj_test=None):
         super().__init__(obj)
         self._initial = obj_test

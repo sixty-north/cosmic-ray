@@ -91,7 +91,7 @@ def _create_clone(source_repo_url):
         try:
             shutil.rmtree(root)
         except (RecursionError, PermissionError):
-            log.warning(f'Unable to remove directory: {root}')
+            log.warning(f"Unable to remove directory: {root}")
 
 
 LOCALHOST_ADDRESSES = (

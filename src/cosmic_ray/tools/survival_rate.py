@@ -17,14 +17,15 @@ SUPPORTED_Z_SCORES = {800: 1.282, 900: 1.645, 950: 1.960, 980: 2.326, 990: 2.576
 @click.option(
     "--confidence",
     type=click.Choice(sorted([str(z / 10) for z in SUPPORTED_Z_SCORES])),
-    default='95.0',
+    default="95.0",
     help="Specify the confidence levels for estimates",
 )
 @click.option(
     "--fail-over",
     type=click.FloatRange(0, 100),
     default=None,
-    help="Exit with a non-zero code if the survival rate is larger than <max_value> or the calculated confidence interval is above the <max_value> (if --estimate is used).  Specified as percentage.",
+    help="Exit with a non-zero code if the survival rate is larger than <max_value> or the calculated confidence interval "
+         "is above the <max_value> (if --estimate is used).  Specified as percentage.",
 )
 @click.argument("session-file", type=click.Path(dir_okay=False, readable=True, exists=True))
 def format_survival_rate(estimate, confidence, fail_over, session_file):
@@ -69,5 +70,5 @@ def survival_rate(work_db):
     return (1 - kills / num_results) * 100
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     format_survival_rate()

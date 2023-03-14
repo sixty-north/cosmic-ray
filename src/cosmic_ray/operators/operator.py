@@ -73,11 +73,11 @@ class Argument:
 @dataclasses.dataclass(frozen=True)
 class Example:
     """A structure to store pre and post mutation operator code snippets,
-       including optional specification of occurrence and operator args.
+    including optional specification of occurrence and operator args.
 
-       This is used for testing whether the pre-mutation code is correctly
-       mutated to the post-mutation code at the given occurrence (if specified)
-       and for the given operator args (if specified).
+    This is used for testing whether the pre-mutation code is correctly
+    mutated to the post-mutation code at the given occurrence (if specified)
+    and for the given operator args (if specified).
     """
 
     pre_mutation_code: str

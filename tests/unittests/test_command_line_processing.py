@@ -2,8 +2,6 @@
 
 # pylint: disable=C0111,W0621,W0613
 
-import contextlib
-import io
 import stat
 
 from exit_codes import ExitCode

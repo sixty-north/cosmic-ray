@@ -10,11 +10,12 @@ _THIS_DIR = Path(os.path.dirname(os.path.realpath(__file__)))
 @pytest.fixture
 def data_dir():
     "Directory containing test data"
-    return _THIS_DIR / 'data'
+    return _THIS_DIR / "data"
 
 
 class PathUtils:
     "Path utilities for testing."
+
     @staticmethod
     @contextlib.contextmanager
     def excursion(directory):

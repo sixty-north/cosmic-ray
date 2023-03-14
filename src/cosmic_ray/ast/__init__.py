@@ -2,7 +2,6 @@
 
 from abc import ABC, abstractmethod
 import io
-import sys
 
 import parso.python.tree
 import parso.tree

@@ -56,7 +56,6 @@ def _generate_html_report(db, only_completed, skip_success):
                 all_items = chain(all_items, incomplete)
 
             with tag("div", klass="container"):
-
                 # Summary info
                 _generate_summary(doc, db)
 
@@ -169,6 +168,7 @@ def _generate_job_list(doc, db, skip_success):
                         _generate_work_item_card(doc, index, work_item, result, skip_success)
 
 
+# flake8: noqa: C901
 def _generate_work_item_card(doc, index, work_item, result, skip_success):
     doc, tag, text = doc.tagtext()
     if result is not None:

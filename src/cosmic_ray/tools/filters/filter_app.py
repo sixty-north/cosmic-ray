@@ -50,10 +50,8 @@ class FilterApp:
         parser = argparse.ArgumentParser(
             description=self.description(),
         )
-        parser.add_argument(
-            'session', help="Path to the session on which to operate")
-        parser.add_argument(
-            '--verbosity', help='Verbosity level for logging', default='WARNING')
+        parser.add_argument("session", help="Path to the session on which to operate")
+        parser.add_argument("--verbosity", help="Verbosity level for logging", default="WARNING")
         self.add_args(parser)
         args = parser.parse_args(argv)
 
