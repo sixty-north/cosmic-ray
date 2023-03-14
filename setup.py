@@ -20,7 +20,6 @@ INSTALL_REQUIRES = [
     "sqlalchemy",
     "stevedore",
     "toml",
-    "virtualenv<=16.7.10",
     "yattag",
 ]
 
