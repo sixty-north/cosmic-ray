@@ -140,6 +140,26 @@ class WorkDB:
         except IntegrityError:
             raise KeyError("Unable to add results for job-id {}. No matching WorkItem.".format(job_id))
 
+    def set_multiple_results(self, job_ids, result):
+        """Set the result for all job IDs.
+
+        This will overwrite any existing results for the jobs.
+
+        Args:
+          job_id: The IDs of the WorkItem to set the results for.
+          result: A WorkResult indicating the result of the job.
+
+        Raises:
+           KeyError: If there is no work-item with a matching job-id.
+        """
+        try:
+            with self._session_maker.begin() as session:
+                for job_id in job_ids:
+                    storage = _work_result_to_storage(result, job_id)
+                    session.merge(storage)
+        except IntegrityError:
+            raise KeyError("Unable to add results for job-id {}. No matching WorkItem.".format(job_id))
+
     @property
     def pending_work_items(self):
         "Iterable of all pending work items. In random order."
