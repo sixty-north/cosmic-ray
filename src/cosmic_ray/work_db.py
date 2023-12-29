@@ -4,7 +4,7 @@ import contextlib
 import json
 from pathlib import Path
 
-from sqlalchemy import Column, Enum, ForeignKey, Integer, JSON, String, Text, create_engine, event
+from sqlalchemy import Column, Enum, ForeignKey, Integer, JSON, String, Text, create_engine, event, func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.orm.session import sessionmaker
@@ -145,7 +145,7 @@ class WorkDB:
         "Iterable of all pending work items. In random order."
         with self._session_maker.begin() as session:
             completed_job_ids = session.query(WorkResultStorage.job_id)
-            pending = session.query(WorkItemStorage).where(~WorkItemStorage.job_id.in_(completed_job_ids))
+            pending = session.query(WorkItemStorage).where(~WorkItemStorage.job_id.in_(completed_job_ids)).order_by(func.random())
             return tuple(_work_item_from_storage(work_item) for work_item in pending)
 
     @property
