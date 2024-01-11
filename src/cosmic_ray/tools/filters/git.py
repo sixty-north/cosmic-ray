@@ -45,6 +45,8 @@ class GitFilter(FilterApp):
     def _skip_filtered(self, work_db, branch):
         git_news = self._git_news(branch)
 
+        job_ids = []
+
         for item in work_db.pending_work_items:
             for mutation in item.mutations:
                 if mutation.module_path not in git_news or not (
@@ -60,13 +62,16 @@ class GitFilter(FilterApp):
                         mutation.end_pos,
                     )
 
-                    work_db.set_result(
-                        item.job_id,
-                        WorkResult(
-                            output="Filtered git",
-                            worker_outcome=WorkerOutcome.SKIPPED,
-                        ),
-                    )
+                    job_ids.append(item.job_id)
+
+        if job_ids:
+            work_db.set_multiple_results(
+                job_ids,
+                WorkResult(
+                    output="Filtered git",
+                    worker_outcome=WorkerOutcome.SKIPPED,
+                ),
+            )
 
     def filter(self, work_db: WorkDB, args: Namespace):
         """Mark as skipped all work item that is not new"""
