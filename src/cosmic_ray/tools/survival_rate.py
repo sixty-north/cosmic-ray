@@ -42,7 +42,10 @@ def format_survival_rate(estimate, confidence, fail_over, session_file):
         num_complete = db.num_results
 
     if estimate:
-        conf_int = math.sqrt(rate * (100 - rate) / num_complete) * z_score * (1 - math.sqrt(num_complete / num_items))
+        if not num_complete:
+            conf_int = 0
+        else:
+            conf_int = math.sqrt(rate * (100 - rate) / num_complete) * z_score * (1 - math.sqrt(num_complete / num_items))
         min_rate = rate - conf_int
         print("{:.2f} {:.2f} {:.2f}".format(min_rate, rate, rate + conf_int))
 
