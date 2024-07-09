@@ -9,7 +9,6 @@ from setuptools import setup, find_packages
 INSTALL_REQUIRES = [
     "aiohttp",
     "anybadge",
-    "astunparse",
     "click",
     "decorator",
     "exit_codes",
