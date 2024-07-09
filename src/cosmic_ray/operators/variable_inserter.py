@@ -8,7 +8,7 @@ from .operator import Argument, Example, Operator
 
 
 class VariableInserter(Operator):
-    """An operator that replaces adds usages of named variables to particular statements."""
+    """An operator that replaces usages of named variables to particular statements."""
 
     def __init__(self, cause_variable, effect_variable):
         self.cause_variable = cause_variable
