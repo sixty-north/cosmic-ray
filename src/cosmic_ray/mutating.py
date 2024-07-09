@@ -26,7 +26,7 @@ async def mutate_and_test(mutations: Iterable[MutationSpec], test_command, timeo
     uncaught exception made its way from some part of the operation to terminate the function. This function will
     intercept all exceptions and return it in a non-exceptional structure.
 
-    Second, the mutation machinery may determines that - for any of the mutations - there is mutation to be made (e.g.
+    Second, the mutation machinery may determines that - for any of the mutations - there is no mutation to be made (e.g.
     the 'occurrence' is too high).  In this case there is no way to report a test result (i.e. killed, survived, or
     incompetent) so a special value is returned indicating that no mutation is possible.
 
