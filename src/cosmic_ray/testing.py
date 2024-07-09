@@ -13,7 +13,7 @@ log = logging.getLogger(__name__)
 # subprocess.run()-based approach because there are problems with timeouts and
 # reading from stderr in subprocess.run. Since we have to be prepared for test
 # processes that run longer than timeout (and, indeed, which run forever), the
-# broken subprocess stuff simply doesn't work. So we do this, which seesm to
+# broken subprocess stuff simply doesn't work. So we do this, which seems to
 # work on all platforms.
 
 
