@@ -74,9 +74,6 @@ setup(
             "cr-filter-git = cosmic_ray.tools.filters.git:main",
             "cr-http-workers = cosmic_ray.tools.http_workers:main",
         ],
-        "cosmic_ray.test_runners": [
-            "unittest = cosmic_ray.testing.unittest_runner:UnittestRunner",
-        ],
         "cosmic_ray.operator_providers": [
             "core = cosmic_ray.operators.provider:OperatorProvider",
         ],
