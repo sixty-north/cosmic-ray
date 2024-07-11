@@ -85,25 +85,8 @@ tag_message = "Bump version: {current_version} → {new_version}"
 [[tool.bumpversion.files]]
 filename = "src/cosmic_ray/version.py"
 
-[[tool.bumpversion.files]]
-filename = "docs/manual/source/conf.py"
-
-
-
-[tool.black]
-line-length = 120
-exclude = '''
-/(
-    \.git
-  | \.hypothesis
-  | \.tox
-  | \.vscode
-  | \__pycache__
-  | build
-  | dist
-  | docs
-)/
-'''
-
 [tool.flake8]
 max-line-length = 120
+
+[tool.ruff]
+line-length = 120
