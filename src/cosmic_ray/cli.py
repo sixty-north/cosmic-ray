@@ -48,9 +48,6 @@ def cli(verbosity):
     logging_level = getattr(logging, verbosity)
     logging.basicConfig(level=logging_level, handlers=[RichHandler()])
 
-    if sys.platform == "win32":
-        asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
-
 
 @cli.command()
 @click.argument("config_file", type=click.File("wt"))
@@ -265,9 +262,7 @@ def mutate_and_test(module_path, operator, occurrence, test_command, keep_stdout
     """
     with open(os.devnull, "w") as devnull:
         with redirect_stdout(sys.stdout if keep_stdout else devnull):
-            work_result = asyncio.get_event_loop().run_until_complete(
-                cosmic_ray.mutating.mutate_and_test(Path(module_path), operator, occurrence, test_command, None)
-            )
+            work_result = cosmic_ray.mutating.mutate_and_test(Path(module_path), operator, occurrence, test_command, None)
 
     sys.stdout.write(json.dumps(dataclasses.asdict(work_result)))
 

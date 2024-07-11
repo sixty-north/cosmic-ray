@@ -129,7 +129,7 @@ async def send_request(url, work_item: WorkItem, test_command, timeout):
 async def handle_mutate_and_test(request):
     """HTTP endpoint handler for requests to mutate-and-test."""
     args = await request.json()
-    result = await mutate_and_test(
+    result = mutate_and_test(
         mutations=[
             MutationSpec(
                 module_path=Path(mutation["module_path"]),

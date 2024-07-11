@@ -3,6 +3,7 @@
 import contextlib
 import difflib
 from itertools import chain
+from pathlib import Path
 import traceback
 from contextlib import contextmanager
 import logging
@@ -17,7 +18,7 @@ log = logging.getLogger(__name__)
 
 
 # pylint: disable=R0913
-async def mutate_and_test(mutations: Iterable[MutationSpec], test_command, timeout) -> WorkResult:
+def mutate_and_test(mutations: Iterable[MutationSpec], test_command, timeout) -> WorkResult:
     """Apply a sequence of mutations, run thest tests, and reports the results.
 
     This is fundamentally the mutation(s)-and-test-run implementation at the heart of Cosmic Ray.
@@ -48,7 +49,7 @@ async def mutate_and_test(mutations: Iterable[MutationSpec], test_command, timeo
     """
     try:
         with contextlib.ExitStack() as stack:
-            file_changes = {}
+            file_changes: dict[Path, tuple[str, str]] = {}
             for mutation in mutations:
                 operator_class = cosmic_ray.plugins.get_operator(mutation.operator_name)
                 try:
@@ -70,14 +71,14 @@ async def mutate_and_test(mutations: Iterable[MutationSpec], test_command, timeo
                 original_code, _ = file_changes.get(mutation.module_path, (previous_code, mutated_code))
                 file_changes[mutation.module_path] = original_code, mutated_code
 
-            test_outcome, output = await run_tests(test_command, timeout)
+            test_outcome, output = run_tests(test_command, timeout)
 
             diffs = [
                 _make_diff(original_code, mutated_code, module_path)
                 for module_path, (original_code, mutated_code) in file_changes.items()
             ]
 
-            return WorkResult(
+            result = WorkResult(
                 output=output,
                 diff="\n".join(chain(*diffs)),
                 test_outcome=test_outcome,
@@ -88,6 +89,8 @@ async def mutate_and_test(mutations: Iterable[MutationSpec], test_command, timeo
         return WorkResult(
             output=traceback.format_exc(), test_outcome=TestOutcome.INCOMPETENT, worker_outcome=WorkerOutcome.EXCEPTION
         )
+
+    return result
 
 
 @contextmanager

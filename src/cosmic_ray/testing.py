@@ -1,6 +1,6 @@
 "Support for running tests in a subprocess."
 
-import asyncio
+import subprocess
 import logging
 import os
 import traceback
@@ -17,7 +17,7 @@ log = logging.getLogger(__name__)
 # work on all platforms.
 
 
-async def run_tests(command, timeout):
+def run_tests(command, timeout):
     """Run test command in a subprocess.
 
     If the command exits with status 0, then we assume that all tests passed. If
@@ -42,29 +42,15 @@ async def run_tests(command, timeout):
     env["PYTHONDONTWRITEBYTECODE"] = "1"
 
     try:
-        proc = await asyncio.create_subprocess_shell(
-            command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.STDOUT, env=env
-        )
-    except Exception:  # pylint: disable=W0703
-        return (TestOutcome.INCOMPETENT, traceback.format_exc())
+        proc = subprocess.run(command.split(), check=True, env=env, timeout=timeout, capture_output=True)
+        assert proc.returncode == 0
+        return (TestOutcome.SURVIVED, proc.stdout.decode("utf-8"))
 
-    try:
-        outs, _errs = await asyncio.wait_for(proc.communicate(), timeout)
+    except subprocess.CalledProcessError as err:
+        return (TestOutcome.KILLED, err.output.decode("utf-8"))
 
-        assert proc.returncode is not None
-
-        if proc.returncode == 0:
-            return (TestOutcome.SURVIVED, outs.decode("utf-8"))
-        else:
-            return (TestOutcome.KILLED, outs.decode("utf-8"))
-
-    except asyncio.TimeoutError:
-        proc.terminate()
+    except subprocess.TimeoutExpired:
         return (TestOutcome.KILLED, "timeout")
 
     except Exception:  # pylint: disable=W0703
-        proc.terminate()
         return (TestOutcome.INCOMPETENT, traceback.format_exc())
-
-    finally:
-        await proc.wait()
