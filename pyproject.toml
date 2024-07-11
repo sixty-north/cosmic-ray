@@ -44,7 +44,7 @@ dependencies = [
 
 [project.optional-dependencies]
 test = ["hypothesis", "pytest", "pytest-mock"]
-dev = ["flake8", "ruff", "bump-my-version"]
+dev = ["flake8", "flake8-pyproject", "ruff", "bump-my-version"]
 docs = ["sphinx", "sphinx_rtd_theme"]
 
 [project.scripts]
