@@ -1,3 +1,74 @@
+[build-system]
+requires = ['setuptools']
+build-backend = 'setuptools.build_meta'
+
+[project]
+name = "cosmic_ray"
+requires-python = ">= 3.7"
+version = "8.3.7"
+authors = [{ name = "Sixty North AS", email = "austin@sixty-north.com" }]
+description = "Mutation testing"
+readme = { file = "README.rst", content-type = "text/x-rst" }
+license = { file = "LICENCE.txt" }
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: Software Development :: Testing",
+
+]
+dependencies = [
+  "aiohttp",
+  "anybadge",
+  "click",
+  "decorator",
+  "exit_codes",
+  "gitpython",
+  "parso",
+  "qprompt",
+  "rich",
+  "sqlalchemy",
+  "stevedore",
+  "toml",
+  "yattag",
+]
+
+[project.optional-dependencies]
+test = ["hypothesis", "pytest", "pytest-mock"]
+dev = ["flake8", "ruff", "bumpversion", "twine"]
+docs = ["sphinx", "sphinx_rtd_theme"]
+
+[project.scripts]
+cosmic-ray = "cosmic_ray.cli:main"
+cr-html = "cosmic_ray.tools.html:report_html"
+cr-report = "cosmic_ray.tools.report:report"
+cr-badge = "cosmic_ray.tools.badge:generate_badge"
+cr-rate = "cosmic_ray.tools.survival_rate:format_survival_rate"
+cr-xml = "cosmic_ray.tools.xml:report_xml"
+cr-filter-operators = "cosmic_ray.tools.filters.operators_filter:main"
+cr-filter-pragma = "cosmic_ray.tools.filters.pragma_no_mutate:main"
+cr-filter-git = "cosmic_ray.tools.filters.git:main"
+cr-http-workers = "cosmic_ray.tools.http_workers:main"
+
+[project.entry-points."cosmic_ray.operator_providers"]
+core = "cosmic_ray.operators.provider:OperatorProvider"
+
+[project.entry-points."cosmic_ray.distributors"]
+http = "cosmic_ray.distribution.http:HttpDistributor"
+local = "cosmic_ray.distribution.local:LocalDistributor"
+
+[project.urls]
+repository = "https://github.com/sixty-north/cosmic-ray"
+
 [tool.black]
 line-length = 120
 exclude = '''
