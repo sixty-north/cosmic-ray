@@ -2,7 +2,6 @@
 
 Here we manage command-line parsing and launching of the internal machinery that does mutation testing.
 """
-import asyncio
 import dataclasses
 import json
 import logging
