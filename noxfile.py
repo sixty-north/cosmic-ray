@@ -16,11 +16,11 @@ def lint(session):
     session.install(".[dev]")
 
     session.log("Checking syntax with flake8")
-    check_syntax = "flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics"
+    check_syntax = "python -m flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics"
     session.run(*check_syntax.split())
 
     session.log("Checking style with flake8")
-    check_style = "flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics"
+    check_style = "python -m flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics"
     session.run(*check_style.split())
 
 
