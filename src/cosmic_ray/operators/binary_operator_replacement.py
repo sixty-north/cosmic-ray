@@ -1,10 +1,10 @@
-"""Implementation of the binary-operator-replacement operator.
-"""
+"""Implementation of the binary-operator-replacement operator."""
 
 import itertools
 from enum import Enum
 
 import parso
+from parso.python.tree import ImportFrom
 
 from .operator import Example, Operator
 from .util import extend_name
@@ -12,6 +12,7 @@ from .util import extend_name
 
 class BinaryOperators(Enum):
     "All binary operators that we mutate."
+
     Add = "+"
     Sub = "-"
     Mul = "*"
@@ -51,13 +52,11 @@ def _create_replace_binary_operator(from_op, to_op):
 
 
 # Parent types of operators which indicate that the operator isn't binary.
-_NON_BINARY_PARENTS = set(
-    (
-        "factor",  # unary operators, e.g. -1
-        "argument",  # extended function definitions, e.g. def foo(*args)
-        "star_expr",  # destructuring, e.g. a, *b = x
-        "import_from",  # star import, e.g. from module import *
-    )
+_NON_BINARY_PARENTS = (
+    # "factor",  # unary operators, e.g. -1
+    # "argument",  # extended function definitions, e.g. def foo(*args)
+    # "star_expr",  # destructuring, e.g. a, *b = x
+    ImportFrom,  # star import, e.g. from module import *
 )
 
 
@@ -67,8 +66,8 @@ def _is_binary_operator(node):
         if isinstance(node.parent, parso.python.tree.Param):
             return False
 
-        if isinstance(node.parent, parso.python.tree.PythonNode):
-            return node.parent.type not in _NON_BINARY_PARENTS
+        if isinstance(node.parent, _NON_BINARY_PARENTS):
+            return False
 
         return True
 
