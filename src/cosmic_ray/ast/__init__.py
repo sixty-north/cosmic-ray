@@ -7,6 +7,8 @@ from pathlib import Path
 import parso.python.tree
 import parso.tree
 
+from cosmic_ray.util import read_python_source
+
 
 class Visitor(ABC):
     """AST visitor for parso trees.
@@ -68,10 +70,8 @@ def get_ast_from_path(module_path: Path):
     Returns:
         The parso parse tree for the code in `module_path`.
     """
-    module_path = Path(module_path)
-    source = module_path.read_text(encoding="utf-8")
+    source = read_python_source(module_path)
     return get_ast(source)
-
 
 def get_ast(source: str):
     """Parse the AST for a code string.

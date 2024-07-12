@@ -10,6 +10,7 @@ import logging
 from typing import Iterable
 
 
+from cosmic_ray.util import read_python_source
 import cosmic_ray.plugins
 from cosmic_ray.ast import Visitor, get_ast
 from cosmic_ray.testing import run_tests
@@ -110,13 +111,13 @@ def use_mutation(module_path, operator, occurrence):
         A `(unmutated-code, mutated-code)` tuple to the with-block. If there was no
         mutation performed, the `mutated-code` is `None`.
     """
-    # TODO: Could/should use async?
+    original_bytes = module_path.read_bytes()
     original_code, mutated_code = apply_mutation(module_path, operator, occurrence)
     try:
         yield original_code, mutated_code
     finally:
-        with module_path.open(mode="wt", encoding="utf-8") as handle:
-            handle.write(original_code)
+        with module_path.open(mode="wb") as handle:
+            handle.write(original_bytes)
             handle.flush()
 
 
@@ -184,7 +185,7 @@ class MutationVisitor(Visitor):
         """
         log.info("Applying mutation: path=%s, op=%s, occurrence=%s", module_path, operator, occurrence)
 
-        original_code = module_path.read_text(encoding="utf-8")
+        original_code = read_python_source(module_path)
         mutated_code = cls.mutate_code(original_code, operator, occurrence)
 
         if mutated_code is None:
