@@ -9,8 +9,9 @@ from contextlib import contextmanager
 import logging
 from typing import Iterable
 
+
 import cosmic_ray.plugins
-from cosmic_ray.ast import Visitor, get_ast_from_path
+from cosmic_ray.ast import Visitor, get_ast
 from cosmic_ray.testing import run_tests
 from cosmic_ray.work_item import MutationSpec, TestOutcome, WorkerOutcome, WorkResult
 
@@ -131,20 +132,7 @@ def apply_mutation(module_path, operator, occurrence):
         A `(unmutated-code, mutated-code)` tuple to the with-block. If there was
         no mutation performed, the `mutated-code` is `None`.
     """
-    log.info("Applying mutation: path=%s, op=%s, occurrence=%s", module_path, operator, occurrence)
-    module_ast = get_ast_from_path(module_path)
-    original_code = module_ast.get_code()
-    visitor = MutationVisitor(occurrence, operator)
-    mutated_ast = visitor.walk(module_ast)
-
-    mutated_code = None
-    if visitor.mutation_applied:
-        mutated_code = mutated_ast.get_code()
-        with module_path.open(mode="wt", encoding="utf-8") as handle:
-            handle.write(mutated_code)
-            handle.flush()
-
-    return original_code, mutated_code
+    return MutationVisitor.mutate_path(module_path, operator, occurrence)
 
 
 def mutate_code(code, operator, occurrence):
@@ -158,13 +146,7 @@ def mutate_code(code, operator, occurrence):
     Returns:
         The mutated code, or None if no mutation was applied.
     """
-    module_ast = get_ast_from_path(code)
-    visitor = MutationVisitor(occurrence, operator)
-    mutated_ast = visitor.walk(module_ast)
-    if not visitor.mutation_applied:
-        return None
-
-    return mutated_ast.get_code()
+    return MutationVisitor.mutate_code(code, operator, occurrence)
 
 
 class MutationVisitor(Visitor):
@@ -178,6 +160,41 @@ class MutationVisitor(Visitor):
     Note that `mutant` is just the specifically mutated node. It will generally
     be a part of the larger AST which is returned from `walk()`.
     """
+
+    @classmethod
+    def mutate_code(cls, source, operator, occurence):
+        ast = get_ast(source)
+        visitor = cls(occurence, operator)
+        mutated_ast = visitor.walk(ast)
+        if not visitor.mutation_applied:
+            return None
+        return mutated_ast.get_code()
+
+    @classmethod
+    def mutate_path(cls, module_path, operator, occurrence):
+        """Mutate a module in place on disk.
+
+        Args:
+            module_path (Path): The path to the module file.
+            operator (Operator): The operator to apply.
+            occurrence (int): The occurrence of the operator to apply.
+
+        Returns:
+            tuple[str, str|None]: The original code and the mutated code (or None)
+        """
+        log.info("Applying mutation: path=%s, op=%s, occurrence=%s", module_path, operator, occurrence)
+
+        original_code = module_path.read_text(encoding="utf-8")
+        mutated_code = cls.mutate_code(original_code, operator, occurrence)
+
+        if mutated_code is None:
+            return original_code, None
+
+        with module_path.open(mode="wt", encoding="utf-8") as handle:
+            handle.write(mutated_code)
+            handle.flush()
+
+        return original_code, mutated_code
 
     def __init__(self, occurrence, operator):
         self.operator = operator

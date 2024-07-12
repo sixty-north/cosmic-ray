@@ -1,4 +1,4 @@
-from cosmic_ray.mutating import apply_mutation
+from cosmic_ray.mutating import mutate_code
 from cosmic_ray.operators.binary_operator_replacement import (
     ReplaceBinaryOperator_Mul_Add,
     ReplaceBinaryOperator_Sub_Add,
@@ -6,36 +6,31 @@ from cosmic_ray.operators.binary_operator_replacement import (
 )
 
 
-def test_import_star_not_mutated_as_binary_operator(tmp_path):
-    module = tmp_path / "module.py"
-    module.write_text("from math import *")
-    _, mutated = apply_mutation(module, ReplaceBinaryOperator_Mul_Add(), 0)
+def test_import_star_not_mutated_as_binary_operator():
+    code = "from math import *"
+    mutated = mutate_code(code, ReplaceBinaryOperator_Mul_Add(), 0)
     assert mutated is None
 
 
-def test_star_expr_not_mutated_as_binary_operator(tmp_path):
-    module = tmp_path / "module.py"
-    module.write_text("a, *b = x")
-    _, mutated = apply_mutation(module, ReplaceBinaryOperator_Mul_Add(), 0)
+def test_star_expr_not_mutated_as_binary_operator():
+    code = "a, *b = x"
+    mutated = mutate_code(code, ReplaceBinaryOperator_Mul_Add(), 0)
     assert mutated is None
 
 
-def test_star_args_not_mutated_as_binary_operator(tmp_path):
-    module = tmp_path / "module.py"
-    module.write_text("def foo(*args): pass")
-    _, mutated = apply_mutation(module, ReplaceBinaryOperator_Mul_Add(), 0)
+def test_star_args_not_mutated_as_binary_operator():
+    code = "def foo(*args): pass"
+    mutated = mutate_code(code, ReplaceBinaryOperator_Mul_Add(), 0)
     assert mutated is None
 
 
-def test_unary_minus_not_mutated_as_binary_operator(tmp_path):
-    module = tmp_path / "module.py"
-    module.write_text("-1")
-    _, mutated = apply_mutation(module, ReplaceBinaryOperator_Sub_Add(), 0)
+def test_unary_minus_not_mutated_as_binary_operator():
+    code = "-1"
+    mutated = mutate_code(code, ReplaceBinaryOperator_Sub_Add(), 0)
     assert mutated is None
 
 
-def test_unary_plus_not_mutated_as_binary_operator(tmp_path):
-    module = tmp_path / "module.py"
-    module.write_text("+1")
-    _, mutated = apply_mutation(module, ReplaceBinaryOperator_Add_Mul(), 0)
+def test_unary_plus_not_mutated_as_binary_operator():
+    code = "+1"
+    mutated = mutate_code(code, ReplaceBinaryOperator_Add_Mul(), 0)
     assert mutated is None
