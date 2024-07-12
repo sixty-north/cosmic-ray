@@ -78,7 +78,7 @@ version = { attr = "cosmic_ray.version.__version__" }
 
 
 [tool.bumpversion]
-current_version = "8.3.13"
+current_version = "8.3.14"
 parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)"
 serialize = ["{major}.{minor}.{patch}"]
 tag = true
