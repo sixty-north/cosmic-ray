@@ -4,7 +4,6 @@ import itertools
 from enum import Enum
 
 import parso
-from parso.python.tree import ImportFrom
 
 from .operator import Example, Operator
 from .util import extend_name
