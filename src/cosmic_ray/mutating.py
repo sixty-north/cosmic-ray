@@ -10,7 +10,7 @@ import logging
 from typing import Iterable
 
 import cosmic_ray.plugins
-from cosmic_ray.ast import Visitor, get_ast
+from cosmic_ray.ast import Visitor, get_ast_from_path
 from cosmic_ray.testing import run_tests
 from cosmic_ray.work_item import MutationSpec, TestOutcome, WorkerOutcome, WorkResult
 
@@ -132,7 +132,7 @@ def apply_mutation(module_path, operator, occurrence):
         no mutation performed, the `mutated-code` is `None`.
     """
     log.info("Applying mutation: path=%s, op=%s, occurrence=%s", module_path, operator, occurrence)
-    module_ast = get_ast(module_path)
+    module_ast = get_ast_from_path(module_path)
     original_code = module_ast.get_code()
     visitor = MutationVisitor(occurrence, operator)
     mutated_ast = visitor.walk(module_ast)
@@ -145,6 +145,26 @@ def apply_mutation(module_path, operator, occurrence):
             handle.flush()
 
     return original_code, mutated_code
+
+
+def mutate_code(code, operator, occurrence):
+    """Apply a specific mutation to a code string.
+
+    Args:
+        code: The code to mutate.
+        operator: The `operator` instance to use.
+        occurrence: The occurrence of the operator to apply.
+
+    Returns:
+        The mutated code, or None if no mutation was applied.
+    """
+    module_ast = get_ast_from_path(code)
+    visitor = MutationVisitor(occurrence, operator)
+    mutated_ast = visitor.walk(module_ast)
+    if not visitor.mutation_applied:
+        return None
+
+    return mutated_ast.get_code()
 
 
 class MutationVisitor(Visitor):

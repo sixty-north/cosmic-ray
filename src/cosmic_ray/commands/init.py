@@ -2,7 +2,7 @@
 import logging
 from typing import Iterable
 import uuid
-from cosmic_ray.ast import get_ast, ast_nodes
+from cosmic_ray.ast import get_ast_from_path, ast_nodes
 import cosmic_ray.modules
 from cosmic_ray.work_item import MutationSpec, WorkItem
 import cosmic_ray.plugins
@@ -49,7 +49,7 @@ def _all_work_items(module_paths, operator_cfgs) -> Iterable[WorkItem]:
     """
 
     for module_path in module_paths:
-        module_ast = get_ast(module_path)
+        module_ast = get_ast_from_path(module_path)
 
         for operator_name, operator_args, operator in _operators(operator_cfgs):
             positions = (

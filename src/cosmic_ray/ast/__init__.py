@@ -2,6 +2,7 @@
 
 from abc import ABC, abstractmethod
 import io
+from pathlib import Path
 
 import parso.python.tree
 import parso.tree
@@ -58,7 +59,7 @@ def ast_nodes(node):
             yield from ast_nodes(child)
 
 
-def get_ast(module_path):
+def get_ast_from_path(module_path: Path):
     """Get the AST for the code in a file.
 
     Args:
@@ -67,9 +68,17 @@ def get_ast(module_path):
     Returns:
         The parso parse tree for the code in `module_path`.
     """
-    with module_path.open(mode="rt", encoding="utf-8") as handle:
-        source = handle.read()
+    module_path = Path(module_path)
+    source = module_path.read_text(encoding="utf-8")
+    return get_ast(source)
 
+
+def get_ast(source: str):
+    """Parse the AST for a code string.
+
+    Args:
+        code (str): _description_
+    """
     return parso.parse(source)
 
 
