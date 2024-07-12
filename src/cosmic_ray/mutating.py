@@ -10,7 +10,7 @@ import logging
 from typing import Iterable
 
 
-from cosmic_ray.util import read_python_source
+from cosmic_ray.util import read_python_source, restore_contents
 import cosmic_ray.plugins
 from cosmic_ray.ast import Visitor, get_ast
 from cosmic_ray.testing import run_tests
@@ -111,14 +111,9 @@ def use_mutation(module_path, operator, occurrence):
         A `(unmutated-code, mutated-code)` tuple to the with-block. If there was no
         mutation performed, the `mutated-code` is `None`.
     """
-    original_bytes = module_path.read_bytes()
-    original_code, mutated_code = apply_mutation(module_path, operator, occurrence)
-    try:
+    with restore_contents(module_path):
+        original_code, mutated_code = apply_mutation(module_path, operator, occurrence)
         yield original_code, mutated_code
-    finally:
-        with module_path.open(mode="wb") as handle:
-            handle.write(original_bytes)
-            handle.flush()
 
 
 def apply_mutation(module_path, operator, occurrence):
