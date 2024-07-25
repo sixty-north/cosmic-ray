@@ -42,11 +42,6 @@ dependencies = [
   "yattag",
 ]
 
-[project.optional-dependencies]
-test = ["hypothesis", "pytest", "pytest-mock"]
-dev = ["flake8", "flake8-pyproject", "ruff", "bump-my-version", "nox"]
-docs = ["sphinx", "sphinx_rtd_theme"]
-
 [project.scripts]
 cosmic-ray = "cosmic_ray.cli:main"
 cr-html = "cosmic_ray.tools.html:report_html"
@@ -68,6 +63,20 @@ local = "cosmic_ray.distribution.local:LocalDistributor"
 
 [project.urls]
 repository = "https://github.com/sixty-north/cosmic-ray"
+
+[tool]
+rye = { dev-dependencies = [
+    "hypothesis>=6.108.4",
+    "pytest>=8.3.1",
+    "pytest-mock>=3.14.0",
+    "flake8>=7.1.0",
+    "flake8-pyproject>=1.2.3",
+    "ruff>=0.5.4",
+    "bump-my-version>=0.24.3",
+    "nox>=2024.4.15",
+    "sphinx>=7.1.2",
+    "sphinx-rtd-theme>=2.0.0",
+] }
 
 [tool.setuptools.packages.find]
 where = ["src"]
