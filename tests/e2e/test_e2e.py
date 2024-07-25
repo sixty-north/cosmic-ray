@@ -97,3 +97,16 @@ def test_inexisting(example_project_root, session):
     assert result.returncode == 66
     assert result.stdout == ""
     assert result.stderr == "Could not find module path example/unknown_file.py" + os.linesep
+
+
+def test_baseline_with_pytest_filter(example_project_root, session):
+    config = "cosmic-ray.with-pytest-filter.conf"
+
+    result = subprocess.run(
+        [sys.executable, "-m", "cosmic_ray.cli", "baseline", str(config)],
+        cwd=str(example_project_root),
+        encoding="utf-8",
+        capture_output=True,
+    )
+
+    assert result.returncode == 0 

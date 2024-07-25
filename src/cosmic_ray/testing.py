@@ -3,6 +3,7 @@
 import subprocess
 import logging
 import os
+import shlex
 import traceback
 
 from cosmic_ray.work_item import TestOutcome
@@ -42,7 +43,7 @@ def run_tests(command, timeout):
     env["PYTHONDONTWRITEBYTECODE"] = "1"
 
     try:
-        proc = subprocess.run(command.split(), check=True, env=env, timeout=timeout, capture_output=True)
+        proc = subprocess.run(shlex.split(command), check=True, env=env, timeout=timeout, capture_output=True)
         assert proc.returncode == 0
         return (TestOutcome.SURVIVED, proc.stdout.decode("utf-8"))
 
