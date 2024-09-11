@@ -6,7 +6,7 @@ import tokenize
 def read_python_source(module_filepath):
     """Load the code in a Python source file.
 
-    Use this whenever reading source code from a Python source file! 
+    Use this whenever reading source code from a Python source file!
     This takes care of handling the encoding of the file.
 
     Args:

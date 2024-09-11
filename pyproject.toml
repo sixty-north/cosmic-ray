@@ -64,19 +64,17 @@ local = "cosmic_ray.distribution.local:LocalDistributor"
 [project.urls]
 repository = "https://github.com/sixty-north/cosmic-ray"
 
-[tool]
-rye = { dev-dependencies = [
-    "hypothesis>=6.108.4",
-    "pytest>=8.3.1",
-    "pytest-mock>=3.14.0",
-    "flake8>=7.1.0",
-    "flake8-pyproject>=1.2.3",
-    "ruff>=0.5.4",
-    "bump-my-version>=0.24.3",
-    "nox>=2024.4.15",
-    "sphinx>=7.1.2",
-    "sphinx-rtd-theme>=2.0.0",
-] }
+[tool.uv]
+dev-dependencies = [
+    "bump-my-version",
+    "hypothesis",
+    "nox",
+    "pytest",
+    "pytest-mock",
+    "ruff",
+    "sphinx",
+    "sphinx-rtd-theme",
+]
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -97,9 +95,6 @@ tag_message = "Bump version: {current_version} → {new_version}"
 
 [[tool.bumpversion.files]]
 filename = "src/cosmic_ray/version.py"
-
-[tool.flake8]
-max-line-length = 120
 
 [tool.ruff]
 line-length = 120

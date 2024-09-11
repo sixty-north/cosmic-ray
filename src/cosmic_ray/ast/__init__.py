@@ -73,6 +73,7 @@ def get_ast_from_path(module_path: Path):
     source = read_python_source(module_path)
     return get_ast(source)
 
+
 def get_ast(source: str):
     """Parse the AST for a code string.
 
