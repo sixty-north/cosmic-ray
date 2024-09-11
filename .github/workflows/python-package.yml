@@ -49,6 +49,8 @@ jobs:
         with:
           version: "latest"
           enable-cache: true
+      - name: Install Python
+        run: uv python install 3.12
       - name: "Build distribution"
         run: |
           uv pip install build
