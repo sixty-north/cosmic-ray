@@ -1,6 +1,7 @@
 deploy_key
 docs/source/_build
 .DS_Store
+.ruff_cache
 
 # Created by https://www.gitignore.io/api/python,visualstudiocode
 # Edit at https://www.gitignore.io/?templates=python,visualstudiocode
