@@ -3,6 +3,7 @@
 # This can be useful for developing new operators, etc.
 
 import ast
+
 from cosmic_ray.mutating import MutatingCore
 from cosmic_ray.operators.comparison_operator_replacement import MutateComparisonOperator
 

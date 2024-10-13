@@ -1,5 +1,5 @@
-import sys
 import subprocess
+import sys
 
 
 def test_smoke_test_initialized_session(initialized_session):

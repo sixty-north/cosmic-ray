@@ -6,7 +6,6 @@ import sys
 
 import pytest
 
-
 SHOW_OUTPUT_OPTIONS = (None, "--show-output", "--no-show-output")
 SHOW_DIFF_OPTIONS = (None, "--show-diff", "--no-show-diff")
 SHOW_PENDING_OPTIONS = (None, "--show-pending", "--no-show-pending")

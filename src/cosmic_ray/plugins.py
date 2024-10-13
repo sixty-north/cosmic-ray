@@ -3,7 +3,7 @@
 
 import logging
 
-from stevedore import driver, ExtensionManager
+from stevedore import ExtensionManager, driver
 
 log = logging.getLogger()  # pylint: disable=invalid-name
 

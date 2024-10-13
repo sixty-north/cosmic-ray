@@ -8,7 +8,6 @@ import qprompt
 from cosmic_ray.config import ConfigDict
 from cosmic_ray.plugins import distributor_names
 
-
 MODULE_PATH_HELP = """The path to the module that will be mutated.
 
 If this is a package (as opposed to a single file module),

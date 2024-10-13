@@ -1,6 +1,6 @@
+import tokenize
 from contextlib import contextmanager
 from pathlib import Path
-import tokenize
 
 
 def read_python_source(module_filepath):

@@ -1,7 +1,8 @@
 "Implementation of the exception-replacement operator."
 
-from cosmic_ray.exceptions import CosmicRayTestingException
 from parso.python.tree import Name, PythonNode
+
+from cosmic_ray.exceptions import CosmicRayTestingException
 
 from .operator import Example, Operator
 

@@ -1,7 +1,7 @@
 "Tools for working with parso ASTs."
 
-from abc import ABC, abstractmethod
 import io
+from abc import ABC, abstractmethod
 from pathlib import Path
 
 import parso.python.tree

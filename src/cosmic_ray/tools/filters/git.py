@@ -10,9 +10,9 @@ from collections import defaultdict
 from pathlib import Path
 
 from cosmic_ray.config import ConfigDict, load_config
-from cosmic_ray.work_db import WorkDB
-from cosmic_ray.work_item import WorkerOutcome, WorkResult
 from cosmic_ray.tools.filters.filter_app import FilterApp
+from cosmic_ray.work_db import WorkDB
+from cosmic_ray.work_item import WorkResult, WorkerOutcome
 
 log = logging.getLogger()
 

@@ -3,8 +3,8 @@
 # pylint: disable=C0111
 
 import copy
-import uuid
 import unittest
+import uuid
 
 import adam.adam_1
 import adam.adam_2

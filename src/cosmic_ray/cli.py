@@ -9,26 +9,26 @@ import os
 import signal
 import subprocess
 import sys
+import tempfile
 from collections import defaultdict
 from contextlib import contextmanager, redirect_stdout
 from pathlib import Path
-import tempfile
 
 import click
 from exit_codes import ExitCode
 from rich.logging import RichHandler
 
 import cosmic_ray.commands
+import cosmic_ray.distribution.http
 import cosmic_ray.modules
 import cosmic_ray.mutating
 import cosmic_ray.plugins
 import cosmic_ray.testing
-import cosmic_ray.distribution.http
 from cosmic_ray.config import load_config, serialize_config
 from cosmic_ray.mutating import apply_mutation
 from cosmic_ray.progress import report_progress
 from cosmic_ray.version import __version__
-from cosmic_ray.work_db import use_db, WorkDB
+from cosmic_ray.work_db import WorkDB, use_db
 from cosmic_ray.work_item import TestOutcome, WorkItem
 
 log = logging.getLogger()

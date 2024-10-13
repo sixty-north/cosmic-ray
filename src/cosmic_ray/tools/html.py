@@ -1,15 +1,14 @@
 "A tool for generating HTML reports."
 
 import datetime
-
 from itertools import chain
 
 import click
 from yattag import Doc
 
+from cosmic_ray.tools.survival_rate import kills_count, survival_rate
 from cosmic_ray.work_db import WorkDB, use_db
 from cosmic_ray.work_item import TestOutcome
-from cosmic_ray.tools.survival_rate import kills_count, survival_rate
 
 
 @click.command()
