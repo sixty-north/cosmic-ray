@@ -34,7 +34,7 @@ def format_survival_rate(estimate, confidence, fail_over, session_file):
     try:
         z_score = SUPPORTED_Z_SCORES[int(float(confidence) * 10)]
     except KeyError:
-        raise ValueError("Unsupported confidence interval: {0}".format(confidence))
+        raise ValueError(f"Unsupported confidence interval: {confidence}")
 
     with use_db(session_file, WorkDB.Mode.open) as db:
         rate = survival_rate(db)
@@ -47,10 +47,10 @@ def format_survival_rate(estimate, confidence, fail_over, session_file):
         else:
             conf_int = math.sqrt(rate * (100 - rate) / num_complete) * z_score * (1 - math.sqrt(num_complete / num_items))
         min_rate = rate - conf_int
-        print("{:.2f} {:.2f} {:.2f}".format(min_rate, rate, rate + conf_int))
+        print(f"{min_rate:.2f} {rate:.2f} {rate + conf_int:.2f}")
 
     else:
-        print("{:.2f}".format(rate))
+        print(f"{rate:.2f}")
         min_rate = rate
 
     if fail_over and min_rate > float(fail_over):

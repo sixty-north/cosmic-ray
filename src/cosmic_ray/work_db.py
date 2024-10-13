@@ -41,9 +41,9 @@ class WorkDB:
         """
         self._path = path
         if mode == WorkDB.Mode.open and (not Path(path).exists()):
-            raise FileNotFoundError("File does not exist: {}".format(path))
+            raise FileNotFoundError(f"File does not exist: {path}")
 
-        self._engine = create_engine("sqlite:///{}".format(path))
+        self._engine = create_engine(f"sqlite:///{path}")
 
         def enable_foreign_keys(dbapi_con, _con_rec):
             dbapi_con.execute("pragma foreign_keys=ON")
@@ -138,7 +138,7 @@ class WorkDB:
                 storage = _work_result_to_storage(result, job_id)
                 session.merge(storage)
         except IntegrityError:
-            raise KeyError("Unable to add results for job-id {}. No matching WorkItem.".format(job_id))
+            raise KeyError(f"Unable to add results for job-id {job_id}. No matching WorkItem.")
 
     def set_multiple_results(self, job_ids, result):
         """Set the result for all job IDs.
@@ -158,7 +158,7 @@ class WorkDB:
                     storage = _work_result_to_storage(result, job_id)
                     session.merge(storage)
         except IntegrityError:
-            raise KeyError("Unable to add results for job-id {}. No matching WorkItem.".format(job_id))
+            raise KeyError(f"Unable to add results for job-id {job_id}. No matching WorkItem.")
 
     @property
     def pending_work_items(self):

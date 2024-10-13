@@ -22,7 +22,7 @@ def load_config(filename=None):
             filename = handle.name
             return deserialize_config(handle.read())
     except (OSError, toml.TomlDecodeError, UnicodeDecodeError) as exc:
-        raise ConfigError("Error loading configuration from {}".format(filename)) from exc
+        raise ConfigError(f"Error loading configuration from {filename}") from exc
 
 
 def deserialize_config(sz) -> "ConfigDict":
@@ -110,6 +110,6 @@ def _config_stream(filename):
         log.info("Reading config from stdin")
         yield sys.stdin
     else:
-        with open(filename, mode="rt") as handle:
+        with open(filename) as handle:
             log.info("Reading config from %r", filename)
             yield handle

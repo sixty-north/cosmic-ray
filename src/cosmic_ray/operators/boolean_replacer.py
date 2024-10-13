@@ -68,14 +68,14 @@ class AddNot(Operator):
 
         if isinstance(node, self.NODE_TYPES):
             expr_node = node.children[1]
-            mutated_code = " not{}".format(expr_node.get_code())
+            mutated_code = f" not{expr_node.get_code()}"
             mutated_node = parso.parse(mutated_code)
             node.children[1] = mutated_node
 
         else:
             assert node.type == "test"
             expr_node = node.children[2]
-            mutated_code = " not{}".format(expr_node.get_code())
+            mutated_code = f" not{expr_node.get_code()}"
             mutated_node = parso.parse(mutated_code)
             node.children[2] = mutated_node
 

@@ -32,8 +32,8 @@ def single_iteration():
 def handle_exception():
     result = None
     try:
-        raise IOError
-    except IOError:
+        raise OSError
+    except OSError:
         result = True
 
     return result

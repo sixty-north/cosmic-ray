@@ -16,7 +16,7 @@ def extend_name(suffix):
     """
 
     def dec(cls):
-        name = "{}{}".format(cls.__name__, suffix)
+        name = f"{cls.__name__}{suffix}"
         setattr(cls, "__name__", name)
         return cls
 

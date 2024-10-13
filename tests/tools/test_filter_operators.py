@@ -39,7 +39,7 @@ class FakeWorkDB:
         return WorkItem.single(
             job_id,
             MutationSpec(
-                module_path="{}.py".format(self.count),
+                module_path=f"{self.count}.py",
                 operator_name=operator_name,
                 occurrence=self.count,
                 start_pos=(self.count, self.count),

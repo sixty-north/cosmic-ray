@@ -24,9 +24,9 @@ class ComparisonOperators(Enum):
 
 
 def _create_operator(from_op, to_op):
-    @extend_name("_{}_{}".format(from_op.name, to_op.name))
+    @extend_name(f"_{from_op.name}_{to_op.name}")
     class ReplaceComparisonOperator(Operator):
-        "An operator that replaces {} with {}".format(from_op.name, to_op.name)
+        f"An operator that replaces {from_op.name} with {to_op.name}"
 
         def mutation_positions(self, node):
             if node.type == "comparison":
@@ -52,7 +52,7 @@ def _create_operator(from_op, to_op):
 
         @classmethod
         def examples(cls):
-            return (Example("x {} y".format(from_op.value), "x {} y".format(to_op.value)),)
+            return (Example(f"x {from_op.value} y", f"x {to_op.value} y"),)
 
     return ReplaceComparisonOperator
 

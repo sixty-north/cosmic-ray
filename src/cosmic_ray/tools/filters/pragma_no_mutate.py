@@ -25,7 +25,7 @@ class PragmaNoMutateFilter(FilterApp):
         with "# pragma: no mutate", This work_item will be skipped.
         """
 
-        @lru_cache()
+        @lru_cache
         def file_contents(file_path):
             "A simple cache of file contents."
             with file_path.open(mode="rt") as handle:
@@ -52,8 +52,7 @@ class PragmaNoMutateFilter(FilterApp):
                         )
                 except Exception as ex:
                     raise Exception(
-                        "module_path: %s, start_pos: %s, end_pos: %s, len(lines): %s"
-                        % (mutation.module_path, mutation.start_pos, mutation.end_pos, len(lines))
+                        f"module_path: {mutation.module_path}, start_pos: {mutation.start_pos}, end_pos: {mutation.end_pos}, len(lines): {len(lines)}"
                     ) from ex
 
 

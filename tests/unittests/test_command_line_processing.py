@@ -34,7 +34,7 @@ def local_unittest_config(config_file):
     """Creates a valid config file for local, unittest-based execution, returning
     the path to the config.
     """
-    with open(config_file, mode="wt") as handle:
+    with open(config_file, mode="w") as handle:
         config = _make_config()
         config_str = cosmic_ray.config.serialize_config(config)
         handle.write(config_str)

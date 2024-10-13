@@ -40,20 +40,20 @@ class ExceptionReplacer(Operator):
         return (
             Example(
                 "try: raise OSError\nexcept OSError: pass",
-                "try: raise OSError\nexcept {}: pass".format(CosmicRayTestingException.__name__),
+                f"try: raise OSError\nexcept {CosmicRayTestingException.__name__}: pass",
             ),
             Example(
                 "try: raise OSError\nexcept (OSError): pass",
-                "try: raise OSError\nexcept ({}): pass".format(CosmicRayTestingException.__name__),
+                f"try: raise OSError\nexcept ({CosmicRayTestingException.__name__}): pass",
             ),
             Example(
                 "try: raise OSError\nexcept (OSError, ValueError): pass",
-                "try: raise OSError\nexcept (OSError, {}): pass".format(CosmicRayTestingException.__name__),
+                f"try: raise OSError\nexcept (OSError, {CosmicRayTestingException.__name__}): pass",
                 occurrence=1,
             ),
             Example(
                 "try: raise OSError\nexcept (OSError, ValueError, KeyError): pass",
-                "try: raise OSError\nexcept (OSError, {}, KeyError): pass".format(CosmicRayTestingException.__name__),
+                f"try: raise OSError\nexcept (OSError, {CosmicRayTestingException.__name__}, KeyError): pass",
                 occurrence=1,
             ),
             Example("try: pass\nexcept: pass", "try: pass\nexcept: pass"),

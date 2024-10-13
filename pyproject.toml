@@ -99,3 +99,6 @@ filename = "src/cosmic_ray/version.py"
 
 [tool.ruff]
 line-length = 120
+
+[tool.ruff.lint]
+select = ["UP"]

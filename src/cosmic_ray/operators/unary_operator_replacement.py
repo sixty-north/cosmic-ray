@@ -21,13 +21,13 @@ class UnaryOperators(Enum):
 
 def _create_replace_unary_operators(from_op, to_op):
     if to_op.value is None:
-        suffix = "_Delete_{}".format(from_op.name)
+        suffix = f"_Delete_{from_op.name}"
     else:
-        suffix = "_{}_{}".format(from_op.name, to_op.name)
+        suffix = f"_{from_op.name}_{to_op.name}"
 
     @extend_name(suffix)
     class ReplaceUnaryOperator(operator.Operator):
-        "An operator that replaces unary {} with unary {}.".format(from_op.name, to_op.name)
+        f"An operator that replaces unary {from_op.name} with unary {to_op.name}."
 
         def mutation_positions(self, node):
             if _is_unary_operator(node):
@@ -50,7 +50,7 @@ def _create_replace_unary_operators(from_op, to_op):
 
         @classmethod
         def examples(cls):
-            from_code = "{}1".format(from_op.value)
+            from_code = f"{from_op.value}1"
             to_code = from_code[len(from_op.value):]
 
             if to_op is not UnaryOperators.Nothing:

@@ -56,7 +56,7 @@ class ASTQuery:
                     if node_value not in v:
                         break
                 else:
-                    raise ValueError("Can't handle operator {}".format(op))
+                    raise ValueError(f"Can't handle operator {op}")
             else:
                 # All is true, continue recursion
                 return self

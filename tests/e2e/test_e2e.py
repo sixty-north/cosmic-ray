@@ -18,7 +18,7 @@ def example_project_root(pytestconfig):
 @pytest.fixture
 def config(tester, distributor):
     "Get config file name."
-    config = "cosmic-ray.{}.{}.conf".format(tester, distributor)
+    config = f"cosmic-ray.{tester}.{distributor}.conf"
     return config
 
 
