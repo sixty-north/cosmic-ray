@@ -4,10 +4,10 @@ import contextlib
 import difflib
 import logging
 import traceback
+from collections.abc import Iterable
 from contextlib import contextmanager
 from itertools import chain
 from pathlib import Path
-from typing import Iterable
 
 import cosmic_ray.plugins
 from cosmic_ray.ast import Visitor, get_ast

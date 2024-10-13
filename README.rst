@@ -23,9 +23,9 @@ Contributing
 The easiest way to contribute is to use Cosmic Ray and submit reports for defects or any other issues you come across.
 Please see CONTRIBUTING.rst for more details.
 
-.. |Python version| image:: https://img.shields.io/badge/Python_version-3.8+-blue.svg
+.. |Python version| image:: https://img.shields.io/badge/Python_version-3.9+-blue.svg
    :target: https://www.python.org/
-.. |Python version windows| image:: https://img.shields.io/badge/Python_version_(windows)-3.8+-blue.svg
+.. |Python version windows| image:: https://img.shields.io/badge/Python_version_(windows)-3.9+-blue.svg
    :target: https://www.python.org/
 .. |Build Status| image:: https://github.com/sixty-north/cosmic-ray/actions/workflows/python-package.yml/badge.svg
    :target: https://github.com/sixty-north/cosmic-ray/actions/workflows/python-package.yml

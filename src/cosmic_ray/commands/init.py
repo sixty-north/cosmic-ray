@@ -1,7 +1,7 @@
 "Implementation of the 'init' command."
 import logging
 import uuid
-from typing import Iterable
+from collections.abc import Iterable
 
 import cosmic_ray.modules
 import cosmic_ray.plugins
