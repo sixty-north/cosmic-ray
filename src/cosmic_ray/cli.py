@@ -2,6 +2,7 @@
 
 Here we manage command-line parsing and launching of the internal machinery that does mutation testing.
 """
+
 import dataclasses
 import json
 import logging
@@ -261,7 +262,9 @@ def mutate_and_test(module_path, operator, occurrence, test_command, keep_stdout
     """
     with open(os.devnull, "w") as devnull:
         with redirect_stdout(sys.stdout if keep_stdout else devnull):
-            work_result = cosmic_ray.mutating.mutate_and_test(Path(module_path), operator, occurrence, test_command, None)
+            work_result = cosmic_ray.mutating.mutate_and_test(
+                Path(module_path), operator, occurrence, test_command, None
+            )
 
     sys.stdout.write(json.dumps(dataclasses.asdict(work_result)))
 

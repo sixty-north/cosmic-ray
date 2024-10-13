@@ -1,5 +1,5 @@
-"""Tool for creating badge.
-"""
+"""Tool for creating badge."""
+
 import os
 from logging import getLogger
 

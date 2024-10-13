@@ -1,6 +1,7 @@
 """A filter that uses git to determine when specific files/lines
 should be skipped.
 """
+
 import logging
 import re
 import subprocess

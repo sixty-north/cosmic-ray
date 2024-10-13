@@ -1,4 +1,5 @@
 """Configuration module."""
+
 import logging
 import sys
 from contextlib import contextmanager

@@ -1,5 +1,4 @@
-"""Implementation of the NumberReplacer operator.
-"""
+"""Implementation of the NumberReplacer operator."""
 
 import parso
 

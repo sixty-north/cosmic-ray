@@ -1,5 +1,4 @@
-"""Query and retrieve the various plugins in Cosmic Ray.
-"""
+"""Query and retrieve the various plugins in Cosmic Ray."""
 
 import logging
 
@@ -34,7 +33,7 @@ def get_operator(name):
     """
     sep = name.index("/")
     provider_name = name[:sep]
-    operator_name = name[sep + 1:]
+    operator_name = name[sep + 1 :]
 
     provider = OPERATOR_PROVIDERS[provider_name]
     return provider[operator_name]

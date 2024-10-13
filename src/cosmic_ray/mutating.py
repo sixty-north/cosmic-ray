@@ -1,5 +1,5 @@
-"""Support for making mutations to source code.
-"""
+"""Support for making mutations to source code."""
+
 import contextlib
 import difflib
 import logging

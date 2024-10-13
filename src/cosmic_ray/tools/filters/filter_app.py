@@ -1,5 +1,5 @@
-"""A simple base for creating common types of work-db filters.
-"""
+"""A simple base for creating common types of work-db filters."""
+
 import argparse
 import logging
 import sys

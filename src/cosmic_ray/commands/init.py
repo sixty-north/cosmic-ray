@@ -1,4 +1,5 @@
 "Implementation of the 'init' command."
+
 import logging
 import uuid
 from typing import Iterable

@@ -1,5 +1,4 @@
-"""adam.adam_1
-"""
+"""adam.adam_1"""
 
 # pylint: disable=C0111
 import operator

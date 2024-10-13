@@ -1,5 +1,4 @@
-"""Operator-provider plugin for all core cosmic ray operators.
-"""
+"""Operator-provider plugin for all core cosmic ray operators."""
 
 import itertools
 
