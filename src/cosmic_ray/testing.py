@@ -1,9 +1,9 @@
 "Support for running tests in a subprocess."
 
-import subprocess
 import logging
 import os
 import shlex
+import subprocess
 import traceback
 
 from cosmic_ray.work_item import TestOutcome

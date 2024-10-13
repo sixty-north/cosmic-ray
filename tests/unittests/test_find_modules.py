@@ -1,7 +1,8 @@
 from pathlib import Path
 
 import pytest
-from cosmic_ray.modules import find_modules, filter_paths
+
+from cosmic_ray.modules import filter_paths, find_modules
 
 
 def test_small_directory_tree(data_dir):

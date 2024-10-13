@@ -4,7 +4,7 @@ import dataclasses
 import enum
 import pathlib
 from pathlib import Path
-from typing import Any, Optional, Tuple, Dict
+from typing import Any, Dict, Optional, Tuple
 
 
 class StrEnum(str, enum.Enum):

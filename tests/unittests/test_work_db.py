@@ -2,8 +2,8 @@
 
 import pytest
 
-from cosmic_ray.work_db import use_db, WorkDB
-from cosmic_ray.work_item import MutationSpec, WorkerOutcome, WorkItem, WorkResult
+from cosmic_ray.work_db import WorkDB, use_db
+from cosmic_ray.work_item import MutationSpec, WorkItem, WorkResult, WorkerOutcome
 from cosmic_ray.work_item import TestOutcome as TOutcome  # We do this to prevent pytest from "collecting" TOutcome
 
 # pylint: disable=W0621,C0111

@@ -4,14 +4,14 @@
 
 import stat
 
-from exit_codes import ExitCode
 import pytest
+from exit_codes import ExitCode
 
 import cosmic_ray.cli
 import cosmic_ray.config
 import cosmic_ray.modules
-import cosmic_ray.plugins
 import cosmic_ray.mutating
+import cosmic_ray.plugins
 
 
 @pytest.fixture

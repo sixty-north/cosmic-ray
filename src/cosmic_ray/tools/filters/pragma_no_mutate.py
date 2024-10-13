@@ -7,7 +7,7 @@ import sys
 from functools import lru_cache
 
 from cosmic_ray.tools.filters.filter_app import FilterApp
-from cosmic_ray.work_item import WorkerOutcome, WorkResult
+from cosmic_ray.work_item import WorkResult, WorkerOutcome
 
 log = logging.getLogger()
 

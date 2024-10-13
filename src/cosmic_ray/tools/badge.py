@@ -3,9 +3,9 @@
 import os
 from logging import getLogger
 
+import click
 from anybadge import Badge
 
-import click
 from cosmic_ray.config import load_config
 from cosmic_ray.tools.survival_rate import survival_rate
 from cosmic_ray.work_db import WorkDB, use_db

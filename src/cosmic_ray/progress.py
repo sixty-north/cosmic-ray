@@ -46,11 +46,10 @@ Example::
 
 """
 
-from contextlib import contextmanager
-from functools import wraps
-
 # Currently installed zero-argument callables used to report progress.
 import sys
+from contextlib import contextmanager
+from functools import wraps
 
 _reporters = []  # pylint: disable=invalid-name
 

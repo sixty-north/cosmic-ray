@@ -2,7 +2,7 @@ import subprocess
 import sys
 
 from cosmic_ray.tools.filters import operators_filter
-from cosmic_ray.work_item import MutationSpec, WorkerOutcome, WorkItem, WorkResult
+from cosmic_ray.work_item import MutationSpec, WorkItem, WorkResult, WorkerOutcome
 
 
 def test_smoke_test_on_initialized_session(initialized_session):

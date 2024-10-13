@@ -22,9 +22,10 @@ from pathlib import Path
 
 import aiohttp
 from aiohttp import web
+
 from cosmic_ray.distribution.distributor import Distributor
 from cosmic_ray.mutating import mutate_and_test
-from cosmic_ray.work_item import MutationSpec, WorkerOutcome, WorkItem, WorkResult
+from cosmic_ray.work_item import MutationSpec, WorkItem, WorkResult, WorkerOutcome
 
 log = logging.getLogger(__name__)
 

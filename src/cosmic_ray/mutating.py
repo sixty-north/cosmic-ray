@@ -2,19 +2,18 @@
 """
 import contextlib
 import difflib
-from itertools import chain
-from pathlib import Path
+import logging
 import traceback
 from contextlib import contextmanager
-import logging
+from itertools import chain
+from pathlib import Path
 from typing import Iterable
 
-
-from cosmic_ray.util import read_python_source, restore_contents
 import cosmic_ray.plugins
 from cosmic_ray.ast import Visitor, get_ast
 from cosmic_ray.testing import run_tests
-from cosmic_ray.work_item import MutationSpec, TestOutcome, WorkerOutcome, WorkResult
+from cosmic_ray.util import read_python_source, restore_contents
+from cosmic_ray.work_item import MutationSpec, TestOutcome, WorkResult, WorkerOutcome
 
 log = logging.getLogger(__name__)
 

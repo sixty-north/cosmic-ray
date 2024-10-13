@@ -1,12 +1,13 @@
 "Implementation of the 'init' command."
 import logging
-from typing import Iterable
 import uuid
-from cosmic_ray.ast import get_ast_from_path, ast_nodes
+from typing import Iterable
+
 import cosmic_ray.modules
-from cosmic_ray.work_item import MutationSpec, WorkItem
 import cosmic_ray.plugins
+from cosmic_ray.ast import ast_nodes, get_ast_from_path
 from cosmic_ray.work_db import WorkDB
+from cosmic_ray.work_item import MutationSpec, WorkItem
 
 log = logging.getLogger()
 

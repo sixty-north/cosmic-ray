@@ -4,12 +4,12 @@ import contextlib
 import json
 from pathlib import Path
 
-from sqlalchemy import Column, Enum, ForeignKey, Integer, JSON, String, Text, create_engine, event, func
+from sqlalchemy import JSON, Column, Enum, ForeignKey, Integer, String, Text, create_engine, event, func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.orm.session import sessionmaker
 
-from .work_item import MutationSpec, TestOutcome, WorkResult, WorkerOutcome, WorkItem
+from .work_item import MutationSpec, TestOutcome, WorkItem, WorkResult, WorkerOutcome
 
 
 class WorkDB:

@@ -2,8 +2,8 @@
 
 import click
 
-from cosmic_ray.work_db import use_db, WorkDB
 from cosmic_ray.tools.survival_rate import kills_count, survival_rate
+from cosmic_ray.work_db import WorkDB, use_db
 
 
 @click.command()

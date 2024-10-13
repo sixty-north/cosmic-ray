@@ -101,4 +101,11 @@ filename = "src/cosmic_ray/version.py"
 line-length = 120
 
 [tool.ruff.lint]
-select = ["UP"]
+select = [
+  "UP", # PYUPGRADE
+  "I", # ISORT
+]
+
+[tool.ruff.lint.isort]
+case-sensitive = true
+known-first-party = ["cosmic_ray"]

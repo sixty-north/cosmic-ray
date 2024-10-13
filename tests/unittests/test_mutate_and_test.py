@@ -2,8 +2,8 @@
 
 from pathlib import Path
 
-from cosmic_ray.work_item import MutationSpec, WorkerOutcome, WorkResult
 from cosmic_ray.mutating import mutate_and_test
+from cosmic_ray.work_item import MutationSpec, WorkResult, WorkerOutcome
 
 
 def test_no_test_return_value(path_utils, data_dir):

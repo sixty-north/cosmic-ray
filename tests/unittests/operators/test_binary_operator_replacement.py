@@ -1,8 +1,8 @@
 from cosmic_ray.mutating import mutate_code
 from cosmic_ray.operators.binary_operator_replacement import (
+    ReplaceBinaryOperator_Add_Mul,
     ReplaceBinaryOperator_Mul_Add,
     ReplaceBinaryOperator_Sub_Add,
-    ReplaceBinaryOperator_Add_Mul,
 )
 
 

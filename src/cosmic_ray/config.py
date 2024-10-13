@@ -1,7 +1,7 @@
 """Configuration module."""
-from contextlib import contextmanager
 import logging
 import sys
+from contextlib import contextmanager
 
 import toml
 
