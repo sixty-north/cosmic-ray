@@ -16,14 +16,14 @@ def _update_progress(work_db):
     pending = num_work_items - work_db.num_results
     total = num_work_items
     remaining = total - pending
-    message = "{} out of {} completed".format(remaining, total)
+    message = f"{remaining} out of {total} completed"
     _progress_messages[work_db.name] = message
 
 
 def _report_progress(stream):
     for db_name, progress_message in _progress_messages.items():
         session = os.path.splitext(db_name)[0]
-        print("{session} : {progress_message}".format(session=session, progress_message=progress_message), file=stream)
+        print(f"{session} : {progress_message}", file=stream)
 
 
 @reports_progress(_report_progress)

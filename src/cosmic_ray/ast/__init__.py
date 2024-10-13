@@ -99,18 +99,18 @@ def dump_node(node):
     write = buffer.write
 
     def do_dump(node, indent=""):
-        write("{}{}({}".format(indent, type(node).__name__, node.type))
+        write(f"{indent}{type(node).__name__}({node.type}")
         value = getattr(node, "value", None)
         if value:
             value = value.replace("\n", "\\n")
-            write(", '{}'".format(value))
+            write(f", '{value}'")
         children = getattr(node, "children", None)
         if children:
             write(", [\n")
             for child in children:
                 do_dump(child, indent + " " * 4)
                 write(",\n")
-            write("{}]".format(indent))
+            write(f"{indent}]")
         write(")")
         if not indent:
             write("\n")

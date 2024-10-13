@@ -18,7 +18,7 @@ def report(show_output, show_diff, show_pending, session_file):
         for work_item, result in db.completed_work_items:
             display_work_item(work_item)
 
-            print("worker outcome: {}, test outcome: {}".format(result.worker_outcome, result.test_outcome))
+            print(f"worker outcome: {result.worker_outcome}, test outcome: {result.test_outcome}")
 
             if show_output:
                 print("=== OUTPUT ===")
@@ -37,20 +37,20 @@ def report(show_output, show_diff, show_pending, session_file):
         num_items = db.num_work_items
         num_complete = db.num_results
 
-        print("total jobs: {}".format(num_items))
+        print(f"total jobs: {num_items}")
 
         if num_complete > 0:
-            print("complete: {} ({:.2f}%)".format(num_complete, num_complete / num_items * 100))
+            print(f"complete: {num_complete} ({num_complete / num_items * 100:.2f}%)")
             num_killed = kills_count(db)
-            print("surviving mutants: {} ({:.2f}%)".format(num_complete - num_killed, survival_rate(db)))
+            print(f"surviving mutants: {num_complete - num_killed} ({survival_rate(db):.2f}%)")
         else:
             print("no jobs completed")
 
 
 def display_work_item(work_item):
-    print("[job-id] {}".format(work_item.job_id))
+    print(f"[job-id] {work_item.job_id}")
     for mutation in work_item.mutations:
-        print("{} {} {}".format(mutation.module_path, mutation.operator_name, mutation.occurrence))
+        print(f"{mutation.module_path} {mutation.operator_name} {mutation.occurrence}")
 
 
 if __name__ == "__main__":

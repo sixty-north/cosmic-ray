@@ -36,7 +36,7 @@ def test_finding_modules_with_missing_file(data_dir):
     path = data_dir / "a" / "inexisting_file.py"
     with pytest.raises(FileNotFoundError) as exc_info:
         tuple(find_modules((data_dir / "a", path, data_dir / "a" / "c")))
-    assert str(exc_info.value) == "Could not find module path {}".format(path)
+    assert str(exc_info.value) == f"Could not find module path {path}"
 
 
 def test_finding_modules_py_dot_py_using_slashes_with_full_filename(data_dir):

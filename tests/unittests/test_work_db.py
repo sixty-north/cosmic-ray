@@ -92,7 +92,7 @@ def test_work_items(work_db):
     original = [
         WorkItem.single(
             f"job_id_{idx}",
-            MutationSpec("path_{}".format(idx), "operator_{}".format(idx), idx, (idx, idx), (idx, idx + 1)),
+            MutationSpec(f"path_{idx}", f"operator_{idx}", idx, (idx, idx), (idx, idx + 1)),
         )
         for idx in range(10)
     ]
@@ -109,18 +109,18 @@ def test_results(work_db):
         work_db.add_work_item(
             WorkItem.single(
                 f"job_id_{idx}",
-                MutationSpec("path_{}".format(idx), "operator_{}".format(idx), idx, (idx, idx), (idx, idx + 1)),
+                MutationSpec(f"path_{idx}", f"operator_{idx}", idx, (idx, idx), (idx, idx + 1)),
             )
         )
 
     original = [
         (
-            "job_id_{}".format(idx),
+            f"job_id_{idx}",
             WorkResult(
-                output="data_{}".format(idx),
+                output=f"data_{idx}",
                 test_outcome=TOutcome.KILLED,
                 worker_outcome=WorkerOutcome.NORMAL,
-                diff="diff_{}".format(idx),
+                diff=f"diff_{idx}",
             ),
         )
         for idx in range(10)
@@ -138,7 +138,7 @@ def test_new_work_items_are_pending(work_db):
     items = [
         WorkItem.single(
             f"job_id_{idx}",
-            MutationSpec("path_{}".format(idx), "operator_{}".format(idx), idx, (idx, idx), (idx, idx + 1)),
+            MutationSpec(f"path_{idx}", f"operator_{idx}", idx, (idx, idx), (idx, idx + 1)),
         )
         for idx in range(10)
     ]
@@ -152,7 +152,7 @@ def test_adding_result_clears_pending(work_db):
     items = [
         WorkItem.single(
             f"job_id_{idx}",
-            MutationSpec("path_{}".format(idx), "operator_{}".format(idx), idx, (idx, idx), (idx, idx + 1)),
+            MutationSpec(f"path_{idx}", f"operator_{idx}", idx, (idx, idx), (idx, idx + 1)),
         )
         for idx in range(10)
     ]
@@ -163,12 +163,12 @@ def test_adding_result_clears_pending(work_db):
     for idx, item in enumerate(items):
         assert sorted(list(work_db.pending_work_items), key=repr) == sorted(items[idx:], key=repr)
         result = (
-            "job_id_{}".format(idx),
+            f"job_id_{idx}",
             WorkResult(
-                output="data_{}".format(idx),
+                output=f"data_{idx}",
                 test_outcome=TOutcome.KILLED,
                 worker_outcome=WorkerOutcome.NORMAL,
-                diff="diff_{}".format(idx),
+                diff=f"diff_{idx}",
             ),
         )
         work_db.set_result(*result)
@@ -178,7 +178,7 @@ def test_adding_result_completes_work_item(work_db):
     items = [
         WorkItem.single(
             f"job_id_{idx}",
-            MutationSpec("path_{}".format(idx), "operator_{}".format(idx), idx, (idx, idx), (idx, idx + 1)),
+            MutationSpec(f"path_{idx}", f"operator_{idx}", idx, (idx, idx), (idx, idx + 1)),
         )
         for idx in range(10)
     ]
@@ -189,12 +189,12 @@ def test_adding_result_completes_work_item(work_db):
     for idx, item in enumerate(items):
         assert [r[0] for r in work_db.completed_work_items] == items[:idx]
         result = (
-            "job_id_{}".format(idx),
+            f"job_id_{idx}",
             WorkResult(
-                output="data_{}".format(idx),
+                output=f"data_{idx}",
                 test_outcome=TOutcome.KILLED,
                 worker_outcome=WorkerOutcome.NORMAL,
-                diff="diff_{}".format(idx),
+                diff=f"diff_{idx}",
             ),
         )
         work_db.set_result(*result)

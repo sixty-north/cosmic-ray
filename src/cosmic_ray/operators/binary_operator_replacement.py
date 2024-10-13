@@ -27,9 +27,9 @@ class BinaryOperators(Enum):
 
 
 def _create_replace_binary_operator(from_op, to_op):
-    @extend_name("_{}_{}".format(from_op.name, to_op.name))
+    @extend_name(f"_{from_op.name}_{to_op.name}")
     class ReplaceBinaryOperator(Operator):
-        "An operator that replaces binary {} with binary {}.".format(from_op.name, to_op.name)
+        f"An operator that replaces binary {from_op.name} with binary {to_op.name}."
 
         def mutation_positions(self, node):
             if _is_binary_operator(node):
@@ -45,7 +45,7 @@ def _create_replace_binary_operator(from_op, to_op):
 
         @classmethod
         def examples(cls):
-            return (Example("x {} y".format(from_op.value), "x {} y".format(to_op.value)),)
+            return (Example(f"x {from_op.value} y", f"x {to_op.value} y"),)
 
     return ReplaceBinaryOperator
 

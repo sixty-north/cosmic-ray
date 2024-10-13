@@ -47,7 +47,7 @@ def operator_names():
         A sequence of operator names.
     """
     return tuple(
-        "{}/{}".format(provider_name, operator_name)
+        f"{provider_name}/{operator_name}"
         for provider_name, provider in OPERATOR_PROVIDERS.items()
         for operator_name in provider
     )

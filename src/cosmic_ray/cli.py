@@ -157,7 +157,7 @@ def baseline(config_file, session_file):
             if result.test_outcome == TestOutcome.KILLED:
                 message = ["Baseline failed. Execution with no mutation gives those following errors:"]
                 for line in result.output.split("\n"):
-                    message.append("  >>> {}".format(line))
+                    message.append(f"  >>> {line}")
                 log.error("\n".join(message))
                 sys.exit(1)
             else:

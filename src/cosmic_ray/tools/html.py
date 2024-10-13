@@ -182,39 +182,39 @@ def _generate_work_item_card(doc, index, work_item, result, skip_success):
         else:
             level = "danger"
 
-    with tag("div", klass="mb-1", id="job_list___sub_accordion_{}".format(index)):
+    with tag("div", klass="mb-1", id=f"job_list___sub_accordion_{index}"):
         with tag("div", klass="card"):
             with tag(
                 "a",
                 ("data-toggle", "collapse"),
-                ("data-target", "#job_list___sub_collapse_{}_1".format(index)),
+                ("data-target", f"#job_list___sub_collapse_{index}_1"),
                 ("aria-expanded", "false"),
-                ("aria-controls", "job_list___sub_collapse_{}_1".format(index)),
+                ("aria-controls", f"job_list___sub_collapse_{index}_1"),
                 href="#",
                 klass="job_list___sub_multi_heading",
             ):
                 with tag(
                     "div",
                     ("role", "alert"),
-                    klass="card-header alert-{}".format(level),
-                    id="job_list___sub_heading_{}_1".format(index),
+                    klass=f"card-header alert-{level}",
+                    id=f"job_list___sub_heading_{index}_1",
                 ):
-                    with tag("button", klass="btn btn-outline-{}".format(level)):
+                    with tag("button", klass=f"btn btn-outline-{level}"):
                         with tag("span", klass="job_id"):
-                            text("{} : Job ID {}".format(index, work_item.job_id))
+                            text(f"{index} : Job ID {work_item.job_id}")
 
             with tag(
                 "div",
-                ("aria-labelledby", "job_list___sub_heading_{}_1".format(index)),
-                ("data-parent", "#job_list___sub_accordion_{}".format(index)),
+                ("aria-labelledby", f"job_list___sub_heading_{index}_1"),
+                ("data-parent", f"#job_list___sub_accordion_{index}"),
                 klass="collapse job_list___sub_multi_collapse",
-                id="job_list___sub_collapse_{}_1".format(index),
+                id=f"job_list___sub_collapse_{index}_1",
             ):
                 with tag("div", klass="card-body"):
                     with tag("div", klass="work-item"):
                         with tag(
                             "div",
-                            klass="alert alert-{} test-outcome".format(level),
+                            klass=f"alert alert-{level} test-outcome",
                             role="alert",
                         ):
                             if result is not None:
@@ -222,9 +222,9 @@ def _generate_work_item_card(doc, index, work_item, result, skip_success):
                                     with tag("p"):
                                         text("SURVIVED")
                                 with tag("p"):
-                                    text("worker outcome: {}".format(result.worker_outcome))
+                                    text(f"worker outcome: {result.worker_outcome}")
                                 with tag("p"):
-                                    text("test outcome: {}".format(result.test_outcome))
+                                    text(f"test outcome: {result.test_outcome}")
                             else:
                                 with tag("p"):
                                     text("No result")
@@ -238,15 +238,11 @@ def _generate_work_item_card(doc, index, work_item, result, skip_success):
                             ):
                                 with tag("button", klass="btn btn-outline-dark"):
                                     text(
-                                        "{}, start pos: {}, end pos: {}".format(
-                                            mutation.module_path,
-                                            mutation.start_pos,
-                                            mutation.end_pos,
-                                        )
+                                        f"{mutation.module_path}, start pos: {mutation.start_pos}, end pos: {mutation.end_pos}"
                                     )
 
                         with tag("pre"):
-                            text("operator: {}, occurrence: {}".format(mutation.operator_name, mutation.occurrence))
+                            text(f"operator: {mutation.operator_name}, occurrence: {mutation.occurrence}")
 
                     if result is not None:
                         if result.diff:
@@ -292,14 +288,14 @@ def _generate_summary(doc, db):
                         text("Date time: {}".format(datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
 
                     with tag("p"):
-                        text("Total jobs: {}".format(num_items))
+                        text(f"Total jobs: {num_items}")
 
                     if num_complete > 0:
                         with tag("p"):
-                            text("Complete: {} ({:.2f}%)".format(num_complete, num_complete / num_items * 100))
+                            text(f"Complete: {num_complete} ({num_complete / num_items * 100:.2f}%)")
                         with tag("p"):
                             num_killed = kills_count(db)
-                            text("Surviving mutants: {} ({:.2f}%)".format(num_complete - num_killed, survival_rate(db)))
+                            text(f"Surviving mutants: {num_complete - num_killed} ({survival_rate(db):.2f}%)")
                     else:
                         with tag("p"):
                             text("No jobs completed")
@@ -307,4 +303,4 @@ def _generate_summary(doc, db):
 
 def pycharm_url(filename, line_number):
     "Get a URL for opening a file in Pycharm."
-    return "pycharm://open?file={}&line={}".format(filename, line_number)
+    return f"pycharm://open?file={filename}&line={line_number}"
