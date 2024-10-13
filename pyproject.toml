@@ -22,6 +22,7 @@ classifiers = [
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
   "Topic :: Software Development :: Libraries :: Python Modules",
   "Topic :: Software Development :: Testing",
 
@@ -66,14 +67,14 @@ repository = "https://github.com/sixty-north/cosmic-ray"
 
 [tool.uv]
 dev-dependencies = [
-    "bump-my-version",
-    "hypothesis",
-    "nox",
-    "pytest",
-    "pytest-mock",
-    "ruff",
-    "sphinx",
-    "sphinx-rtd-theme",
+  "bump-my-version",
+  "hypothesis",
+  "nox",
+  "pytest",
+  "pytest-mock",
+  "ruff",
+  "sphinx",
+  "sphinx-rtd-theme",
 ]
 
 [tool.setuptools.packages.find]
