@@ -165,8 +165,11 @@ class WorkDB:
         "Iterable of all pending work items. In random order."
         with self._session_maker.begin() as session:
             completed_job_ids = session.query(WorkResultStorage.job_id)
-            pending = session.query(WorkItemStorage).where(
-                ~WorkItemStorage.job_id.in_(completed_job_ids)).order_by(func.random())
+            pending = (
+                session.query(WorkItemStorage)
+                .where(~WorkItemStorage.job_id.in_(completed_job_ids))
+                .order_by(func.random())
+            )
             return tuple(_work_item_from_storage(work_item) for work_item in pending)
 
     @property
@@ -208,6 +211,7 @@ Base = declarative_base()
 
 class WorkItemStorage(Base):
     "Database model for WorkItem."
+
     __tablename__ = "work_items"
 
     job_id = Column(String, primary_key=True)
@@ -216,6 +220,7 @@ class WorkItemStorage(Base):
 
 class MutationSpecStorage(Base):
     "Database model for MutationSpecs"
+
     __tablename__ = "mutation_specs"
     module_path = Column(String)
     operator_name = Column(String)
@@ -231,6 +236,7 @@ class MutationSpecStorage(Base):
 
 class WorkResultStorage(Base):
     "Database model for WorkResult."
+
     __tablename__ = "work_results"
 
     worker_outcome = Column(Enum(WorkerOutcome))

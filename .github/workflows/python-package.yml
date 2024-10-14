@@ -28,7 +28,9 @@ jobs:
       - name: Install dependencies
         run: uv sync -i https://pypi.org/simple  # Ignore download URLs in uv.lock.
       - name: Lint with ruff
-        run: uv run ruff check src/cosmic_ray
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
       - name: Test with pytest
         run: uv run pytest tests --run-slow
 

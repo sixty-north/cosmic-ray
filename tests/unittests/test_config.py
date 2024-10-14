@@ -1,5 +1,5 @@
-"""Tests for config loading functions.
-"""
+"""Tests for config loading functions."""
+
 import io
 
 import pytest

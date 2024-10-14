@@ -1,6 +1,7 @@
 """This module contains mutation operators which replace one
 comparison operator with another.
 """
+
 import itertools
 from enum import Enum
 
@@ -13,6 +14,7 @@ from .util import extend_name
 
 class ComparisonOperators(Enum):
     "All comparison operators that we mutate."
+
     Eq = "=="
     NotEq = "!="
     Lt = "<"

@@ -1,5 +1,4 @@
-"""adam.adam_2
-"""
+"""adam.adam_2"""
 
 
 def trigger_infinite_loop():

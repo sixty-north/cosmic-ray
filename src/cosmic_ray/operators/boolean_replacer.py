@@ -1,5 +1,4 @@
-"""Implementation of the boolean replacement operators.
-"""
+"""Implementation of the boolean replacement operators."""
 
 import parso.python.tree
 

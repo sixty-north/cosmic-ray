@@ -1,5 +1,4 @@
-"""Implementation of the 'new-config' command.
-"""
+"""Implementation of the 'new-config' command."""
 
 import os.path
 

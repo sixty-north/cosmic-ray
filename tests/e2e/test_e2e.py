@@ -109,4 +109,4 @@ def test_baseline_with_pytest_filter(example_project_root, session):
         capture_output=True,
     )
 
-    assert result.returncode == 0 
+    assert result.returncode == 0

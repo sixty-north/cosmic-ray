@@ -1,5 +1,5 @@
-"""Classes for describing work and results.
-"""
+"""Classes for describing work and results."""
+
 import dataclasses
 import enum
 import pathlib
@@ -56,6 +56,7 @@ class WorkResult:
 @dataclasses.dataclass(frozen=True)
 class MutationSpec:
     "Description of a single mutation."
+
     module_path: Path
     operator_name: str
     occurrence: int

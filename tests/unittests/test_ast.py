@@ -18,4 +18,4 @@ def foo():
     with module_filepath.open("wb") as f:
         f.write(input_code)
     ast = get_ast_from_path(module_filepath)
-    assert ast.get_code().encode('latin-1') == input_code
+    assert ast.get_code().encode("latin-1") == input_code

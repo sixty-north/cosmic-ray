@@ -25,7 +25,7 @@ SUPPORTED_Z_SCORES = {800: 1.282, 900: 1.645, 950: 1.960, 980: 2.326, 990: 2.576
     type=click.FloatRange(0, 100),
     default=None,
     help="Exit with a non-zero code if the survival rate is larger than <max_value> or the calculated confidence interval "
-         "is above the <max_value> (if --estimate is used).  Specified as percentage.",
+    "is above the <max_value> (if --estimate is used).  Specified as percentage.",
 )
 @click.argument("session-file", type=click.Path(dir_okay=False, readable=True, exists=True))
 def format_survival_rate(estimate, confidence, fail_over, session_file):
@@ -45,7 +45,9 @@ def format_survival_rate(estimate, confidence, fail_over, session_file):
         if not num_complete:
             conf_int = 0
         else:
-            conf_int = math.sqrt(rate * (100 - rate) / num_complete) * z_score * (1 - math.sqrt(num_complete / num_items))
+            conf_int = (
+                math.sqrt(rate * (100 - rate) / num_complete) * z_score * (1 - math.sqrt(num_complete / num_items))
+            )
         min_rate = rate - conf_int
         print(f"{min_rate:.2f} {rate:.2f} {rate + conf_int:.2f}")
 

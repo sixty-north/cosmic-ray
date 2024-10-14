@@ -1,5 +1,5 @@
-"""Tests for the various mutation operators.
-"""
+"""Tests for the various mutation operators."""
+
 import parso
 import pytest
 

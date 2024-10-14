@@ -1,4 +1,5 @@
 """Implementation of the variable-replacement operator."""
+
 from random import randint
 
 from parso.python.tree import ExprStmt, Leaf, Number

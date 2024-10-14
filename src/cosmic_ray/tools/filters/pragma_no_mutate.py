@@ -1,6 +1,7 @@
 """A filter that uses "# pragma: no mutate" to determine when specific mutations
 should be skipped.
 """
+
 import logging
 import re
 import sys

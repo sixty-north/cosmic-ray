@@ -1,4 +1,5 @@
 """Implementation of the variable-inserter operator."""
+
 import random
 
 import parso.python.tree

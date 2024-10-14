@@ -1,5 +1,4 @@
-"""Implementation of the unary-operator-replacement operator.
-"""
+"""Implementation of the unary-operator-replacement operator."""
 
 from enum import Enum
 from itertools import permutations
@@ -12,6 +11,7 @@ from .util import extend_name
 
 class UnaryOperators(Enum):
     "All unary operators that we mutate."
+
     UAdd = "+"
     USub = "-"
     Invert = "~"
@@ -51,7 +51,7 @@ def _create_replace_unary_operators(from_op, to_op):
         @classmethod
         def examples(cls):
             from_code = f"{from_op.value}1"
-            to_code = from_code[len(from_op.value):]
+            to_code = from_code[len(from_op.value) :]
 
             if to_op is not UnaryOperators.Nothing:
                 to_code = to_op.value + to_code

@@ -16,6 +16,7 @@ configure the list of worker URLs in ``cosmic-ray.distributor.http.worker-urls``
     [cosmic-ray.distributor.http]
     worker-urls = ['http://localhost:9876', 'http://localhost:9877']
 """
+
 import asyncio
 import logging
 from pathlib import Path

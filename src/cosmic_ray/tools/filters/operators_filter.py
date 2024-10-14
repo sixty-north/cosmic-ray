@@ -1,5 +1,5 @@
-"""An filter that removes operators based on regular expressions.
-"""
+"""An filter that removes operators based on regular expressions."""
+
 import logging
 import re
 import sys
