@@ -4,7 +4,7 @@ build-backend = 'setuptools.build_meta'
 
 [project]
 name = "cosmic_ray"
-requires-python = ">= 3.8"
+requires-python = ">= 3.9"
 dynamic = ["version"]
 authors = [{ name = "Sixty North AS", email = "austin@sixty-north.com" }]
 description = "Mutation testing"
@@ -17,7 +17,6 @@ classifiers = [
   "License :: OSI Approved :: MIT License",
   "Operating System :: OS Independent",
   "Programming Language :: Python",
-  "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
@@ -103,7 +102,7 @@ line-length = 120
 [tool.ruff.lint]
 select = [
   "UP", # PYUPGRADE
-  "I", # ISORT
+  "I",  # ISORT
 ]
 
 [tool.ruff.lint.isort]

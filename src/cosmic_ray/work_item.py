@@ -4,7 +4,7 @@ import dataclasses
 import enum
 import pathlib
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Optional
 
 
 class StrEnum(str, enum.Enum):
@@ -60,9 +60,9 @@ class MutationSpec:
     module_path: Path
     operator_name: str
     occurrence: int
-    start_pos: Tuple[int, int]
-    end_pos: Tuple[int, int]
-    operator_args: Dict[str, Any] = dataclasses.field(default_factory=dict)
+    start_pos: tuple[int, int]
+    end_pos: tuple[int, int]
+    operator_args: dict[str, Any] = dataclasses.field(default_factory=dict)
 
     # pylint: disable=R0913
     def __post_init__(self):
@@ -86,7 +86,7 @@ class WorkItem:
     """
 
     job_id: str
-    mutations: Tuple[MutationSpec]
+    mutations: tuple[MutationSpec]
 
     @classmethod
     def single(cls, job_id, mutation: MutationSpec):
