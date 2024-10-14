@@ -1,32 +1,33 @@
 """Tests for config loading functions."""
 
 import io
+from unittest import mock
 
 import pytest
 
 from cosmic_ray.config import ConfigDict, ConfigError, load_config, serialize_config
 
 
-def test_load_valid_stdin(mocker):
+def test_load_valid_stdin():
     temp_stdin = io.StringIO()
     temp_stdin.name = "stringio"
     config = ConfigDict()
     config["key"] = "value"
     temp_stdin.write(serialize_config(config))
     temp_stdin.seek(0)
-    mocker.patch("sys.stdin", temp_stdin)
-    assert load_config()["key"] == "value"
+    with mock.patch("cosmic_ray.config.sys.stdin", temp_stdin):
+        assert load_config()["key"] == "value"
 
 
-def test_load_invalid_stdin_raises_ConfigError(mocker):
+def test_load_invalid_stdin_raises_ConfigError():
     temp_stdin = io.StringIO()
     temp_stdin.name = "stringio"
     temp_stdin.write("{invalid")
     temp_stdin.seek(0)
-    mocker.patch("sys.stdin", temp_stdin)
 
-    with pytest.raises(ConfigError):
-        load_config()
+    with mock.patch("cosmic_ray.config.sys.stdin", temp_stdin):
+        with pytest.raises(ConfigError):
+            load_config()
 
 
 def test_load_from_valid_config_file(tmpdir):

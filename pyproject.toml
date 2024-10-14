@@ -70,7 +70,6 @@ dev-dependencies = [
   "hypothesis",
   "nox",
   "pytest",
-  "pytest-mock",
   "ruff",
   "sphinx",
   "sphinx-rtd-theme",
