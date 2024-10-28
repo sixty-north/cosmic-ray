@@ -63,12 +63,13 @@ click.argument()
 
 
 @cli.command()
+@click.argument("force", type=bool, default=False)
 @click.argument("config_file")
 @click.argument(
     "session_file",
     # help="The filename for the database in which the work order will be stored."
 )
-def init(config_file, session_file):
+def init(config_file, session_file,force):
     """Initialize a mutation testing session from a configuration. This
     primarily creates a session - a database of "work to be done" -
     which describes all of the mutations and test runs that need to be
@@ -96,7 +97,11 @@ def init(config_file, session_file):
             log.info(" - %s: %s", directory, ", ".join(sorted(files)))
 
     with use_db(session_file) as database:
-        cosmic_ray.commands.init(modules, database, operators_cfg)
+        if database.num_results>0:
+            sys.exit(ExitCode.OK)
+        elif database.num_results==0 or force:
+            cosmic_ray.commands.init(modules, database, operators_cfg)
+            
 
     sys.exit(ExitCode.OK)
 

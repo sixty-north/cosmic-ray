@@ -5,6 +5,7 @@
 import stat
 
 import pytest
+
 from exit_codes import ExitCode
 
 import cosmic_ray.cli
@@ -12,7 +13,7 @@ import cosmic_ray.config
 import cosmic_ray.modules
 import cosmic_ray.mutating
 import cosmic_ray.plugins
-
+from cosmic_ray.work_db import WorkDB, use_db
 
 @pytest.fixture
 def config_file(tmpdir):
@@ -59,10 +60,23 @@ def test_non_existent_session_file_returns_EX_NOINPUT(local_unittest_config):
     assert cosmic_ray.cli.main(["exec", str(local_unittest_config), "foo.session"]) == ExitCode.NO_INPUT
 
 
-def test_non_existent_config_file_returns_EX_NOINPUT(session, local_unittest_config):
-    cosmic_ray.cli.main(["init", local_unittest_config, str(session)])
+def test_non_existent_config_file_returns_EX_NOINPUT(session, local_unittest_config,force):
+    cosmic_ray.cli.main(["init", local_unittest_config, str(session),force])
     assert cosmic_ray.cli.main(["exec", "no-such-file", str(session)]) == ExitCode.CONFIG
 
+
+
+def test_init_with_existing_results_no_force(session, local_unittest_config,force):
+    """Test that init exits without reinitializing when results exist and force=False"""
+    with use_db(session) as database:
+        database.num_results = 1  # Simulate existing results
+        result = cosmic_ray.cli.main(["init", local_unittest_config, str(session),force])
+        assert result == ExitCode.OK
+def test_init_with_existing_results_force(session, local_unittest_config,force=True):
+    """Test that init exits without reinitializing when results exist and force=False"""
+        
+    result = cosmic_ray.cli.main(["init", local_unittest_config, str(session),force])
+    assert result != ExitCode.OK
 
 @pytest.mark.skip("need to sort this API out")
 def test_unreadable_file_returns_EX_PERM(tmpdir, local_unittest_config):
@@ -80,8 +94,8 @@ def test_new_config_success_returns_EX_OK(monkeypatch, config_file):
 # NOTE: We have integration tests for the happy-path for many commands, so we don't cover them explicitly here.
 
 
-def test_dump_success_returns_EX_OK(lobotomize, local_unittest_config, session):
-    errcode = cosmic_ray.cli.main(["init", local_unittest_config, str(session)])
+def test_dump_success_returns_EX_OK(lobotomize, local_unittest_config, session,force):
+    errcode = cosmic_ray.cli.main(["init", local_unittest_config, str(session),force])
     assert errcode == ExitCode.OK
 
     errcode = cosmic_ray.cli.main(["dump", str(session)])
