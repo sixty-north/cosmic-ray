@@ -13,7 +13,8 @@ import cosmic_ray.config
 import cosmic_ray.modules
 import cosmic_ray.mutating
 import cosmic_ray.plugins
-from cosmic_ray.work_db import WorkDB, use_db
+from cosmic_ray.work_db import WorkDB
+from cosmic_ray.work_item import WorkItem,MutationSpec
 
 @pytest.fixture
 def config_file(tmpdir):
@@ -60,23 +61,60 @@ def test_non_existent_session_file_returns_EX_NOINPUT(local_unittest_config):
     assert cosmic_ray.cli.main(["exec", str(local_unittest_config), "foo.session"]) == ExitCode.NO_INPUT
 
 
-def test_non_existent_config_file_returns_EX_NOINPUT(session, local_unittest_config,force):
-    cosmic_ray.cli.main(["init", local_unittest_config, str(session),force])
+def test_non_existent_config_file_returns_EX_NOINPUT(session, local_unittest_config):
+    cosmic_ray.cli.main(["init", local_unittest_config, str(session)])
     assert cosmic_ray.cli.main(["exec", "no-such-file", str(session)]) == ExitCode.CONFIG
 
 
 
-def test_init_with_existing_results_no_force(session, local_unittest_config,force):
+def test_init_with_existing_results_no_force(session, local_unittest_config):
     """Test that init exits without reinitializing when results exist and force=False"""
-    with use_db(session) as database:
-        database.num_results = 1  # Simulate existing results
-        result = cosmic_ray.cli.main(["init", local_unittest_config, str(session),force])
-        assert result == ExitCode.OK
-def test_init_with_existing_results_force(session, local_unittest_config,force=True):
-    """Test that init exits without reinitializing when results exist and force=False"""
+    # Sample WorkItem creation
+    mutation_spec = MutationSpec(
+        module_path="src/example/test.py",
+        operator_name="delete_line",
+        occurrence=1,
+        start_pos=(10, 0),
+        end_pos=(10, 20),
+        operator_args={"comment": "Delete print statement"}
+    )
+
+    work_items = [
+        WorkItem(
+            job_id="test_job_123",
+            mutations=(mutation_spec,)
+        )
+    ]
+    
+    db=WorkDB(session,1)
+    db.add_work_items(work_items)
+
+    # Verify initial database state has our test work items
+    initial_count = db.num_work_items
+    assert initial_count == len(work_items)
+
+
+
+    result = cosmic_ray.cli.main(["init", local_unittest_config, str(session)])
+    db=WorkDB(session,2)
+    final_count = db.num_results
+    assert final_count == initial_count  # Confirm work items are unchanged
+    assert result == ExitCode.OK 
+
+
+
+
+
+
+
+
+
+
+def test_init_with_existing_results_force(session, local_unittest_config,force):
+    """Test that reinitialization occurs when force=True"""
         
-    result = cosmic_ray.cli.main(["init", local_unittest_config, str(session),force])
-    assert result != ExitCode.OK
+    result = cosmic_ray.cli.main(["init", local_unittest_config, str(session),"--force"])
+    assert result == ExitCode.OK
 
 @pytest.mark.skip("need to sort this API out")
 def test_unreadable_file_returns_EX_PERM(tmpdir, local_unittest_config):
@@ -94,8 +132,8 @@ def test_new_config_success_returns_EX_OK(monkeypatch, config_file):
 # NOTE: We have integration tests for the happy-path for many commands, so we don't cover them explicitly here.
 
 
-def test_dump_success_returns_EX_OK(lobotomize, local_unittest_config, session,force):
-    errcode = cosmic_ray.cli.main(["init", local_unittest_config, str(session),force])
+def test_dump_success_returns_EX_OK(lobotomize, local_unittest_config, session):
+    errcode = cosmic_ray.cli.main(["init", local_unittest_config, str(session)])
     assert errcode == ExitCode.OK
 
     errcode = cosmic_ray.cli.main(["dump", str(session)])
