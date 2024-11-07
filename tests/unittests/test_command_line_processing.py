@@ -7,13 +7,16 @@ import stat
 import pytest
 
 from exit_codes import ExitCode
-
+from pathlib import Path
 import cosmic_ray.cli
 import cosmic_ray.config
 import cosmic_ray.modules
 import cosmic_ray.mutating
 import cosmic_ray.plugins
-from cosmic_ray.work_db import WorkDB
+import cosmic_ray.commands
+from cosmic_ray.config import ConfigDict
+from cosmic_ray.work_db import WorkDB,use_db
+from cosmic_ray.commands.execute import execute
 from cosmic_ray.work_item import WorkItem,MutationSpec
 
 @pytest.fixture
@@ -69,9 +72,53 @@ def test_non_existent_config_file_returns_EX_NOINPUT(session, local_unittest_con
 
 def test_init_with_existing_results_no_force(session, local_unittest_config):
     """Test that init exits without reinitializing when results exist and force=False"""
+    #lobotomize
     # Sample WorkItem creation
     mutation_spec = MutationSpec(
-        module_path="src/example/test.py",
+        module_path=Path("src/operators/util.py"),
+        operator_name="extend_name",
+        occurrence=1,
+        start_pos=(10, 0),
+        end_pos=(10, 20),
+        operator_args={"comment": "Delete print statement"}
+    )
+
+    work_items = [
+        WorkItem(
+            job_id="test_job_123",
+            mutations=(mutation_spec,)
+        )
+    ]
+    
+    with use_db(session,WorkDB.Mode.create) as db:
+        db.add_work_items(work_items)
+        execute(db,config=ConfigDict)
+
+    
+    with use_db(session,WorkDB.Mode.open) as db:
+        initial_count = db.num_results
+
+    # Verify initial database state has our test work item
+    result = cosmic_ray.cli.main(["init", local_unittest_config, str(session)])
+    with use_db(session,WorkDB.Mode.open) as db:
+        final_count = db.num_results
+
+    assert final_count == initial_count  # Confirm work items are unchanged
+    assert result == ExitCode.OK 
+
+
+
+
+
+
+
+
+
+
+def test_init_with_existing_results_force(session, local_unittest_config):
+    """Test that reinitialization occurs when force=True"""
+    mutation_spec = MutationSpec(
+        module_path=Path("src/operators/test.py"),
         operator_name="delete_line",
         occurrence=1,
         start_pos=(10, 0),
@@ -86,34 +133,22 @@ def test_init_with_existing_results_no_force(session, local_unittest_config):
         )
     ]
     
-    db=WorkDB(session,1)
-    db.add_work_items(work_items)
+    with use_db(session,WorkDB.Mode.create) as db:
+        db.add_work_items(work_items)
+    
 
+    instance=WorkDB()
+    instance.set_result(WorkDB.Mode.open,config=ConfigDict)
+    initial_count = db.num_results
     # Verify initial database state has our test work items
-    initial_count = db.num_work_items
-    assert initial_count == len(work_items)
-
-
-
-    result = cosmic_ray.cli.main(["init", local_unittest_config, str(session)])
-    db=WorkDB(session,2)
-    final_count = db.num_results
-    assert final_count == initial_count  # Confirm work items are unchanged
-    assert result == ExitCode.OK 
-
-
-
-
-
-
-
-
-
-
-def test_init_with_existing_results_force(session, local_unittest_config,force):
-    """Test that reinitialization occurs when force=True"""
-        
+            
     result = cosmic_ray.cli.main(["init", local_unittest_config, str(session),"--force"])
+    with use_db(session,WorkDB.Mode.open) as db:
+        final_count = db.num_results
+        execute(db,config=ConfigDict)
+
+    assert initial_count!=0 and final_count == 0  
+
     assert result == ExitCode.OK
 
 @pytest.mark.skip("need to sort this API out")

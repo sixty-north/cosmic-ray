@@ -79,7 +79,7 @@ class WorkDB:
         """The number of work items."""
         with self._session_maker.begin() as session:
             return session.query(WorkItemStorage).count()
-
+ 
     def add_work_item(self, work_item):
         """Add a :class:`WorkItem`.
 
