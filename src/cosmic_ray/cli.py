@@ -68,7 +68,8 @@ click.argument()
     "session_file",
     # help="The filename for the database in which the work order will be stored."
 )
-def init(config_file, session_file):
+@click.option("--force", is_flag=True, help="Re-initialize the session even if it already contains results")
+def init(config_file, session_file, force):
     """Initialize a mutation testing session from a configuration. This
     primarily creates a session - a database of "work to be done" -
     which describes all of the mutations and test runs that need to be
@@ -96,7 +97,7 @@ def init(config_file, session_file):
             log.info(" - %s: %s", directory, ", ".join(sorted(files)))
 
     with use_db(session_file) as database:
-        if database.num_results > 0:
+        if (database.num_results > 0) and (not force):
             log.error("Session file already contains results. Use --force to overwrite.")
             sys.exit(ExitCode.DATA_ERR)
 

@@ -124,11 +124,40 @@ def test_reinit_session_with_results_fails(example_project_root, config, session
 
     session_path = example_project_root / session
     with use_db(str(session_path), WorkDB.Mode.open) as work_db:
-        assert work_db.num_work_items > 0
-        assert work_db.num_results == work_db.num_work_items
+        initial_num_work_items = work_db.num_work_items
+        assert work_db.num_results == initial_num_work_items > 0
 
     with pytest.raises(subprocess.CalledProcessError):
         subprocess.check_call(
             [sys.executable, "-m", "cosmic_ray.cli", "init", config, str(session)], cwd=str(example_project_root)
         )
+
+    with use_db(str(session_path), WorkDB.Mode.open) as work_db:
+        assert work_db.num_results == work_db.num_work_items == initial_num_work_items
+
+
+
+@pytest.mark.slow
+def test_force_reinit_session_with_results_succeeds(example_project_root, config, session):
+    subprocess.check_call(
+        [sys.executable, "-m", "cosmic_ray.cli", "init", config, str(session)], cwd=str(example_project_root)
+    )
+
+    subprocess.check_call(
+        [sys.executable, "-m", "cosmic_ray.cli", "exec", config, str(session)], cwd=str(example_project_root)
+    )
+
+    session_path = example_project_root / session
+    with use_db(str(session_path), WorkDB.Mode.open) as work_db:
+        initial_num_work_items = work_db.num_work_items
+        assert initial_num_work_items > 0
+        assert work_db.num_results == work_db.num_work_items
+
+    subprocess.check_call(
+        [sys.executable, "-m", "cosmic_ray.cli", "init", config, str(session), "--force"], cwd=str(example_project_root)
+    )
+
+    with use_db(str(session_path), WorkDB.Mode.open) as work_db:
+        assert work_db.num_work_items == initial_num_work_items
+        assert work_db.num_results == 0
 
