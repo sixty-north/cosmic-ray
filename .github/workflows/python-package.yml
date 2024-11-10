@@ -26,7 +26,7 @@ jobs:
       - name: Install Python
         run: uv python install ${{ matrix.python-version }}
       - name: Install dependencies
-        run: uv sync -i https://pypi.org/simple  # Ignore download URLs in uv.lock.
+        run: uv sync
       - name: Lint with ruff
         run: |
           uv run ruff check .

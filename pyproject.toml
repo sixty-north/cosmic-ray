@@ -74,6 +74,7 @@ dev-dependencies = [
   "sphinx",
   "sphinx-rtd-theme",
 ]
+index-url = "https://pypi.org/simple"
 
 [tool.setuptools.packages.find]
 where = ["src"]
