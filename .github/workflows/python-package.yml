@@ -55,6 +55,7 @@ jobs:
         run: uv python install 3.12
       - name: "Build distribution"
         run: |
+          uv venv
           uv pip install build
           uv run python -m build
       - name: Publish package distributions to PyPI
