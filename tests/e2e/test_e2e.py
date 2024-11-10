@@ -23,7 +23,7 @@ def config(tester, distributor):
 
 
 @pytest.mark.slow
-def test_e2e(example_project_root, config, session):
+def test_init_and_exec(example_project_root, config, session):
     subprocess.check_call(
         [sys.executable, "-m", "cosmic_ray.cli", "init", config, str(session)], cwd=str(example_project_root)
     )
