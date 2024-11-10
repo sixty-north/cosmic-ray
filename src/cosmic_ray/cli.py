@@ -96,6 +96,10 @@ def init(config_file, session_file):
             log.info(" - %s: %s", directory, ", ".join(sorted(files)))
 
     with use_db(session_file) as database:
+        if database.num_results > 0:
+            log.error("Session file already contains results. Use --force to overwrite.")
+            sys.exit(ExitCode.DATA_ERR)
+
         cosmic_ray.commands.init(modules, database, operators_cfg)
 
     sys.exit(ExitCode.OK)

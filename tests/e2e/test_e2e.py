@@ -110,3 +110,25 @@ def test_baseline_with_pytest_filter(example_project_root, session):
     )
 
     assert result.returncode == 0
+
+
+@pytest.mark.slow
+def test_reinit_session_with_results_fails(example_project_root, config, session):
+    subprocess.check_call(
+        [sys.executable, "-m", "cosmic_ray.cli", "init", config, str(session)], cwd=str(example_project_root)
+    )
+
+    subprocess.check_call(
+        [sys.executable, "-m", "cosmic_ray.cli", "exec", config, str(session)], cwd=str(example_project_root)
+    )
+
+    session_path = example_project_root / session
+    with use_db(str(session_path), WorkDB.Mode.open) as work_db:
+        assert work_db.num_work_items > 0
+        assert work_db.num_results == work_db.num_work_items
+
+    with pytest.raises(subprocess.CalledProcessError):
+        subprocess.check_call(
+            [sys.executable, "-m", "cosmic_ray.cli", "init", config, str(session)], cwd=str(example_project_root)
+        )
+
