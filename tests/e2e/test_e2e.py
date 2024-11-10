@@ -136,7 +136,6 @@ def test_reinit_session_with_results_fails(example_project_root, config, session
         assert work_db.num_results == work_db.num_work_items == initial_num_work_items
 
 
-
 @pytest.mark.slow
 def test_force_reinit_session_with_results_succeeds(example_project_root, config, session):
     subprocess.check_call(
@@ -160,4 +159,3 @@ def test_force_reinit_session_with_results_succeeds(example_project_root, config
     with use_db(str(session_path), WorkDB.Mode.open) as work_db:
         assert work_db.num_work_items == initial_num_work_items
         assert work_db.num_results == 0
-
