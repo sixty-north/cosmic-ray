@@ -11,8 +11,9 @@ from cosmic_ray.work_item import MutationSpec, WorkItem, WorkResult, WorkerOutco
 from cosmic_ray.work_item import TestOutcome as TOutcome
 from cosmic_ray.mutating import mutate_and_test
 from cosmic_ray.commands.init import _all_work_items
-import cosmic_ray.commands.init as init_module
+from cosmic_ray.commands import init
 from cosmic_ray.work_db import WorkDB, use_db
+from cosmic_ray.config import ConfigDict
 
 
 def test_workitem_with_multiple_mutations():
@@ -142,3 +143,101 @@ def test_multiple_mutation_unique_ids():
     assert len(item2.mutations) == 2
     assert item2.mutations[0].module_path == Path("path1")
     assert item2.mutations[1].module_path == Path("path2")
+
+
+def test_mutation_limit_first_order(monkeypatch):
+    """Test that the mutation limit works for first-order mutants."""
+    # Create 10 mock mutations
+    mock_mutations = [
+        MutationSpec(Path(f"path{i}"), f"operator{i}", i, (i, 0), (i, 1))
+        for i in range(10)
+    ]
+    
+    # Mock uuid.uuid4().hex to return predictable values
+    monkeypatch.setattr(uuid, "uuid4", lambda: type('obj', (object,), {'hex': 'test-uuid'}))
+    
+    # Patch random.sample to return a predictable subset
+    def mock_sample(items, count):
+        return items[:count]
+    
+    with mock.patch('cosmic_ray.commands.init._generate_mutations', return_value=mock_mutations), \
+         mock.patch('random.sample', side_effect=mock_sample):
+        # Test with first-order mutants (mutation_order=1) and a limit of 5
+        work_items = list(_all_work_items([], {}, mutation_order=1, mutation_limit=5))
+        
+        # There should be exactly 5 work items due to the limit
+        assert len(work_items) == 5
+        
+        # Each work item should have exactly 1 mutation (first-order)
+        for item in work_items:
+            assert len(item.mutations) == 1
+
+
+def test_mutation_limit_higher_order(monkeypatch):
+    """Test that the mutation limit works for higher-order mutants."""
+    # Create 5 mock mutations
+    mock_mutations = [
+        MutationSpec(Path(f"path{i}"), f"operator{i}", i, (i, 0), (i, 1))
+        for i in range(5)
+    ]
+    
+    # Mock uuid.uuid4().hex to return predictable values
+    monkeypatch.setattr(uuid, "uuid4", lambda: type('obj', (object,), {'hex': 'test-uuid'}))
+    
+    # Patch random.sample to return a predictable subset
+    def mock_sample(items, count):
+        return items[:count]
+    
+    with mock.patch('cosmic_ray.commands.init._generate_mutations', return_value=mock_mutations), \
+         mock.patch('random.sample', side_effect=mock_sample):
+        # Test with second-order mutants (mutation_order=2) and a limit of 7
+        work_items = list(_all_work_items([], {}, mutation_order=2, mutation_limit=7))
+        
+        # There should be exactly 7 work items due to the limit
+        assert len(work_items) == 7
+        
+        # Count the number of each order
+        orders = {}
+        for item in work_items:
+            order = len(item.mutations)
+            orders[order] = orders.get(order, 0) + 1
+            
+        # With our mock_sample implementation, we should get the first 7 work items,
+        # which would be all 5 first-order mutants and the first 2 second-order mutants
+        assert orders.get(1, 0) == 5
+        assert orders.get(2, 0) == 2
+
+
+def test_config_passes_mutation_limit_to_work_items():
+    """Test that the config's mutation limit is correctly passed to _all_work_items."""
+    # Create 5 mock mutations
+    mock_mutations = [
+        MutationSpec(Path(f"path{i}"), f"operator{i}", i, (i, 0), (i, 1))
+        for i in range(5)
+    ]
+    
+    # Create all work items with different mutation limits
+    with mock.patch('cosmic_ray.commands.init._generate_mutations', return_value=mock_mutations), \
+         mock.patch('random.sample', side_effect=lambda items, count: items[:count]):
+        
+        # With no limit
+        items_no_limit = list(_all_work_items([], {}, mutation_order=2, mutation_limit=None))
+        
+        # With a limit of 3
+        items_with_limit = list(_all_work_items([], {}, mutation_order=2, mutation_limit=3))
+        
+        # With limit larger than total possible mutations
+        items_big_limit = list(_all_work_items([], {}, mutation_order=2, mutation_limit=100))
+        
+        # Verify the expected number of items
+        # For mutation_order=2 with 5 mutations, we expect:
+        # - 5 first-order mutants
+        # - 10 second-order mutants (5 choose 2)
+        # - Total: 15 work items without limit
+        assert len(items_no_limit) == 15
+        
+        # With limit of 3, we should only get 3 items
+        assert len(items_with_limit) == 3
+        
+        # With a large limit, we should get all items
+        assert len(items_big_limit) == 15

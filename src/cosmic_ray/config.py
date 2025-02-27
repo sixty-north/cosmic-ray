@@ -107,6 +107,17 @@ class ConfigDict(dict):
         Higher values result in applying multiple mutations in a single test run.
         """
         return int(self.get("mutation-order", 1))
+        
+    @property
+    def mutation_limit(self):
+        """The maximum number of mutations to generate.
+        
+        If not specified, all possible mutations will be generated.
+        When specified, only a random subset of mutations will be selected.
+        This is particularly useful for higher-order mutations which can grow exponentially.
+        """
+        limit = self.get("mutation-limit", None)
+        return int(limit) if limit is not None else None
 
 
 @contextmanager

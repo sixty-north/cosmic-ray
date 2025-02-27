@@ -49,6 +49,16 @@ def new_config():
         hlp="The maximum number of mutations to apply in a single test run. 1 means only first-order mutants, higher values enable higher-order mutants.",
     )
     config["mutation-order"] = int(mutation_order)
+    
+    mutation_limit = qprompt.ask_str(
+        "Mutation limit (default: unlimited)",
+        vld=lambda x: x == "" or int(x) > 0,
+        dflt="",
+        blk=True,
+        hlp="The maximum number of mutations to generate. Useful for higher-order mutations which can grow exponentially. When specified, mutations will be selected randomly.",
+    )
+    if mutation_limit:
+        config["mutation-limit"] = int(mutation_limit)
 
     config["test-command"] = qprompt.ask_str("Test command", blk=False, hlp=TEST_COMMAND_HELP)
 
