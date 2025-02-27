@@ -109,6 +109,16 @@ class ConfigDict(dict):
         return int(self.get("mutation-order", 1))
         
     @property
+    def specific_order(self):
+        """The specific order of mutations to generate.
+        
+        If not specified, mutations of all orders up to mutation_order will be generated.
+        When specified, only mutations of exactly this order will be generated.
+        """
+        specific = self.get("specific-order", None)
+        return int(specific) if specific is not None else None
+        
+    @property
     def mutation_limit(self):
         """The maximum number of mutations to generate.
         

@@ -96,3 +96,52 @@ def test_second_order_mutations(higher_order_project_root, session_file):
         # The combined total should be greater than just the first-order count
         # This proves we're actually generating higher-order mutants
         assert len(work_items) > first_order_count
+        
+@pytest.mark.slow
+def test_specific_order_mutations(higher_order_project_root, session_file):
+    """Test that specific-order mutations work correctly."""
+    import toml
+    from pathlib import Path
+    
+    # Create a temporary configuration file with specific-order set
+    temp_config_path = Path(higher_order_project_root) / "temp-specific-order.conf"
+    
+    # Start with the order-2 config
+    order2_config_path = Path(higher_order_project_root) / "cosmic-ray-order-2.conf"
+    with open(order2_config_path) as f:
+        config_data = toml.load(f)
+    
+    # Add specific-order = 2 to only generate second-order mutants
+    config_data["cosmic-ray"]["specific-order"] = 2
+    
+    with open(temp_config_path, "w") as f:
+        toml.dump(config_data, f)
+    
+    try:
+        # Initialize the session
+        subprocess.check_call(
+            [sys.executable, "-m", "cosmic_ray.cli", "init", str(temp_config_path), str(session_file)],
+            cwd=str(higher_order_project_root),
+        )
+        
+        # Run the mutations
+        subprocess.check_call(
+            [sys.executable, "-m", "cosmic_ray.cli", "exec", str(temp_config_path), str(session_file)],
+            cwd=str(higher_order_project_root),
+        )
+        
+        # Analyze the results
+        with use_db(str(session_file), WorkDB.Mode.open) as work_db:
+            # Count the number of work items
+            work_items = list(work_db.work_items)
+            
+            # Verify all are second-order mutations (each with exactly two mutations)
+            assert all(len(item.mutations) == 2 for item in work_items)
+            
+            # Make sure we have some mutations
+            assert len(work_items) > 0
+    
+    finally:
+        # Clean up the temporary config file
+        if temp_config_path.exists():
+            temp_config_path.unlink()

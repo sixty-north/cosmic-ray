@@ -77,13 +77,15 @@ def _generate_mutations(module_paths, operator_cfgs) -> Iterable[MutationSpec]:
                 )
 
 
-def _all_work_items(module_paths, operator_cfgs, mutation_order=1, mutation_limit=None, disable_overlapping=True) -> Iterable[WorkItem]:
+def _all_work_items(module_paths, operator_cfgs, mutation_order=1, specific_order=None, 
+               mutation_limit=None, disable_overlapping=True) -> Iterable[WorkItem]:
     """Iterable of all WorkItems for the given inputs.
     
     Args:
         module_paths: Paths to the modules to mutate
         operator_cfgs: Configurations for the operators
         mutation_order: The order of mutations to create (how many mutations per work item)
+        specific_order: If specified, only generate mutations of exactly this order
         mutation_limit: Optional limit to the number of work items to generate. If specified,
                         a random sample will be selected rather than generating all combinations.
         disable_overlapping: Whether to disable mutations that affect the same code location.
@@ -118,8 +120,18 @@ def _all_work_items(module_paths, operator_cfgs, mutation_order=1, mutation_limi
         # We'll collect all work items first so we can count and limit them if needed
         work_items = []
         
-        # Generate all combinations of mutations up to the specified order
-        for order in range(1, mutation_order + 1):
+        # Determine which orders to generate
+        if specific_order is not None:
+            # Only generate mutations of the specific order
+            orders_to_generate = [specific_order]
+            log.info(f"Generating only mutations of order {specific_order}")
+        else:
+            # Generate all orders up to the maximum
+            orders_to_generate = range(1, mutation_order + 1)
+            log.info(f"Generating mutations of orders 1 to {mutation_order}")
+        
+        # Generate combinations for each requested order
+        for order in orders_to_generate:
             for mutation_combo in itertools.combinations(all_mutations, order):
                 # Filter out combinations with overlapping mutations if enabled
                 if disable_overlapping and order > 1:
@@ -171,6 +183,7 @@ def init(module_paths, work_db: WorkDB, operator_cfgs, config=None):
     
     # Get mutation options from config if provided
     mutation_order = config.mutation_order if config else 1
+    specific_order = config.specific_order if config else None
     mutation_limit = config.mutation_limit if config else None
     disable_overlapping = config.disable_overlapping_mutations if config else True
     
@@ -178,6 +191,7 @@ def init(module_paths, work_db: WorkDB, operator_cfgs, config=None):
         module_paths, 
         operator_cfgs, 
         mutation_order,
+        specific_order,
         mutation_limit,
         disable_overlapping
     ))

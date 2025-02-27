@@ -209,6 +209,19 @@ When a value greater than 1 is specified, Cosmic Ray will generate work items fo
 mutations up to the specified order. For example, with ``mutation-order = 2``, it will generate all single mutations 
 (first-order) and all pairs of mutations (second-order).
 
+If you want to generate only mutations of a specific order, you can use the ``specific-order`` configuration key.
+This will restrict mutations to exactly the specified order. For example, to generate only second-order mutants:
+
+.. code-block:: ini
+
+   # config.toml
+   [cosmic-ray]
+   mutation-order = 2  # Maximum order
+   specific-order = 2  # Only generate second-order mutants
+
+This is useful when you want to analyze mutations of a specific order in isolation, rather than testing all
+orders up to the maximum.
+
 Higher-order mutants can be useful for:
 
 1. Testing the robustness of your test suite against more complex mutations
@@ -221,9 +234,9 @@ which can significantly increase the total number of tests to run.
 Example: Using Higher-order Mutants
 -----------------------------------
 
-Let's look at a practical example of higher-order mutation testing.
+Let's look at practical examples of higher-order mutation testing.
 
-First, we create a configuration file with a higher mutation order:
+First, here's a configuration file with a higher mutation order that will generate both first and second-order mutants:
 
 .. code-block:: ini
 
@@ -249,6 +262,24 @@ For example, if there are 5 possible first-order mutations, Cosmic Ray will crea
 
 - 5 first-order mutants (individual mutations)
 - 10 second-order mutants (all possible pairs of mutations)
+
+Now, if we want to analyze only second-order mutants, we can use this configuration:
+
+.. code-block:: ini
+
+   # config.toml
+   [cosmic-ray]
+   module-path = "my_module.py"
+   test-command = "python -m unittest discover tests"
+   timeout = 30
+   mutation-order = 2
+   specific-order = 2  # Only generate second-order mutants
+   
+   [cosmic-ray.operators]
+   arithmetic_operator_replacement = true
+   comparison_operator_replacement = true
+
+With this configuration, Cosmic Ray will skip the first-order mutants and only generate the 10 second-order mutants.
 
 The resulting report will show both first-order and higher-order results. In the HTML report, higher-order mutants will have multiple mutations listed in their details, showing the locations and types of each mutation combined.
 

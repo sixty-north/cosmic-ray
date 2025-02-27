@@ -50,6 +50,16 @@ def new_config():
     )
     config["mutation-order"] = int(mutation_order)
     
+    specific_order = qprompt.ask_str(
+        "Specific mutation order (default: all orders up to maximum)",
+        vld=lambda x: x == "" or (int(x) > 0 and int(x) <= int(mutation_order)),
+        dflt="",
+        blk=True,
+        hlp="If specified, only generate mutations of exactly this order. Must be less than or equal to the maximum mutation order.",
+    )
+    if specific_order:
+        config["specific-order"] = int(specific_order)
+    
     mutation_limit = qprompt.ask_str(
         "Mutation limit (default: unlimited)",
         vld=lambda x: x == "" or int(x) > 0,
