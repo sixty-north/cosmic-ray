@@ -60,9 +60,10 @@ def new_config():
     if mutation_limit:
         config["mutation-limit"] = int(mutation_limit)
     
-    disable_overlapping = qprompt.ask_yn(
-        "Disable overlapping mutations",
-        dflt="y",
+    disable_overlapping = qprompt.ask_str(
+        "Disable overlapping mutations (default: True)",
+        vld=bool,
+        dflt=True,
         hlp="If enabled (default), higher-order mutants will not include mutations that target the same code location, which could lead to mutations canceling each other out."
     )
     config["disable-overlapping-mutations"] = disable_overlapping
