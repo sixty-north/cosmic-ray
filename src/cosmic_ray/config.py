@@ -118,6 +118,16 @@ class ConfigDict(dict):
         """
         limit = self.get("mutation-limit", None)
         return int(limit) if limit is not None else None
+        
+    @property
+    def disable_overlapping_mutations(self):
+        """Whether to disable mutations that affect the same code location.
+        
+        When True (the default), higher-order mutants will not include multiple
+        mutations targeting the same code location, which could lead to mutations
+        canceling each other out or causing unpredictable behavior.
+        """
+        return self.get("disable-overlapping-mutations", True)
 
 
 @contextmanager

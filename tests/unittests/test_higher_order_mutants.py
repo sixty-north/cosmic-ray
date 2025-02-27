@@ -241,3 +241,70 @@ def test_config_passes_mutation_limit_to_work_items():
         
         # With a large limit, we should get all items
         assert len(items_big_limit) == 15
+        
+        
+def test_disable_overlapping_mutations():
+    """Test that overlapping mutations are correctly filtered out."""
+    # Create mutations with some overlapping positions
+    mock_mutations = [
+        # Different files, different positions
+        MutationSpec(Path("path1"), "operator1", 0, (1, 0), (1, 5)),
+        MutationSpec(Path("path2"), "operator2", 0, (1, 0), (1, 5)),
+        
+        # Same file, different positions
+        MutationSpec(Path("path3"), "operator1", 0, (1, 0), (1, 5)),
+        MutationSpec(Path("path3"), "operator2", 0, (2, 0), (2, 5)),
+        
+        # Same file, same position, different operators
+        MutationSpec(Path("path4"), "operator1", 0, (5, 0), (5, 5)),
+        MutationSpec(Path("path4"), "operator2", 0, (5, 0), (5, 5)),
+    ]
+    
+    with mock.patch('cosmic_ray.commands.init._generate_mutations', return_value=mock_mutations):
+        
+        # Test with overlapping mutations enabled
+        work_items_with_overlap = list(_all_work_items(
+            [], {}, mutation_order=2, disable_overlapping=False
+        ))
+        
+        # Test with overlapping mutations disabled (default)
+        work_items_no_overlap = list(_all_work_items(
+            [], {}, mutation_order=2, disable_overlapping=True
+        ))
+        
+        # With overlapping enabled, we should get:
+        # - 6 first-order mutations
+        # - 15 second-order mutations (6 choose 2)
+        # - Total: 21 work items
+        assert len(work_items_with_overlap) == 21
+        
+        # With overlapping disabled, we should exclude the combination of
+        # the two mutations on path4 with the same position
+        # - 6 first-order mutations
+        # - 14 second-order mutations (missing the overlapping pair)
+        # - Total: 20 work items
+        assert len(work_items_no_overlap) == 20
+        
+        # Verify the specific combinations
+        overlapping_pair_found = False
+        for item in work_items_with_overlap:
+            if len(item.mutations) == 2:
+                m1, m2 = item.mutations
+                if (m1.module_path == Path("path4") and m2.module_path == Path("path4") and 
+                    m1.start_pos == (5, 0) and m2.start_pos == (5, 0)):
+                    overlapping_pair_found = True
+                    break
+        
+        assert overlapping_pair_found, "Overlapping mutation pair should be found when enable_overlapping=False"
+        
+        # Verify the overlapping pair is not in the filtered list
+        overlapping_pair_found = False
+        for item in work_items_no_overlap:
+            if len(item.mutations) == 2:
+                m1, m2 = item.mutations
+                if (m1.module_path == Path("path4") and m2.module_path == Path("path4") and 
+                    m1.start_pos == (5, 0) and m2.start_pos == (5, 0)):
+                    overlapping_pair_found = True
+                    break
+        
+        assert not overlapping_pair_found, "Overlapping mutation pair should not be found when disable_overlapping=True"

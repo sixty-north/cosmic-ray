@@ -77,7 +77,7 @@ def _generate_mutations(module_paths, operator_cfgs) -> Iterable[MutationSpec]:
                 )
 
 
-def _all_work_items(module_paths, operator_cfgs, mutation_order=1, mutation_limit=None) -> Iterable[WorkItem]:
+def _all_work_items(module_paths, operator_cfgs, mutation_order=1, mutation_limit=None, disable_overlapping=True) -> Iterable[WorkItem]:
     """Iterable of all WorkItems for the given inputs.
     
     Args:
@@ -86,6 +86,8 @@ def _all_work_items(module_paths, operator_cfgs, mutation_order=1, mutation_limi
         mutation_order: The order of mutations to create (how many mutations per work item)
         mutation_limit: Optional limit to the number of work items to generate. If specified,
                         a random sample will be selected rather than generating all combinations.
+        disable_overlapping: Whether to disable mutations that affect the same code location.
+                            Defaults to True, which prevents multiple mutations at the same spot.
         
     Yields:
         WorkItem objects containing the mutations to apply
@@ -119,6 +121,24 @@ def _all_work_items(module_paths, operator_cfgs, mutation_order=1, mutation_limi
         # Generate all combinations of mutations up to the specified order
         for order in range(1, mutation_order + 1):
             for mutation_combo in itertools.combinations(all_mutations, order):
+                # Filter out combinations with overlapping mutations if enabled
+                if disable_overlapping and order > 1:
+                    # Check if any mutations in this combo affect the same location
+                    locations = []
+                    has_overlap = False
+                    
+                    for mutation in mutation_combo:
+                        # Location is identified by module path and position
+                        location = (mutation.module_path, mutation.start_pos, mutation.end_pos)
+                        if location in locations:
+                            has_overlap = True
+                            break
+                        locations.append(location)
+                    
+                    if has_overlap:
+                        continue  # Skip this combination as it has overlapping mutations
+                
+                # Add valid combination to work items
                 work_items.append(WorkItem(job_id=uuid.uuid4().hex, mutations=tuple(mutation_combo)))
         
         # If a limit is set, randomly sample from all generated work items
@@ -152,10 +172,12 @@ def init(module_paths, work_db: WorkDB, operator_cfgs, config=None):
     # Get mutation options from config if provided
     mutation_order = config.mutation_order if config else 1
     mutation_limit = config.mutation_limit if config else None
+    disable_overlapping = config.disable_overlapping_mutations if config else True
     
     work_db.add_work_items(_all_work_items(
         module_paths, 
         operator_cfgs, 
         mutation_order,
-        mutation_limit
+        mutation_limit,
+        disable_overlapping
     ))
