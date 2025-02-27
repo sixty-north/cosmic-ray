@@ -187,3 +187,87 @@ timeout after 10 seconds, use:
    # config.toml
    [cosmic-ray]
    timeout = 10
+   
+Higher-order Mutants
+===================
+
+By default, Cosmic Ray applies a single mutation at a time, creating what are known as *first-order mutants*. 
+This means each test run tests exactly one mutation. However, Cosmic Ray also supports *higher-order mutants*, 
+which are produced by applying multiple mutations simultaneously.
+
+You can configure the order of mutations through the ``mutation-order`` configuration key. This specifies 
+the maximum number of mutations that will be applied in a single test run. For example, to specify that 
+tests should apply up to 2 mutations simultaneously, use:
+
+.. code-block:: ini
+
+   # config.toml
+   [cosmic-ray]
+   mutation-order = 2
+   
+When a value greater than 1 is specified, Cosmic Ray will generate work items for all possible combinations of 
+mutations up to the specified order. For example, with ``mutation-order = 2``, it will generate all single mutations 
+(first-order) and all pairs of mutations (second-order).
+
+Higher-order mutants can be useful for:
+
+1. Testing the robustness of your test suite against more complex mutations
+2. Finding interactions between mutations that might not be detected with first-order mutants
+3. Reducing test execution time by testing multiple mutations at once
+
+Be aware that the number of possible combinations grows rapidly with the mutation order, 
+which can significantly increase the total number of tests to run.
+
+Example: Using Higher-order Mutants
+-----------------------------------
+
+Let's look at a practical example of higher-order mutation testing.
+
+First, we create a configuration file with a higher mutation order:
+
+.. code-block:: ini
+
+   # config.toml
+   [cosmic-ray]
+   module-path = "my_module.py"
+   test-command = "python -m unittest discover tests"
+   timeout = 30
+   mutation-order = 2
+   
+   [cosmic-ray.operators]
+   arithmetic_operator_replacement = true
+   comparison_operator_replacement = true
+
+When we run ``cosmic-ray init config.toml session.sqlite``, Cosmic Ray will:
+
+1. Find all possible mutation locations for the specified operators
+2. Generate all first-order mutants (single mutations)
+3. Generate all second-order mutants (pairs of mutations)
+4. Store these as work items in the session database
+
+For example, if there are 5 possible first-order mutations, Cosmic Ray will create:
+
+- 5 first-order mutants (individual mutations)
+- 10 second-order mutants (all possible pairs of mutations)
+
+The resulting report will show both first-order and higher-order results. In the HTML report, higher-order mutants will have multiple mutations listed in their details, showing the locations and types of each mutation combined.
+
+Analyzing Higher-order Mutant Results
+-------------------------------------
+
+When analyzing higher-order mutant results, you may observe interesting patterns:
+
+1. **Mutation interactions**: Sometimes two mutations that individually are killed by tests may survive when combined, indicating potential gaps in your test coverage.
+
+2. **Equivalent mutants**: Higher-order mutants are less likely to be equivalent mutants (mutants that are functionally identical to the original code), as multiple changes are more likely to create a genuinely different behavior.
+
+3. **Performance benefits**: Running higher-order mutations can significantly reduce total test execution time compared to running each mutation individually.
+
+To manually test a specific higher-order mutant for debugging purposes, you can use the CLI's ``mutate-and-test`` command with multiple mutations:
+
+.. code-block:: bash
+
+   cosmic-ray mutate-and-test my_module.py ArithmeticOperatorReplacement 0 "python -m unittest" \
+     --second-mutation "my_module.py:ComparisonOperatorReplacement:2"
+
+This will apply two specific mutations and run the tests, helping you understand exactly how the mutations interact.

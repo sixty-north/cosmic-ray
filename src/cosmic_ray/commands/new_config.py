@@ -40,6 +40,15 @@ def new_config():
     )
     config["timeout"] = float(timeout)
     config["excluded-modules"] = []
+    
+    mutation_order = qprompt.ask_str(
+        "Mutation order (default: 1)",
+        vld=lambda x: int(x) > 0,
+        dflt="1",
+        blk=False,
+        hlp="The maximum number of mutations to apply in a single test run. 1 means only first-order mutants, higher values enable higher-order mutants.",
+    )
+    config["mutation-order"] = int(mutation_order)
 
     config["test-command"] = qprompt.ask_str("Test command", blk=False, hlp=TEST_COMMAND_HELP)
 

@@ -43,13 +43,19 @@ def _operators(operator_cfgs):
                 yield operator_name, operator_args, operator_class(**operator_args)
 
 
-def _all_work_items(module_paths, operator_cfgs) -> Iterable[WorkItem]:
-    """Iterable of all WorkItems for the given inputs.
-
+def _generate_mutations(module_paths, operator_cfgs) -> Iterable[MutationSpec]:
+    """Generate all possible MutationSpecs for the given modules and operators.
+    
+    Args:
+        module_paths: Paths to the modules to mutate
+        operator_cfgs: Configurations for the operators
+        
+    Yields:
+        MutationSpec objects describing each possible mutation
+        
     Raises:
         TypeError: If an operator is provided with a parameterization it can't use.
     """
-
     for module_path in module_paths:
         module_ast = get_ast_from_path(module_path)
 
@@ -61,7 +67,7 @@ def _all_work_items(module_paths, operator_cfgs) -> Iterable[WorkItem]:
             )
 
             for occurrence, (start_pos, end_pos) in enumerate(positions):
-                mutation = MutationSpec(
+                yield MutationSpec(
                     module_path=str(module_path),
                     operator_name=operator_name,
                     operator_args=operator_args,
@@ -69,10 +75,40 @@ def _all_work_items(module_paths, operator_cfgs) -> Iterable[WorkItem]:
                     start_pos=start_pos,
                     end_pos=end_pos,
                 )
-                yield WorkItem.single(job_id=uuid.uuid4().hex, mutation=mutation)
 
 
-def init(module_paths, work_db: WorkDB, operator_cfgs):
+def _all_work_items(module_paths, operator_cfgs, mutation_order=1) -> Iterable[WorkItem]:
+    """Iterable of all WorkItems for the given inputs.
+    
+    Args:
+        module_paths: Paths to the modules to mutate
+        operator_cfgs: Configurations for the operators
+        mutation_order: The order of mutations to create (how many mutations per work item)
+        
+    Yields:
+        WorkItem objects containing the mutations to apply
+        
+    Raises:
+        TypeError: If an operator is provided with a parameterization it can't use.
+    """
+    import itertools
+    
+    # Generate all possible mutations
+    all_mutations = list(_generate_mutations(module_paths, operator_cfgs))
+    
+    if mutation_order <= 1:
+        # First-order mutants (traditional approach)
+        for mutation in all_mutations:
+            yield WorkItem.single(job_id=uuid.uuid4().hex, mutation=mutation)
+    else:
+        # Higher-order mutants
+        # Generate all combinations of mutations up to the specified order
+        for order in range(1, mutation_order + 1):
+            for mutation_combo in itertools.combinations(all_mutations, order):
+                yield WorkItem(job_id=uuid.uuid4().hex, mutations=tuple(mutation_combo))
+
+
+def init(module_paths, work_db: WorkDB, operator_cfgs, config=None):
     """Clear and initialize a work-db with work items.
 
     Any existing data in the work-db will be cleared and replaced with entirely
@@ -83,10 +119,15 @@ def init(module_paths, work_db: WorkDB, operator_cfgs):
       module_paths: iterable of pathlib.Paths of modules to mutate.
       work_db: A `WorkDB` instance into which the work orders will be saved.
       operator_cfgs: A dict mapping operator names to parameterization dicts.
+      config: Optional configuration object containing mutation options.
 
     Raises:
         TypeError: Arguments provided for an operator are invalid.
     """
     # By default each operator will be parameterized with an empty dict.
     work_db.clear()
-    work_db.add_work_items(_all_work_items(module_paths, operator_cfgs))
+    
+    # Get mutation order from config if provided, otherwise default to 1 (first-order)
+    mutation_order = config.mutation_order if config else 1
+    
+    work_db.add_work_items(_all_work_items(module_paths, operator_cfgs, mutation_order))

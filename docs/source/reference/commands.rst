@@ -88,6 +88,16 @@ The ``init`` verb use following entries from the configuration file:
   ::
 
    excluded-modules = ["*/tests/*", "*/migrations/*"]
+   
+- ``[cosmic-ray] mutation-order = 1``: Specify the order of mutations to apply.
+  The default value is 1, which means only first-order mutants will be created.
+  Higher values will create higher-order mutants by applying multiple mutations
+  in a single test run. For example, a value of 2 will create both first-order and
+  second-order mutants.
+
+  ::
+
+   mutation-order = 2
 
 
 As mentioned in

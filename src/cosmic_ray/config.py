@@ -98,6 +98,15 @@ class ConfigDict(dict):
         parameterization.
         """
         return self.get("operators", {})
+        
+    @property
+    def mutation_order(self):
+        """The order of mutations to apply (how many mutations per work item).
+        
+        If not specified or set to 1, only first-order mutants will be created.
+        Higher values result in applying multiple mutations in a single test run.
+        """
+        return int(self.get("mutation-order", 1))
 
 
 @contextmanager
