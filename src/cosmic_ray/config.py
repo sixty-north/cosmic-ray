@@ -98,41 +98,41 @@ class ConfigDict(dict):
         parameterization.
         """
         return self.get("operators", {})
-        
+
     @property
     def mutation_order(self):
         """The order of mutations to apply (how many mutations per work item).
-        
+
         If not specified or set to 1, only first-order mutants will be created.
         Higher values result in applying multiple mutations in a single test run.
         """
         return int(self.get("mutation-order", 1))
-        
+
     @property
     def specific_order(self):
         """The specific order of mutations to generate.
-        
+
         If not specified, mutations of all orders up to mutation_order will be generated.
         When specified, only mutations of exactly this order will be generated.
         """
         specific = self.get("specific-order", None)
         return int(specific) if specific is not None else None
-        
+
     @property
     def mutation_limit(self):
         """The maximum number of mutations to generate.
-        
+
         If not specified, all possible mutations will be generated.
         When specified, only a random subset of mutations will be selected.
         This is particularly useful for higher-order mutations which can grow exponentially.
         """
         limit = self.get("mutation-limit", None)
         return int(limit) if limit is not None else None
-        
+
     @property
     def disable_overlapping_mutations(self):
         """Whether to disable mutations that affect the same code location.
-        
+
         When True (the default), higher-order mutants will not include multiple
         mutations targeting the same code location, which could lead to mutations
         canceling each other out or causing unpredictable behavior.

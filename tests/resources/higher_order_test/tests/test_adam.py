@@ -1,6 +1,7 @@
 """Tests for the adam module."""
 
 import unittest
+
 from adam import add_and_compare, check_logic
 
 

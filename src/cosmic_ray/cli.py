@@ -259,11 +259,11 @@ def http_worker(port, path):
 @click.option("--third-mutation", type=str, help="Optional third mutation in format 'module:operator:occurrence'")
 def mutate_and_test(module_path, operator, occurrence, test_command, keep_stdout, second_mutation, third_mutation):
     """Run a worker process which performs mutation(s) and a test run.
-    
+
     By default, this creates a first-order mutant by mutating the
     <occurrence>-th instance of <operator> in <module-path>, runs the test
     suite, prints the results, and exits.
-    
+
     For higher-order mutants, you can specify additional mutations with the
     --second-mutation and --third-mutation options. These take values in
     the format 'module:operator:occurrence'.
@@ -273,47 +273,49 @@ def mutate_and_test(module_path, operator, occurrence, test_command, keep_stdout
     its own for testing and debugging purposes.
     """
     from cosmic_ray.work_item import MutationSpec
-    
+
     # Create list to hold mutations
     mutations = []
-    
+
     # Add primary mutation
-    mutations.append(MutationSpec(
-        module_path=Path(module_path),
-        operator_name=operator,
-        occurrence=occurrence,
-        start_pos=(0, 0),  # These will be set by the operator
-        end_pos=(0, 0),    # These will be set by the operator
-    ))
-    
+    mutations.append(
+        MutationSpec(
+            module_path=Path(module_path),
+            operator_name=operator,
+            occurrence=occurrence,
+            start_pos=(0, 0),  # These will be set by the operator
+            end_pos=(0, 0),  # These will be set by the operator
+        )
+    )
+
     # Add secondary mutations if specified
     for mutation_str in [second_mutation, third_mutation]:
         if mutation_str:
-            parts = mutation_str.split(':')
+            parts = mutation_str.split(":")
             if len(parts) != 3:
                 log.error("Additional mutation must be in format 'module:operator:occurrence'")
                 sys.exit(ExitCode.DATA_ERR)
-                
+
             m_module, m_operator, m_occurrence = parts
             try:
                 m_occurrence = int(m_occurrence)
             except ValueError:
                 log.error("Occurrence must be an integer")
                 sys.exit(ExitCode.DATA_ERR)
-                
-            mutations.append(MutationSpec(
-                module_path=Path(m_module),
-                operator_name=m_operator,
-                occurrence=m_occurrence,
-                start_pos=(0, 0),  # These will be set by the operator
-                end_pos=(0, 0),    # These will be set by the operator
-            ))
-    
+
+            mutations.append(
+                MutationSpec(
+                    module_path=Path(m_module),
+                    operator_name=m_operator,
+                    occurrence=m_occurrence,
+                    start_pos=(0, 0),  # These will be set by the operator
+                    end_pos=(0, 0),  # These will be set by the operator
+                )
+            )
+
     with open(os.devnull, "w") as devnull:
         with redirect_stdout(sys.stdout if keep_stdout else devnull):
-            work_result = cosmic_ray.mutating.mutate_and_test(
-                mutations, test_command, None
-            )
+            work_result = cosmic_ray.mutating.mutate_and_test(mutations, test_command, None)
 
     sys.stdout.write(json.dumps(dataclasses.asdict(work_result)))
 

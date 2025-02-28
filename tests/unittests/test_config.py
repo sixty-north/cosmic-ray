@@ -68,31 +68,20 @@ def test_mutation_order_and_limit_properties():
     assert config.mutation_order == 1
     assert config.mutation_limit is None
     assert config.disable_overlapping_mutations is True  # Default is True
-    
+
     # Test with explicitly set values
-    config = ConfigDict({
-        "mutation-order": 3,
-        "mutation-limit": 100,
-        "disable-overlapping-mutations": False
-    })
+    config = ConfigDict({"mutation-order": 3, "mutation-limit": 100, "disable-overlapping-mutations": False})
     assert config.mutation_order == 3
     assert config.mutation_limit == 100
     assert config.disable_overlapping_mutations is False
-    
+
     # Test with string values (should be converted properly)
-    config = ConfigDict({
-        "mutation-order": "2",
-        "mutation-limit": "50"
-    })
+    config = ConfigDict({"mutation-order": "2", "mutation-limit": "50"})
     assert config.mutation_order == 2
     assert config.mutation_limit == 50
-    
+
     # Test with mutation-limit set to None explicitly
-    config = ConfigDict({
-        "mutation-order": 4,
-        "mutation-limit": None,
-        "disable-overlapping-mutations": True
-    })
+    config = ConfigDict({"mutation-order": 4, "mutation-limit": None, "disable-overlapping-mutations": True})
     assert config.mutation_order == 4
     assert config.mutation_limit is None
     assert config.disable_overlapping_mutations is True
