@@ -191,7 +191,10 @@ def dump(session_file):
     def result_to_dict(result):
         d = dataclasses.asdict(result)
         d["worker_outcome"] = d["worker_outcome"].value
-        d["test_outcome"] = d["test_outcome"].value
+        if d["test_outcome"] is not None:
+            d["test_outcome"] = d["test_outcome"].value
+        else:
+            d["test_outcome"] = None
         return d
 
     with use_db(session_file, WorkDB.Mode.open) as database:
