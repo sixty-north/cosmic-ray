@@ -222,6 +222,8 @@ class MutationSpecStorage(Base):
     "Database model for MutationSpecs"
 
     __tablename__ = "mutation_specs"
+    # Add an id as primary key to allow multiple mutations per job
+    id = Column(Integer, primary_key=True, autoincrement=True)
     module_path = Column(String)
     operator_name = Column(String)
     operator_args = Column(JSON)
@@ -230,7 +232,7 @@ class MutationSpecStorage(Base):
     start_pos_col = Column(Integer)
     end_pos_row = Column(Integer)
     end_pos_col = Column(Integer)
-    job_id = Column(String, ForeignKey("work_items.job_id"), primary_key=True)
+    job_id = Column(String, ForeignKey("work_items.job_id"))
     work_item = relationship("WorkItemStorage", back_populates="mutations")
 
 
