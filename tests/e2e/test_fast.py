@@ -11,7 +11,7 @@ from cosmic_ray.work_db import WorkDB, use_db
 @pytest.fixture(scope="session")
 def project_root(pytestconfig):
     root = pathlib.Path(str(pytestconfig.rootdir))
-    return root / "resources" / "fast_tests"
+    return root / "tests" / "resources" / "fast_tests"
 
 
 def test_fast_tests(project_root, session):

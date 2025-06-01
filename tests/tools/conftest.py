@@ -9,10 +9,9 @@ import pytest
 
 
 @pytest.fixture(scope="session")
-def fast_tests_root(pytestconfig):
+def fast_tests_root(resources_dirpath):
     "Root directory for 'fast_tests'."
-    root = pathlib.Path(str(pytestconfig.rootdir))
-    return root / "resources" / "fast_tests"
+    return resources_dirpath / "fast_tests"
 
 
 @dataclass

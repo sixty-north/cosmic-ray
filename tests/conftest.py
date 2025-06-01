@@ -2,11 +2,18 @@ from pathlib import Path
 
 import pytest
 
+THIS_DIR = Path(__file__).parent
+
 
 @pytest.fixture
 def tmpdir_path(tmpdir):
     """A temporary directory as a pathlib.Path."""
     return Path(str(tmpdir))
+
+
+@pytest.fixture(scope="session")
+def resources_dirpath():
+    return THIS_DIR / "resources"
 
 
 @pytest.fixture

@@ -12,7 +12,7 @@ from cosmic_ray.work_db import WorkDB, use_db
 @pytest.fixture(scope="session")
 def example_project_root(pytestconfig):
     root = pathlib.Path(str(pytestconfig.rootdir))
-    return root / "resources" / "example_project"
+    return root / "tests" / "resources" / "example_project"
 
 
 @pytest.fixture
