@@ -65,7 +65,13 @@ def _is_binary_operator(node):
         if isinstance(node.parent, parso.python.tree.Param):
             return False
 
-        if node.parent.type in _NON_BINARY_PARENTS:
+        operator_is_pipe_in_assignment_annotation = (
+            (node.value == "|")
+            and (node.parent and node.parent.type == "expr")
+            and (node.parent.parent and node.parent.parent.type == "annassign")
+        )
+
+        if node.parent.type in _NON_BINARY_PARENTS or operator_is_pipe_in_assignment_annotation:
             return False
 
         return True
