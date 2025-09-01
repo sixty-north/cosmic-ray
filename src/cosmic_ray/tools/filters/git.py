@@ -29,7 +29,7 @@ class GitFilter(FilterApp):
         # we could use interlap, but do not want to
         # add new dependency at the moment
         git_command = ["git", "diff", "--relative", "-U0", branch, "."]
-        log.info(f'Executing {" ".join(git_command)}')
+        log.info(f"Executing {' '.join(git_command)}")
         try:
             output = subprocess.check_output(git_command, stderr=subprocess.PIPE)
         except subprocess.CalledProcessError as exc:
@@ -92,7 +92,7 @@ class GitFilter(FilterApp):
         if args.config is not None:
             config = load_config(args.config)
 
-        branch = config.sub("git", "git-filter").get("branch", "main")
+        branch = config.sub("git", "git-filter").get("branch", "master")
         log.info(f"Base git branch: {branch}")
         self._skip_filtered(work_db, branch)
 
