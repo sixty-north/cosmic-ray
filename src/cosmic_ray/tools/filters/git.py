@@ -28,16 +28,25 @@ class GitFilter(FilterApp):
         """Get the set of new lines by file"""
         # we could use interlap, but do not want to
         # add new dependency at the moment
-        diff = subprocess.run(["git", "diff", "--relative", "-U0", branch, "."], capture_output=True)
+        git_command = ["git", "diff", "--relative", "-U0", branch, "."]
+        log.info(f'Executing {" ".join(git_command)}')
+        try:
+            output = subprocess.check_output(git_command, stderr=subprocess.PIPE)
+        except subprocess.CalledProcessError as exc:
+            log.error(f"'git diff' call failed: {exc}\n[stdout]\n{exc.stdout.decode()}\n[stderr]\n{exc.stderr.decode()}")
+            raise
+
         regex = re.compile(r"@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@.*")
         current_file = None
         res = defaultdict(set)
-        for diff_line in diff.stdout.decode("utf-8").split("\n"):
+        for diff_line in output.decode("utf-8").split("\n"):
             if diff_line.startswith("@@"):
                 m = regex.match(diff_line)
+                if m is None:
+                    continue
                 start = int(m.group(1))
-                lenght = int(m.group(2)) if m.group(2) is not None else 1
-                for line in range(start, start + lenght):
+                length = int(m.group(2)) if m.group(2) is not None else 1
+                for line in range(start, start + length):
                     res[current_file].add(line)
             if diff_line.startswith("+++ b/"):
                 current_file = Path(diff_line[6:])
@@ -81,7 +90,8 @@ class GitFilter(FilterApp):
         if args.config is not None:
             config = load_config(args.config)
 
-        branch = config.sub("git", "git-filter").get("branch", "master")
+        branch = config.sub("git", "git-filter").get("branch", "main")
+        log.info(f'Base git branch: {branch}')
         self._skip_filtered(work_db, branch)
 
     def add_args(self, parser):
