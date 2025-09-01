@@ -33,7 +33,9 @@ class GitFilter(FilterApp):
         try:
             output = subprocess.check_output(git_command, stderr=subprocess.PIPE)
         except subprocess.CalledProcessError as exc:
-            log.error(f"'git diff' call failed: {exc}\n[stdout]\n{exc.stdout.decode()}\n[stderr]\n{exc.stderr.decode()}")
+            log.error(
+                f"'git diff' call failed: {exc}\n[stdout]\n{exc.stdout.decode()}\n[stderr]\n{exc.stderr.decode()}"
+            )
             raise
 
         regex = re.compile(r"@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@.*")
@@ -91,7 +93,7 @@ class GitFilter(FilterApp):
             config = load_config(args.config)
 
         branch = config.sub("git", "git-filter").get("branch", "main")
-        log.info(f'Base git branch: {branch}')
+        log.info(f"Base git branch: {branch}")
         self._skip_filtered(work_db, branch)
 
     def add_args(self, parser):
