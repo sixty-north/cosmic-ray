@@ -41,6 +41,43 @@ def new_config():
     config["timeout"] = float(timeout)
     config["excluded-modules"] = []
 
+    mutation_order = qprompt.ask_str(
+        "Mutation order (default: 1)",
+        vld=lambda x: int(x) > 0,
+        dflt="1",
+        blk=False,
+        hlp="The maximum number of mutations to apply in a single test run. 1 means only first-order mutants, higher values enable higher-order mutants.",
+    )
+    config["mutation-order"] = int(mutation_order)
+
+    specific_order = qprompt.ask_str(
+        "Specific mutation order (default: all orders up to maximum)",
+        vld=lambda x: x == "" or (int(x) > 0 and int(x) <= int(mutation_order)),
+        dflt="",
+        blk=True,
+        hlp="If specified, only generate mutations of exactly this order. Must be less than or equal to the maximum mutation order.",
+    )
+    if specific_order:
+        config["specific-order"] = int(specific_order)
+
+    mutation_limit = qprompt.ask_str(
+        "Mutation limit (default: unlimited)",
+        vld=lambda x: x == "" or int(x) > 0,
+        dflt="",
+        blk=True,
+        hlp="The maximum number of mutations to generate. Useful for higher-order mutations which can grow exponentially. When specified, mutations will be selected randomly.",
+    )
+    if mutation_limit:
+        config["mutation-limit"] = int(mutation_limit)
+
+    disable_overlapping = qprompt.ask_str(
+        "Disable overlapping mutations (default: True)",
+        vld=bool,
+        dflt=True,
+        hlp="If enabled (default), higher-order mutants will not include mutations that target the same code location, which could lead to mutations canceling each other out.",
+    )
+    config["disable-overlapping-mutations"] = disable_overlapping
+
     config["test-command"] = qprompt.ask_str("Test command", blk=False, hlp=TEST_COMMAND_HELP)
 
     menu = qprompt.Menu()

@@ -43,13 +43,19 @@ def _operators(operator_cfgs):
                 yield operator_name, operator_args, operator_class(**operator_args)
 
 
-def _all_work_items(module_paths, operator_cfgs) -> Iterable[WorkItem]:
-    """Iterable of all WorkItems for the given inputs.
+def _generate_mutations(module_paths, operator_cfgs) -> Iterable[MutationSpec]:
+    """Generate all possible MutationSpecs for the given modules and operators.
+
+    Args:
+        module_paths: Paths to the modules to mutate
+        operator_cfgs: Configurations for the operators
+
+    Yields:
+        MutationSpec objects describing each possible mutation
 
     Raises:
         TypeError: If an operator is provided with a parameterization it can't use.
     """
-
     for module_path in module_paths:
         module_ast = get_ast_from_path(module_path)
 
@@ -61,7 +67,7 @@ def _all_work_items(module_paths, operator_cfgs) -> Iterable[WorkItem]:
             )
 
             for occurrence, (start_pos, end_pos) in enumerate(positions):
-                mutation = MutationSpec(
+                yield MutationSpec(
                     module_path=str(module_path),
                     operator_name=operator_name,
                     operator_args=operator_args,
@@ -69,10 +75,162 @@ def _all_work_items(module_paths, operator_cfgs) -> Iterable[WorkItem]:
                     start_pos=start_pos,
                     end_pos=end_pos,
                 )
+
+
+def _all_work_items(
+    module_paths, operator_cfgs, mutation_order=1, specific_order=None, mutation_limit=None, disable_overlapping=True
+) -> Iterable[WorkItem]:
+    """Iterable of all WorkItems for the given inputs.
+
+    Args:
+        module_paths: Paths to the modules to mutate
+        operator_cfgs: Configurations for the operators
+        mutation_order: The order of mutations to create (how many mutations per work item)
+        specific_order: If specified, only generate mutations of exactly this order
+        mutation_limit: Optional limit to the number of work items to generate. If specified,
+                        a random sample will be selected rather than generating all combinations.
+        disable_overlapping: Whether to disable mutations that affect the same code location.
+                            Defaults to True, which prevents multiple mutations at the same spot.
+
+    Yields:
+        WorkItem objects containing the mutations to apply
+
+    Raises:
+        TypeError: If an operator is provided with a parameterization it can't use.
+    """
+    import itertools
+    import random
+
+    # Generate all possible mutations
+    all_mutations = list(_generate_mutations(module_paths, operator_cfgs))
+
+    if mutation_order <= 1:
+        # First-order mutants (traditional approach)
+        if mutation_limit is not None and mutation_limit < len(all_mutations):
+            log.info(f"Limiting mutations from {len(all_mutations)} to {mutation_limit}")
+            # Randomly sample mutations without generating all work items first
+            for mutation in random.sample(all_mutations, mutation_limit):
                 yield WorkItem.single(job_id=uuid.uuid4().hex, mutation=mutation)
+        else:
+            # No limit or limit exceeds available mutations
+            for mutation in all_mutations:
+                yield WorkItem.single(job_id=uuid.uuid4().hex, mutation=mutation)
+    else:
+        # Higher-order mutants
+        # Determine which orders to generate
+        if specific_order is not None:
+            # Only generate mutations of the specific order
+            orders_to_generate = [specific_order]
+            log.info(f"Generating only mutations of order {specific_order}")
+        else:
+            # Generate all orders up to the maximum
+            orders_to_generate = range(1, mutation_order + 1)
+            log.info(f"Generating mutations of orders 1 to {mutation_order}")
+
+        # Count how many work items we've generated
+        generated_count = 0
+
+        # If we have a limit, we need to estimate the total possible combinations
+        # to decide whether to use reservoir sampling or direct generation
+        if mutation_limit is not None:
+            import math
+
+            # Estimate total possible combinations across all orders
+            total_possible = 0
+            for order in orders_to_generate:
+                # nCr = n! / (r! * (n-r)!)
+                n = len(all_mutations)
+                r = order
+                if n >= r:
+                    # Use log factorial to avoid overflow for large numbers
+                    log_factorial = lambda x: sum(math.log(i) for i in range(1, x + 1))
+                    if r > 0 and n - r > 0:
+                        try:
+                            comb = math.exp(log_factorial(n) - log_factorial(r) - log_factorial(n - r))
+                            total_possible += int(comb)
+                        except OverflowError:
+                            # If we overflow, we know it's a very large number
+                            total_possible = float("inf")
+                            break
+
+            # If total possible combinations is much larger than our limit,
+            # we'll use reservoir sampling to avoid generating all combinations
+            use_reservoir_sampling = total_possible > mutation_limit * 10
+
+            if use_reservoir_sampling:
+                log.info(
+                    f"Using reservoir sampling to select {mutation_limit} mutations from an estimated {total_possible} possible combinations"
+                )
+                # Reservoir sampling algorithm (Algorithm R)
+                reservoir = []
+                item_count = 0
+
+                # Process each order
+                for order in orders_to_generate:
+                    for mutation_combo in itertools.combinations(all_mutations, order):
+                        # Check for overlapping mutations if needed
+                        if disable_overlapping and order > 1:
+                            locations = []
+                            has_overlap = False
+
+                            for mutation in mutation_combo:
+                                location = (mutation.module_path, mutation.start_pos, mutation.end_pos)
+                                if location in locations:
+                                    has_overlap = True
+                                    break
+                                locations.append(location)
+
+                            if has_overlap:
+                                continue  # Skip overlapping mutations
+
+                        # Apply reservoir sampling
+                        item_count += 1
+                        if len(reservoir) < mutation_limit:
+                            # Reservoir not yet full, add item
+                            reservoir.append(mutation_combo)
+                        else:
+                            # Reservoir full, replace items with decreasing probability
+                            j = random.randrange(item_count)
+                            if j < mutation_limit:
+                                reservoir[j] = mutation_combo
+
+                # Yield work items from the reservoir
+                for mutation_combo in reservoir:
+                    yield WorkItem(job_id=uuid.uuid4().hex, mutations=tuple(mutation_combo))
+
+                return  # We're done after reservoir sampling
+
+        # Standard generation approach (either no limit or small enough to generate directly)
+        for order in orders_to_generate:
+            for mutation_combo in itertools.combinations(all_mutations, order):
+                # Filter out combinations with overlapping mutations if enabled
+                if disable_overlapping and order > 1:
+                    # Check if any mutations in this combo affect the same location
+                    locations = []
+                    has_overlap = False
+
+                    for mutation in mutation_combo:
+                        # Location is identified by module path and position
+                        location = (mutation.module_path, mutation.start_pos, mutation.end_pos)
+                        if location in locations:
+                            has_overlap = True
+                            break
+                        locations.append(location)
+
+                    if has_overlap:
+                        continue  # Skip this combination as it has overlapping mutations
+
+                # Create and yield the work item
+                yield WorkItem(job_id=uuid.uuid4().hex, mutations=tuple(mutation_combo))
+
+                # Increment counter and check if we've reached the limit
+                generated_count += 1
+                if mutation_limit is not None and generated_count >= mutation_limit:
+                    log.info(f"Reached mutation limit of {mutation_limit}")
+                    return
 
 
-def init(module_paths, work_db: WorkDB, operator_cfgs):
+def init(module_paths, work_db: WorkDB, operator_cfgs, config=None):
     """Clear and initialize a work-db with work items.
 
     Any existing data in the work-db will be cleared and replaced with entirely
@@ -83,10 +241,22 @@ def init(module_paths, work_db: WorkDB, operator_cfgs):
       module_paths: iterable of pathlib.Paths of modules to mutate.
       work_db: A `WorkDB` instance into which the work orders will be saved.
       operator_cfgs: A dict mapping operator names to parameterization dicts.
+      config: Optional configuration object containing mutation options.
 
     Raises:
         TypeError: Arguments provided for an operator are invalid.
     """
     # By default each operator will be parameterized with an empty dict.
     work_db.clear()
-    work_db.add_work_items(_all_work_items(module_paths, operator_cfgs))
+
+    # Get mutation options from config if provided
+    mutation_order = config.mutation_order if config else 1
+    specific_order = config.specific_order if config else None
+    mutation_limit = config.mutation_limit if config else None
+    disable_overlapping = config.disable_overlapping_mutations if config else True
+
+    work_db.add_work_items(
+        _all_work_items(
+            module_paths, operator_cfgs, mutation_order, specific_order, mutation_limit, disable_overlapping
+        )
+    )
