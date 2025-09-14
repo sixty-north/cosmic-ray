@@ -92,7 +92,7 @@ class GitFilter(FilterApp):
         if args.config is not None:
             config = load_config(args.config)
 
-        branch = config.sub("git", "git-filter").get("branch", "master")
+        branch = config.sub("filters", "git-filter").get("branch", "master")
         log.info(f"Base git branch: {branch}")
         self._skip_filtered(work_db, branch)
 
