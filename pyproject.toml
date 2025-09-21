@@ -65,7 +65,7 @@ local = "cosmic_ray.distribution.local:LocalDistributor"
 repository = "https://github.com/sixty-north/cosmic-ray"
 
 [dependency-groups]
-dev-dependencies = [
+dev = [
   "bump-my-version",
   "hypothesis",
   "nox",
