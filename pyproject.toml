@@ -64,7 +64,7 @@ local = "cosmic_ray.distribution.local:LocalDistributor"
 [project.urls]
 repository = "https://github.com/sixty-north/cosmic-ray"
 
-[tool.uv]
+[dependency-groups]
 dev-dependencies = [
   "bump-my-version",
   "hypothesis",
@@ -74,6 +74,8 @@ dev-dependencies = [
   "sphinx",
   "sphinx-rtd-theme",
 ]
+
+[tool.uv]
 index-url = "https://pypi.org/simple"
 
 [tool.setuptools.packages.find]
