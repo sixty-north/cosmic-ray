@@ -30,7 +30,7 @@ from cosmic_ray.mutating import apply_mutation
 from cosmic_ray.progress import report_progress
 from cosmic_ray.version import __version__
 from cosmic_ray.work_db import WorkDB, use_db
-from cosmic_ray.work_item import TestOutcome, WorkItem
+from cosmic_ray.work_item import MutationSpec, TestOutcome, WorkItem
 
 log = logging.getLogger()
 
@@ -267,8 +267,20 @@ def mutate_and_test(module_path, operator, occurrence, test_command, keep_stdout
     """
     with open(os.devnull, "w") as devnull:
         with redirect_stdout(sys.stdout if keep_stdout else devnull):
+            breakpoint()
             work_result = cosmic_ray.mutating.mutate_and_test(
-                Path(module_path), operator, occurrence, test_command, None
+                [
+                    MutationSpec(
+                        Path(module_path),
+                        operator,
+                        occurrence,
+                        # TODO: As in other places, these are placeholder position values. How can we not have to provide them?
+                        (0, 0),
+                        (0, 1),
+                    )
+                ],
+                test_command,
+                None,
             )
 
     sys.stdout.write(json.dumps(dataclasses.asdict(work_result)))
