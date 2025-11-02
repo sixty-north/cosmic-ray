@@ -72,6 +72,7 @@ dev = [
   "pytest",
   "ruff",
   "sphinx",
+  "sphinx-click>=6.0.0",
   "sphinx-rtd-theme",
 ]
 

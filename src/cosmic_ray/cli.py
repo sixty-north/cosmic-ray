@@ -24,7 +24,6 @@ import cosmic_ray.distribution.http
 import cosmic_ray.modules
 import cosmic_ray.mutating
 import cosmic_ray.plugins
-import cosmic_ray.testing
 from cosmic_ray.config import load_config, serialize_config
 from cosmic_ray.mutating import apply_mutation
 from cosmic_ray.progress import report_progress

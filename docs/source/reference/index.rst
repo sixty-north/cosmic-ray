@@ -6,7 +6,7 @@ Reference
    :maxdepth: 1
 
    api/modules
-   commands
+   cli
    tests
    continuous_integration
    badge
