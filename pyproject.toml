@@ -76,8 +76,8 @@ dev = [
   "sphinx-rtd-theme",
 ]
 
-[tool.uv]
-index-url = "https://pypi.org/simple"
+[[tool.uv.index]]
+url = "https://pypi.org/simple"
 
 [tool.setuptools.packages.find]
 where = ["src"]
