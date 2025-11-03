@@ -267,7 +267,6 @@ def mutate_and_test(module_path, operator, occurrence, test_command, keep_stdout
     """
     with open(os.devnull, "w") as devnull:
         with redirect_stdout(sys.stdout if keep_stdout else devnull):
-            breakpoint()
             work_result = cosmic_ray.mutating.mutate_and_test(
                 [
                     MutationSpec(
