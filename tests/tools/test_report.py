@@ -9,9 +9,10 @@ import pytest
 SHOW_OUTPUT_OPTIONS = (None, "--show-output", "--no-show-output")
 SHOW_DIFF_OPTIONS = (None, "--show-diff", "--no-show-diff")
 SHOW_PENDING_OPTIONS = (None, "--show-pending", "--no-show-pending")
+SURVIVING_ONLY_OPTIONS = (None, "--surviving-only", "--all-mutations")
 OPTION_COMBINATIONS = (
     list(filter(None, combo))
-    for combo in itertools.product(SHOW_OUTPUT_OPTIONS, SHOW_DIFF_OPTIONS, SHOW_PENDING_OPTIONS)
+    for combo in itertools.product(SHOW_OUTPUT_OPTIONS, SHOW_DIFF_OPTIONS, SHOW_PENDING_OPTIONS, SURVIVING_ONLY_OPTIONS)
 )
 
 

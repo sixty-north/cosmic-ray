@@ -10,12 +10,20 @@ from cosmic_ray.work_db import WorkDB, use_db
 @click.option("--show-output/--no-show-output", default=False, help="Display output of test executions")
 @click.option("--show-diff/--no-show-diff", default=False, help="Display diff of mutants")
 @click.option("--show-pending/--no-show-pending", default=False, help="Display results for incomplete tasks")
+@click.option(
+    "--surviving-only/--all-mutations",
+    default=False,
+    help="Only display completed work items whose tests survived",
+)
 @click.argument("session-file", type=click.Path(dir_okay=False, readable=True, exists=True))
-def report(show_output, show_diff, show_pending, session_file):
+def report(show_output, show_diff, show_pending, surviving_only, session_file):
     """Print a nicely formatted report of test results and some basic statistics."""
 
     with use_db(session_file, WorkDB.Mode.open) as db:
         for work_item, result in db.completed_work_items:
+            if surviving_only and result.is_killed:
+                continue
+
             display_work_item(work_item)
 
             print(f"worker outcome: {result.worker_outcome}, test outcome: {result.test_outcome}")
