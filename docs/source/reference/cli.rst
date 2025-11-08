@@ -36,6 +36,9 @@ executed. This will tell you what progress has been made.
     :prog: cr-report
     :nested: full
 
+Use ``--surviving-only`` alongside ``--show-diff`` (and/or ``--show-output``) to focus the detailed listings on
+mutants whose tests survived, e.g. ``cr-report session.sqlite --show-diff --surviving-only``.
+
 ``cr-badge``
 ============
 
@@ -78,4 +81,3 @@ executed. This will tell you what progress has been made.
 ================= 
 
 **TODO**
-
