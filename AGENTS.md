@@ -1,7 +1,7 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-Cosmic Ray uses a strict `src/` layout: core packages live in `src/cosmic_ray`, version metadata in `src/cosmic_ray/version.py`, and CLI surfaces under `src/cosmic_ray/cli`. Tests sit in `tests/unittests`, `tests/tools`, and `tests/e2e`, with shared fixtures in `tests/resources`. Documentation lives in `docs/source`, and helper utilities live in `tools/`. Mirror this hierarchy so new modules, tests, and assets stay discoverable.
+Cosmic Ray uses a strict `src/` layout: core packages live in `src/cosmic_ray`, version metadata in `src/cosmic_ray/version.py`, and CLI surfaces under `src/cosmic_ray/cli`. Tests sit in `tests/unittests`, `tests/tools`, and `tests/e2e`, with shared fixtures in `tests/resources`. Documentation lives in `docs/source`, and helper utilities live in `tools/`. The canonical upstream lives at `https://github.com/sixty-north/cosmic-ray`; mirror this hierarchy so new modules, tests, and assets stay discoverable across forks.
 
 ## Build, Test, and Development Commands
 - Cosmic Ray uses the uv project manager.
