@@ -1,9 +1,10 @@
 "Implementation of operator base class."
 
-import dataclasses
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
 from typing import Optional
+
+from attrs import define, field
 
 
 class Operator(ABC):
@@ -64,13 +65,13 @@ class Operator(ABC):
         """
 
 
-@dataclasses.dataclass(frozen=True)
+@define(frozen=True)
 class Argument:
-    name: str
-    description: str
+    name: str = field()
+    description: str = field()
 
 
-@dataclasses.dataclass(frozen=True)
+@define(frozen=True)
 class Example:
     """A structure to store pre and post mutation operator code snippets,
     including optional specification of occurrence and operator args.
@@ -80,11 +81,11 @@ class Example:
     and for the given operator args (if specified).
     """
 
-    pre_mutation_code: str
-    post_mutation_code: str
-    occurrence: Optional[int] = 0
-    operator_args: Optional[dict] = None
+    pre_mutation_code: str = field()
+    post_mutation_code: str = field()
+    occurrence: Optional[int] = field(default=0)
+    operator_args: Optional[dict] = field(default=None)
 
-    def __post_init__(self):
+    def __attrs_post_init__(self):
         if not self.operator_args:
             object.__setattr__(self, "operator_args", {})

@@ -27,6 +27,7 @@ classifiers = [
 
 ]
 dependencies = [
+  "attrs",
   "aiohttp",
   "anybadge",
   "click",

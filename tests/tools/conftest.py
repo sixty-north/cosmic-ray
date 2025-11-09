@@ -2,10 +2,10 @@ import pathlib
 import subprocess
 import sys
 import tempfile
-from dataclasses import dataclass
 from pathlib import Path
 
 import pytest
+from attrs import define
 
 
 @pytest.fixture(scope="session")
@@ -14,7 +14,7 @@ def fast_tests_root(resources_dirpath):
     return resources_dirpath / "fast_tests"
 
 
-@dataclass
+@define
 class SessionData:
     config: Path
     session: Path
