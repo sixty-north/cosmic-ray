@@ -93,10 +93,14 @@ def test_inexisting(example_project_root, session):
         encoding="utf-8",
         capture_output=True,
     )
+    
+    # Workaround to take out new line in result.stderr value that causes error in Windows, 
+    # despite using os.linesep
+    stripped_version = result.stderr.strip()
 
     assert result.returncode == 66
     assert result.stdout == ""
-    assert result.stderr == "Could not find module path example/unknown_file.py" + os.linesep
+    assert stripped_version == "Could not find module path example" + os.sep + "unknown_file.py"
 
 
 def test_baseline_with_pytest_filter(example_project_root, session):
