@@ -93,8 +93,8 @@ def test_inexisting(example_project_root, session):
         encoding="utf-8",
         capture_output=True,
     )
-    
-    # Workaround to take out new line in result.stderr value that causes error in Windows, 
+
+    # Workaround to take out new line in result.stderr value that causes error in Windows,
     # despite using os.linesep
     stripped_version = result.stderr.strip()
 
