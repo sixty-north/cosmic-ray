@@ -2,6 +2,7 @@
 
 # pylint: disable=C0111,W0621,W0613
 
+import json
 import stat
 
 import pytest
@@ -12,6 +13,8 @@ import cosmic_ray.config
 import cosmic_ray.modules
 import cosmic_ray.mutating
 import cosmic_ray.plugins
+from cosmic_ray.work_db import use_db
+from cosmic_ray.work_item import MutationSpec, WorkItem, WorkResult, WorkerOutcome
 
 
 @pytest.fixture
@@ -86,6 +89,34 @@ def test_dump_success_returns_EX_OK(lobotomize, local_unittest_config, session):
 
     errcode = cosmic_ray.cli.main(["dump", str(session)])
     assert errcode == ExitCode.OK
+
+
+def test_dump_handles_results_without_test_outcome(session, capsys):
+    mutation = MutationSpec(
+        module_path="foo.py",
+        operator_name="core/FakeOperator",
+        occurrence=0,
+        start_pos=(1, 0),
+        end_pos=(1, 1),
+        operator_args={},
+    )
+
+    with use_db(session) as db:
+        db.clear()
+        db.add_work_item(WorkItem.single("job-1", mutation))
+        db.set_result(
+            "job-1",
+            WorkResult(worker_outcome=WorkerOutcome.SKIPPED, output="Filtered operator"),
+        )
+
+    errcode = cosmic_ray.cli.main(["dump", str(session)])
+    assert errcode == ExitCode.OK
+
+    stdout = capsys.readouterr().out.strip().splitlines()
+    assert stdout
+    _, result = json.loads(stdout[0])
+    assert result["worker_outcome"] == WorkerOutcome.SKIPPED.value
+    assert result["test_outcome"] is None
 
 
 def test_operators_success_returns_EX_OK():

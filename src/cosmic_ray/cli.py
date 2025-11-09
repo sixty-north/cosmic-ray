@@ -3,7 +3,6 @@
 Here we manage command-line parsing and launching of the internal machinery that does mutation testing.
 """
 
-import dataclasses
 import json
 import logging
 import os
@@ -16,6 +15,7 @@ from contextlib import contextmanager, redirect_stdout
 from pathlib import Path
 
 import click
+from attrs import asdict as attrs_asdict
 from exit_codes import ExitCode
 from rich.logging import RichHandler
 
@@ -46,6 +46,21 @@ def cli(verbosity):
     "Mutation testing for Python3"
     logging_level = getattr(logging, verbosity)
     logging.basicConfig(level=logging_level, handlers=[RichHandler()])
+
+
+def _work_item_to_dict(work_item):
+    data = attrs_asdict(work_item)
+    for mutation in data["mutations"]:
+        mutation["module_path"] = str(mutation["module_path"])
+    return data
+
+
+def _result_to_dict(result):
+    data = attrs_asdict(result)
+    data["worker_outcome"] = data["worker_outcome"].value
+    if data["test_outcome"] is not None:
+        data["test_outcome"] = data["test_outcome"].value
+    return data
 
 
 @cli.command()
@@ -181,23 +196,11 @@ def dump(session_file):
     WorkItem with no results.
     """
 
-    def item_to_dict(work_item):
-        d = dataclasses.asdict(work_item)
-        for m in d["mutations"]:
-            m["module_path"] = str(m["module_path"])
-        return d
-
-    def result_to_dict(result):
-        d = dataclasses.asdict(result)
-        d["worker_outcome"] = d["worker_outcome"].value
-        d["test_outcome"] = d["test_outcome"].value
-        return d
-
     with use_db(session_file, WorkDB.Mode.open) as database:
         for work_item, result in database.completed_work_items:
-            print(json.dumps((item_to_dict(work_item), result_to_dict(result))))
+            print(json.dumps((_work_item_to_dict(work_item), _result_to_dict(result))))
         for work_item in database.pending_work_items:
-            print(json.dumps((item_to_dict(work_item), None)))
+            print(json.dumps((_work_item_to_dict(work_item), None)))
 
     sys.exit(ExitCode.OK)
 
@@ -281,7 +284,7 @@ def mutate_and_test(module_path, operator, occurrence, test_command, keep_stdout
                 None,
             )
 
-    sys.stdout.write(json.dumps(dataclasses.asdict(work_result)))
+    sys.stdout.write(json.dumps(_result_to_dict(work_result)))
 
     sys.exit(ExitCode.OK)
 
