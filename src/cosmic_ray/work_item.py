@@ -2,9 +2,10 @@
 
 import dataclasses
 import enum
-import pathlib
 from pathlib import Path
 from typing import Any, Optional
+
+from attrs import define, field
 
 
 class StrEnum(str, enum.Enum):
@@ -53,28 +54,24 @@ class WorkResult:
         return self.test_outcome != TestOutcome.SURVIVED
 
 
-@dataclasses.dataclass(frozen=True)
+@define(frozen=True)
 class MutationSpec:
     "Description of a single mutation."
 
-    module_path: Path
-    operator_name: str
-    occurrence: int
-    start_pos: tuple[int, int]
-    end_pos: tuple[int, int]
-    operator_args: dict[str, Any] = dataclasses.field(default_factory=dict)
+    module_path: Path = field(converter=Path)
+    operator_name: str = field()
+    occurrence: int = field(converter=int)
+    start_pos: tuple[int, int] = field()
+    end_pos: tuple[int, int] = field()
+    operator_args: dict[str, Any] = field(factory=dict)
 
-    # pylint: disable=R0913
-    def __post_init__(self):
-        object.__setattr__(self, "module_path", pathlib.Path(self.module_path))
-        object.__setattr__(self, "occurrence", int(self.occurrence))
+    @end_pos.validator
+    def _validate_positions(self, attribute, value):
+        start_line, start_col = self.start_pos
+        end_line, end_col = value
 
-        if self.start_pos[0] > self.end_pos[0]:
-            raise ValueError("Start line must not be after end line")
-
-        if self.start_pos[0] == self.end_pos[0]:
-            if self.start_pos[1] >= self.end_pos[1]:
-                raise ValueError("End position must come after start position.")
+        if start_line > end_line or (start_line == end_line and start_col >= end_col):
+            raise ValueError("End position must come after start position.")
 
 
 @dataclasses.dataclass(frozen=True)
