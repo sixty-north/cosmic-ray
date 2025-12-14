@@ -230,6 +230,7 @@ class MutationSpecStorage(Base):
     start_pos_col = Column(Integer)
     end_pos_row = Column(Integer)
     end_pos_col = Column(Integer)
+    function_name = Column(String, nullable=True)
     job_id = Column(String, ForeignKey("work_items.job_id"), primary_key=True)
     work_item = relationship("WorkItemStorage", back_populates="mutations")
 
@@ -254,6 +255,7 @@ def _mutation_spec_from_storage(mutation_spec: MutationSpecStorage):
         occurrence=mutation_spec.occurrence,
         start_pos=(mutation_spec.start_pos_row, mutation_spec.start_pos_col),
         end_pos=(mutation_spec.end_pos_row, mutation_spec.end_pos_col),
+        function_name=mutation_spec.function_name,
     )
 
 
@@ -268,6 +270,7 @@ def _mutation_spec_to_storage(mutation_spec: MutationSpec, job_id: str):
         start_pos_col=mutation_spec.start_pos[1],
         end_pos_row=mutation_spec.end_pos[0],
         end_pos_col=mutation_spec.end_pos[1],
+        function_name=mutation_spec.function_name,
     )
 
 
