@@ -7,6 +7,7 @@ from collections.abc import Iterable
 import cosmic_ray.modules
 import cosmic_ray.plugins
 from cosmic_ray.ast import ast_nodes, get_ast_from_path
+from cosmic_ray.ast.ast_query import ASTQuery
 from cosmic_ray.work_db import WorkDB
 from cosmic_ray.work_item import MutationSpec, WorkItem
 
@@ -55,12 +56,13 @@ def _all_work_items(module_paths, operator_cfgs) -> Iterable[WorkItem]:
 
         for operator_name, operator_args, operator in _operators(operator_cfgs):
             positions = (
-                (start_pos, end_pos)
+                (node, start_pos, end_pos)
                 for node in ast_nodes(module_ast)
                 for start_pos, end_pos in operator.mutation_positions(node)
             )
 
-            for occurrence, (start_pos, end_pos) in enumerate(positions):
+            for occurrence, (node, start_pos, end_pos) in enumerate(positions):
+                function_name = ASTQuery(node).get_definition_name()
                 mutation = MutationSpec(
                     module_path=str(module_path),
                     operator_name=operator_name,
@@ -68,6 +70,7 @@ def _all_work_items(module_paths, operator_cfgs) -> Iterable[WorkItem]:
                     occurrence=occurrence,
                     start_pos=start_pos,
                     end_pos=end_pos,
+                    function_name=function_name,
                 )
                 yield WorkItem.single(job_id=uuid.uuid4().hex, mutation=mutation)
 
