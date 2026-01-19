@@ -1,5 +1,7 @@
 "Tools for querying ASTs."
 
+import parso.python.tree
+
 
 class ASTQuery:
     """
@@ -92,6 +94,15 @@ class ASTQuery:
         if self.obj is None:
             return self
         return self._clone(self.obj[item])
+
+    def get_definition_name(self):
+        "Get the name of the function or class enclosing the current node."
+        obj = self.obj
+        while obj:
+            if isinstance(obj, (parso.python.tree.Function, parso.python.tree.Class)):
+                return obj.name.value
+            obj = obj.parent
+        return None
 
 
 class ASTQueryOptional(ASTQuery):
