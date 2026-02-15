@@ -14,11 +14,12 @@ from cosmic_ray.work_item import TestOutcome
 @click.command()
 @click.option("--only-completed/--not-only-completed", default=False)
 @click.option("--skip-success/--include-success", default=False)
+@click.option("--hide-skipped/--show-skipped", default=False)
 @click.argument("session-file", type=click.Path(dir_okay=False, readable=True, exists=True))
-def report_html(only_completed, skip_success, session_file):
+def report_html(only_completed, skip_success, hide_skipped, session_file):
     """Print an HTML formatted report of test results."""
     with use_db(session_file, WorkDB.Mode.open) as db:
-        doc = _generate_html_report(db, only_completed, skip_success)
+        doc = _generate_html_report(db, only_completed, skip_success, hide_skipped)
 
     print(doc.getvalue())
 
@@ -26,7 +27,7 @@ def report_html(only_completed, skip_success, session_file):
 # TODO: Redo this with jinja?
 
 
-def _generate_html_report(db, only_completed, skip_success):
+def _generate_html_report(db, only_completed, skip_success, hide_skipped):
     # pylint: disable=too-many-statements
     doc, tag, text = Doc().tagtext()
     doc.asis("<!DOCTYPE html>")
@@ -60,7 +61,7 @@ def _generate_html_report(db, only_completed, skip_success):
 
                 # Job list
 
-                _generate_job_list(doc, db, skip_success)
+                _generate_job_list(doc, db, skip_success, hide_skipped)
 
             with tag("script"):
                 doc.attr(src="https://code.jquery.com/jquery-3.3.1.slim.min.js")
@@ -116,7 +117,7 @@ def _generate_html_report(db, only_completed, skip_success):
     return doc
 
 
-def _generate_job_list(doc, db, skip_success):
+def _generate_job_list(doc, db, skip_success, hide_skipped):
     doc, tag, text = doc.tagtext()
     with tag("div", klass="mb-1", id="job_list___accordion"):
         with tag("div", klass="card"):
@@ -164,12 +165,15 @@ def _generate_job_list(doc, db, skip_success):
                     # Job item
                     all_items = db.completed_work_items
                     for index, (work_item, result) in enumerate(all_items, start=1):
-                        _generate_work_item_card(doc, index, work_item, result, skip_success)
+                        _generate_work_item_card(doc, index, work_item, result, skip_success, hide_skipped)
 
 
 # flake8: noqa: C901
-def _generate_work_item_card(doc, index, work_item, result, skip_success):
+def _generate_work_item_card(doc, index, work_item, result, skip_success, hide_skipped):
     doc, tag, text = doc.tagtext()
+    if hide_skipped and result is not None and result.worker_outcome == "skipped":
+        return
+
     if result is not None:
         if result.is_killed:
             if result.test_outcome == TestOutcome.INCOMPETENT:
