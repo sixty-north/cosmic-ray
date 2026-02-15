@@ -100,7 +100,7 @@ def init(config_file, session_file, force):
             log.error("Session file already contains results. Use --force to overwrite.")
             sys.exit(ExitCode.DATA_ERR)
 
-        cosmic_ray.commands.init(modules, database, operators_cfg)
+        cosmic_ray.commands.init(modules, database, operators_cfg, cfg.sub("annotation-filter"))
 
     sys.exit(ExitCode.OK)
 
