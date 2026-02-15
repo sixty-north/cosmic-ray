@@ -218,7 +218,8 @@ contains any results that you want to keep. At the same time, if you change your
 which tests are run and which mutations are made, then you should re-initialize your session.
 
 Generally speaking, if you change the 'module-path', 'timeout', 'excluded-modules', or 'test-command' parts of your
-configuration, or if you change any of the filters you use, then you need to re-initialize your session and start over.
+configuration, if you change ``annotation-filter.allow-contexts``, or if you change any of the filters you use, then you
+need to re-initialize your session and start over.
 Any of these changes can affect the operations that the subsequent `exec` command will run.
 
 Similarly, you need to create a new session with `init` whenever your code-under-test or your tests themselves change.

@@ -28,6 +28,31 @@ For example, if you wanted to apply the ``cr-filter-pragma`` filter to your sess
 The ``init`` would first create a session where *all* mutation would be run, and then the ``cr-filter-pragma`` call
 would mark as skipped all mutations which are on a line with the pragma comment.
 
+Annotation filtering during init
+================================
+
+Type annotations are handled slightly differently from the command-line filters in this page. During ``cosmic-ray init``,
+Cosmic Ray marks annotation mutations as ``skipped`` by default.
+
+You can allow specific annotation contexts in your configuration:
+
+.. code-block:: toml
+
+  [cosmic-ray.annotation-filter]
+  allow-contexts = ["param", "return"]
+
+The supported context names are:
+
+- ``annassign``
+- ``param``
+- ``return``
+- ``type_alias``
+
+If this section is omitted, all annotation contexts are skipped.
+
+Because this behavior is controlled at ``init`` time, changing ``allow-contexts`` requires re-running ``cosmic-ray init``
+to rebuild the session.
+
 Filters included with Cosmic Ray
 ================================
 
@@ -107,6 +132,9 @@ External filters
 
 Other filters are defined in separate projects.
 
+It is also possible to create your own filter to implement project-specific annotation handling, for example selectively
+re-enabling or disabling specific annotation mutations based on framework conventions or module patterns.
+
 cosmic-ray-spor-filter
 ----------------------
 
@@ -116,4 +144,3 @@ arbitrary metadata with ranges of code, and this metadata is stored outside of t
 has algorithms to update the metadata (and its association with the code) automatically.
 
 Get more details at `the project page <https://github.com/abingham/cosmic-ray-spor-filter>`_.
-

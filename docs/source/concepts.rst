@@ -111,6 +111,29 @@ You would run ``cosmic-ray init`` like this:
 
 You'll notice that this creates a new file called ``allele_session.sqlite``. This is the database for your session.
 
+Annotation mutation filtering
+-----------------------------
+
+By default, ``cosmic-ray init`` marks mutations inside type annotations as ``skipped`` in the session. This keeps
+annotation-only mutations out of normal execution while preserving stable operator occurrence numbering.
+
+You can control this behavior through the optional ``annotation-filter`` configuration section. The
+``allow-contexts`` key accepts a list of annotation contexts which should remain executable:
+
+.. code-block:: ini
+
+    [cosmic-ray.annotation-filter]
+    allow-contexts = ["annassign", "param", "return", "type_alias"]
+
+Supported contexts are:
+
+- ``annassign``: variable annotations, e.g. ``x: int = 1``
+- ``param``: function parameter annotations
+- ``return``: function return annotations
+- ``type_alias``: type alias values
+
+If ``annotation-filter`` is omitted, all of these annotation contexts are skipped during ``init``.
+
 .. _test_suite:
 
 Test suite
