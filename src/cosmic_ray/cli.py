@@ -15,9 +15,8 @@ from collections import defaultdict
 from contextlib import contextmanager, redirect_stdout
 from pathlib import Path
 
-from attrs import asdict
-
 import click
+from attrs import asdict
 from exit_codes import ExitCode
 from rich.logging import RichHandler
 

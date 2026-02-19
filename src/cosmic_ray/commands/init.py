@@ -62,7 +62,7 @@ def _all_work_items(module_paths, operator_cfgs) -> Iterable[WorkItem]:
             )
 
             for occurrence, (node, start_pos, end_pos) in enumerate(positions):
-                function_name = ASTQuery(node).get_definition_name()
+                definition_name = ASTQuery(node).get_definition_name()
                 mutation = MutationSpec(
                     module_path=str(module_path),
                     operator_name=operator_name,
@@ -70,7 +70,7 @@ def _all_work_items(module_paths, operator_cfgs) -> Iterable[WorkItem]:
                     occurrence=occurrence,
                     start_pos=start_pos,
                     end_pos=end_pos,
-                    function_name=function_name,
+                    definition_name=definition_name,
                 )
                 yield WorkItem.single(job_id=uuid.uuid4().hex, mutation=mutation)
 

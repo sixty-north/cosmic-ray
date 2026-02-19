@@ -63,7 +63,7 @@ class MutationSpec:
     start_pos: tuple[int, int] = field()
     end_pos: tuple[int, int] = field()
     operator_args: dict[str, Any] = field(factory=dict)
-    function_name: Optional[str] = field(default=None)
+    definition_name: Optional[str] = field(default=None)
 
     @end_pos.validator
     def _validate_positions(self, attribute, value):
