@@ -54,9 +54,8 @@ class WorkDB:
 
     def close(self):
         """Close the database."""
-        # TODO: We don't really need this any more. Should we just remove it? Similarly, is there any need
-        # for use_db()? It seems possible that we'll eventually move back to needing an explicit close()
-        # call, so I'm a bit hesitant to remove this.
+        if engine := getattr(self, "_engine", None):
+            engine.dispose()
 
     def name(self):
         """A name for this database.
@@ -230,6 +229,7 @@ class MutationSpecStorage(Base):
     start_pos_col = Column(Integer)
     end_pos_row = Column(Integer)
     end_pos_col = Column(Integer)
+    definition_name = Column(String, nullable=True)
     job_id = Column(String, ForeignKey("work_items.job_id"), primary_key=True)
     work_item = relationship("WorkItemStorage", back_populates="mutations")
 
@@ -254,6 +254,7 @@ def _mutation_spec_from_storage(mutation_spec: MutationSpecStorage):
         occurrence=mutation_spec.occurrence,
         start_pos=(mutation_spec.start_pos_row, mutation_spec.start_pos_col),
         end_pos=(mutation_spec.end_pos_row, mutation_spec.end_pos_col),
+        definition_name=mutation_spec.definition_name,
     )
 
 
@@ -268,6 +269,7 @@ def _mutation_spec_to_storage(mutation_spec: MutationSpec, job_id: str):
         start_pos_col=mutation_spec.start_pos[1],
         end_pos_row=mutation_spec.end_pos[0],
         end_pos_col=mutation_spec.end_pos[1],
+        definition_name=mutation_spec.definition_name,
     )
 
 

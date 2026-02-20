@@ -245,7 +245,10 @@ def _generate_work_item_card(doc, index, work_item, result, skip_success, hide_s
                                     )
 
                         with tag("pre"):
-                            text(f"operator: {mutation.operator_name}, occurrence: {mutation.occurrence}")
+                            text(
+                                f"operator: {mutation.operator_name}, occurrence: {mutation.occurrence},"
+                                f" definition_name: {mutation.definition_name}"
+                            )
 
                     if result is not None:
                         if result.diff:

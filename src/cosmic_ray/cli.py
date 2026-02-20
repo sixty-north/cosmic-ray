@@ -16,6 +16,7 @@ from contextlib import contextmanager, redirect_stdout
 from pathlib import Path
 
 import click
+from attrs import asdict
 from exit_codes import ExitCode
 from rich.logging import RichHandler
 
@@ -182,13 +183,13 @@ def dump(session_file):
     """
 
     def item_to_dict(work_item):
-        d = dataclasses.asdict(work_item)
+        d = asdict(work_item)
         for m in d["mutations"]:
             m["module_path"] = str(m["module_path"])
         return d
 
     def result_to_dict(result):
-        d = dataclasses.asdict(result)
+        d = asdict(result)
         d["worker_outcome"] = d["worker_outcome"].value
         d["test_outcome"] = d["test_outcome"].value
         return d
