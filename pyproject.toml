@@ -5,7 +5,7 @@ build-backend = 'setuptools.build_meta'
 [project]
 name = "cosmic_ray"
 requires-python = ">= 3.9"
-version = "8.4.3"
+version = "8.4.4"
 authors = [{ name = "Sixty North AS", email = "austin@sixty-north.com" }]
 description = "Mutation testing"
 readme = { file = "README.rst", content-type = "text/x-rst" }
