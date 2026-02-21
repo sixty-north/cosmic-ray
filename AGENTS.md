@@ -1,5 +1,9 @@
 # Repository Guidelines
 
+## Revision control
+
+If there is a .jj directory or otherwise appears that jujutsu is being used for verison control, use it instead of git.
+
 ## Project Structure & Module Organization
 Cosmic Ray follows a `src/` layout: packages live in `src/cosmic_ray`, metadata in `src/cosmic_ray/version.py`, and CLI surfaces in `src/cosmic_ray/cli`. Tests live in `tests/unittests`, `tests/tools`, and `tests/e2e`, with fixtures/configs parked under `tests/resources`. Documentation resides in `docs/source`, and helper utilities live in `tools/`. The canonical upstream is `https://github.com/sixty-north/cosmic-ray`; match this layout when mirroring across forks.
 
