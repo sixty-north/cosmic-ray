@@ -13,6 +13,7 @@ import sys
 import tempfile
 from collections import defaultdict
 from contextlib import contextmanager, redirect_stdout
+from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 
 import click
@@ -28,11 +29,15 @@ import cosmic_ray.plugins
 from cosmic_ray.config import load_config, serialize_config
 from cosmic_ray.mutating import apply_mutation
 from cosmic_ray.progress import report_progress
-from cosmic_ray.version import __version__
 from cosmic_ray.work_db import WorkDB, use_db
 from cosmic_ray.work_item import MutationSpec, TestOutcome, WorkItem
 
 log = logging.getLogger()
+
+try:
+    __version__ = version("cosmic_ray")
+except PackageNotFoundError:
+    __version__ = "unknown"
 
 
 @click.group()
