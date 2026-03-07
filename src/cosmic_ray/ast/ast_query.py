@@ -99,6 +99,9 @@ class ASTQuery:
         "Get the name of the function or class enclosing the current node."
         obj = self.obj
         while obj:
+            if isinstance(obj, parso.python.tree.Lambda):
+                obj = obj.parent
+                continue
             if isinstance(obj, (parso.python.tree.Function, parso.python.tree.Class)):
                 return obj.name.value
             obj = obj.parent
