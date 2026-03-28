@@ -4,7 +4,6 @@ import sys
 
 import pytest
 
-
 # Skip these tests when running in GitHub Actions where a proper git
 # workspace isn't available in the test environment.
 skip_in_ci = pytest.mark.xfail(
