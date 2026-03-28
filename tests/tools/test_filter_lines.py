@@ -8,10 +8,7 @@ import pytest
 # workspace isn't available in the test environment.
 skip_in_ci = pytest.mark.xfail(
     os.environ.get("GITHUB_ACTIONS") == "true",
-    reason=(
-        "This test fails on non-master branches in CI, so we ignore this "
-        "problem for now."
-    ),
+    reason=("This test fails on non-master branches in CI, so we ignore this problem for now."),
 )
 
 
@@ -37,4 +34,3 @@ def test_smoke_test_on_execd_session(execd_session, fast_tests_root):
     ]
 
     subprocess.check_call(command, cwd=str(fast_tests_root))
-

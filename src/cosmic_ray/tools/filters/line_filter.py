@@ -57,11 +57,8 @@ class LineFilter(FilterApp):
         if lines_cfg is None:
             lines_cfg = {}
         if not isinstance(lines_cfg, Mapping):
-            raise ValueError(
-                "line-filter 'lines' section must be a mapping "
-                "from module path to line specification(s)."
-            )
-            
+            raise ValueError("line-filter 'lines' section must be a mapping from module path to line specification(s).")
+
         normalized_lines_cfg = {}
         for file_key, specs in lines_cfg.items():
             if isinstance(specs, str):
@@ -82,7 +79,6 @@ class LineFilter(FilterApp):
 
             normalized_lines_cfg[file_key] = specs_list
         return normalized_lines_cfg
-
 
     def _resolve_module_path(self, file_key, module_path_cfg):
         base = Path(module_path_cfg) if module_path_cfg else None
@@ -139,9 +135,7 @@ class LineFilter(FilterApp):
             for mutation in item.mutations:
                 ranges = parsed_files.get(mutation.module_path)
 
-                if not ranges or not self._ranges_overlap(
-                    mutation.start_pos[0], mutation.end_pos[0], ranges
-                ):
+                if not ranges or not self._ranges_overlap(mutation.start_pos[0], mutation.end_pos[0], ranges):
                     log.info(
                         "line-filter skipping %s %s %s %s %s %s",
                         item.job_id,
@@ -162,7 +156,6 @@ class LineFilter(FilterApp):
                     worker_outcome=WorkerOutcome.SKIPPED,
                 ),
             )
-
 
     def _ranges_overlap(self, m_start, m_end, ranges):
         return any(m_start <= r_end and r_start <= m_end for r_start, r_end in ranges)
