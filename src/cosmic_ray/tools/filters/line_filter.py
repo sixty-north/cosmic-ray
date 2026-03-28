@@ -3,7 +3,6 @@
 import logging
 import sys
 from argparse import Namespace
-
 from collections.abc import Mapping
 from pathlib import Path
 
@@ -71,17 +70,14 @@ class LineFilter(FilterApp):
                 specs_list = list(specs)
             else:
                 raise ValueError(
-                    "line-filter 'lines' values must be a string or a list/tuple "
-                    "of strings; got %r for %r" % (type(specs).__name__, file_key)
+                    f"line-filter 'lines' values must be a string or a list/tuple "
+                    f"of strings; got {type(specs).__name__!r} for {file_key!r}"
                 )
 
             for spec in specs_list:
                 if not isinstance(spec, str):
                     raise ValueError(
-                        "line-filter 'lines' entries must be strings; got %r in %r" % (
-                            type(spec).__name__,
-                            file_key,
-                        )
+                        f"line-filter 'lines' entries must be strings; got {type(spec).__name__!r} in {file_key!r}"
                     )
 
             normalized_lines_cfg[file_key] = specs_list
