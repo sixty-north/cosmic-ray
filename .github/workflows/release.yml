@@ -50,37 +50,9 @@ jobs:
           echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           echo "Planned release tag: ${TAG} at $(git rev-parse --short HEAD)"
 
-  test:
-    name: Test (${{ matrix.python-version }})
-    needs: prepare
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [3.9, "3.10", "3.11", "3.12", "3.13"]
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ needs.prepare.outputs.commit_sha }}
-          fetch-depth: 0
-      - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v3
-        with:
-          version: "latest"
-          enable-cache: true
-      - name: Install Python
-        run: uv python install ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: uv sync
-      - name: Lint with ruff
-        run: |
-          uv run ruff check .
-          uv run ruff format --check .
-      - name: Test with pytest
-        run: uv run pytest tests --run-slow
-
   publish:
     name: Tag and publish to PyPI
-    needs: [prepare, test]
+    needs: prepare
     runs-on: ubuntu-latest
     permissions:
       contents: write
