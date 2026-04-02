@@ -2,7 +2,7 @@
 
 import os.path
 
-import qprompt
+import click
 
 from cosmic_ray.config import ConfigDict
 from cosmic_ray.plugins import distributor_names
@@ -28,25 +28,25 @@ def new_config():
     Returns: A new ConfigDict.
     """
     config = ConfigDict()
-    config["module-path"] = qprompt.ask_str(
-        "Top-level module path", blk=False, vld=os.path.exists, hlp=MODULE_PATH_HELP
+    click.echo(MODULE_PATH_HELP)
+    config["module-path"] = click.prompt(
+        "Top-level module path",
+        type=click.Path(exists=True, path_type=str),
     )
 
-    timeout = qprompt.ask_str(
+    timeout = click.prompt(
         "Test execution timeout (seconds)",
-        vld=float,
-        blk=False,
-        hlp="The number of seconds to let a test run before terminating it.",
+        type=float,
+        show_default=False,
     )
-    config["timeout"] = float(timeout)
+    config["timeout"] = timeout
     config["excluded-modules"] = []
 
-    config["test-command"] = qprompt.ask_str("Test command", blk=False, hlp=TEST_COMMAND_HELP)
+    click.echo(TEST_COMMAND_HELP)
+    config["test-command"] = click.prompt("Test command", type=str)
 
-    menu = qprompt.Menu()
-    for at_pos, distributor_name in enumerate(distributor_names()):
-        menu.add(str(at_pos), distributor_name)
+    distributors = sorted(distributor_names())
     config["distributor"] = ConfigDict()
-    config["distributor"]["name"] = menu.show(header="Distributor", returns="desc")
+    config["distributor"]["name"] = click.prompt("Distributor", type=click.Choice(distributors, case_sensitive=True))
 
     return config

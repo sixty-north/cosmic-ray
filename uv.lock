@@ -418,7 +418,6 @@ dependencies = [
     { name = "exit-codes" },
     { name = "gitpython" },
     { name = "parso" },
-    { name = "qprompt" },
     { name = "rich" },
     { name = "sqlalchemy" },
     { name = "stevedore" },
@@ -451,7 +450,6 @@ requires-dist = [
     { name = "exit-codes" },
     { name = "gitpython" },
     { name = "parso" },
-    { name = "qprompt" },
     { name = "rich" },
     { name = "sqlalchemy" },
     { name = "stevedore" },
@@ -904,22 +902,6 @@ resolution-markers = [
 sdist = { url = "https://files.pythonhosted.org/packages/72/34/14ca021ce8e5dfedc35312d08ba8bf51fdd999c576889fc2c24cb97f4f10/iniconfig-2.3.0.tar.gz", hash = "sha256:c76315c77db068650d49c5b56314774a7804df16fee4402c1f19d6d15d8c4730", size = 20503, upload-time = "2025-10-18T21:55:43.219Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/cb/b1/3846dd7f199d53cb17f49cba7e651e9ce294d8497c8c150530ed11865bb8/iniconfig-2.3.0-py3-none-any.whl", hash = "sha256:f631c04d2c48c52b84d0d0549c99ff3859c98df65b3101406327ecc7d53fbf12", size = 7484, upload-time = "2025-10-18T21:55:41.639Z" },
-]
-
-[[package]]
-name = "iterfzf"
-version = "1.8.0.62.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/f6/3c/f1be6cbc6a805dfb1b21d0bdc8b850c3a18f55745acd7f3cf794e1454335/iterfzf-1.8.0.62.0.tar.gz", hash = "sha256:17f8b787da3561493608ce995f192421ccd5cc6be818fd12db5d3fc54b5aa5eb", size = 1827592, upload-time = "2025-05-15T13:13:10.015Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/ed/07/b43cd0d821e39d2d9afc03ca15d658f9c7aed7d8363bb95b2f35c22500bf/iterfzf-1.8.0.62.0-py3-none-macosx_10_7_x86_64.macosx_10_9_x86_64.whl", hash = "sha256:057ac19b67128269a2c9efa7d419fef130d0df2210658d0e2fbe5a009b8b09e1", size = 1705552, upload-time = "2025-05-15T13:12:50.734Z" },
-    { url = "https://files.pythonhosted.org/packages/e5/2b/0c9125d0500df4cec54fcc76a8db86fbffee65fbfdcf85b712231a431829/iterfzf-1.8.0.62.0-py3-none-macosx_11_0_arm64.whl", hash = "sha256:e18ea2ccf4d572695987d90537977ef060ebf4157e783bb1a72a7f3fa1da2cd0", size = 1618660, upload-time = "2025-05-15T13:12:52.924Z" },
-    { url = "https://files.pythonhosted.org/packages/67/d5/16d76f04b23ecd4a2e98b112e73b10cfb058a4795a6e63d21df020d1c8cc/iterfzf-1.8.0.62.0-py3-none-manylinux_1_2_aarch64.manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:24d5d658995be678a19c8ae633486daa9ef63fd17a2d759581c565885861817c", size = 1485885, upload-time = "2025-05-15T13:12:57.512Z" },
-    { url = "https://files.pythonhosted.org/packages/df/37/4349484d7693324e40d51d0dc2f4d52b49b6765598e14af56642075ecdde/iterfzf-1.8.0.62.0-py3-none-manylinux_1_2_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:15094a8ac72d0755d3657333fcd72329ef2d79ea6633c37a6be27be66671ae48", size = 1610003, upload-time = "2025-05-15T13:13:00.101Z" },
-    { url = "https://files.pythonhosted.org/packages/c9/85/520fedf1a01fe014366307ea4b1ce5527e29dfcf042155eb874972dcc1f7/iterfzf-1.8.0.62.0-py3-none-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:32878d993fc6058641bdec50867a25e199b40736cebb0e28449b8a61b054bf3d", size = 1482981, upload-time = "2025-05-15T13:13:02.153Z" },
-    { url = "https://files.pythonhosted.org/packages/7b/08/e9fafe7bc4609f317d50df7cdb3c23a46ec65cedf255bd2ef55916d04e54/iterfzf-1.8.0.62.0-py3-none-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:b43e757b4c0141250aa48cb545083da25e41722d14b003fdc9bddb366a373479", size = 1604392, upload-time = "2025-05-15T13:13:04.102Z" },
-    { url = "https://files.pythonhosted.org/packages/5b/0f/7169c67ba591917c9eb09ab5433cb6c8cc2346baee7b9abab9351da277a6/iterfzf-1.8.0.62.0-py3-none-win_amd64.whl", hash = "sha256:b7cb95f93d5c1d901e8b7ccc886870f48f8331ebbba230cbd49eaedf045f142e", size = 1833659, upload-time = "2025-05-15T13:13:06.39Z" },
-    { url = "https://files.pythonhosted.org/packages/6b/b0/ff38147ebb94a9ad79781e7356f2b5e69bd79721a9f0653ccf25506c4cfe/iterfzf-1.8.0.62.0-py3-none-win_arm64.whl", hash = "sha256:9ae79840b14c090c6a4590add2eaa90f1e945319433d9c900badf0b588b576f8", size = 1689599, upload-time = "2025-05-15T13:13:08.463Z" },
 ]
 
 [[package]]
@@ -1454,15 +1436,6 @@ sdist = { url = "https://files.pythonhosted.org/packages/a3/5c/00a0e072241553e1a
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a8/a4/20da314d277121d6534b3a980b29035dcd51e6744bd79075a6ce8fa4eb8d/pytest-8.4.2-py3-none-any.whl", hash = "sha256:872f880de3fc3a5bdc88a11b39c9710c3497a547cfa9320bc3c5e62fbf272e79", size = 365750, upload-time = "2025-09-04T14:34:20.226Z" },
 ]
-
-[[package]]
-name = "qprompt"
-version = "0.16.3"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "iterfzf" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/8c/87/6d16deb372f272f253fc737f6e1935392c18a51850c47907235fcc65ed67/qprompt-0.16.3.tar.gz", hash = "sha256:a375510899d7ccec143e919aef41c853afc61d9a43426c206595362d981cd171", size = 10821, upload-time = "2021-11-20T03:17:53.048Z" }
 
 [[package]]
 name = "requests"
