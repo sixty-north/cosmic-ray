@@ -33,6 +33,10 @@ From the GitHub UI, run the ``release`` workflow manually:
 3. Choose ``ref`` (defaults to ``master``).
 4. Start the workflow.
 
+The workflow requires a repository secret named ``RELEASE_TOKEN`` (a PAT with
+repository write plus workflow permissions) so it can push release tags even
+when the target commit updates workflow files.
+
 The workflow computes the next release tag automatically and publishes only
 after test/lint jobs succeed.
 
