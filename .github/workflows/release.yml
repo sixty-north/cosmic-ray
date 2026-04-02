@@ -1,0 +1,135 @@
+name: release
+
+on:
+  workflow_dispatch:
+    inputs:
+      part:
+        description: SemVer component to bump
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      ref:
+        description: Branch, tag, or SHA to release from
+        required: true
+        default: master
+        type: string
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    name: Prepare release metadata
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      tag: ${{ steps.compute.outputs.tag }}
+      version: ${{ steps.compute.outputs.version }}
+      commit_sha: ${{ steps.compute.outputs.commit_sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+          fetch-depth: 0
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compute next version
+        id: compute
+        run: |
+          VERSION="$(python3 tools/release.py "${{ inputs.part }}" --next-version-only --allow-dirty --no-push)"
+          TAG="release/v${VERSION}"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "Planned release tag: ${TAG} at $(git rev-parse --short HEAD)"
+
+  test:
+    name: Test (${{ matrix.python-version }})
+    needs: prepare
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.9, "3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.commit_sha }}
+          fetch-depth: 0
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+          enable-cache: true
+      - name: Install Python
+        run: uv python install ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: uv sync
+      - name: Lint with ruff
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+      - name: Test with pytest
+        run: uv run pytest tests --run-slow
+
+  publish:
+    name: Tag and publish to PyPI
+    needs: [prepare, test]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    environment:
+      name: pypi
+      url: https://pypi.org/p/cosmic-ray
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.commit_sha }}
+          fetch-depth: 0
+      - name: Create and push release tag
+        env:
+          TAG: ${{ needs.prepare.outputs.tag }}
+          COMMIT_SHA: ${{ needs.prepare.outputs.commit_sha }}
+        run: |
+          git fetch --tags --force
+          git show-ref --verify --quiet "refs/tags/${TAG}" && {
+            echo "Tag ${TAG} already exists locally." >&2
+            exit 1
+          }
+          git ls-remote --exit-code --tags --refs origin "refs/tags/${TAG}" >/dev/null && {
+            echo "Tag ${TAG} already exists on origin." >&2
+            exit 1
+          }
+          git tag -a "${TAG}" "${COMMIT_SHA}" -m "Release v${TAG#release/v}"
+          git push origin "${TAG}"
+      - name: Check out release tag
+        env:
+          TAG: ${{ needs.prepare.outputs.tag }}
+        run: |
+          git fetch --tags --force
+          git checkout "${TAG}"
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+          enable-cache: true
+      - name: Install Python
+        run: uv python install 3.12
+      - name: Build distribution
+        run: |
+          uv venv
+          uv pip install build
+          uv run python -m build
+      - name: Verify universal wheel
+        run: |
+          ls dist/*.whl
+          find dist -name "*.whl" -print | grep -E "py3-none-any\.whl$"
+      - name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1

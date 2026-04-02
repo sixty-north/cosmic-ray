@@ -6,7 +6,6 @@ name: Python package
 on:
   push:
     branches: ["*"]
-    tags: ["release/*"]
   pull_request:
     branches: [master]
 
@@ -35,36 +34,3 @@ jobs:
           uv run ruff format --check .
       - name: Test with pytest
         run: uv run pytest tests --run-slow
-
-  pypi-publish:
-    name: Upload release to PyPI
-    needs: test
-    if: startsWith(github.ref, 'refs/tags/release')
-    runs-on: ubuntu-latest
-    environment:
-      name: pypi
-      url: https://pypi.org/p/cosmic-ray
-    permissions:
-      id-token: write 
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v3
-        with:
-          version: "latest"
-          enable-cache: true
-      - name: Install Python
-        run: uv python install 3.12
-      - name: "Build distribution"
-        run: |
-          uv venv
-          uv pip install build
-          uv run python -m build
-      - name: Verify universal wheel
-        run: |
-          ls dist/*.whl
-          find dist -name "*.whl" -print | grep -E "py3-none-any\.whl$"
-      - name: Publish package distributions to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
