@@ -5,7 +5,7 @@
 Cosmic Ray uses GitHub Actions for continuous integration and release
 automation.
 
-On every push and pull request, the ``Python package`` workflow runs linting and
+On every push and pull request, the ``Run tests`` workflow runs linting and
 tests across supported Python versions.
 
 Release publishing is managed by the manually triggered ``release`` workflow:
