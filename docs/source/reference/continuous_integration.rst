@@ -12,10 +12,11 @@ Release publishing is managed by the manually triggered ``release`` workflow:
 
 1. Select a ref (branch/tag/SHA) and bump component (major/minor/patch).
 2. The workflow computes the next ``release/vX.Y.Z`` tag.
-3. It runs lint/tests across supported Python versions at the selected commit.
-4. If tests pass, it creates/pushes the tag, builds distributions, and uploads
-   them to PyPI.
-5. Version metadata comes from the release tag through ``hatch-vcs``.
+3. It checks out the selected commit and computes release metadata.
+4. It creates/pushes the tag, builds distributions, and uploads them to PyPI.
+5. It generates GitHub Release notes using ``git-cliff`` from commits since the
+   previous release tag.
+6. Version metadata comes from the release tag through ``hatch-vcs``.
 
 Releasing a new version
 =======================
@@ -33,8 +34,8 @@ From the GitHub UI, run the ``release`` workflow manually:
 3. Choose ``ref`` (defaults to ``master``).
 4. Start the workflow.
 
-The workflow computes the next release tag automatically and publishes only
-after test/lint jobs succeed.
+The workflow computes the next release tag automatically and publishes from the
+selected release ref.
 
 Option 2: Use the helper script (local/manual fallback)
 -------------------------------------------------------
@@ -67,11 +68,14 @@ Typical usage:
 
 .. code-block:: bash
 
-   # Generate or refresh the full changelog from tags/commits
+   # Generate or refresh a local changelog from tags/commits
    git cliff --config cliff.toml -o CHANGELOG.md
 
    # Preview unreleased notes without writing to disk
    git cliff --config cliff.toml --unreleased
+
+The release workflow uses ``git-cliff --latest --strip header`` to generate the
+GitHub Release body directly during CI; no changelog commit is created.
 
 Conventional commit types such as ``feat`` and ``fix`` are grouped into changelog
 sections (Added, Fixed, and so on). Non-conventional commits are filtered out.
