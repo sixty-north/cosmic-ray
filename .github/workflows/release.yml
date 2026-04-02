@@ -69,12 +69,7 @@ jobs:
         env:
           TAG: ${{ needs.prepare.outputs.tag }}
           COMMIT_SHA: ${{ needs.prepare.outputs.commit_sha }}
-          RELEASE_TOKEN: ${{ secrets.RELEASE_TOKEN }}
         run: |
-          if [ -z "${RELEASE_TOKEN}" ]; then
-            echo "Missing RELEASE_TOKEN secret. Configure a PAT with repo and workflow permissions." >&2
-            exit 1
-          fi
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git fetch --tags --force
@@ -87,7 +82,7 @@ jobs:
             exit 1
           }
           git tag -a "${TAG}" "${COMMIT_SHA}" -m "Release v${TAG#release/v}"
-          git push "https://x-access-token:${RELEASE_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "${TAG}"
+          git push origin "${TAG}"
       - name: Check out release tag
         env:
           TAG: ${{ needs.prepare.outputs.tag }}
