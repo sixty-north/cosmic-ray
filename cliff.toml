@@ -1,0 +1,55 @@
+[changelog]
+header = """
+# Changelog
+
+All notable changes to this project are documented in this file.
+"""
+body = """
+{% if version %}
+## [{{ version | trim_start_matches(pat="release/v") }}] - {{ timestamp | date(format="%Y-%m-%d") }}
+{% else %}
+## [Unreleased]
+{% endif %}
+{% for group, commits in commits | group_by(attribute="group") %}
+### {{ group }}
+{% for commit in commits %}
+- {% if commit.scope %}**{{ commit.scope }}:** {% endif %}{{ commit.message | upper_first }}{% if commit.links %} ({{ commit.links | map(attribute="text") | join(sep=", ") }}){% endif %}
+{% endfor %}
+{% endfor %}
+"""
+trim = true
+footer = ""
+
+[git]
+conventional_commits = true
+filter_unconventional = true
+require_conventional = false
+split_commits = false
+protect_breaking_commits = true
+tag_pattern = "release/v[0-9].*"
+sort_commits = "oldest"
+
+commit_preprocessors = [
+  { pattern = '\(#([0-9]+)\)', replace = " (#$1)" },
+]
+
+commit_parsers = [
+  { message = "^feat", group = "Added" },
+  { message = "^fix", group = "Fixed" },
+  { message = "^perf", group = "Changed" },
+  { message = "^refactor", group = "Changed" },
+  { message = "^revert", group = "Changed" },
+  { message = "^docs", group = "Documentation" },
+  { message = "^test", group = "Tests" },
+  { message = "^chore\\(release\\)", skip = true },
+  { message = "^chore", group = "Maintenance" },
+  { body = ".*security", group = "Security" },
+]
+
+link_parsers = [
+  { pattern = "#([0-9]+)", href = "https://github.com/sixty-north/cosmic-ray/issues/$1", text = "#$1" },
+]
+
+[remote.github]
+owner = "sixty-north"
+repo = "cosmic-ray"

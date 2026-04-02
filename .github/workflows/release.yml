@@ -105,5 +105,19 @@ jobs:
         run: |
           ls dist/*.whl
           find dist -name "*.whl" -print | grep -E "py3-none-any\.whl$"
+      - name: Generate GitHub release notes
+        id: git-cliff
+        uses: orhun/git-cliff-action@v4
+        with:
+          config: cliff.toml
+          args: --latest --strip header
+        env:
+          GITHUB_REPO: ${{ github.repository }}
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.prepare.outputs.tag }}
+          name: cosmic-ray v${{ needs.prepare.outputs.version }}
+          body: ${{ steps.git-cliff.outputs.content }}
