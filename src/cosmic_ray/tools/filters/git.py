@@ -34,14 +34,17 @@ class GitFilter(FilterApp):
             output = subprocess.check_output(git_command, stderr=subprocess.PIPE)
         except subprocess.CalledProcessError as exc:
             log.error(
-                f"'git diff' call failed: {exc}\n[stdout]\n{exc.stdout.decode()}\n[stderr]\n{exc.stderr.decode()}"
+                "'git diff' call failed: %s\n[stdout]\n%s\n[stderr]\n%s",
+                exc,
+                exc.stdout.decode(errors="replace"),
+                exc.stderr.decode(errors="replace"),
             )
             raise
 
         regex = re.compile(r"@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@.*")
         current_file = None
         res = defaultdict(set)
-        for diff_line in output.decode("utf-8").split("\n"):
+        for diff_line in output.decode("utf-8", errors="replace").splitlines():
             if diff_line.startswith("@@"):
                 m = regex.match(diff_line)
                 if m is None:
