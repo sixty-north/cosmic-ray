@@ -1,25 +1,73 @@
 #!/usr/bin/env python3
-"""Bump, tag, and push a Cosmic Ray release."""
+"""Compute, tag, and optionally push a Cosmic Ray release."""
 
 from __future__ import annotations
 
 import argparse
+import re
 import shutil
 import subprocess
 import sys
+from dataclasses import dataclass
+
+RELEASE_TAG_RE = re.compile(r"^release/v(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)$")
+RUN_VERBOSE = True
+
+
+@dataclass(frozen=True, order=True)
+class SemVer:
+    major: int
+    minor: int
+    patch: int
+
+    @classmethod
+    def parse(cls, value: str) -> SemVer:
+        match = re.fullmatch(r"(\d+)\.(\d+)\.(\d+)", value)
+        if match is None:
+            fail(f"invalid semantic version: {value!r} (expected MAJOR.MINOR.PATCH)")
+        return cls(*(int(group) for group in match.groups()))
+
+    @classmethod
+    def from_release_tag(cls, value: str) -> SemVer | None:
+        match = RELEASE_TAG_RE.fullmatch(value)
+        if match is None:
+            return None
+        return cls(
+            int(match.group("major")),
+            int(match.group("minor")),
+            int(match.group("patch")),
+        )
+
+    def bump(self, part: str) -> SemVer:
+        if part == "major":
+            return SemVer(self.major + 1, 0, 0)
+        if part == "minor":
+            return SemVer(self.major, self.minor + 1, 0)
+        if part == "patch":
+            return SemVer(self.major, self.minor, self.patch + 1)
+        fail(f"unknown version component: {part!r}")
+        raise AssertionError("unreachable")
+
+    def release_tag(self) -> str:
+        return f"release/v{self}"
+
+    def __str__(self) -> str:
+        return f"{self.major}.{self.minor}.{self.patch}"
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("part", choices=("major", "minor", "patch"), help="Version component to bump.")
-    parser.add_argument("--remote", default="origin", help="Remote name to push to.")
+    parser.add_argument("--remote", default="origin", help="Remote name for tag checks and push.")
     parser.add_argument(
-        "--push-ref",
-        help="Remote branch ref to push HEAD to (required if HEAD is detached).",
+        "--from-ref",
+        default="HEAD",
+        help="Git ref to tag. Defaults to HEAD.",
     )
     parser.add_argument(
-        "--branch",
-        help="Expected current branch. If provided and different from HEAD, the release is aborted.",
+        "--base-version",
+        default="0.0.0",
+        help="Version to use when no release tags exist.",
     )
     parser.add_argument(
         "--allow-dirty",
@@ -34,7 +82,17 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--dry-run",
         action="store_true",
-        help="Print actions and validations without changing files, creating tags, or pushing.",
+        help="Print actions and validations without creating or pushing tags.",
+    )
+    parser.add_argument(
+        "--no-push",
+        action="store_true",
+        help="Create the tag locally without pushing it.",
+    )
+    parser.add_argument(
+        "--next-version-only",
+        action="store_true",
+        help="Print the computed next version and exit.",
     )
     return parser.parse_args()
 
@@ -51,7 +109,8 @@ def run(
     mutates: bool = False,
 ) -> str:
     command = " ".join(args)
-    print(f"+ {command}")
+    if RUN_VERBOSE:
+        print(f"+ {command}")
     if dry_run and mutates:
         return ""
 
@@ -88,14 +147,40 @@ def ensure_clean_worktree() -> None:
         fail("git working tree is not clean")
 
 
-def current_branch() -> str:
-    return run("git", "branch", "--show-current", capture_output=True)
-
-
-def ensure_remote_exists(remote: str) -> None:
+def remote_exists(remote: str) -> bool:
     remotes = run("git", "remote", capture_output=True).splitlines()
-    if remote not in remotes:
-        fail(f"remote {remote!r} does not exist")
+    return remote in remotes
+
+
+def parse_remote_tag_line(line: str) -> str | None:
+    # git ls-remote --tags --refs output is "<sha>\trefs/tags/<tag-name>"
+    parts = line.split("\t", 1)
+    if len(parts) != 2:
+        return None
+    ref = parts[1]
+    if not ref.startswith("refs/tags/"):
+        return None
+    return ref.removeprefix("refs/tags/")
+
+
+def all_release_versions(remote: str | None) -> list[SemVer]:
+    tags = run("git", "tag", "--list", "release/v*", capture_output=True).splitlines()
+    versions = [v for v in (SemVer.from_release_tag(tag) for tag in tags) if v is not None]
+
+    if remote is not None:
+        remote_lines = run(
+            "git",
+            "ls-remote",
+            "--tags",
+            "--refs",
+            remote,
+            "refs/tags/release/v*",
+            capture_output=True,
+        ).splitlines()
+        remote_tags = [tag for tag in (parse_remote_tag_line(line) for line in remote_lines) if tag is not None]
+        versions.extend(v for v in (SemVer.from_release_tag(tag) for tag in remote_tags) if v is not None)
+
+    return versions
 
 
 def ensure_no_existing_tag(tag: str) -> None:
@@ -106,7 +191,7 @@ def ensure_no_existing_tag(tag: str) -> None:
 
 def ensure_no_existing_remote_tag(remote: str, tag: str) -> None:
     remote_result = subprocess.run(
-        ["git", "ls-remote", "--exit-code", "--tags", remote, f"refs/tags/{tag}"],
+        ["git", "ls-remote", "--exit-code", "--tags", "--refs", remote, f"refs/tags/{tag}"],
         check=False,
         capture_output=True,
         text=True,
@@ -127,37 +212,39 @@ def confirm(prompt: str) -> bool:
 
 
 def main() -> None:
+    global RUN_VERBOSE
     args = parse_args()
+    RUN_VERBOSE = not args.next_version_only
 
     ensure_tool("git")
-    ensure_tool("uv")
     ensure_git_repo()
-    ensure_remote_exists(args.remote)
 
-    branch = current_branch()
-    if args.branch and branch != args.branch:
-        fail(f"current branch is {branch!r}, expected {args.branch!r}")
-
-    push_ref = args.push_ref or branch
-    if not push_ref:
-        fail("detached HEAD detected; pass --push-ref to specify which remote branch to update")
+    has_remote = remote_exists(args.remote)
+    if not has_remote and not args.no_push:
+        fail(f"remote {args.remote!r} does not exist")
 
     if not args.allow_dirty:
         ensure_clean_worktree()
 
-    current = run("uv", "version", "--short", capture_output=True)
-    new = run("uv", "version", "--bump", args.part, "--dry-run", "--short", capture_output=True)
-    tag = f"release/v{new}"
+    base_version = SemVer.parse(args.base_version)
+    latest = max(all_release_versions(args.remote if has_remote else None), default=base_version)
+    new = latest.bump(args.part)
+    tag = new.release_tag()
 
     ensure_no_existing_tag(tag)
-    ensure_no_existing_remote_tag(args.remote, tag)
+    if has_remote:
+        ensure_no_existing_remote_tag(args.remote, tag)
+
+    if args.next_version_only:
+        print(new)
+        return
 
     print(
         f"Prepared release:\n"
-        f"  branch: {branch or '(detached HEAD)'}\n"
-        f"  push ref: {push_ref}\n"
+        f"  from ref: {args.from_ref}\n"
         f"  remote: {args.remote}\n"
-        f"  current version: {current}\n"
+        f"  push tag: {not args.no_push}\n"
+        f"  latest version: {latest}\n"
         f"  new version: {new}\n"
         f"  tag: {tag}"
     )
@@ -166,17 +253,16 @@ def main() -> None:
         print("Dry-run mode: no changes were made.")
         return
 
-    if not args.yes and not confirm("Continue with release?"):
+    if not args.yes and not confirm("Continue with release tag creation?"):
         fail("release aborted by user", code=2)
 
-    run("uv", "version", "--bump", args.part, mutates=True)
-    run("git", "add", "pyproject.toml", mutates=True)
-    run("git", "commit", "-m", f"Release v{new}", mutates=True)
-    run("git", "tag", "-a", tag, "-m", f"Release v{new}", mutates=True)
-    run("git", "push", args.remote, f"HEAD:{push_ref}", mutates=True)
-    run("git", "push", args.remote, tag, mutates=True)
+    run("git", "tag", "-a", tag, args.from_ref, "-m", f"Release v{new}", mutates=True)
+    if not args.no_push:
+        run("git", "push", args.remote, tag, mutates=True)
 
-    print("Release push complete. Tag-triggered publish workflow should start on GitHub Actions.")
+    print("Release tag creation complete.")
+    if args.no_push:
+        print(f"To push later: git push {args.remote} {tag}")
 
 
 if __name__ == "__main__":
