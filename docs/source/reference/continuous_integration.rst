@@ -55,6 +55,27 @@ Outside a release tag, development builds use VCS-derived versions from
 ``hatch-vcs``/``setuptools-scm`` (for example ``8.5.1.dev3+g<hash>``), making
 it obvious the build is not a final release.
 
+Changelog with git-cliff
+------------------------
+
+Changelog generation is based on ``git-cliff`` and Conventional Commits.
+
+Configuration lives in ``cliff.toml`` and is tuned for release tags named
+``release/vX.Y.Z``.
+
+Typical usage:
+
+.. code-block:: bash
+
+   # Generate or refresh the full changelog from tags/commits
+   git cliff --config cliff.toml -o CHANGELOG.md
+
+   # Preview unreleased notes without writing to disk
+   git cliff --config cliff.toml --unreleased
+
+Conventional commit types such as ``feat`` and ``fix`` are grouped into changelog
+sections (Added, Fixed, and so on). Non-conventional commits are filtered out.
+
 Releasing from historical commits
 ---------------------------------
 

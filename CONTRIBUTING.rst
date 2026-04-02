@@ -44,20 +44,21 @@ Making Changes
   although we accept that much of what is in PEP 8 are guidelines
   rather than rules, so we value readability over strict compliance.
 * Check for unnecessary whitespace with ``git diff --check`` before committing.
-* Make sure your commit messages are in the proper format::
+* Make sure your commit messages use Conventional Commits::
 
 
-    Issue #1234 - Make the example in CONTRIBUTING imperative and concrete
+    fix(git-filter): handle binary files
 
-    Without this patch applied the example commit message in the CONTRIBUTING
-    document is not a concrete example.  This is a problem because the
-    contributor is left to imagine what the commit message should look like
-    based on a description rather than an example.  This patch fixes the
-    problem by making the example concrete and imperative.
+    Git filtering failed when a repository contained non-text files.
+    Skip binary files so filtering behaves consistently.
 
-    The first line is a real life imperative statement with an issue number
-    from our issue tracker.  The body describes the behavior without the patch,
-    why this is a problem, and how the patch fixes the problem when applied.
+    Refs: #582
+
+  The first line should use ``<type>(<optional-scope>): <subject>`` where
+  ``type`` is typically one of ``feat``, ``fix``, ``refactor``, ``perf``,
+  ``docs``, ``test``, or ``chore``.
+* For breaking changes, use either ``!`` in the type/scope (for example
+  ``feat(api)!: ...``) or include a ``BREAKING CHANGE: ...`` footer.
 
 
 * Make sure you have added the necessary tests for your changes.
@@ -70,20 +71,10 @@ Documentation
 -------------
 
 For changes of a trivial nature to comments and documentation, it is not
-always necessary to create a new issue. In this case, it is appropriate
-to start the first line of a commit with 'Doc -' instead of an issue
-number::
+always necessary to create a new issue. In this case, use a Conventional
+Commit with type ``docs``::
 
-    Doc - Add documentation commit example to CONTRIBUTING
-
-    There is no example for contributing a documentation commit
-    to the Cosmic Ray repository. This is a problem because the contributor
-    is left to assume how a commit of this nature may appear.
-
-    The first line is a real life imperative statement with 'Doc -' in
-    place of what would have been the ticket number in a
-    non-documentation related commit. The body describes the nature of
-    the new documentation or comments added.
+    docs(contributing): clarify commit message examples
 
 Submitting Changes
 ==================
