@@ -35,7 +35,6 @@ dependencies = [
   "exit_codes",
   "gitpython",
   "parso",
-  "qprompt",
   "rich",
   "sqlalchemy",
   "stevedore",
