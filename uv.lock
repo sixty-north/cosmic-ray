@@ -407,7 +407,6 @@ wheels = [
 
 [[package]]
 name = "cosmic-ray"
-version = "8.4.3"
 source = { editable = "." }
 dependencies = [
     { name = "aiohttp" },

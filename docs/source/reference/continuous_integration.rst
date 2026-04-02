@@ -13,17 +13,19 @@ Release publishing is tag-driven:
 1. Create and push a tag with the ``release/`` prefix (for example
    ``release/v8.5.0``).
 2. GitHub Actions detects the tag and runs the publish job.
-3. The publish job builds distributions and uploads them to PyPI.
+3. The publish job builds distributions and uploads them to PyPI. Version
+   metadata comes from the Git tag through ``hatch-vcs``.
 
 Releasing a new version
 =======================
 
-Releases now use ``uv version`` instead of ``bump-my-version``.
+Releases use dynamic VCS-based versioning. ``pyproject.toml`` does not contain
+a static ``project.version`` value.
 
 Option 1: Use the helper script
 -------------------------------
 
-From a clean working tree on the branch you want to release:
+From a clean working tree on the commit you want to release:
 
 .. code-block:: bash
 
@@ -32,26 +34,32 @@ From a clean working tree on the branch you want to release:
 This script:
 
 1. Verifies preconditions (git repository, clean tree, existing remote).
-2. Bumps the version in ``pyproject.toml`` using ``uv version --bump``.
-3. Creates a commit.
-4. Creates an annotated tag named ``release/vX.Y.Z``.
-5. Pushes the branch and tag to the configured remote.
+2. Finds the latest ``release/vX.Y.Z`` tag.
+3. Computes the next semantic version from the requested bump component.
+4. Creates an annotated tag named ``release/vX.Y.Z`` at the selected ref.
+5. Pushes the tag to the configured remote.
 
 Use ``tools/release.py --help`` for options such as ``--dry-run``,
-``--branch``, ``--push-ref``, and ``--remote``.
+``--from-ref``, ``--next-version-only``, ``--no-push``, and ``--remote``.
 
 Option 2: Run commands manually
 -------------------------------
 
 .. code-block:: bash
 
-   uv version --bump patch
-   VERSION="$(uv version --short)"
-   git add pyproject.toml
-   git commit -m "Release v${VERSION}"
+   VERSION=8.5.0
    git tag -a "release/v${VERSION}" -m "Release v${VERSION}"
-   git push origin "HEAD:$(git branch --show-current)"
    git push origin "release/v${VERSION}"
+
+Version metadata for sdist/wheel is then derived from the release tag during
+the build.
+
+Development versions
+--------------------
+
+Outside a release tag, development builds use VCS-derived versions from
+``hatch-vcs``/``setuptools-scm`` (for example ``8.5.1.dev3+g<hash>``), making
+it obvious the build is not a final release.
 
 Releasing from historical commits
 ---------------------------------
