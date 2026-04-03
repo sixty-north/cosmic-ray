@@ -52,6 +52,7 @@ cr-xml = "cosmic_ray.tools.xml:report_xml"
 cr-filter-operators = "cosmic_ray.tools.filters.operators_filter:main"
 cr-filter-pragma = "cosmic_ray.tools.filters.pragma_no_mutate:main"
 cr-filter-git = "cosmic_ray.tools.filters.git:main"
+cr-filter-lines = "cosmic_ray.tools.filters.line_filter:main"
 cr-http-workers = "cosmic_ray.tools.http_workers:main"
 
 [project.entry-points."cosmic_ray.operator_providers"]
