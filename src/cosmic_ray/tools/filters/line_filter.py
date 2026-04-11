@@ -21,12 +21,10 @@ class LineFilter(FilterApp):
         return __doc__
 
     def add_args(self, parser):
-        parser.add_argument("--config", help="Config file to use")
+        parser.add_argument("--config", required=True, help="Config file to use")
 
     def filter(self, work_db: WorkDB, args: Namespace):
-        config = ConfigDict()
-        if args.config is not None:
-            config = load_config(args.config)
+        config = load_config(args.config)
 
         module_path = config.get("module-path", "")
 
