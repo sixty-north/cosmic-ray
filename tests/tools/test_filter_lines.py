@@ -106,7 +106,7 @@ class FakeWorkDB:
     def set_multiple_results(self, job_ids, work_result: WorkResult):
         for job_id in job_ids:
             self.results.append((job_id, work_result.worker_outcome))
-            
+
 
 def test_line_filter_skips_items_outside_configured_ranges():
     data = FakeWorkDB()
@@ -122,8 +122,8 @@ def test_line_filter_skips_items_outside_configured_ranges():
         ("id4", WorkerOutcome.SKIPPED),
         ("id5", WorkerOutcome.SKIPPED),
     ]
-    
-    
+
+
 def test_line_filter_skips_all_items_when_no_files_are_configured():
     data = FakeWorkDB()
     parsed_files = {}
@@ -151,6 +151,7 @@ def test_line_filter_keeps_all_items_when_all_ranges_match():
 
     assert data.results == []
 
+
 def test_line_filter_supports_multiple_ranges_for_same_file():
     data = FakeWorkDB()
     parsed_files = {
@@ -163,6 +164,7 @@ def test_line_filter_supports_multiple_ranges_for_same_file():
     assert data.results == [
         ("id5", WorkerOutcome.SKIPPED),
     ]
+
 
 def test_line_filter_supports_multiple_files():
     data = FakeWorkDB()
@@ -178,6 +180,7 @@ def test_line_filter_supports_multiple_files():
         ("id4", WorkerOutcome.SKIPPED),
         ("id5", WorkerOutcome.SKIPPED),
     ]
+
 
 def test_ranges_overlap_returns_true_when_mutation_overlaps_range():
     result = line_filter.LineFilter()._ranges_overlap(3, 5, [(1, 4)])

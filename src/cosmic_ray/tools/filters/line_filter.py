@@ -110,10 +110,10 @@ class LineFilter(FilterApp):
 
         for file_key, specs in files.items():
             file_path = self._resolve_module_path(file_key, module_path_cfg)
-            
+
             if file_path is None:
                 continue
-            
+
             parsed[file_path] = self._parse_line_specs(specs)
 
         return parsed
