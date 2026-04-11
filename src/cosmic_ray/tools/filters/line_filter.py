@@ -81,10 +81,28 @@ class LineFilter(FilterApp):
         return normalized_lines_cfg
 
     def _resolve_module_path(self, file_key, module_path_cfg):
-        base = Path(module_path_cfg) if module_path_cfg else None
         file_path = Path(file_key)
 
-        if not file_path.is_absolute() and base is not None:
+        if not module_path_cfg:
+            return file_path
+
+        base = Path(module_path_cfg)
+
+        if base.suffix:
+            if file_path.is_absolute():
+                return file_path
+
+            if file_path == base or file_path == Path(base.name):
+                return base
+
+            log.warning(
+                "line-filter: config file key %r does not match single-file module-path %r; ignoring this entry",
+                file_key,
+                module_path_cfg,
+            )
+            return None
+
+        if not file_path.is_absolute():
             file_path = base / file_path
 
         return file_path
@@ -94,6 +112,10 @@ class LineFilter(FilterApp):
 
         for file_key, specs in files.items():
             file_path = self._resolve_module_path(file_key, module_path_cfg)
+            
+            if file_path is None:
+                continue
+            
             parsed[file_path] = self._parse_line_specs(specs)
 
         return parsed
