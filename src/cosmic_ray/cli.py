@@ -114,12 +114,21 @@ def init(config_file, session_file, force):
 @cli.command(name="exec")
 @click.argument("config_file")
 @click.argument("session_file")
-def handle_exec(config_file, session_file):
+@click.option(
+    "--verbosity",
+    required=False,
+    help="The logging level to use.",
+    type=click.Choice(["CRITICAL", "DEBUG", "ERROR", "FATAL", "INFO", "WARNING"], case_sensitive=True),
+)
+def handle_exec(config_file, session_file, verbosity):
     """Perform the remaining work to be done in the specified session.
     This requires that the rest of your mutation testing
     infrastructure (e.g. worker processes) are already running.
     """
     cfg = load_config(config_file)
+    
+    if verbosity:
+        log.setLevel(verbosity)
 
     with use_db(session_file, mode=WorkDB.Mode.open) as work_db:
         cosmic_ray.commands.execute(work_db, cfg)
