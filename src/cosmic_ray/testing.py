@@ -3,12 +3,25 @@
 import logging
 import os
 import shlex
+import signal
 import subprocess
 import traceback
 
 from cosmic_ray.work_item import TestOutcome
 
 log = logging.getLogger(__name__)
+
+
+def _kill_process_group(proc):
+    """Kill the whole process group led by `proc`, falling back to just `proc`.
+
+    `os.killpg` is not available on all platforms, and the group may already be gone.
+    """
+    try:
+        os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+    except (AttributeError, OSError):
+        proc.kill()
+
 
 # We use an asyncio-subprocess-based approach here instead of a simple
 # subprocess.run()-based approach because there are problems with timeouts and
@@ -43,15 +56,27 @@ def run_tests(command, timeout):
     env["PYTHONDONTWRITEBYTECODE"] = "1"
 
     try:
-        proc = subprocess.run(shlex.split(command), check=True, env=env, timeout=timeout, capture_output=True)
-        assert proc.returncode == 0
-        return (TestOutcome.SURVIVED, proc.stdout.decode("utf-8"))
+        # `start_new_session` puts the test command in its own process group so that a
+        # timeout can kill the whole group. Without it only the immediate child is
+        # killed, and any process it spawned keeps running unsupervised.
+        proc = subprocess.Popen(  # pylint: disable=R1732
+            shlex.split(command),
+            env=env,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            start_new_session=True,
+        )
+        try:
+            stdout, _ = proc.communicate(timeout=timeout)
+        except subprocess.TimeoutExpired:
+            _kill_process_group(proc)
+            proc.communicate()
+            return (TestOutcome.KILLED, "timeout")
 
-    except subprocess.CalledProcessError as err:
-        return (TestOutcome.KILLED, err.output.decode("utf-8"))
+        if proc.returncode != 0:
+            return (TestOutcome.KILLED, stdout.decode("utf-8"))
 
-    except subprocess.TimeoutExpired:
-        return (TestOutcome.KILLED, "timeout")
+        return (TestOutcome.SURVIVED, stdout.decode("utf-8"))
 
     except Exception:  # pylint: disable=W0703
         return (TestOutcome.INCOMPETENT, traceback.format_exc())
