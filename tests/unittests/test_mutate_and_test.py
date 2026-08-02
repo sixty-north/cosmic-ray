@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from cosmic_ray.mutating import mutate_and_test
+from cosmic_ray.mutating import _make_diff, mutate_and_test
 from cosmic_ray.work_item import MutationSpec, WorkResult, WorkerOutcome
 
 
@@ -32,30 +32,15 @@ def test_no_test_return_value(path_utils, data_dir):
         assert result == expected
 
 
-def test_private_make_diff(path_utils):
-    current_path = Path.cwd()
-    example_folder = current_path.joinpath("tests/resources/example_project/adam")
+def test_private_make_diff():
+    result = _make_diff("return True\n", "return False\n", Path("adam_1.py"))
 
-    with path_utils.excursion(example_folder):
-        result = mutate_and_test(
-            [
-                MutationSpec(
-                    Path("adam_1.py"),
-                    "core/ReplaceTrueWithFalse",
-                    1,
-                    # TODO: As in other places, these are placeholder position values. How can we not have to provide them?
-                    (0, 0),
-                    (0, 1),
-                )
-            ],
-            "python -m pytest tests",
-            1000,
-        )
-
-        expected = WorkResult(
-            output="",
-            test_outcome="killed",
-            diff='--- mutation diff ---\n--- a/adam_1.py\n+++ b/adam_1.py\n@@ -33,7 +33,7 @@\n \n def bool_if():\n     if object():\n-        return True\n+        return False\n \n     raise Exception("bool_if() failed")\n ',
-            worker_outcome=WorkerOutcome.NORMAL,
-        )
-        assert result == expected
+    assert result == [
+        "--- mutation diff ---",
+        "--- a/adam_1.py",
+        "+++ b/adam_1.py",
+        "@@ -1,2 +1,2 @@",
+        "-return True",
+        "+return False",
+        " ",
+    ]
