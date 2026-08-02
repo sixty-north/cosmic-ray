@@ -2,35 +2,87 @@
  Continuous Integration
 ========================
 
-Cosmic Ray has a continuous integration system based on `Travis
-<https://travis-ci.org>`__. Whenever we push new changes to our github
-repository, travis runs a set of tests. These :doc:`tests <tests>` include
-low-level unit tests, end-to-end integration tests, static analysis (e.g.
-linting), and testing documentation builds. Generally speaking, these tests are
-run on all versions of Python which we support.
+Cosmic Ray uses GitHub Actions for continuous integration and release
+automation.
 
-Automated release deployment
-============================
+On every push and pull request, the ``Run tests`` workflow runs linting and
+tests across supported Python versions.
 
-Cosmic Ray also has an automated release deployment scheme. Whenever you push
-changes to `the release
-branch <https://github.com/sixty-north/cosmic-ray/tree/release>`__, travis attempts
-to make a new release. This process involves determining the release version by
-reading ``cosmic_ray/version.py``, creating and uploading PyPI distributions, and
-creating new release tags in git.
+Release publishing is managed by the manually triggered ``release`` workflow:
+
+1. Select a ref (branch/tag/SHA) and bump component (major/minor/patch).
+2. The workflow computes the next ``release/vX.Y.Z`` tag.
+3. It checks out the selected commit and computes release metadata.
+4. It creates/pushes the tag, builds distributions, and uploads them to PyPI.
+5. It generates GitHub Release notes using ``git-cliff`` from commits since the
+   previous release tag.
+6. Version metadata comes from the release tag through ``hatch-vcs``.
 
 Releasing a new version
------------------------
+=======================
 
-As described above, the release process for Cosmic Ray is largely automatic. In
-order to do a new release, you simply need to:
+Releases use dynamic VCS-based versioning. ``pyproject.toml`` does not contain a
+static ``project.version`` value.
 
-1. Bump the version with `bumpversion`.
-2. Push it to ``master`` on github.
-3. Push the changes to the ``release`` branch on github.
+Option 1: Use GitHub Actions (recommended)
+------------------------------------------
 
-Once the push is made to ``release``, the automated release system will take over.
+From the GitHub UI, run the ``release`` workflow manually:
 
-Note that only the Python 3.6 travis build will attempt to make a release
-deployment. So to see the progress of your release, check the output for that
-build.
+1. Open the ``release`` workflow.
+2. Choose ``part`` (``patch``, ``minor``, or ``major``).
+3. Choose ``ref`` (defaults to ``master``).
+4. Start the workflow.
+
+The workflow computes the next release tag automatically and publishes from the
+selected release ref.
+
+Option 2: Use the helper script (local/manual fallback)
+-------------------------------------------------------
+
+From a clean working tree on the commit you want to release:
+
+.. code-block:: bash
+
+   tools/release.py patch
+
+Use ``tools/release.py --help`` for options such as ``--dry-run``,
+``--from-ref``, ``--next-version-only``, ``--no-push``, and ``--remote``.
+
+Development versions
+--------------------
+
+Outside a release tag, development builds use VCS-derived versions from
+``hatch-vcs``/``setuptools-scm`` (for example ``8.5.1.dev3+g<hash>``), making
+it obvious the build is not a final release.
+
+Changelog with git-cliff
+------------------------
+
+Changelog generation is based on ``git-cliff`` and Conventional Commits.
+
+Configuration lives in ``cliff.toml`` and is tuned for release tags named
+``release/vX.Y.Z``.
+
+Typical usage:
+
+.. code-block:: bash
+
+   # Generate or refresh a local changelog from tags/commits
+   git cliff --config cliff.toml -o CHANGELOG.md
+
+   # Preview unreleased notes without writing to disk
+   git cliff --config cliff.toml --unreleased
+
+The release workflow uses ``git-cliff --latest --strip header`` to generate the
+GitHub Release body directly during CI; no changelog commit is created.
+
+Conventional commit types such as ``feat`` and ``fix`` are grouped into changelog
+sections (Added, Fixed, and so on). Non-conventional commits are filtered out.
+
+Releasing from historical commits
+---------------------------------
+
+GitHub manual workflow dispatch runs on branch or tag refs, not arbitrary commit
+SHAs. To release from a historical point, create a branch at that commit first,
+then run the normal release process from that branch.

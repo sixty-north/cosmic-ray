@@ -1,6 +1,6 @@
 [build-system]
-requires = ['setuptools']
-build-backend = 'setuptools.build_meta'
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
 
 [project]
 name = "cosmic_ray"
@@ -35,7 +35,6 @@ dependencies = [
   "exit_codes",
   "gitpython",
   "parso",
-  "qprompt",
   "rich",
   "sqlalchemy",
   "stevedore",
@@ -53,6 +52,7 @@ cr-xml = "cosmic_ray.tools.xml:report_xml"
 cr-filter-operators = "cosmic_ray.tools.filters.operators_filter:main"
 cr-filter-pragma = "cosmic_ray.tools.filters.pragma_no_mutate:main"
 cr-filter-git = "cosmic_ray.tools.filters.git:main"
+cr-filter-lines = "cosmic_ray.tools.filters.line_filter:main"
 cr-http-workers = "cosmic_ray.tools.http_workers:main"
 
 [project.entry-points."cosmic_ray.operator_providers"]
@@ -67,10 +67,10 @@ repository = "https://github.com/sixty-north/cosmic-ray"
 
 [dependency-groups]
 dev = [
-  "bump-my-version",
   "hypothesis",
   "nox",
   "pytest",
+  "pytest-cov>=7.1.0",
   "ruff",
   "sphinx",
   "sphinx-click>=6.0.0",
@@ -80,25 +80,22 @@ dev = [
 [[tool.uv.index]]
 url = "https://pypi.org/simple"
 
-[tool.setuptools.packages.find]
-where = ["src"]
+[tool.hatch.version]
+source = "vcs"
+tag-pattern = "^release/v(?P<version>.*)$"
 
-[tool.setuptools.dynamic]
-version = { attr = "cosmic_ray.version.__version__" }
+[tool.hatch.build]
+exclude = [
+  "/.git",
+  "/.jj",
+  "/.venv",
+  "/.pytest_cache",
+  "/.ruff_cache",
+  "/.uv-cache",
+]
 
-
-[tool.bumpversion]
-current_version = "8.4.3"
-parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)"
-serialize = ["{major}.{minor}.{patch}"]
-tag = true
-commit = true
-message = "Bump version: {current_version} → {new_version}"
-tag_name = "release/v{new_version}"
-tag_message = "Bump version: {current_version} → {new_version}"
-
-[[tool.bumpversion.files]]
-filename = "src/cosmic_ray/version.py"
+[tool.hatch.build.targets.wheel]
+packages = ["src/cosmic_ray"]
 
 [tool.ruff]
 line-length = 120

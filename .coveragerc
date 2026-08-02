@@ -7,7 +7,7 @@ branch = True
 disable_warnings = include-ignored
 
 [report]
-include = cosmic_ray/*,test/*
+include = src/cosmic_ray/*,tests/*
 exclude_lines =
     raise NotImplementedError
     pragma: no cover

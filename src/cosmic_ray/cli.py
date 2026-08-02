@@ -12,10 +12,11 @@ import sys
 import tempfile
 from collections import defaultdict
 from contextlib import contextmanager, redirect_stdout
+from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 
 import click
-from attrs import asdict as attrs_asdict
+from attrs import asdict
 from exit_codes import ExitCode
 from rich.logging import RichHandler
 
@@ -27,11 +28,15 @@ import cosmic_ray.plugins
 from cosmic_ray.config import load_config, serialize_config
 from cosmic_ray.mutating import apply_mutation
 from cosmic_ray.progress import report_progress
-from cosmic_ray.version import __version__
 from cosmic_ray.work_db import WorkDB, use_db
 from cosmic_ray.work_item import MutationSpec, TestOutcome, WorkItem
 
 log = logging.getLogger()
+
+try:
+    __version__ = version("cosmic_ray")
+except PackageNotFoundError:
+    __version__ = "unknown"
 
 
 @click.group()
@@ -123,12 +128,21 @@ def init(config_file, session_file, force):
 @cli.command(name="exec")
 @click.argument("config_file")
 @click.argument("session_file")
-def handle_exec(config_file, session_file):
+@click.option(
+    "--verbosity",
+    required=False,
+    help="The logging level to use.",
+    type=click.Choice(["CRITICAL", "DEBUG", "ERROR", "FATAL", "INFO", "WARNING"], case_sensitive=True),
+)
+def handle_exec(config_file, session_file, verbosity):
     """Perform the remaining work to be done in the specified session.
     This requires that the rest of your mutation testing
     infrastructure (e.g. worker processes) are already running.
     """
     cfg = load_config(config_file)
+    
+    if verbosity:
+        log.setLevel(verbosity)
 
     with use_db(session_file, mode=WorkDB.Mode.open) as work_db:
         cosmic_ray.commands.execute(work_db, cfg)
@@ -195,6 +209,18 @@ def dump(session_file):
     WorkResult, both JSON-serialized. The WorkResult can be null, indicating a
     WorkItem with no results.
     """
+
+    def item_to_dict(work_item):
+        d = asdict(work_item)
+        for m in d["mutations"]:
+            m["module_path"] = str(m["module_path"])
+        return d
+
+    def result_to_dict(result):
+        d = asdict(result)
+        d["worker_outcome"] = d["worker_outcome"].value
+        d["test_outcome"] = d["test_outcome"].value
+        return d
 
     with use_db(session_file, WorkDB.Mode.open) as database:
         for work_item, result in database.completed_work_items:

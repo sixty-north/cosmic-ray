@@ -27,8 +27,8 @@ Please see CONTRIBUTING.rst for more details.
    :target: https://www.python.org/
 .. |Python version windows| image:: https://img.shields.io/badge/Python_version_(windows)-3.9+-blue.svg
    :target: https://www.python.org/
-.. |Build Status| image:: https://github.com/sixty-north/cosmic-ray/actions/workflows/python-package.yml/badge.svg
-   :target: https://github.com/sixty-north/cosmic-ray/actions/workflows/python-package.yml
+.. |Build Status| image:: https://github.com/sixty-north/cosmic-ray/actions/workflows/run-tests.yml/badge.svg
+   :target: https://github.com/sixty-north/cosmic-ray/actions/workflows/run-tests.yml
 .. |Code Health| image:: https://landscape.io/github/sixty-north/cosmic-ray/master/landscape.svg?style=flat
    :target: https://landscape.io/github/sixty-north/cosmic-ray/master
 .. |Code Coverage| image:: https://codecov.io/gh/sixty-north/cosmic-ray/branch/master/graph/badge.svg

@@ -30,3 +30,32 @@ def test_no_test_return_value(path_utils, data_dir):
             worker_outcome=WorkerOutcome.NO_TEST,
         )
         assert result == expected
+
+
+def test_private_make_diff(path_utils):
+    current_path = Path.cwd()
+    example_folder = current_path.joinpath("tests/resources/example_project/adam")
+
+    with path_utils.excursion(example_folder):
+        result = mutate_and_test(
+            [
+                MutationSpec(
+                    Path("adam_1.py"),
+                    "core/ReplaceTrueWithFalse",
+                    1,
+                    # TODO: As in other places, these are placeholder position values. How can we not have to provide them?
+                    (0, 0),
+                    (0, 1),
+                )
+            ],
+            "python -m pytest tests",
+            1000,
+        )
+
+        expected = WorkResult(
+            output="",
+            test_outcome="killed",
+            diff='--- mutation diff ---\n--- a/adam_1.py\n+++ b/adam_1.py\n@@ -33,7 +33,7 @@\n \n def bool_if():\n     if object():\n-        return True\n+        return False\n \n     raise Exception("bool_if() failed")\n ',
+            worker_outcome=WorkerOutcome.NORMAL,
+        )
+        assert result == expected

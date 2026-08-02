@@ -36,7 +36,6 @@ class PragmaNoMutateFilter(FilterApp):
 
         for item in work_db.work_items:
             for mutation in item.mutations:
-                print(mutation.module_path)
                 lines = file_contents(mutation.module_path)
                 try:
                     # item.{start,end}_pos[0] seems to be 1-based.

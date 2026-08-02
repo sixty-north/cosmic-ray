@@ -217,8 +217,8 @@ def _make_diff(original_source, mutated_source, module_path):
     for line in difflib.unified_diff(
         original_source.split("\n"),
         mutated_source.split("\n"),
-        fromfile="a" + str(module_path),
-        tofile="b" + str(module_path),
+        fromfile="a/" + str(module_path),
+        tofile="b/" + str(module_path),
         lineterm="",
     ):
         module_diff.append(line)
