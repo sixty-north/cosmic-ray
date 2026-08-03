@@ -54,14 +54,14 @@ def cli(verbosity):
 
 
 def _work_item_to_dict(work_item):
-    data = attrs_asdict(work_item)
+    data = asdict(work_item)
     for mutation in data["mutations"]:
         mutation["module_path"] = str(mutation["module_path"])
     return data
 
 
 def _result_to_dict(result):
-    data = attrs_asdict(result)
+    data = asdict(result)
     data["worker_outcome"] = data["worker_outcome"].value
     if data["test_outcome"] is not None:
         data["test_outcome"] = data["test_outcome"].value
