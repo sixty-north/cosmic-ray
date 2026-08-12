@@ -311,3 +311,155 @@ If ``HttpDistributor`` doesn't meet your needs, Cosmic Ray allows you to write y
 plugin. You might want to write a distributor plugin using `Celery
 <https://docs.celeryproject.org/en/stable/getting-started/introduction.html>`_, for example, to take advantage of its
 sophisticated message bus.
+
+Github Actions
+==============
+
+As free tier workers in Github have access just to 2 CPU cores, using ``cr-http-workers`` to execute the tests in
+parallel isn't really an option. Thankfully, the parallelizm doesn't have to be synchronised in time if
+we partition the work ahead of time.
+
+The following example assumes Github free tier for open source projects, so 2 CPUs per worker and at most
+20 workers active in parallel (at least that's the situation at the beginning of 2024).
+
+We also assume you're familiar with `Github Actions
+<https://docs.github.com/en/actions>`_ (you do use it for CI already, don't you?).
+
+The job needs to be split up into three phases: mutation generation and database sharding, test execution, database
+reconstitution.
+
+Mutation generation and sharding
+--------------------------------
+
+Generate the database as normal:
+
+.. code-block:: bash
+
+   comic-ray init config.toml session.sqlite
+
+Then you have to `shard <https://en.wikipedia.org/wiki/Shard_(database_architecture)>`_ the database into as many
+workers as you will run.
+
+To do that, first create a ``to_del`` table that will work as the sharding ID
+(save the following script `create_to_del.sql``):
+
+.. code-block:: SQL
+
+    CREATE TABLE to_del (job_id VARCHAR NOT NULL, id INTEGER PRIMARY KEY);
+    INSERT INTO to_del SELECT *, ROWID FROM work_items;
+
+And execute it against the created databse:
+
+.. code-block:: bash
+
+   sqlite3 session.sqlite "$(cat create_to_del.sql)"
+
+For sharding, we will use the ``id`` column to drop work items not matching
+the worker number. For that use a script like so (save it as ``shard-db.sql``):
+
+.. code-block:: SQL
+
+   DELETE FROM mutation_specs WHERE job_id IN (SELECT job_id FROM to_del WHERE to_del.ID % 20 != %SHARD%);
+   DELETE FROM work_items WHERE job_id IN (SELECT job_id FROM to_del WHERE to_del.ID % 20 != %SHARD%);
+   DROP TABLE to_del;
+
+Then create as many copies of the database as there are workers (20 in
+this example) and drop values non matching given worker:
+
+.. code-block:: bash
+
+   mkdir sessions
+   for i in $(seq 0 19); do
+     sed "s/%SHARD%/$i/" < shard-db.sql > shard.sql
+     cp session.sqlite sessions/session-$i.sqlite
+     sqlite3 sessions/session-$i.sqlite "$(cat shard.sql)"
+   done
+
+To copy the sessions between workers use the ``cache`` action:
+
+.. code-block::
+
+   - name: Save session objects
+     uses: actions/cache@v3
+     with:
+       path: |
+         sessions/
+       key: sessions-${{ github.sha }}
+
+(Use cache as saving and restoring from cache is faster than
+artifact upload/download.)
+
+Test execution
+--------------
+
+In job that executes the mutations, create workers using ``matrix`` strategy.
+If you name the runs ``0`` to ``19``, you can select which session to run with simple copy:
+
+.. code-block:: bash
+
+   cp sessions/session-${{ matrix.name }}.sqlite session.sqlite
+
+Then either execute it normally, or execute it in background and kill
+the process after few minutes.
+
+The resulting database can be copied to the final job using a cache too:
+
+.. code-block::
+
+   - name: Session done objects
+     uses: actions/cache@v3
+     with:
+       path: |
+         sessions-done/session-${{ matrix.name }}-done.sqlite
+       key: sessions-${{ github.sha }}-${{ matrix.name }}-done
+
+Database reconstruction and analysis
+------------------------------------
+
+To download all processed databases you'll unfortunately have to define steps to download each sqlite
+file separately:
+
+.. code-block::
+
+   - name: Session done objects
+     uses: actions/cache@v3
+     with:
+       path: |
+         sessions-done/session-0-done.sqlite
+       key: sessions-${{ github.sha }}-0-done
+   - name: Session done objects
+     uses: actions/cache@v3
+     with:
+       path: |
+         sessions-done/session-1-done.sqlite
+       key: sessions-${{ github.sha }}-1-done
+    ...
+
+The files can be combined using the following ``combine.sql`` SQL script:
+
+.. code-block:: SQL
+
+   ATTACH 'session-to_merge.sqlite' AS toMerge;
+   BEGIN;
+       INSERT INTO work_items SELECT * FROM toMerge.work_items;
+       INSERT INTO mutation_specs SELECT * FROM toMerge.mutation_specs;
+       INSERT INTO work_results SELECT * FROM toMerge.work_results;
+   COMMIT;
+   DETACH toMerge;
+
+and the following bash script:
+
+.. code-block:: bash
+
+   cp sessions-done/session-0-done.sqlite session.sqlite
+   for i in $(seq 1 19); do
+       cp sessions-done/session-$i-done.sqlite session-to_merge.sqlite && sqlite3 session.sqlite "$(cat sql/combine.sql)"
+   done
+
+Finally, you can use ``cr-rate`` to check if the survival rate hasn't risen too high, for example using
+
+.. code-block:: bash
+
+   cr-rate --estimate --fail-over 20 --confidence 99.9 session.sqlite
+
+To fail the CI job if the survival rate has risen to over 20%.
