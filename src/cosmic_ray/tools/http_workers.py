@@ -56,7 +56,7 @@ async def run(config_file, repo_url, location):
 @click.option("--location", default="", help="The relative path under a repo clone at which to run the worker")
 def main(config_file, repo_url, location):
     logging.basicConfig(level=logging.INFO)
-    asyncio.get_event_loop().run_until_complete(run(config_file, repo_url, location))
+    asyncio.run(run(config_file, repo_url, location))
 
 
 @contextlib.contextmanager
