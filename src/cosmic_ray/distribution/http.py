@@ -117,7 +117,10 @@ async def send_request(url, work_item: WorkItem, test_command, timeout):
         "timeout": timeout,
     }
     log.info("Sending HTTP request to %s", url)
-    async with aiohttp.request("POST", url, json=parameters) as resp:
+    # Allow mutation setup, source restoration, and result delivery beyond the
+    # worker's test deadline, while still bounding an unresponsive worker.
+    request_timeout = aiohttp.ClientTimeout(total=timeout + 60, connect=30)
+    async with aiohttp.request("POST", url, json=parameters, timeout=request_timeout) as resp:
         result = await resp.json()
         # TODO: Account for possibility that `data` is the wrong shape.
         return WorkResult(
