@@ -13,28 +13,41 @@ class ExceptionReplacer(Operator):
     def mutation_positions(self, node):
         if isinstance(node, PythonNode):
             if node.type == "except_clause":
-                for name in self._name_nodes(node):
-                    yield (name.start_pos, name.end_pos)
+                for expression in self._exception_expressions(node):
+                    yield (expression.start_pos, expression.end_pos)
 
     def mutate(self, node, index):
         assert isinstance(node, PythonNode)
         assert node.type == "except_clause"
 
-        name_nodes = self._name_nodes(node)
-        assert index < len(name_nodes)
-        name_nodes[index].value = CosmicRayTestingException.__name__
+        expressions = self._exception_expressions(node)
+        assert index < len(expressions)
+        expression = expressions[index]
+        if isinstance(expression, Name):
+            expression.value = CosmicRayTestingException.__name__
+            return node
+
+        replacement = Name(
+            CosmicRayTestingException.__name__,
+            expression.start_pos,
+            prefix=expression.get_first_leaf().prefix,
+        )
+        parent = expression.parent
+        assert parent is not None
+        parent.children[parent.children.index(expression)] = replacement
+        replacement.parent = parent
         return node
 
     @staticmethod
-    def _name_nodes(node):
-        if isinstance(node.children[1], Name):
-            return (node.children[1],)
+    def _exception_expressions(node):
+        expression = node.children[1]
+        if isinstance(expression, Name) or expression.type != "atom" or expression.children[0].value != "(":
+            return (expression,)
 
-        atom = node.children[1]
-        test_list = atom.children[1]
-        if isinstance(test_list, Name):
-            return (test_list,)
-        return test_list.children[::2]
+        inner = expression.children[1]
+        if isinstance(inner, Name) or inner.type != "testlist_comp":
+            return (inner,)
+        return inner.children[::2]
 
     @classmethod
     def examples(cls):
@@ -55,6 +68,15 @@ class ExceptionReplacer(Operator):
             Example(
                 "try: raise OSError\nexcept (OSError, ValueError, KeyError): pass",
                 f"try: raise OSError\nexcept (OSError, {CosmicRayTestingException.__name__}, KeyError): pass",
+                occurrence=1,
+            ),
+            Example(
+                "try: raise OSError\nexcept subprocess.TimeoutExpired: pass",
+                f"try: raise OSError\nexcept {CosmicRayTestingException.__name__}: pass",
+            ),
+            Example(
+                "try: raise OSError\nexcept (OSError, subprocess.TimeoutExpired) as exc: pass",
+                f"try: raise OSError\nexcept (OSError, {CosmicRayTestingException.__name__}) as exc: pass",
                 occurrence=1,
             ),
             Example("try: pass\nexcept: pass", "try: pass\nexcept: pass"),
