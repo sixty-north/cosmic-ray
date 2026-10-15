@@ -43,8 +43,7 @@ class HttpDistributor(Distributor):
         # - which writes results to the database - be able to complete, or will it be blocked? Do we have to copy the
         # pending work as we used to do?
 
-        # TODO: Will there be an event loop? Where should we ensure that there is?
-        asyncio.get_event_loop().run_until_complete(self._process(*args, **kwargs))
+        asyncio.run(self._process(*args, **kwargs))
 
     async def _process(self, pending_work, test_command, timeout, config, on_task_complete):
         urls = config.get("worker-urls", [])
