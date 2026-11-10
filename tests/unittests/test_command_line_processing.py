@@ -96,7 +96,23 @@ def test_dump_corrupt_session_file_returns_EX_DATAERR(tmpdir, capsys):
     corrupt.write("this is not a sqlite database")
     errcode = cosmic_ray.cli.main(["dump", str(corrupt)])
     assert errcode == ExitCode.DATA_ERR
-    assert "Invalid session file" in capsys.readouterr().err
+    error = capsys.readouterr().err
+    assert "Database error:" in error
+    assert "not a database" in error
+
+
+
+def test_exec_corrupt_session_file_returns_EX_DATAERR(tmpdir, local_unittest_config, capsys):
+    corrupt = tmpdir.join("corrupt.session.sqlite")
+    corrupt.write("this is not a sqlite database")
+    errcode = cosmic_ray.cli.main(["exec", local_unittest_config, str(corrupt)])
+    assert errcode == ExitCode.DATA_ERR
+    assert "Database error:" in capsys.readouterr().err
+
+
+def test_dump_missing_session_file_returns_EX_NOINPUT(tmpdir):
+    missing = tmpdir.join("missing.session.sqlite")
+    assert cosmic_ray.cli.main(["dump", str(missing)]) == ExitCode.NO_INPUT
 
 
 def test_dump_handles_results_without_test_outcome(session, capsys):
