@@ -101,7 +101,6 @@ def test_dump_corrupt_session_file_returns_EX_DATAERR(tmpdir, capsys):
     assert "not a database" in error
 
 
-
 def test_exec_corrupt_session_file_returns_EX_DATAERR(tmpdir, local_unittest_config, capsys):
     corrupt = tmpdir.join("corrupt.session.sqlite")
     corrupt.write("this is not a sqlite database")
