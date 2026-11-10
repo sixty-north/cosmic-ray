@@ -29,7 +29,7 @@ import cosmic_ray.plugins
 from cosmic_ray.config import load_config, serialize_config
 from cosmic_ray.mutating import apply_mutation
 from cosmic_ray.progress import report_progress
-from cosmic_ray.work_db import WorkDB, use_db
+from cosmic_ray.work_db import InvalidSessionError, WorkDB, use_db
 from cosmic_ray.work_item import MutationSpec, TestOutcome, WorkItem
 
 log = logging.getLogger()
@@ -337,6 +337,9 @@ def main(argv=None):
     except PermissionError as exc:
         print(exc, file=sys.stderr)
         return ExitCode.NO_PERM
+    except InvalidSessionError as exc:
+        print(exc, file=sys.stderr)
+        return ExitCode.DATA_ERR
     except DatabaseError as exc:
         print(f"Database error: {exc}", file=sys.stderr)
         return ExitCode.DATA_ERR

@@ -1,8 +1,9 @@
 "Tests for the WorkDB"
 
 import pytest
+from sqlalchemy import create_engine, inspect
 
-from cosmic_ray.work_db import WorkDB, use_db
+from cosmic_ray.work_db import InvalidSessionError, WorkDB, use_db
 from cosmic_ray.work_item import MutationSpec, WorkItem, WorkResult, WorkerOutcome
 from cosmic_ray.work_item import TestOutcome as TOutcome  # We do this to prevent pytest from "collecting" TOutcome
 
@@ -198,3 +199,48 @@ def test_adding_result_completes_work_item(work_db):
             ),
         )
         work_db.set_result(*result)
+
+
+def test_open_existing_session_does_not_create_tables(tmp_path):
+    path = tmp_path / "session.sqlite"
+    with use_db(path, WorkDB.Mode.create):
+        pass
+
+    with use_db(path, WorkDB.Mode.open) as db:
+        assert db.num_work_items == 0
+
+
+def test_open_unrelated_sqlite_database_does_not_modify_schema(tmp_path):
+    path = tmp_path / "unrelated.sqlite"
+    engine = create_engine(f"sqlite:///{path}")
+    with engine.begin() as connection:
+        connection.exec_driver_sql("CREATE TABLE unrelated (id INTEGER PRIMARY KEY)")
+    engine.dispose()
+
+    with pytest.raises(InvalidSessionError, match="missing tables"):
+        with use_db(path, WorkDB.Mode.open):
+            pass
+
+    engine = create_engine(f"sqlite:///{path}")
+    try:
+        assert inspect(engine).get_table_names() == ["unrelated"]
+    finally:
+        engine.dispose()
+
+
+def test_open_empty_sqlite_database_is_rejected_without_initialization(tmp_path):
+    path = tmp_path / "empty.sqlite"
+    engine = create_engine(f"sqlite:///{path}")
+    with engine.connect():
+        pass
+    engine.dispose()
+
+    with pytest.raises(InvalidSessionError):
+        with use_db(path, WorkDB.Mode.open):
+            pass
+
+    engine = create_engine(f"sqlite:///{path}")
+    try:
+        assert inspect(engine).get_table_names() == []
+    finally:
+        engine.dispose()
