@@ -19,6 +19,7 @@ import click
 from attrs import asdict
 from exit_codes import ExitCode
 from rich.logging import RichHandler
+from sqlalchemy.exc import DatabaseError
 
 import cosmic_ray.commands
 import cosmic_ray.distribution.http
@@ -222,11 +223,15 @@ def dump(session_file):
         d["test_outcome"] = d["test_outcome"].value
         return d
 
-    with use_db(session_file, WorkDB.Mode.open) as database:
-        for work_item, result in database.completed_work_items:
-            print(json.dumps((_work_item_to_dict(work_item), _result_to_dict(result))))
-        for work_item in database.pending_work_items:
-            print(json.dumps((_work_item_to_dict(work_item), None)))
+    try:
+        with use_db(session_file, WorkDB.Mode.open) as database:
+            for work_item, result in database.completed_work_items:
+                print(json.dumps((_work_item_to_dict(work_item), _result_to_dict(result))))
+            for work_item in database.pending_work_items:
+                print(json.dumps((_work_item_to_dict(work_item), None)))
+    except DatabaseError:
+        print(f"Invalid session file: {session_file}", file=sys.stderr)
+        sys.exit(ExitCode.DATA_ERR)
 
     sys.exit(ExitCode.OK)
 
