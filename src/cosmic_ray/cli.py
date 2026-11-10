@@ -223,15 +223,11 @@ def dump(session_file):
         d["test_outcome"] = d["test_outcome"].value
         return d
 
-    try:
-        with use_db(session_file, WorkDB.Mode.open) as database:
-            for work_item, result in database.completed_work_items:
-                print(json.dumps((_work_item_to_dict(work_item), _result_to_dict(result))))
-            for work_item in database.pending_work_items:
-                print(json.dumps((_work_item_to_dict(work_item), None)))
-    except DatabaseError:
-        print(f"Invalid session file: {session_file}", file=sys.stderr)
-        sys.exit(ExitCode.DATA_ERR)
+    with use_db(session_file, WorkDB.Mode.open) as database:
+        for work_item, result in database.completed_work_items:
+            print(json.dumps((_work_item_to_dict(work_item), _result_to_dict(result))))
+        for work_item in database.pending_work_items:
+            print(json.dumps((_work_item_to_dict(work_item), None)))
 
     sys.exit(ExitCode.OK)
 
@@ -341,6 +337,9 @@ def main(argv=None):
     except PermissionError as exc:
         print(exc, file=sys.stderr)
         return ExitCode.NO_PERM
+    except DatabaseError as exc:
+        print(f"Database error: {exc}", file=sys.stderr)
+        return ExitCode.DATA_ERR
     except cosmic_ray.config.ConfigError as exc:
         print(repr(exc), file=sys.stderr)
         if exc.__cause__ is not None:
