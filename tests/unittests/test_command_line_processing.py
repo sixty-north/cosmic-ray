@@ -91,6 +91,14 @@ def test_dump_success_returns_EX_OK(lobotomize, local_unittest_config, session):
     assert errcode == ExitCode.OK
 
 
+def test_dump_corrupt_session_file_returns_EX_DATAERR(tmpdir, capsys):
+    corrupt = tmpdir.join("corrupt.session.sqlite")
+    corrupt.write("this is not a sqlite database")
+    errcode = cosmic_ray.cli.main(["dump", str(corrupt)])
+    assert errcode == ExitCode.DATA_ERR
+    assert "Invalid session file" in capsys.readouterr().err
+
+
 def test_dump_handles_results_without_test_outcome(session, capsys):
     mutation = MutationSpec(
         module_path="foo.py",
