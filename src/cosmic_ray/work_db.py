@@ -4,12 +4,16 @@ import contextlib
 import json
 from pathlib import Path
 
-from sqlalchemy import JSON, Column, Enum, ForeignKey, Integer, String, Text, create_engine, event, func
+from sqlalchemy import JSON, Column, Enum, ForeignKey, Integer, String, Text, create_engine, event, func, inspect
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.orm.session import sessionmaker
 
 from .work_item import MutationSpec, TestOutcome, WorkItem, WorkResult, WorkerOutcome
+
+
+class InvalidSessionError(ValueError):
+    """An existing SQLite file is not a Cosmic Ray session."""
 
 
 class WorkDB:
@@ -49,7 +53,19 @@ class WorkDB:
             dbapi_con.execute("pragma foreign_keys=ON")
 
         event.listen(self._engine, "connect", enable_foreign_keys)
-        Base.metadata.create_all(self._engine)
+        try:
+            if mode == WorkDB.Mode.open:
+                # Opening a session must not initialize or modify another SQLite database.
+                existing_tables = set(inspect(self._engine).get_table_names())
+                required_tables = set(Base.metadata.tables)
+                if not required_tables.issubset(existing_tables):
+                    missing = ", ".join(sorted(required_tables - existing_tables))
+                    raise InvalidSessionError(f"Not a Cosmic Ray session: {path} (missing tables: {missing})")
+            else:
+                Base.metadata.create_all(self._engine)
+        except Exception:
+            self._engine.dispose()
+            raise
         self._session_maker = sessionmaker(self._engine)
 
     def close(self):

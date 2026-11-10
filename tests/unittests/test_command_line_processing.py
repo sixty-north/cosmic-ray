@@ -7,6 +7,7 @@ import stat
 
 import pytest
 from exit_codes import ExitCode
+from sqlalchemy import create_engine, inspect
 
 import cosmic_ray.cli
 import cosmic_ray.config
@@ -112,6 +113,23 @@ def test_exec_corrupt_session_file_returns_EX_DATAERR(tmpdir, local_unittest_con
 def test_dump_missing_session_file_returns_EX_NOINPUT(tmpdir):
     missing = tmpdir.join("missing.session.sqlite")
     assert cosmic_ray.cli.main(["dump", str(missing)]) == ExitCode.NO_INPUT
+
+
+def test_dump_unrelated_sqlite_file_returns_EX_DATAERR_without_modification(tmpdir, capsys):
+    unrelated = tmpdir.join("unrelated.sqlite")
+    engine = create_engine(f"sqlite:///{unrelated}")
+    with engine.begin() as connection:
+        connection.exec_driver_sql("CREATE TABLE unrelated (id INTEGER PRIMARY KEY)")
+    engine.dispose()
+
+    assert cosmic_ray.cli.main(["dump", str(unrelated)]) == ExitCode.DATA_ERR
+    assert "Not a Cosmic Ray session" in capsys.readouterr().err
+
+    engine = create_engine(f"sqlite:///{unrelated}")
+    try:
+        assert inspect(engine).get_table_names() == ["unrelated"]
+    finally:
+        engine.dispose()
 
 
 def test_dump_handles_results_without_test_outcome(session, capsys):
