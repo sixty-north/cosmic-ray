@@ -19,7 +19,7 @@ log = logging.getLogger(__name__)
 
 
 # pylint: disable=R0913
-def mutate_and_test(mutations: Iterable[MutationSpec], test_command, timeout) -> WorkResult:
+def mutate_and_test(mutations: Iterable[MutationSpec], test_command, timeout, memory_limit_mb=None) -> WorkResult:
     """Apply a sequence of mutations, run thest tests, and reports the results.
 
     This is fundamentally the mutation(s)-and-test-run implementation at the heart of Cosmic Ray.
@@ -72,7 +72,7 @@ def mutate_and_test(mutations: Iterable[MutationSpec], test_command, timeout) ->
                 original_code, _ = file_changes.get(mutation.module_path, (previous_code, mutated_code))
                 file_changes[mutation.module_path] = original_code, mutated_code
 
-            test_outcome, output = run_tests(test_command, timeout)
+            test_outcome, output = run_tests(test_command, timeout, memory_limit_mb)
 
             diffs = [
                 _make_diff(original_code, mutated_code, module_path)
