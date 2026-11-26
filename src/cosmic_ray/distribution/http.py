@@ -109,6 +109,7 @@ async def send_request(url, work_item: WorkItem, test_command, timeout):
                 "module_path": str(mutation.module_path),
                 "operator": mutation.operator_name,
                 "occurrence": mutation.occurrence,
+                "operator_args": mutation.operator_args,
             }
             for mutation in work_item.mutations
         ],
@@ -139,6 +140,8 @@ async def handle_mutate_and_test(request):
                 module_path=Path(mutation["module_path"]),
                 operator_name=mutation["operator"],
                 occurrence=mutation["occurrence"],
+                # Coordinators from before operator_args was sent omit it.
+                operator_args=mutation.get("operator_args", {}),
                 # TODO: These are not really used, but we have to provide
                 # them because MutationSpec requires them. This is the genesis of the old
                 # distinction between MutationSpec and ResolvedMutationSpec. How should we
