@@ -8,6 +8,7 @@ import subprocess
 import sys
 import traceback
 
+from cosmic_ray.config import ConfigValueError
 from cosmic_ray.work_item import TestOutcome
 
 log = logging.getLogger(__name__)
@@ -16,8 +17,18 @@ if sys.platform == "win32":
     from cosmic_ray.windows_job import CREATE_SUSPENDED, Job
 
 
+def validate_memory_limit(memory_limit_mb):
+    """Reject invalid or unsupported limits before any mutation is executed."""
+    if memory_limit_mb is None:
+        return
+    if isinstance(memory_limit_mb, bool) or not isinstance(memory_limit_mb, int) or memory_limit_mb <= 0:
+        raise ConfigValueError("memory-limit-mb must be a positive integer")
+    if sys.platform not in ("linux", "win32"):
+        raise ConfigValueError("memory-limit-mb is supported only on Linux and Windows; omit it on this platform")
+
+
 def _limit_memory(memory_limit_mb):
-    """A ``preexec_fn`` that caps the address space of the test process and its children (POSIX)."""
+    """A ``preexec_fn`` that caps the address space of the test process and its children (Linux)."""
     import resource  # pylint: disable=import-outside-toplevel
 
     limit = int(memory_limit_mb) * 2**20
@@ -59,13 +70,17 @@ def run_tests(command, timeout, memory_limit_mb=None):
     Args:
         command (str): The command to execute.
         timeout (number): The maximum number of seconds to allow the tests to run.
-        memory_limit_mb (number): Optional cap, in MiB, on the memory of the test command and the processes it
-            starts. On Windows it caps the whole process tree; on POSIX each process. A test run that hits it fails,
+        memory_limit_mb (int): Optional cap, in MiB, on the memory of the test command and the processes it
+            starts. On Windows it caps the whole process tree; on Linux each process. A test run that hits it fails,
             so the mutant counts as killed.
 
     Return: A tuple `(TestOutcome, output)` where the `output` is a string
         containing the output of the command.
+
+    Raises:
+        ConfigValueError: If the memory limit is invalid or unsupported.
     """
+    validate_memory_limit(memory_limit_mb)
     log.info("Running test (timeout=%s): %s", timeout, command)
 
     # We want to avoid writing pyc files in case our changes happen too fast for Python to
@@ -93,7 +108,18 @@ def run_tests(command, timeout, memory_limit_mb=None):
                 creationflags=CREATE_SUSPENDED if job else 0,
             )
             if job:
-                job.adopt(proc)
+                try:
+                    job.adopt(proc)
+                except BaseException:
+                    # Assignment may fail before the suspended child belongs to the job.
+                    # Closing the job alone cannot terminate that child.
+                    try:
+                        proc.kill()
+                        proc.wait()
+                    finally:
+                        proc.stdout.close()
+                        proc.stderr.close()
+                    raise
             try:
                 stdout, _ = proc.communicate(timeout=timeout)
             except subprocess.TimeoutExpired:

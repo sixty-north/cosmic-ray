@@ -1,7 +1,12 @@
 "Tests for worker."
 
 from pathlib import Path
+from types import SimpleNamespace
 
+import pytest
+
+import cosmic_ray.testing as testing
+from cosmic_ray.config import ConfigValueError
 from cosmic_ray.mutating import _make_diff, mutate_and_test
 from cosmic_ray.work_item import MutationSpec, WorkResult, WorkerOutcome
 
@@ -44,3 +49,14 @@ def test_private_make_diff():
         "+return False",
         " ",
     ]
+
+
+def test_unsupported_memory_limit_is_rejected_before_mutation(monkeypatch):
+    monkeypatch.setattr(testing, "sys", SimpleNamespace(platform="darwin"))
+
+    def mutations():
+        pytest.fail("Unsupported limits must not apply any mutations")
+        yield
+
+    with pytest.raises(ConfigValueError, match="supported only"):
+        mutate_and_test(mutations(), "unused", 5, memory_limit_mb=200)

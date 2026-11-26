@@ -11,7 +11,7 @@ from pathlib import Path
 
 import cosmic_ray.plugins
 from cosmic_ray.ast import Visitor, get_ast
-from cosmic_ray.testing import run_tests
+from cosmic_ray.testing import run_tests, validate_memory_limit
 from cosmic_ray.util import read_python_source, restore_contents
 from cosmic_ray.work_item import MutationSpec, TestOutcome, WorkResult, WorkerOutcome
 
@@ -39,15 +39,17 @@ def mutate_and_test(mutations: Iterable[MutationSpec], test_command, timeout, me
         mutations: An iterable of ``MutationSpec``\\s describing the mutations to make.
         test_command: The command to execute to run the tests
         timeout: The maximum amount of time (seconds) to let the tests run
+        memory_limit_mb: Optional positive integer memory limit in MiB (Linux and Windows only).
 
     Returns:
         A ``WorkResult``.
 
     Raises:
-        This will generally not raise any exceptions. Rather, exceptions will be reported using the 'exception'
-        result-type in the return value.
+        ConfigValueError: If the memory limit is invalid or unsupported, before applying mutations.
+        Other exceptions are reported using the 'exception' result-type in the return value.
 
     """
+    validate_memory_limit(memory_limit_mb)
     try:
         with contextlib.ExitStack() as stack:
             file_changes: dict[Path, tuple[str, str]] = {}

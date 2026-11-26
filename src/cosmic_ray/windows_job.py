@@ -58,15 +58,19 @@ class Job:
         self._handle = self._kernel.CreateJobObjectW(None, None)
         if not self._handle:
             raise ctypes.WinError(ctypes.get_last_error())
-        info = _ExtendedLimits()
-        info.BasicLimitInformation.LimitFlags = _LIMIT_KILL_ON_JOB_CLOSE
-        if memory_limit_mb:
-            info.BasicLimitInformation.LimitFlags |= _LIMIT_JOB_MEMORY
-            info.JobMemoryLimit = int(memory_limit_mb) * 2**20
-        if not self._kernel.SetInformationJobObject(
-            self._handle, _EXTENDED_LIMIT_INFORMATION, ctypes.byref(info), ctypes.sizeof(info)
-        ):
-            raise ctypes.WinError(ctypes.get_last_error())
+        try:
+            info = _ExtendedLimits()
+            info.BasicLimitInformation.LimitFlags = _LIMIT_KILL_ON_JOB_CLOSE
+            if memory_limit_mb:
+                info.BasicLimitInformation.LimitFlags |= _LIMIT_JOB_MEMORY
+                info.JobMemoryLimit = int(memory_limit_mb) * 2**20
+            if not self._kernel.SetInformationJobObject(
+                self._handle, _EXTENDED_LIMIT_INFORMATION, ctypes.byref(info), ctypes.sizeof(info)
+            ):
+                raise ctypes.WinError(ctypes.get_last_error())
+        except BaseException:
+            self.close()
+            raise
 
     def adopt(self, process: subprocess.Popen):
         """Put the suspended process in the job, then let it run."""
@@ -75,7 +79,10 @@ class Job:
             raise ctypes.WinError(ctypes.get_last_error())
         ntdll = ctypes.WinDLL("ntdll")
         ntdll.NtResumeProcess.argtypes = [wintypes.HANDLE]
-        ntdll.NtResumeProcess(handle)
+        ntdll.NtResumeProcess.restype = ctypes.c_int32
+        status = ntdll.NtResumeProcess(handle)
+        if status < 0:
+            raise OSError(f"NtResumeProcess failed with NTSTATUS 0x{status & 0xFFFFFFFF:08X}")
 
     def close(self):
         """Kill every process still in the job."""
