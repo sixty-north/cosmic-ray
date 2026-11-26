@@ -11,7 +11,7 @@ from pathlib import Path
 
 import cosmic_ray.plugins
 from cosmic_ray.ast import Visitor, get_ast
-from cosmic_ray.testing import run_tests
+from cosmic_ray.testing import run_tests, validate_memory_limit
 from cosmic_ray.util import read_python_source, restore_contents
 from cosmic_ray.work_item import MutationSpec, TestOutcome, WorkResult, WorkerOutcome
 
@@ -19,7 +19,7 @@ log = logging.getLogger(__name__)
 
 
 # pylint: disable=R0913
-def mutate_and_test(mutations: Iterable[MutationSpec], test_command, timeout) -> WorkResult:
+def mutate_and_test(mutations: Iterable[MutationSpec], test_command, timeout, memory_limit_mb=None) -> WorkResult:
     """Apply a sequence of mutations, run thest tests, and reports the results.
 
     This is fundamentally the mutation(s)-and-test-run implementation at the heart of Cosmic Ray.
@@ -39,15 +39,17 @@ def mutate_and_test(mutations: Iterable[MutationSpec], test_command, timeout) ->
         mutations: An iterable of ``MutationSpec``\\s describing the mutations to make.
         test_command: The command to execute to run the tests
         timeout: The maximum amount of time (seconds) to let the tests run
+        memory_limit_mb: Optional positive integer memory limit in MiB (Linux and Windows only).
 
     Returns:
         A ``WorkResult``.
 
     Raises:
-        This will generally not raise any exceptions. Rather, exceptions will be reported using the 'exception'
-        result-type in the return value.
+        ConfigValueError: If the memory limit is invalid or unsupported, before applying mutations.
+        Other exceptions are reported using the 'exception' result-type in the return value.
 
     """
+    validate_memory_limit(memory_limit_mb)
     try:
         with contextlib.ExitStack() as stack:
             file_changes: dict[Path, tuple[str, str]] = {}
@@ -72,7 +74,7 @@ def mutate_and_test(mutations: Iterable[MutationSpec], test_command, timeout) ->
                 original_code, _ = file_changes.get(mutation.module_path, (previous_code, mutated_code))
                 file_changes[mutation.module_path] = original_code, mutated_code
 
-            test_outcome, output = run_tests(test_command, timeout)
+            test_outcome, output = run_tests(test_command, timeout, memory_limit_mb)
 
             diffs = [
                 _make_diff(original_code, mutated_code, module_path)
