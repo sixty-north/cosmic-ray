@@ -41,10 +41,10 @@ async def run(config_file, repo_url, location):
     with contextlib.ExitStack() as stack:
         procs = [
             await asyncio.create_subprocess_shell(
-                f"cosmic-ray --verbosity INFO http-worker {option} {value}",
+                "cosmic-ray --verbosity INFO http-worker " + " ".join(str(arg) for arg in args),
                 cwd=stack.enter_context(_create_clone(repo_url)) / location,
             )
-            for option, value in worker_args
+            for args in worker_args
         ]
 
         await asyncio.gather(*[proc.communicate() for proc in procs])
@@ -100,8 +100,17 @@ LOCALHOST_ADDRESSES = (
     "127.0.0.1",
 )
 
+# Hosts that mean "every interface". Workers for these keep the default binding rather than being passed --host, which
+# would narrow them to IPv4 only.
+WILDCARD_ADDRESSES = ("0.0.0.0",)
+
 
 def _urls_to_args(urls, config_filepath: Path):
+    """Generate the ``http-worker`` arguments for each worker URL that can be started locally.
+
+    Each item is a tuple of command-line arguments. Workers for localhost HTTP(S) URLs are bound to the URL's host, so
+    a worker configured as ``http://127.0.0.1:9876`` only listens on the loopback interface.
+    """
     for url in urls:
         url = yarl.URL(url)
         if url.scheme == "":
@@ -114,8 +123,11 @@ def _urls_to_args(urls, config_filepath: Path):
             elif url.host.lower() not in LOCALHOST_ADDRESSES:
                 log.warning("%s does not appear to be on localhost", url)
 
-            else:
+            elif url.host.lower() in WILDCARD_ADDRESSES:
                 yield ("--port", url.port)
+
+            else:
+                yield ("--port", url.port, "--host", url.host)
         else:
             log.warning("The scheme of URL %s is not supported", url)
 

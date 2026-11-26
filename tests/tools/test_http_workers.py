@@ -13,6 +13,7 @@ from pathlib import Path
 import pytest
 
 from cosmic_ray.distribution.http import send_request
+from cosmic_ray.tools.http_workers import _urls_to_args
 from cosmic_ray.work_item import MutationSpec, TestOutcome, WorkItem, WorkerOutcome
 
 
@@ -114,3 +115,26 @@ def test_launcher_processes_native_mutation_without_ambient_event_loop(tmp_path)
             except subprocess.TimeoutExpired:
                 os.killpg(process.pid, signal.SIGKILL)
                 process.wait(timeout=5)
+
+
+@pytest.mark.parametrize(
+    "url, expected",
+    [
+        ("http://127.0.0.1:9876", ("--port", 9876, "--host", "127.0.0.1")),
+        ("http://localhost:9876", ("--port", 9876, "--host", "localhost")),
+        ("https://LOCALHOST:9876", ("--port", 9876, "--host", "localhost")),
+        # A wildcard URL keeps the default all-interfaces binding.
+        ("http://0.0.0.0:9876", ("--port", 9876)),
+    ],
+)
+def test_launcher_binds_local_workers_to_configured_host(url, expected, tmp_path):
+    assert list(_urls_to_args([url], tmp_path / "cosmic-ray.toml")) == [expected]
+
+
+def test_launcher_socket_workers_take_no_host(tmp_path):
+    assert list(_urls_to_args(["worker.sock"], tmp_path / "cosmic-ray.toml")) == [("--path", tmp_path / "worker.sock")]
+
+
+@pytest.mark.parametrize("url", ["http://example.com:9876", "ftp://127.0.0.1:9876"])
+def test_launcher_skips_workers_it_cannot_start(url, tmp_path):
+    assert list(_urls_to_args([url], tmp_path / "cosmic-ray.toml")) == []

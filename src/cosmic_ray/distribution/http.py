@@ -163,7 +163,7 @@ async def handle_mutate_and_test(request):
     )
 
 
-def run_worker(port=None, path=None):
+def run_worker(port=None, path=None, host=None):
     """Run the worker HTTP server.
 
     You must specify either `port` or `path`, but not both.
@@ -171,9 +171,13 @@ def run_worker(port=None, path=None):
     Args:
         port: The TCP port on which to listen.
         path: Path to Unix domain socket on which to listen.
+        host: The host address on which to listen when using `port`, e.g. ``127.0.0.1``. If `None`, the worker
+            listens on all interfaces. Not valid with `path`.
     """
     if port is None and path is None:
         raise ValueError("Worker requires either a port or domain socket path")
+    if host is not None and path is not None:
+        raise ValueError("Worker host can only be used with a port, not a domain socket path")
     app = web.Application()
     app.add_routes([web.post("/", handle_mutate_and_test)])
-    web.run_app(app, port=port, path=path)
+    web.run_app(app, host=host, port=port, path=path)

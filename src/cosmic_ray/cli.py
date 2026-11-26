@@ -263,14 +263,23 @@ def apply(module_path, operator, occurrence):
 @cli.command()
 @click.option("--port", type=int, default=None, help="The port on which to listen for requests")
 @click.option("--path", default=None, help="Path to Unix domain socket on which to listen for requests")
-def http_worker(port, path):
+@click.option(
+    "--host",
+    default=None,
+    help="The host address on which to listen, e.g. 127.0.0.1. Only valid with --port. Defaults to all interfaces.",
+)
+def http_worker(port, path, host):
     """Run an HTTP worker for the 'http' distributor."""
     if (port is None) == (path is None):
         log.error("You must specify exactly one of --path or --port")
         sys.exit(ExitCode.USAGE)
 
+    if host is not None and path is not None:
+        log.error("--host can only be used with --port")
+        sys.exit(ExitCode.USAGE)
+
     try:
-        cosmic_ray.distribution.http.run_worker(port=port, path=path)
+        cosmic_ray.distribution.http.run_worker(port=port, path=path, host=host)
     except ValueError as exc:
         log.error(str(exc))
         sys.exit(ExitCode.DATA_ERR)

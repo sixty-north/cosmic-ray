@@ -80,6 +80,16 @@ configuration. The worker will tell you that it's waiting to process requests on
     ======== Running on http://0.0.0.0:9876 ========
     (Press CTRL+C to quit)    
 
+By default the worker listens on all network interfaces, as the ``0.0.0.0`` address shows. A worker runs whatever test
+command it is sent, so if the worker and ``exec`` are on the same machine you can use ``--host`` to listen on the
+loopback interface only:
+
+.. code-block:: bash
+
+    cosmic-ray --verbosity INFO http-worker --port 9876 --host 127.0.0.1
+
+``--host`` can only be used with ``--port``, not with ``--path``.
+
 Note that your worker must be running in the same directory as you would normally run the tests from. In this case, we're
 expecting the tests to be run in ``$ROOT``, so make sure your worker is running in that directory. Generally speaking,
 the worker doesn't do much more than mutate the code on disk and run the test command you've specified in your config.
@@ -243,6 +253,11 @@ determine how many workers to start, and you provide it with a git repository to
 configuration it will clone the git repository and start a worker in that clone. You can then run ``exec`` to distribute
 work to those workers. Once the testing is over, you can kill ``cr-http-workers`` and it will clean up the workers and
 their clones.
+
+Each worker started for an ``http`` or ``https`` URL listens on the host named in that URL. For example, a worker for
+``http://127.0.0.1:9876`` only accepts connections on the loopback interface. A ``localhost`` URL typically binds both
+the IPv4 and IPv6 loopback addresses (``127.0.0.1`` and ``::1``), depending on how your system resolves ``localhost``.
+Workers for ``http://0.0.0.0:<port>`` URLs listen on all interfaces.
 
 Preparing the git repository
 ----------------------------
